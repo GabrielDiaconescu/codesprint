@@ -14,7 +14,7 @@
 | 0     | Human prerequisites & open decisions | **In progress** (parallel, see below) |
 | 1     | Project setup & architecture         | **Complete** — device check deferred  |
 | 2     | Design system                        | **Complete** — pending device check   |
-| 3     | Database foundation                  | Blocked on Docker (see human actions) |
+| 3     | Database foundation                  | **Unblocked** — ready to start        |
 | 4–23  | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
@@ -41,7 +41,7 @@ and is green: typecheck, lint, 102 tests, and a gitleaks scan of the full histor
 | Apple Developer                                                                                    | Enrolling; Organization enrolment also needs the D-U-N-S                                                                                                                                                                                                                                                                                                                                                                             |
 | Product name                                                                                       | **CodeSprint stays.** Free in both app stores, which is what matters. The domain namespace is crowded (`.com` parked for sale; `.app`, `.dev`, `.io`, `.co`, `.net` all registered), and a survey of 15 alternative names found 14 of 15 `.com`s taken — chasing a clean `.com` was abandoned deliberately. Reversible until store assets are produced in Phase 23, because every brand string goes through `src/constants/brand.ts` |
 | Domain                                                                                             | **`codesprint.ro`** (~10 EUR/yr, uncontested). Hosts the legal pages, support page and `app-ads.txt`. Whatever domain is declared as the developer website in the store listings must be the one serving `app-ads.txt`, so this choice is now fixed                                                                                                                                                                                  |
-| Docker                                                                                             | Docker Desktop 4.91.0 + CLI 29.8.0 installed (per-user). **Engine will not start: WSL is not installed.** Hardware virtualization IS available — VBS is running — so this is not a BIOS problem. Fix: `wsl --install` as administrator, then reboot                                                                                                                                                                                  |
+| Docker                                                                                             | **Working.** Docker Desktop 4.91.0 + CLI/engine 29.8.0, WSL2 backend, `docker-desktop` distro running. The earlier "virtualization not detected" error was a missing WSL install, not a BIOS setting                                                                                                                                                                                                                                 |
 | Supabase                                                                                           | Account created and linked to GitHub; project created. **EU region still to be confirmed**                                                                                                                                                                                                                                                                                                                                           |
 | Because Windows is primary and the Mac is occasional, always `git pull` before switching machines. |
 
@@ -267,12 +267,9 @@ text not colour alone, and the toast queue cap.
 
 **Before Phase 3 (the next phase):**
 
-- **Start Docker Desktop** and let it finish first-run setup. The CLI is installed
-  (per-user install, v29.8.0) but the engine
-  is not running: `docker info` fails with "daemon is not running". A reboot may be needed for
-  the WSL2 backend.
-- **Create the Supabase project** in an **EU region** (Frankfurt). Free plan is fine for staging.
-- **Authenticate `gh`** (`gh auth login`) so the private repository can be created and CI can run.
+- **Confirm the Supabase project region is in the EU** (Frankfurt / `eu-central-1`). If it is not,
+  delete and recreate it now while it is empty — after it holds user data this becomes a GDPR
+  problem, not just a migration.
 
 **Before Phase 4:**
 
