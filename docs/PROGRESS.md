@@ -2,8 +2,8 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 1 complete — awaiting approval for Phase 2 (Design system).
-**Last updated:** 2026-09-16
+**Current phase:** Phase 2 complete — awaiting approval for Phase 3 (Database foundation).
+**Last updated:** 2026-09-17
 
 ---
 
@@ -12,8 +12,8 @@
 | Phase | Scope                                | Status                                |
 | ----- | ------------------------------------ | ------------------------------------- |
 | 0     | Human prerequisites & open decisions | **In progress** (parallel, see below) |
-| 1     | Project setup & architecture         | **Complete** — pending device check   |
-| 2     | Design system                        | Not started                           |
+| 1     | Project setup & architecture         | **Complete** — device check deferred  |
+| 2     | Design system                        | **Complete** — pending device check   |
 | 3     | Database foundation                  | Blocked on Docker (see human actions) |
 | 4–23  | See `PLAN.md` / SPEC §57             | Not started                           |
 
@@ -89,7 +89,7 @@ Plan approved 2026-09-16. Defaults apply for everything not marked OPEN.
 - GitHub Actions CI: typecheck, lint, tests, gitleaks secret scan.
 - `git init` + `.gitignore` (`.env` ignored, `.env.example` tracked — verified).
 
-### Verification results
+### Phase 1 verification results
 
 ```
 typecheck   tsc --noEmit ............. 0 errors
@@ -132,18 +132,106 @@ SDK import boundary rejects each restricted package outside `src/services` and a
 
 ---
 
-## Known limitations after Phase 1
+---
+
+## Phase 2 — what was implemented (Design system)
+
+Design tokens existed from Phase 1; Phase 2 adds the components that consume them.
+
+**Fonts (SPEC §8)** — Inter (UI) and JetBrains Mono (code), both SIL OFL 1.1, embedded rather
+than fetched. Inter was chosen partly because SPEC §38 requires correct Romanian comma-below
+diacritics; JetBrains Mono disambiguates `0/O` and `1/l/I`, which matters when a learner reads a
+snippet character by character. Only the six weights the type scale uses are bundled. The splash
+screen is held until fonts load, so the first frame never renders in the system font.
+
+**Primitives** — `Text` (the only text component; font scaling is never disabled), `Icon`
+(typed wrapper over one icon set), `Button` (4 variants, loading/disabled states, never below the
+48dp touch target), `Card`, `Badge`, `Chip`, `Divider`, `Screen`.
+
+**Progress** — `ProgressBar` (Reanimated, honours reduce-motion) and `ProgressRing` (SVG stroke
+offset). Both expose a percentage through `accessibilityValue`.
+
+**States** — `Skeleton` / `SkeletonLines` (SPEC §13: never a blank screen while loading) and
+`StateView`, the shared shape for empty, error and offline states; every one offers a way forward.
+`PlaceholderState` is now a thin wrapper over it.
+
+**Overlays** — `BottomSheet` (Modal + Reanimated + drag-to-dismiss, with backdrop and close
+button so the gesture is never the only exit) and a toast system (`toastStore` + `ToastHost`,
+queue capped at 3, announced as a polite live region).
+
+**CodeBlock (SPEC §8)** — monospace, never wrapped, horizontal scroll, forced LTR, and exposed to
+screen readers as ONE node reading the raw source rather than dozens of coloured spans. Optional
+output panel and line numbers.
+
+**Python syntax highlighter** — written locally (`src/lib/pythonHighlight.ts`, ~230 lines) instead
+of pulling in a web-oriented highlighting library, as SPEC §8 requires. Handles keywords,
+builtins, all string forms (triple-quoted, prefixed f/r/b/u, escapes), comments, numbers in every
+literal form, decorators and operators.
+
+**AnswerFeedback (SPEC §8, §18)** — presentational only. Result is carried by icon + text as well
+as colour, an incorrect answer always gets the explanation and never shaming language, and the
+panel is a polite live region.
+
+**Component gallery** — `src/app/gallery.tsx`, reachable only from a `__DEV__`-guarded button on
+the Profile tab. Renders every component plus a theme switcher and a reduce-motion readout.
+
+### Phase 2 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+tests       jest ..................... 12 suites, 102 tests, all passing
+bundle      expo export (android) .... succeeds
+```
+
+New tests: 32 for the Python tokenizer (including the lossless-output, never-throws and
+always-terminates invariants), plus component tests covering the accessibility behaviours that
+regress silently — button disabled/busy state, progress `accessibilityValue`, feedback shown as
+text not colour alone, and the toast queue cap.
+
+---
+
+## Decisions and interpretations made during Phase 2
+
+1. **The code surface stays dark in both themes.** One contrast-checked syntax palette instead of
+   two, it matches how developers expect code to look, and it guarantees legibility whatever the
+   app theme. Recorded in `src/theme/colors.ts` so it reads as a decision, not an oversight.
+2. **Bottom sheet built in-house** rather than adding `@gorhom/bottom-sheet`. The V1 use cases
+   need presentation plus drag-to-dismiss, not a snap-point system (SPEC §59.13, §59.19).
+3. **`react-native-svg` added** — required for `ProgressRing` (SPEC §8 asks for rings) and needed
+   again by the Phase 28 statistics screen. First-party Expo dependency.
+4. **Weight lives in `fontFamily`, not `fontWeight`.** On Android a numeric weight applied to a
+   named font file is ignored, which silently flattens the type hierarchy.
+5. **Toast queue capped at 3.** A retry loop firing toasts could otherwise bury the UI.
+6. **`clampProgress(Infinity)` returns 1, not 0.** Infinity means "past the maximum"; only `NaN`
+   (no position on the scale) falls back to zero. Caught by a unit test.
+7. **Jest needs `react-native-worklets/jest/resolver`.** Reanimated 4 sits on worklets, whose
+   `.native.` modules require the native runtime. The official `react-native-reanimated/mock`
+   does NOT work — it re-imports the real module. The resolver is the supported fix and is wired
+   into `jest.config.js`.
+8. **`StyleSheet.absoluteFillObject` is gone** from React Native 0.86's types; explicit
+   `position/top/left/right/bottom` is used instead.
+9. **Gallery strings are deliberately not localized.** The screen never ships to a user, and
+   adding it to the i18n namespaces would pollute the translation files (SPEC §38).
+
+## Known limitations
 
 - No backend: `ConfigService` serves bundled defaults only (Phase 3 wires `app_config`).
 - All services are no-ops; nothing touches the network yet.
 - Tab screens show honest "ships in Phase N" placeholders — no mocked data presented as real.
 - No authentication, no content, no gameplay.
-- Component library is minimal (`Screen`, `PlaceholderState`) — the real design system is Phase 2.
+- Design system exists but is unused by product screens — the tabs still show placeholders
+  until Phases 7–13 build the real screens on top of it.
+- Lottie animations and `expo-image` are not installed yet; they arrive when a screen needs
+  them (achievements in Phase 10, avatars in Phase 12).
 - `npm audit` reports **14 moderate** advisories, all inside Expo's own build tooling
   (`@expo/cli` and its `query-string` / `decode-uri-component` / `uuid` / `xcode` chain).
   They are build-time code, not shipped app code, and cannot be resolved without an Expo
   release — `npm audit fix --force` would downgrade Expo itself. Recheck each SDK upgrade.
-- The app has not yet been run on a physical device — that is the Phase 1 device check below.
+- **The app has not been run on a physical device yet.** Phase 1 and Phase 2 device checks are
+  both outstanding, deferred by agreement. Fonts, contrast, dynamic type and reduce-motion in
+  particular can only be verified on hardware.
+- GitHub repository not created yet, so CI has never actually run.
 
 ---
 
@@ -202,3 +290,32 @@ Run on a physical **Android** phone, and on **iPhone** from the MacBook.
 
 > `ios/` is gitignored (it is generated). Running `expo run:ios` regenerates it on the Mac,
 > so the two machines never fight over native project files.
+
+---
+
+## Phase 2 device test checklist
+
+Open the app, go to **Profile → Component gallery (dev)**. The gallery only appears in
+development builds.
+
+1. Every section renders: typography, buttons, badges/chips, progress, code, answer feedback,
+   cards, loading, overlays, states.
+2. **Fonts loaded** — text is Inter, not the system font. Code blocks are JetBrains Mono.
+3. **Diacritics** — the line `ă â î ș ț / Ă Â Î Ș Ț` shows ș and ț with a **comma below**, not a
+   cedilla. This is the SPEC §38 requirement for Romanian.
+4. **Theme** — tap system / light / dark at the top; colours change immediately. Then change the
+   phone's own theme and confirm "system" follows it.
+5. **Code block** — the long line scrolls horizontally and does **not** wrap. Syntax colours are
+   readable. The output panel shows `34`.
+6. **Buttons** — "Tap to show loading" becomes a spinner and cannot be pressed again while busy.
+   The disabled button does nothing.
+7. **Bottom sheet** — opens, drags down to dismiss, tapping the backdrop closes it.
+8. **Toasts** — tap info/success/error; they stack, auto-dismiss, and never exceed 3 at once.
+9. **Dynamic type** — set the phone's font size to the largest setting. Text scales and nothing
+   is clipped or overlapping.
+10. **Reduce motion** — enable it in accessibility settings. The gallery header shows
+    "Reduce motion: on", the progress bar jumps instead of animating, and the skeleton stops
+    pulsing.
+11. **Screen reader** (TalkBack / VoiceOver) — the code block is read as one block of source,
+    progress announces a percentage, and the answer feedback announces "Correct"/"Not quite"
+    as words rather than relying on colour.

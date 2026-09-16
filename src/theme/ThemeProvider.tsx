@@ -4,7 +4,8 @@ import { useColorScheme } from 'react-native';
 import { useSettingsStore } from '@/store/settingsStore';
 
 import { palettes, type ColorScheme, type Palette } from './colors';
-import { a11y, elevation, motion, radius, spacing, typography } from './tokens';
+import { fontFamily } from './fonts';
+import { a11y, elevation, motion, pressed, radius, spacing, typography } from './tokens';
 
 export interface Theme {
   scheme: ColorScheme;
@@ -15,6 +16,8 @@ export interface Theme {
   motion: typeof motion;
   elevation: typeof elevation;
   a11y: typeof a11y;
+  fontFamily: typeof fontFamily;
+  pressed: typeof pressed;
 }
 
 /**
@@ -40,6 +43,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       motion,
       elevation,
       a11y,
+      fontFamily,
+      pressed,
     }),
     [scheme],
   );

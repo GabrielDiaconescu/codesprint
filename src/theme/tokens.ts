@@ -1,11 +1,13 @@
 /**
  * Design tokens (SPEC §8).
  *
- * Phase 1 defines the token VALUES only. The component library that consumes them
- * (buttons, cards, progress rings, CodeBlock, feedback panel) is Phase 2.
+ * Values only — no component imports them directly except through the theme, so a token
+ * change propagates everywhere at once.
  *
  * Dark mode is designed intentionally, not inverted (SPEC §8).
  */
+
+import { fontFamily } from './fonts';
 
 export const spacing = {
   xs: 4,
@@ -25,15 +27,25 @@ export const radius = {
   pill: 999,
 } as const;
 
-/** Type scale. `lineHeight` is absolute so dynamic font scaling stays predictable (SPEC §47). */
+/**
+ * Type scale (SPEC §8).
+ *
+ * Weight is carried by `fontFamily`, not `fontWeight`: on Android a numeric weight applied to
+ * a named font file is ignored, which silently loses the intended hierarchy. Line heights are
+ * absolute so dynamic font scaling stays predictable (SPEC §47).
+ */
 export const typography = {
-  display: { fontSize: 32, lineHeight: 38, fontWeight: '700' },
-  title: { fontSize: 24, lineHeight: 30, fontWeight: '700' },
-  heading: { fontSize: 20, lineHeight: 26, fontWeight: '600' },
-  body: { fontSize: 16, lineHeight: 24, fontWeight: '400' },
-  bodyStrong: { fontSize: 16, lineHeight: 24, fontWeight: '600' },
-  caption: { fontSize: 13, lineHeight: 18, fontWeight: '400' },
-  mono: { fontSize: 14, lineHeight: 21, fontWeight: '400' },
+  display: { fontSize: 32, lineHeight: 38, fontFamily: fontFamily.bold },
+  title: { fontSize: 24, lineHeight: 30, fontFamily: fontFamily.bold },
+  heading: { fontSize: 20, lineHeight: 26, fontFamily: fontFamily.semibold },
+  subheading: { fontSize: 17, lineHeight: 24, fontFamily: fontFamily.semibold },
+  body: { fontSize: 16, lineHeight: 24, fontFamily: fontFamily.regular },
+  bodyStrong: { fontSize: 16, lineHeight: 24, fontFamily: fontFamily.semibold },
+  bodySmall: { fontSize: 14, lineHeight: 20, fontFamily: fontFamily.regular },
+  caption: { fontSize: 13, lineHeight: 18, fontFamily: fontFamily.medium },
+  label: { fontSize: 12, lineHeight: 16, fontFamily: fontFamily.semibold },
+  mono: { fontSize: 14, lineHeight: 21, fontFamily: fontFamily.mono },
+  monoSmall: { fontSize: 12, lineHeight: 18, fontFamily: fontFamily.mono },
 } as const;
 
 /** Motion durations in ms. Every animation must honour OS reduce-motion (SPEC §8, §47). */
@@ -55,6 +67,9 @@ export const elevation = {
   medium: 6,
   high: 12,
 } as const;
+
+/** Opacity applied to a pressed surface, so every component reacts identically. */
+export const pressed = { opacity: 0.7, scale: 0.98 } as const;
 
 export type Spacing = keyof typeof spacing;
 export type Radius = keyof typeof radius;

@@ -86,3 +86,33 @@ export const palettes: Record<ColorScheme, Palette> = {
   light: lightPalette,
   dark: darkPalette,
 };
+
+/**
+ * Syntax colours for the CodeBlock (SPEC §8).
+ *
+ * The code surface stays dark in BOTH themes — a deliberate choice, not an oversight. It keeps
+ * one set of contrast-checked syntax colours instead of two, matches how developers expect code
+ * to look, and guarantees the highlighting is legible whatever the app theme. Every colour below
+ * is checked against `codeBackground`.
+ */
+export interface SyntaxPalette {
+  keyword: string;
+  builtin: string;
+  string: string;
+  comment: string;
+  number: string;
+  operator: string;
+  decorator: string;
+  plain: string;
+}
+
+export const syntaxPalette: SyntaxPalette = {
+  keyword: '#FF9BC8',
+  builtin: '#8BD6FF',
+  string: '#9BE7A4',
+  comment: '#8C93A8',
+  number: '#FFC46B',
+  operator: '#E4E8F5',
+  decorator: '#D7B3FF',
+  plain: '#E4E8F5',
+};
