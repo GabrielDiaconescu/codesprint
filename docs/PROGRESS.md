@@ -19,6 +19,20 @@
 
 ---
 
+## Development environment (confirmed 2026-09-17)
+
+| Machine           | Role                        | Notes                                                                                                    |
+| ----------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Windows 11 PC** | Primary development         | Node 24.15.0, npm 11.12.1, git 2.53. Docker and Python 3.12 still to install                             |
+| **MacBook**       | iOS builds and verification | Used per phase to build/run iOS. Specs to confirm (macOS, Xcode, chip)                                   |
+| **Android phone** | Device checks               | Primary device target for Phases 1–13                                                                    |
+| **iPhone**        | Device checks               | Available. Free personal-team signing (profile expires every 7 days) until the paid Apple account exists |
+
+Sync between machines is via a **private GitHub repository** (also required by the CI workflow).
+Because Windows is primary and the Mac is occasional, always `git pull` before switching machines.
+
+---
+
 ## Decisions taken
 
 | #   | Decision                 | Value                                 | Notes                                                           |
@@ -148,7 +162,9 @@ SDK import boundary rejects each restricted package outside `src/services` and a
 
 - Name clearance (EUIPO/TMview, USPTO, App Store, Google Play).
 - Legal entity decision.
-- Apple Developer Program + Google Play Console; decide **D12**.
+- Google Play Console; decide **D12**.
+- Apple Developer Program (99$/yr) — no longer blocks iOS device testing, but is required
+  from **Phase 14** (In-App Purchase sandbox) and for TestFlight/submission.
 - If D12 = Personal: recruit 15–20 testers; the closed test must start by end of Phase 15.
 
 **Before EAS builds:** run `npx eas-cli login` then `npx eas init` to create the EAS project and
@@ -158,8 +174,9 @@ populate `EAS_PROJECT_ID`.
 
 ## Phase 1 device test checklist
 
-Run on a physical **Android** phone (iOS is deferred to Phase 14 — no Mac and no Apple
-Developer account yet).
+Run on a physical **Android** phone, and on **iPhone** from the MacBook.
+
+### Android (from the Windows PC)
 
 1. `npx eas-cli login`, then `npx eas init`, then
    `npx eas build --profile development --platform android`.
@@ -171,3 +188,17 @@ Developer account yet).
 7. Switch the phone between light and dark mode: colours follow the system immediately.
 8. The app appears in the launcher as **"CodeSprint (Dev)"**.
 9. Increase the system font size: text scales without clipping.
+
+### iOS (from the MacBook)
+
+1. `git pull` so the Mac has the current commit, then `npm install`.
+2. `npx expo run:ios` — builds locally and launches the Simulator. No Apple account needed.
+3. For the physical iPhone: open the generated `ios/*.xcworkspace` in Xcode (the exact name
+   comes from the variant's app name), select your personal team under Signing &
+   Capabilities, pick the iPhone as the run target, and run. On a free Apple ID the
+   provisioning profile expires after 7 days; re-run from Xcode to reinstall.
+4. Repeat checks 4–9 above on iOS.
+5. Confirm the app appears as **"CodeSprint (Dev)"** and that dark mode follows iOS settings.
+
+> `ios/` is gitignored (it is generated). Running `expo run:ios` regenerates it on the Mac,
+> so the two machines never fight over native project files.
