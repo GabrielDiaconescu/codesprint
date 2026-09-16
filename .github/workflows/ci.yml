@@ -44,7 +44,20 @@ jobs:
           fetch-depth: 0
 
       # SPEC §40: no secret may ever reach the repository.
-      - name: gitleaks
-        uses: gitleaks/gitleaks-action@v2
+      #
+      # gitleaks is invoked directly rather than through gitleaks-action, which derives a
+      # commit RANGE and so fails on the first push (the initial commit has no parent, making
+      # `<sha>^..<sha>` an invalid revision). Scanning the full history is also strictly more
+      # thorough: a secret committed and later removed still sits in history.
+      - name: Install gitleaks
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: 8.24.3
+        run: |
+          URL="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL "$URL" -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Scan full repository history
+        run: gitleaks detect --source . --redact --verbose --exit-code 1
