@@ -1,0 +1,49 @@
+import { getLocales } from 'expo-localization';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+import common from './locales/en/common.json';
+import home from './locales/en/home.json';
+import leaderboard from './locales/en/leaderboard.json';
+import learn from './locales/en/learn.json';
+import navigation from './locales/en/navigation.json';
+import profile from './locales/en/profile.json';
+
+/**
+ * i18n setup (SPEC §38).
+ *
+ * English only at launch; the architecture is ready for Romanian, Spanish, German, French.
+ * No user-facing string is hardcoded in a component, and no string is built by concatenation.
+ */
+export const FALLBACK_LOCALE = 'en';
+
+export const resources = {
+  en: { common, navigation, home, learn, leaderboard, profile },
+} as const;
+
+export const NAMESPACES = Object.keys(resources.en) as (keyof typeof resources.en)[];
+
+/** Best available locale, narrowed to what we actually ship. */
+export const resolveLocale = (): string => {
+  const preferred = getLocales()[0]?.languageCode ?? FALLBACK_LOCALE;
+  return preferred in resources ? preferred : FALLBACK_LOCALE;
+};
+
+export const initI18n = () => {
+  if (i18n.isInitialized) return i18n;
+
+  void i18n.use(initReactI18next).init({
+    resources,
+    lng: resolveLocale(),
+    fallbackLng: FALLBACK_LOCALE,
+    defaultNS: 'common',
+    ns: NAMESPACES,
+    // React already escapes rendered values.
+    interpolation: { escapeValue: false },
+    returnNull: false,
+  });
+
+  return i18n;
+};
+
+export default i18n;

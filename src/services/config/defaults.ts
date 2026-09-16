@@ -1,0 +1,27 @@
+import type { AppConfigValues } from '../types';
+
+/**
+ * Bundled configuration defaults (SPEC §50).
+ *
+ * Used on first launch and whenever the remote fetch fails, so the app is never blocked on
+ * the network for its own feature flags. The server copy in `app_config` always wins once
+ * it loads. Values mirror the spec defaults.
+ */
+export const DEFAULT_APP_CONFIG: AppConfigValues = {
+  ads_enabled: true,
+  subscriptions_enabled: true,
+  paywall_enabled: true,
+  leaderboard_enabled: true,
+  exams_enabled: true,
+  daily_challenge_enabled: true,
+  guest_mode_enabled: true,
+  // SPEC §16: coding challenges are schema-only in V1 (needs sandboxed execution).
+  coding_challenges_enabled: false,
+  // SPEC §50: reserved, MUST remain false in V1.
+  offline_mode_enabled: false,
+  // SPEC D5: modules 1-6 free.
+  free_module_count: 6,
+  lives_max: 5,
+  content_version: 0,
+  min_supported_app_version: '0.1.0',
+};

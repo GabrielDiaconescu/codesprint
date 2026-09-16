@@ -1,0 +1,18 @@
+{
+  "appName": "CodeSprint",
+  "tagline": "Learn to Code. 5 Minutes a Day.",
+  "promoLine": "Bite-sized lessons. Daily challenges. Real coding progress.",
+  "actions": {
+    "retry": "Try again",
+    "continue": "Continue",
+    "close": "Close",
+    "cancel": "Cancel"
+  },
+  "states": {
+    "loading": "Loading…",
+    "offlineTitle": "No internet connection",
+    "offlineBody": "Check your connection and try again.",
+    "errorTitle": "Something went wrong",
+    "errorBody": "We couldn't load this. Please try again."
+  }
+}
