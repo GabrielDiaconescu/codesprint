@@ -28,9 +28,9 @@
 | **Android phone** | Device checks               | Primary device target for Phases 1–13                                                                    |
 | **iPhone**        | Device checks               | Available. Free personal-team signing (profile expires every 7 days) until the paid Apple account exists |
 
-Sync between machines is via a **private GitHub repository** (also required by the CI workflow).
-`gh` CLI 2.101.0 is installed but **not yet authenticated**, so the repository does not exist yet
-and CI has never run.
+Sync between machines is via the private GitHub repository
+**https://github.com/GabrielDiaconescu/codesprint** (created 2026-09-17). CI runs on every push
+and is green: typecheck, lint, 102 tests, and a gitleaks scan of the full history.
 
 **Business decisions (2026-09-17)**
 
@@ -256,9 +256,10 @@ text not colour alone, and the toast queue cap.
 
 **Critical path — start now:**
 
-- **Request a D-U-N-S number** for the PFA (free, via Dun & Bradstreet). Organization enrolment
-  on **both** Google Play and Apple Developer requires it, and issuance takes days to weeks.
-  Nothing else can be done about that delay, so it should be requested first.
+- **Register the PFA, then request a D-U-N-S number** (free, via Dun & Bradstreet). The D-U-N-S
+  cannot be requested before the entity legally exists, so these are strictly sequential:
+  PFA registration → D-U-N-S (days to weeks) → Organization enrolment on both stores.
+  This chain is the longest lead time in the project and gates Phases 14 and 22.
 - **Decide the public trader address.** Under the EU DSA both stores publish the trader's name,
   address, email and phone. If the PFA is registered at a home address, that address becomes
   public. A separate registered office avoids that.
