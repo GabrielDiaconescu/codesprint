@@ -29,26 +29,39 @@
 | **iPhone**        | Device checks               | Available. Free personal-team signing (profile expires every 7 days) until the paid Apple account exists |
 
 Sync between machines is via a **private GitHub repository** (also required by the CI workflow).
-Because Windows is primary and the Mac is occasional, always `git pull` before switching machines.
+`gh` CLI 2.101.0 is installed but **not yet authenticated**, so the repository does not exist yet
+and CI has never run.
+
+**Business decisions (2026-09-17)**
+
+| Item                                                                                               | Decision                                                                                                                                                                           |
+| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Legal entity                                                                                       | **PFA** (Romanian sole trader)                                                                                                                                                     |
+| Google Play account                                                                                | **Organization** — exempt from the closed-test requirement                                                                                                                         |
+| Apple Developer                                                                                    | Enrolling; Organization enrolment also needs the D-U-N-S                                                                                                                           |
+| Product name                                                                                       | **CodeSprint stays.** Availability confirmed by the user. Reversible until store assets are produced in Phase 23, because every brand string goes through `src/constants/brand.ts` |
+| Docker                                                                                             | Docker Desktop 4.91.0 installed per-user at `%LOCALAPPDATA%\Programs\DockerDesktop`; engine must be started before Phase 3                                                         |
+| Supabase                                                                                           | Account created and linked to GitHub; EU-region project still to be created                                                                                                        |
+| Because Windows is primary and the Mac is occasional, always `git pull` before switching machines. |
 
 ---
 
 ## Decisions taken
 
-| #   | Decision                 | Value                                 | Notes                                                           |
-| --- | ------------------------ | ------------------------------------- | --------------------------------------------------------------- |
-| D1  | Guest mode               | ON (default)                          | Approved with the plan                                          |
-| D2  | No Ads product           | Monthly subscription €2.99            | Approved with the plan                                          |
-| D3  | Annual Premium           | YES                                   | Approved with the plan                                          |
-| D4  | Free trial               | None at launch                        | Paywall still renders trial terms dynamically                   |
-| D5  | Free boundary            | Modules 1–6 (`free_module_count = 6`) | Config-driven, computed not stored                              |
-| D6  | Social login             | **OPEN**                              | Default Apple + Google. Blocks Phase 4 scope                    |
-| D7  | Analytics                | PostHog Cloud EU                      |                                                                 |
-| D8  | Monitoring               | Sentry                                |                                                                 |
-| D9  | Python semantics         | 3.12 + latest stable 3.x              | Needs Python 3.12 installed (Phase 6)                           |
-| D10 | Minimum age              | 13                                    |                                                                 |
-| D11 | Personalized ads         | Consent + 16+ only                    |                                                                 |
-| D12 | Google Play account type | **OPEN**                              | Organization vs Personal — changes release timeline by 2+ weeks |
+| #   | Decision                 | Value                                 | Notes                                                                                         |
+| --- | ------------------------ | ------------------------------------- | --------------------------------------------------------------------------------------------- |
+| D1  | Guest mode               | ON (default)                          | Approved with the plan                                                                        |
+| D2  | No Ads product           | Monthly subscription €2.99            | Approved with the plan                                                                        |
+| D3  | Annual Premium           | YES                                   | Approved with the plan                                                                        |
+| D4  | Free trial               | None at launch                        | Paywall still renders trial terms dynamically                                                 |
+| D5  | Free boundary            | Modules 1–6 (`free_module_count = 6`) | Config-driven, computed not stored                                                            |
+| D6  | Social login             | Apple + Google (default stands)       | Not re-raised; revisit before Phase 4 if scope needs trimming                                 |
+| D7  | Analytics                | PostHog Cloud EU                      |                                                                                               |
+| D8  | Monitoring               | Sentry                                |                                                                                               |
+| D9  | Python semantics         | 3.12 + latest stable 3.x              | Needs Python 3.12 installed (Phase 6)                                                         |
+| D10 | Minimum age              | 13                                    |                                                                                               |
+| D11 | Personalized ads         | Consent + 16+ only                    |                                                                                               |
+| D12 | Google Play account type | **Organization**                      | Decided 2026-09-17. Exempt from the 12-tester / 14-day closed test. Requires a D-U-N-S number |
 
 Plan approved 2026-09-16. Defaults apply for everything not marked OPEN.
 
@@ -56,12 +69,16 @@ Plan approved 2026-09-16. Defaults apply for everything not marked OPEN.
 
 ## Open questions
 
-1. **D12 — Google Play account type.** Organization is exempt from the 12-tester / 14-day
-   closed test; Personal is not. Needed before Phase 15 planning; does not block Phases 1–13.
-2. **D6 — social login in V1?** Apple + Google (default) or email-only. Determines Phase 4 scope.
+1. **D-U-N-S number** — required for Organization enrolment on **both** stores. Free, but issuance
+   takes days to weeks. Now on the critical path for Phase 14 and Phase 22 (see human actions).
+2. **Public trader address (EU DSA).** A PFA is commonly registered at a home address, and both
+   stores publish the trader's address, email and phone. Decide whether to register a different
+   business address before the store listings go live.
 3. **Sentry DSN** — not provided, so `MonitoringService` ships as a no-op. Supply
    `EXPO_PUBLIC_SENTRY_DSN` to enable it earlier than Phase 16.
-4. **Product name** — "CodeSprint" is a working name; clearance is still outstanding (SPEC §0.3).
+4. **Domain + transactional SMTP** — needed at **Phase 4** (Supabase Auth email verification and
+   password reset; the built-in sender is not for production) and again at Phase 18 for the static
+   legal pages. The user asked to be reminded at that point.
 
 ---
 
@@ -237,26 +254,39 @@ text not colour alone, and the toast queue cap.
 
 ## Human actions required before the next phases
 
-**Before Phase 2:** none.
+**Critical path — start now:**
 
-**Before Phase 3 (hard blockers):**
+- **Request a D-U-N-S number** for the PFA (free, via Dun & Bradstreet). Organization enrolment
+  on **both** Google Play and Apple Developer requires it, and issuance takes days to weeks.
+  Nothing else can be done about that delay, so it should be requested first.
+- **Decide the public trader address.** Under the EU DSA both stores publish the trader's name,
+  address, email and phone. If the PFA is registered at a home address, that address becomes
+  public. A separate registered office avoids that.
 
-- Install **Docker Desktop** (or Rancher Desktop / Podman) — the Supabase CLI needs it.
-- Create a **Supabase account** and a staging project in an **EU region**.
+**Before Phase 3 (the next phase):**
+
+- **Start Docker Desktop** and let it finish first-run setup. The CLI is installed
+  (per-user install, v29.8.0) but the engine
+  is not running: `docker info` fails with "daemon is not running". A reboot may be needed for
+  the WSL2 backend.
+- **Create the Supabase project** in an **EU region** (Frankfurt). Free plan is fine for staging.
+- **Authenticate `gh`** (`gh auth login`) so the private repository can be created and CI can run.
+
+**Before Phase 4:**
+
+- **Domain + transactional SMTP.** Supabase Auth needs a custom SMTP sender for email
+  verification and password reset — the built-in sender is not permitted in production.
+  _(The user asked to be reminded here.)_
 
 **Before Phase 6:** install **Python 3.12** alongside 3.14 (D9 dual-version verification).
 
-**Start now — longest lead times (SPEC §0.3):**
+**Before Phase 14:** Apple Developer and Google Play accounts fully active, including paid-apps
+agreement, tax and banking. Google Play requires a bundle uploaded to a testing track before
+subscription products can be created.
 
-- Name clearance (EUIPO/TMview, USPTO, App Store, Google Play).
-- Legal entity decision.
-- Google Play Console; decide **D12**.
-- Apple Developer Program (99$/yr) — no longer blocks iOS device testing, but is required
-  from **Phase 14** (In-App Purchase sandbox) and for TestFlight/submission.
-- If D12 = Personal: recruit 15–20 testers; the closed test must start by end of Phase 15.
+**Before Phase 18:** legal review of privacy policy, terms, consent flow and age handling.
 
-**Before EAS builds:** run `npx eas-cli login` then `npx eas init` to create the EAS project and
-populate `EAS_PROJECT_ID`.
+**Before EAS builds:** `npx eas-cli login`, then `npx eas init` to populate `EAS_PROJECT_ID`.
 
 ---
 
