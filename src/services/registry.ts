@@ -1,5 +1,6 @@
 import { SupabaseAuthService } from './auth/SupabaseAuthService';
 import { SupabaseConfigService } from './config/SupabaseConfigService';
+import { SupabaseContentService } from './content/SupabaseContentService';
 import { SupabaseProfileService } from './profile/SupabaseProfileService';
 import {
   NoopAdService,
@@ -16,6 +17,7 @@ import type {
   BillingService,
   ConfigService,
   ConsentService,
+  ContentService,
   MonitoringService,
   NotificationService,
   ProfileService,
@@ -34,6 +36,7 @@ export type Services = {
   monitoring: MonitoringService;
   auth: AuthService;
   profile: ProfileService;
+  content: ContentService;
   analytics: AnalyticsService;
   consent: ConsentService;
   ads: AdService;
@@ -46,6 +49,7 @@ export const services: Services = {
   monitoring: NoopMonitoringService, // Phase 16 (earlier if a Sentry DSN is provided)
   auth: SupabaseAuthService, // Phase 4 — real
   profile: SupabaseProfileService, // Phase 5 — real
+  content: SupabaseContentService, // Phase 6 — real
   analytics: NoopAnalyticsService, // Phase 16
   consent: NoopConsentService, // Phase 15
   ads: NoopAdService, // Phase 15

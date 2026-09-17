@@ -1,0 +1,13 @@
+id: 7cd509b8-8fc4-4d5d-8127-2ab94a639bc4
+slug: getting-started
+title:
+  en: Getting Started
+description:
+  en: What Python is, how to make it say something, and how to read it when it complains.
+order_index: 1
+estimated_minutes: 20
+lessons:
+  - what-is-python
+  - printing
+  - comments
+  - reading-errors

@@ -59,16 +59,18 @@ npm run dev                                               # start Metro for the 
 
 ## Commands
 
-| Command             | Purpose                                             |
-| ------------------- | --------------------------------------------------- |
-| `npm run dev`       | Start Metro for the development build               |
-| `npm run typecheck` | `tsc --noEmit`                                      |
-| `npm run lint`      | ESLint (`--max-warnings=0`)                         |
-| `npm test`          | Jest unit + component tests                         |
-| `npm run verify`    | typecheck + lint + test                             |
-| `npm run db:reset`  | Apply migrations + seed a local Supabase (Phase 3+) |
-| `npm run db:test`   | pgTAP suite (Phase 3+)                              |
-| `npm run db:types`  | Regenerate database types after a migration         |
+| Command                 | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `npm run dev`           | Start Metro for the development build                 |
+| `npm run typecheck`     | `tsc --noEmit`                                        |
+| `npm run lint`          | ESLint (`--max-warnings=0`)                           |
+| `npm test`              | Jest unit + component tests                           |
+| `npm run verify`        | typecheck + lint + test                               |
+| `npm run db:reset`      | Apply migrations + seed a local Supabase (Phase 3+)   |
+| `npm run db:test`       | pgTAP suite (Phase 3+)                                |
+| `npm run db:types`      | Regenerate database types after a migration           |
+| `npm run content:check` | Validate content and run every snippet on real Python |
+| `npm run content:seed`  | Regenerate `supabase/seed.sql` from the content files |
 
 Local services while Supabase is running: Studio on <http://127.0.0.1:54323>, the API on
 <http://127.0.0.1:54321>, and **Mailpit** — the local inbox that catches every verification and
@@ -123,6 +125,15 @@ The age gate is the exception — it acts immediately. Below `min_user_age` (13)
 **deleted**, not merely blocked, because leaving it would mean storing a child's email address.
 Below `minor_protection_age` (16) the database forces analytics off, the leaderboard hidden and
 ads non-personalised, whatever the client sends. See `docs/DATABASE.md`.
+
+## Content
+
+Lessons live in `content/` as YAML and are treated as code: reviewed in pull requests,
+validated in CI, and **executed** in CI. Every runnable snippet is run on Python 3.12 and 3.14
+and compared with what the lesson claims, so a lesson that says a program prints 24 when it
+prints 25 fails the build.
+
+`supabase/seed.sql` is generated from those files, never hand-written. See `docs/CONTENT.md`.
 
 ## Security notes
 

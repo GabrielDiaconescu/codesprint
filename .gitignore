@@ -60,3 +60,4 @@ supabase/.temp/
 .idea/
 *.swp
 Thumbs.db
+.tmp/

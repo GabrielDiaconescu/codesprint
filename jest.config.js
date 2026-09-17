@@ -9,6 +9,10 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // jest-expo resolves packages the way a browser would, which picks yaml's ESM build and
+    // then fails to parse it. The content pipeline is Node tooling, so point it at the
+    // CommonJS entry the `node` export condition would have chosen.
+    '^yaml$': '<rootDir>/node_modules/yaml/dist/index.js',
   },
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts', '!src/**/index.ts', '!src/types/**'],
   testMatch: ['**/__tests__/**/*.test.{ts,tsx}', '**/*.test.{ts,tsx}'],

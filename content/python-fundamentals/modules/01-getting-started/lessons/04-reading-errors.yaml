@@ -1,0 +1,208 @@
+id: 4df3daa1-5801-4173-b93d-46ce15a385cd
+slug: reading-errors
+title:
+  en: Reading an error message
+summary:
+  en: Errors are instructions, not insults. Learning to read them saves hours.
+estimated_minutes: 5
+review_status: reviewed
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Every programmer sees errors constantly. They are not a sign you are doing badly —
+        they are Python telling you precisely what it could not do.
+
+  - type: text
+    body:
+      en: |
+        An error message has three useful parts: the **line** it happened on, the **type** of
+        problem, and a short **description**. Read it from the bottom up: the last line is
+        usually the most specific.
+
+  - type: code
+    code: |
+      print("hello"
+    caption:
+      en: |
+        This is missing a closing bracket. Python reports a SyntaxError and points at the line
+        where it ran out of patience.
+    runnable: false
+
+  - type: text
+    body:
+      en: |
+        Three types you will meet early:
+
+        - **SyntaxError** — the text is not valid Python at all, so nothing runs.
+        - **NameError** — you used a name Python has never seen.
+        - **TypeError** — the values are fine, but not that kind of value for that operation.
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        A SyntaxError often points at the line *after* the real mistake, because that is where
+        Python finally noticed. If the reported line looks fine, check the one above it.
+
+  - type: question
+    question:
+      id: 8764fe6c-31ad-43e4-aa11-b920b095f9d2
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which part of an error message tells you where to look first?
+      payload:
+        options:
+          - id: line-number
+            text:
+              en: The line number
+          - id: length
+            text:
+              en: How long the message is
+          - id: first-word
+            text:
+              en: The first word of the file
+          - id: colour
+            text:
+              en: The colour it is printed in
+      answer:
+        option_id: line-number
+      explanation:
+        en: >
+          The line number narrows hours of searching down to one line. Check it first, and if
+          that line looks correct, check the line above — a SyntaxError often surfaces late.
+      skill_tags: [errors]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 95b7fe8c-8ae5-4930-b84a-9d07f3a43192
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: 'Python says: `NameError: name ''totl'' is not defined`. What has most likely happened?'
+      payload:
+        options:
+          - id: typo
+            text:
+              en: A name was misspelled
+          - id: broken-python
+            text:
+              en: Python is installed incorrectly
+          - id: too-long
+            text:
+              en: The name is too long
+          - id: needs-quotes
+            text:
+              en: The name needs quotation marks around it
+      answer:
+        option_id: typo
+      explanation:
+        en: >
+          A NameError means Python has never seen that name. Nine times out of ten it is a
+          misspelling of something you did define — here, `totl` where `total` was meant.
+      hint:
+        en: Read the name in the message out loud.
+      skill_tags: [errors, debugging]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 6ab13905-9dd5-48b5-b9de-3e36cc96ac0a
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each error type to what causes it.
+      payload:
+        concepts:
+          - id: syntax
+            text:
+              en: SyntaxError
+          - id: name
+            text:
+              en: NameError
+          - id: type
+            text:
+              en: TypeError
+        definitions:
+          - id: not-valid-python
+            text:
+              en: The text is not valid Python, so nothing runs at all
+          - id: never-seen
+            text:
+              en: A name was used that Python has never been given
+          - id: wrong-kind
+            text:
+              en: The operation is fine, but not for that kind of value
+      answer:
+        pairs:
+          syntax: not-valid-python
+          name: never-seen
+          type: wrong-kind
+      explanation:
+        en: >
+          The three differ in when they happen. A SyntaxError stops the program before it
+          starts. A NameError and a TypeError happen while it runs, which means everything
+          before that line already did its work.
+      skill_tags: [errors]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 4c85bb3d-07a5-41df-a4f1-ec3fcea3bf10
+      type: true_false
+      difficulty: medium
+      prompt:
+        en: If a program has a SyntaxError, the lines before the mistake still run.
+      answer:
+        value: false
+      explanation:
+        en: >
+          Nothing runs. Python has to read the whole file before it can start, and a
+          SyntaxError means it could not. A NameError is different — it happens while running,
+          so earlier lines have already done their work.
+      skill_tags: [errors, python-basics]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: a51af7ed-df63-431b-be04-f4762b80590c
+      type: debugging
+      difficulty: easy
+      prompt:
+        en: This program will not start. Which line has the mistake?
+      code_snippet: |
+        print("Ready")
+        print("Set"
+        print("Go")
+      payload:
+        mode: select_line
+        lines:
+          - id: ready
+            text: 'print("Ready")'
+          - id: set
+            text: 'print("Set"'
+          - id: go
+            text: 'print("Go")'
+      answer:
+        line_id: set
+      runnable: true
+      fixed_code: |
+        print("Ready")
+        print("Set")
+        print("Go")
+      fixed_output: |-
+        Ready
+        Set
+        Go
+      explanation:
+        en: >
+          The second line never closes its bracket. Python reads on looking for the closing
+          `)`, reaches the next line, and reports the error there — which is why the line it
+          names is often one below the real mistake.
+      hint:
+        en: Count the opening and closing brackets on each line.
+      skill_tags: [errors, debugging]
+      review_status: reviewed

@@ -50,8 +50,11 @@ insert into public.user_entitlements (user_id, entitlement, is_active)
 values ('22222222-2222-2222-2222-222222222222', 'premium', true);
 
 -- Minimal content: a free module and a premium one, each with a lesson and a question.
+-- Test fixtures use their own slugs. The development seed now publishes the real course, and
+-- a fixture that reused its slug would collide on the unique constraint — which is exactly the
+-- kind of coupling between test data and real data that should never exist.
 insert into public.courses (id, slug, title)
-values ('aaaaaaaa-0000-0000-0000-000000000001', 'python-fundamentals', '{"en":"Python"}');
+values ('aaaaaaaa-0000-0000-0000-000000000001', 'rls-matrix-fixture', '{"en":"Fixture course"}');
 
 insert into public.modules (id, course_id, slug, title, order_index)
 values

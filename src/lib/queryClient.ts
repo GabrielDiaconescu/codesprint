@@ -33,6 +33,8 @@ export const queryKeys = {
   content: {
     course: (contentVersion: number, courseId: string) =>
       ['content', contentVersion, 'course', courseId] as const,
+    overview: (contentVersion: number, courseSlug: string, locale: string) =>
+      ['content', contentVersion, 'overview', courseSlug, locale] as const,
     lesson: (contentVersion: number, lessonId: string) =>
       ['content', contentVersion, 'lesson', lessonId] as const,
   },

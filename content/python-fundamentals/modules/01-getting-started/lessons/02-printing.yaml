@@ -1,0 +1,200 @@
+id: 8b14ce7b-46ce-44a3-b97a-92d34a1689d4
+slug: printing
+title:
+  en: Showing output with print
+summary:
+  en: Getting your program to say something, and controlling exactly what it says.
+estimated_minutes: 5
+review_status: reviewed
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `print` is how a program shows something to the person running it. Whatever you put
+        between the brackets gets displayed.
+
+  - type: code
+    code: |
+      print("Learning Python")
+    output: 'Learning Python'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        You can print several things at once by separating them with commas. Python puts a
+        single space between them.
+
+  - type: code
+    code: |
+      print("Total:", 42)
+    output: 'Total: 42'
+    runnable: true
+    caption:
+      en: Notice the space between the text and the number — you did not type it.
+
+  - type: text
+    body:
+      en: |
+        Each `print` starts a new line, so two prints produce two lines of output.
+
+  - type: code
+    code: |
+      print("first")
+      print("second")
+    output: |-
+      first
+      second
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Quotes change what a value is. `print(2 + 2)` adds two numbers and shows 4, while
+        `print("2" + "2")` joins two pieces of text and shows 22.
+
+  - type: question
+    question:
+      id: 3c5222fe-517a-49ac-91d7-1a137a528870
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("Score:", 10)
+      payload:
+        input: text
+      answer:
+        value: 'Score: 10'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The comma separates two items, and Python joins them with a single space. You did
+          not type that space — printing several items always puts one between each pair.
+      skill_tags: [printing]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 16cdc674-e894-45ae-b0d6-54446f427e50
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("up")
+        print("down")
+      payload:
+        input: choice
+        options:
+          - id: two-lines
+            text:
+              en: "up\ndown"
+          - id: one-line-space
+            text:
+              en: 'up down'
+          - id: one-line-joined
+            text:
+              en: 'updown'
+          - id: reversed
+            text:
+              en: "down\nup"
+      answer:
+        value: "up\ndown"
+        match_mode: exact
+      explanation:
+        en: >
+          Every `print` ends its line, so two calls give two lines. They run in the order they
+          are written, which is why "up" comes first.
+      skill_tags: [printing]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: fb9e4bbf-0fd7-435f-b470-ff2be737db00
+      type: fill_blank
+      difficulty: easy
+      prompt:
+        en: Complete the line so the program displays the word Ready.
+      code_snippet: |
+        ___("Ready")
+      payload:
+        input: tokens
+        tokens: [print, show, display, say]
+      answer:
+        value: print
+        match_mode: trimmed
+      explanation:
+        en: >
+          `print` is the built-in name Python understands. `show`, `display` and `say` read
+          like English but mean nothing to Python — it only knows the names it was given.
+      hint:
+        en: Which of these have you actually seen in a Python program?
+      skill_tags: [printing]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 772a78bc-1901-431c-b779-cedc8112f099
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What does `print("3" + "4")` display?
+      payload:
+        options:
+          - id: joined
+            text:
+              en: '34'
+          - id: added
+            text:
+              en: '7'
+          - id: spaced
+            text:
+              en: '3 4'
+          - id: error
+            text:
+              en: An error, because you cannot add text
+      answer:
+        option_id: joined
+      explanation:
+        en: >
+          Both values are text, because of the quotes. For text, `+` means "join end to end",
+          so "3" and "4" become "34". Without the quotes it would be arithmetic and give 7.
+      hint:
+        en: Look carefully at where the quotes are.
+      skill_tags: [printing, data-types]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: d6ea8906-8c5b-4c72-9627-e468f1ab4180
+      type: code_ordering
+      difficulty: medium
+      prompt:
+        en: Arrange these lines so the program counts down from three.
+      payload:
+        lines:
+          - id: three
+            text: print(3)
+          - id: two
+            text: print(2)
+          - id: one
+            text: print(1)
+          - id: go
+            text: print("Go!")
+      answer:
+        order: [three, two, one, go]
+      runnable: true
+      expected_output: |-
+        3
+        2
+        1
+        Go!
+      explanation:
+        en: >
+          Python runs lines top to bottom, so the order you write them in is exactly the order
+          they happen in. Counting down means writing them in descending order.
+      skill_tags: [printing, python-basics]
+      review_status: reviewed

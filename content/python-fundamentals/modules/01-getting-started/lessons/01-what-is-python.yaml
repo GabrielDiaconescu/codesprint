@@ -1,0 +1,179 @@
+id: ae47f49b-9ada-4145-af64-a445fd72dc15
+slug: what-is-python
+title:
+  en: What is Python?
+summary:
+  en: Where Python fits, and what happens when you run a program.
+estimated_minutes: 4
+review_status: reviewed
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Python is a programming language: a way of writing instructions precisely enough that
+        a computer can carry them out. You write plain text, and Python reads it from top to
+        bottom and does what it says.
+
+  - type: text
+    body:
+      en: |
+        People choose Python because it reads close to English. Here is a complete, working
+        program.
+
+  - type: code
+    code: |
+      print("Hello!")
+    output: 'Hello!'
+    runnable: true
+    caption:
+      en: One line, and it really is the whole program.
+
+  - type: text
+    body:
+      en: |
+        The thing that reads your code and runs it is called the **interpreter**. It works
+        through your file one line at a time, in order. Nothing happens out of sequence, and
+        nothing runs until you ask it to.
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        Python does not need to be "compiled" into a separate program first. You write a file
+        and run it. That short loop is a large part of why it suits learning.
+
+  - type: question
+    question:
+      id: a1a77c7f-c0a4-4320-8fd0-734d9d9d895a
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Python runs the lines of a program from top to bottom, in order.
+      answer:
+        value: true
+      explanation:
+        en: >
+          Yes. The interpreter starts at the first line and works downwards. Later you will
+          meet ways to repeat lines or skip them, but the default is always straight down.
+      skill_tags: [python-basics]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: f931c8e5-5cf2-41f0-95c0-8ee0f585bb40
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What is the interpreter?
+      payload:
+        options:
+          - id: reads-and-runs
+            text:
+              en: The program that reads your code and carries out the instructions
+          - id: text-editor
+            text:
+              en: The editor you type your code into
+          - id: error-checker
+            text:
+              en: A tool that only checks your code for mistakes
+          - id: website
+            text:
+              en: The website where Python is downloaded
+      answer:
+        option_id: reads-and-runs
+      explanation:
+        en: >
+          The interpreter is what actually runs your program. Your editor helps you write the
+          text, but on its own it does nothing — the interpreter is what turns that text into
+          something happening.
+      hint:
+        en: Think about which one does something when you press "run".
+      skill_tags: [python-basics]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 2f2a58fa-0c26-4b3d-9b20-825ea7d3be34
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this program print?
+      code_snippet: |
+        print("Python")
+      payload:
+        input: text
+      answer:
+        value: 'Python'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `print` shows whatever is inside the brackets. The quotes mark where the text starts
+          and ends — they tell Python how much of the line is text, and are not printed.
+      skill_tags: [python-basics, printing]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 87b202d9-5f8a-4f33-a208-81b1775a74b9
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these are true about Python?
+      payload:
+        options:
+          - id: reads-like-english
+            text:
+              en: Its syntax is designed to be readable
+          - id: runs-top-to-bottom
+            text:
+              en: A program runs from top to bottom by default
+          - id: needs-compiling
+            text:
+              en: You must compile a program into a separate file before running it
+          - id: only-websites
+            text:
+              en: It can only be used to build websites
+          - id: plain-text
+            text:
+              en: You write programs as plain text
+      answer:
+        option_ids: [reads-like-english, runs-top-to-bottom, plain-text]
+      explanation:
+        en: >
+          Python is plain text, readable, and runs top to bottom. It does not need a separate
+          compile step, and it is used well beyond the web — data analysis, automation,
+          science and more.
+      skill_tags: [python-basics]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 12c1b591-5eca-4a56-88e1-a6c8847efe6f
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: You have written a Python file but never run it. What has happened so far?
+      payload:
+        options:
+          - id: nothing
+            text:
+              en: Nothing — it is just text until the interpreter runs it
+          - id: half
+            text:
+              en: Python has already run the first line
+          - id: checked
+            text:
+              en: Python has checked the whole file for mistakes
+          - id: saved-output
+            text:
+              en: The output has been saved, ready to show
+      answer:
+        option_id: nothing
+      explanation:
+        en: >
+          A Python file is only text until something runs it. That is why a mistake can sit in
+          a file unnoticed for a long time — nobody finds it until that line actually runs.
+      skill_tags: [python-basics]
+      is_challenge_eligible: false
+      review_status: reviewed

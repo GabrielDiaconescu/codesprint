@@ -1,0 +1,13 @@
+id: 7cecf0b8-fb35-40a1-aa60-952d6d23da03
+slug: variables
+title:
+  en: Variables & Assignment
+description:
+  en: Storing values, naming them well, and changing them as your program runs.
+order_index: 2
+estimated_minutes: 22
+lessons:
+  - creating-variables
+  - naming-variables
+  - changing-values
+  - using-variables-together

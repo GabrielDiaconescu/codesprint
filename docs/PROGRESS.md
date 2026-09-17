@@ -2,7 +2,7 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 5 complete — awaiting approval for Phase 6 (Content pipeline).
+**Current phase:** Phase 6 complete — awaiting approval for Phase 7 (Course & lesson engine).
 **Last updated:** 2026-09-17
 
 ---
@@ -17,7 +17,8 @@
 | 3     | Database foundation                  | **Complete** — pending device check   |
 | 4     | Authentication                       | **Complete** — pending device check   |
 | 5     | Onboarding, age gate, consent        | **Complete** — pending device check   |
-| 6–23  | See `PLAN.md` / SPEC §57             | Not started                           |
+| 6     | Content pipeline & development seed  | **Complete** — pending device check   |
+| 7–23  | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -483,6 +484,88 @@ Exercised against the running stack through the real HTTP API:
    local sign-out — placed in a `finally`, so even a failed delete cannot leave someone
    inside the app.
 
+## Phase 6 — what was implemented (Content pipeline & development seed)
+
+**Authoring format** — `src/lib/content/schema.ts`
+
+Zod schemas for every file and all eight question types, under `src/lib` rather than `scripts/`
+because the app renders the same shapes from Phase 7. Everything is `.strict()`: a typo like
+`explaination:` fails rather than silently publishing a question with no explanation.
+
+**Pipeline** — `scripts/content/`
+
+| Script             | Job                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `load.ts`          | Reads the YAML tree, collecting every problem rather than the first                  |
+| `validate.ts`      | Cross-file rules: ids, references, question counts, difficulty mix, placeholder text |
+| `runnables.ts`     | Emits a JSON manifest of everything Python should be made to prove                   |
+| `verify_python.py` | Executes it all on 3.12 **and** 3.14 (D9), standard library only                     |
+| `build.ts`         | Maps content to database rows, splitting answers from payloads                       |
+| `seed.ts`          | Generates `supabase/seed.sql` from the real files                                    |
+| `publish.ts`       | Upserts into Supabase; never deletes; bumps `content_version`                        |
+
+**Content** — two complete modules of Python Fundamentals: _Getting Started_ and
+_Variables & Assignment_. 8 lessons, 40 questions, all eight types, exam pool 38, challenge
+pool 39, every item reviewed.
+
+**Seed** — `supabase/seed.sql` is generated, never hand-written, and carries three test
+accounts (free / no_ads / premium) whose entitlement rows are tagged `store = 'dev-seed'`.
+
+**App** — `ContentService` plus the Learn screen, which now lists the published modules with
+lesson counts and lock state instead of a placeholder.
+
+### Phase 6 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 26 suites, 398 tests, all passing
+database    supabase test db ......... 5 files, 93 pgTAP tests, all passing
+content     content:validate ......... 1 course, 2 modules, 8 lessons, 40 questions (8/8 types)
+python      content:verify ........... 35 snippets on Python 3.12 and 3.14
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+Checked against the running stack:
+
+| Check                                         | Result                                         |
+| --------------------------------------------- | ---------------------------------------------- |
+| Seed applies                                  | 40 questions, 40 answer keys, 2 exams, 3 users |
+| Dev accounts sign in                          | all three                                      |
+| Signed-in client reads `question_answer_keys` | denied, 42501                                  |
+| Signed-in client reads `questions`            | denied, 42501 (RPC only, as designed)          |
+| Signed-in client reads `modules`              | allowed                                        |
+| Any published payload containing an answer    | none                                           |
+
+The verifier was itself tested against deliberately broken cases — a lesson claiming the wrong
+output, code that crashes, code that waits for input, and a debugging question with no actual
+bug. It caught all four and exits non-zero.
+
+## Decisions and interpretations made during Phase 6
+
+1. **The Python verifier takes a JSON manifest rather than parsing YAML.** `runnables.ts`
+   emits it, so the schemas live in one place and the verifier needs no third-party Python
+   packages on any machine or in CI.
+2. **Runnable `debugging` questions verify BOTH sides.** The broken version must actually fail
+   or print the wrong thing, and the fix must work. A "find the bug" exercise whose code runs
+   perfectly teaches the learner to distrust their own correct reading.
+3. **Lesson blocks reference questions by id rather than embedding them.** It keeps the lesson
+   payload under the 50 KB cap (SPEC §45) and makes it structurally impossible for an answer
+   to ride along inside a lesson body.
+4. **Module directories encode their order, and the loader checks it.** `01-getting-started`
+   must match `order_index: 1`, or the filesystem order and the teaching order drift silently.
+5. **A lesson file not listed in `module.yaml` is an error.** It is nearly always a forgotten
+   entry rather than a deliberate draft, and the pipeline would otherwise ignore it in silence.
+6. **The seed generator sets eight empty-string token columns on `auth.users`.** GoTrue scans
+   them into Go strings rather than pointers, so NULL makes every sign-in fail with an opaque
+   500 — from rows that look perfectly correct in Studio. This cost real time to find.
+7. **`yaml` is mapped to its CommonJS build in `jest.config.js`.** jest-expo resolves packages
+   the way a browser would, which picks the ESM bundle and then cannot parse it.
+8. **The free/premium lock on the Learn screen is display only.** It is computed from
+   `free_module_count` for the padlock; access is decided by `can_access_module()` on the
+   server, so a client lying to itself gains only a wrong icon.
+
 ## Known limitations
 
 - Services other than Config are still no-ops: billing (14), ads (15), analytics and
@@ -498,7 +581,10 @@ Exercised against the running stack through the real HTTP API:
 - No content: the tables exist but are empty until the Phase 6 pipeline seeds them.
 - `supabase/seed.sql` does not exist yet, so `db:reset` warns about it. Harmless, and the
   file arrives with the content pipeline.
-- Tab screens show honest "ships in Phase N" placeholders — no mocked data presented as real.
+- Home, Leaderboard and Profile still show honest "ships in Phase N" placeholders. Learn now
+  shows real published modules.
+- Tapping a module does nothing yet: opening a lesson is Phase 7. The screen says so rather
+  than leading somewhere unfinished.
 - Onboarding does not yet let an intermediate user choose a starting module (SPEC §11):
   there is no content to choose from until Phase 6. Their answer is stored and will drive
   that choice then.
@@ -537,9 +623,9 @@ Exercised against the running stack through the real HTTP API:
 
 - None. Docker is running and the Supabase project is in the EU region.
 
-**Before Phase 6 (the next phase):**
+**Before Phase 7 (the next phase):**
 
-- None. Both Python versions are installed (3.12.10 and 3.14.4), verified 2026-09-17.
+- None.
 
 **Still outstanding from Phase 4 — needed before a production release, not before Phase 5:**
 
@@ -771,3 +857,52 @@ Onboarding runs once per account, so use a **fresh guest** for each pass: sign o
     button.
 22. Dark mode: every step is legible, and the selected option is distinguishable by more than
     colour.
+
+---
+
+## Phase 6 device test checklist
+
+The seed is applied by `npm run db:reset`, so make sure that has run since the last content
+change.
+
+### Learn shows the real course
+
+1. Open the **Learn** tab. It shows "Python Fundamentals" with a description, then two module
+   cards — not a placeholder.
+2. Module 01 reads _Getting Started_, 4 lessons. Module 02 reads _Variables & Assignment_,
+   4 lessons.
+3. Pull down to refresh: the list reloads without flickering to an error.
+4. Tapping a module does nothing yet. That is correct for this phase — the lesson player is
+   Phase 7.
+
+### It really comes from the database
+
+5. In Studio (`http://127.0.0.1:54323`), open `modules` and change the title of
+   `getting-started`.
+6. In `app_config`, increment `content_version`.
+7. Reopen Learn. The new title appears — proving the screen reads published content and that
+   `content_version` is what invalidates the cache.
+8. Set `modules.is_active = false` for one module. It disappears from the list.
+
+### The free boundary
+
+9. In `app_config`, set `free_module_count` to `1`.
+10. Reopen Learn: module 02 now carries a **Premium** badge and a padlock; module 01 does not.
+11. Set it back to `6`: both are unlocked again. No module is ever hidden — the boundary is
+    shown, not concealed.
+
+### The test accounts
+
+12. Sign out, then sign in as `premium@codesprint.test` with `sprint2026`. It works.
+13. Repeat for `free@codesprint.test` and `noads@codesprint.test`.
+14. In Studio, `user_entitlements` shows `store = 'dev-seed'` for the premium account — the
+    tag that distinguishes a fixture from a real purchase.
+
+### Robustness
+
+15. Stop Supabase (`npx supabase stop`) and open Learn: an error state with a **Try again**
+    button, not a blank screen or a crash.
+16. Start it again and tap Try again: the modules come back.
+17. With a screen reader on, a module card announces its title, its lock state and its lesson
+    count in one phrase.
+18. Large text and dark mode: the cards stay legible and nothing clips.

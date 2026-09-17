@@ -1,0 +1,37 @@
+# Python Fundamentals — the launch course (SPEC §14).
+#
+# Modules are discovered by scanning ./modules/*/module.yaml and ordered by their own
+# order_index. Two modules are authored for the development seed (SPEC §35); the remaining
+# fifteen arrive in Phase 19.
+
+id: 63537f48-2a70-4e15-a7eb-b85f4ea8f637
+slug: python-fundamentals
+title:
+  en: Python Fundamentals
+description:
+  en: Learn Python from the very beginning — one short session at a time.
+language: python
+icon_key: python
+order_index: 0
+
+# The free sample and the full exam are two rows, not a code branch (SPEC §27).
+exams:
+  - id: 6249f5f9-cf88-4c63-96df-c94dae961427
+    slug: python-fundamentals-sample
+    title:
+      en: Python Fundamentals — Sample Exam
+    description:
+      en: A ten-question taste of the full exam. Free for everyone.
+    question_count: 10
+    pass_threshold_pct: 70
+
+  - id: 98b56042-630c-4303-9b01-84327d58c912
+    slug: python-fundamentals-full
+    title:
+      en: Python Fundamentals Exam
+    description:
+      en: Thirty questions across everything the course covers, with a 45 minute timer.
+    question_count: 30
+    time_limit_minutes: 45
+    pass_threshold_pct: 70
+    requires_entitlement: premium

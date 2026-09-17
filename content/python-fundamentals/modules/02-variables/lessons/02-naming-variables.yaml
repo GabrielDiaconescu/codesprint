@@ -1,0 +1,182 @@
+id: 3fba4acd-580c-4b58-bb81-3723335f9c95
+slug: naming-variables
+title:
+  en: Choosing good names
+summary:
+  en: What Python allows, and what your future self will thank you for.
+estimated_minutes: 5
+review_status: reviewed
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Python has only a few rules about names. A name may contain letters, digits and
+        underscores; it may not start with a digit; and it may not contain a space.
+
+  - type: code
+    code: |
+      user_name = "Ana"
+      score2 = 17
+      print(user_name, score2)
+    output: 'Ana 17'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Names are case-sensitive, so `total` and `Total` are two different variables. That
+        catches people out constantly.
+
+  - type: text
+    body:
+      en: |
+        Beyond the rules there is a convention: Python programmers use `lower_case_with_
+        underscores`. Following it makes your code look like everyone else's, which makes it
+        easier for others — and for you in six months.
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        A good name says what the value means, not what type it is. `price` beats `p`, and
+        `days_remaining` beats `number`.
+
+  - type: question
+    question:
+      id: b623e3ea-65c0-41aa-9282-1255ae18f0f0
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these are valid variable names in Python?
+      payload:
+        options:
+          - id: user-name
+            text:
+              en: user_name
+          - id: score2
+            text:
+              en: score2
+          - id: two-words
+            text:
+              en: two words
+          - id: leading-digit
+            text:
+              en: 2nd_place
+          - id: underscore
+            text:
+              en: _total
+      answer:
+        option_ids: [user-name, score2, underscore]
+      explanation:
+        en: >
+          Letters, digits and underscores are allowed, and a name may start with a letter or
+          an underscore. It may not contain a space, and it may not start with a digit —
+          Python would begin reading `2nd_place` as a number.
+      skill_tags: [variables, naming]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 93dcaabb-c9f7-4388-8dd7-be3e2ca2aeae
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        total = 10
+        Total = 20
+        print(total)
+      payload:
+        input: text
+      answer:
+        value: '10'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Names are case-sensitive, so `total` and `Total` are two separate variables. The
+          second line creates a new one rather than changing the first — a mistake that
+          produces no error at all, just a wrong answer.
+      skill_tags: [variables, naming]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 91102369-a309-4de8-be34-02c6bc4c6f72
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This program should print the greeting, but it fails. Which line is wrong?
+      code_snippet: |
+        message = "Hi there"
+        print(Message)
+      payload:
+        mode: select_line
+        lines:
+          - id: assign
+            text: 'message = "Hi there"'
+          - id: show
+            text: 'print(Message)'
+      answer:
+        line_id: show
+      runnable: true
+      fixed_code: |
+        message = "Hi there"
+        print(message)
+      fixed_output: 'Hi there'
+      explanation:
+        en: >
+          The variable was created as `message` but printed as `Message`. Python treats those
+          as different names, so it reports a NameError for one it has never seen.
+      hint:
+        en: Compare the two names letter by letter.
+      skill_tags: [variables, naming, debugging]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 5adb7977-9faa-4c44-97f9-851a07dc8c95
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`item count = 5` is a valid way to create a variable.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          A name cannot contain a space — Python would read `item` and then not know what to
+          do with `count`. Use `item_count` instead.
+      skill_tags: [variables, naming]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 796c7463-0715-40eb-a3e5-52c014b93b0e
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: Which name best follows Python's conventions for a person's date of birth?
+      payload:
+        options:
+          - id: snake
+            text:
+              en: date_of_birth
+          - id: camel
+            text:
+              en: dateOfBirth
+          - id: short
+            text:
+              en: dob
+          - id: typed
+            text:
+              en: str_date
+      answer:
+        option_id: snake
+      explanation:
+        en: >
+          Python uses lower case with underscores. `dateOfBirth` is the convention in other
+          languages, `dob` needs explaining, and `str_date` describes the type rather than the
+          meaning — and would be wrong the moment the value changed type.
+      skill_tags: [naming]
+      is_exam_eligible: false
+      review_status: reviewed

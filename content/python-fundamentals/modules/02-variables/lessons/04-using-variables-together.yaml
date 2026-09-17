@@ -1,0 +1,218 @@
+id: 1efcab6f-3118-4d16-966a-83214cc494b8
+slug: using-variables-together
+title:
+  en: Putting variables to work
+summary:
+  en: Combining values, and what happens when the types do not match.
+estimated_minutes: 6
+review_status: reviewed
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Variables become useful when you combine them. Arithmetic works exactly as you would
+        expect, and the result can be stored in a new name.
+
+  - type: code
+    code: |
+      hours = 7
+      rate = 12
+      pay = hours * rate
+      print(pay)
+    output: '84'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Text can be combined too, with `+`. This is called concatenation, and it joins the
+        pieces exactly — no space is added for you.
+
+  - type: code
+    code: |
+      first = "Ada"
+      last = "Lovelace"
+      print(first + " " + last)
+    output: 'Ada Lovelace'
+    runnable: true
+    caption:
+      en: The `" "` in the middle is a space, added deliberately.
+
+  - type: text
+    body:
+      en: |
+        What you cannot do is add text to a number. Python refuses rather than guessing which
+        one you meant.
+
+  - type: code
+    code: |
+      age = 21
+      print("Age: " + str(age))
+    output: 'Age: 21'
+    runnable: true
+    caption:
+      en: '`str(age)` turns the number into text first, so `+` has two pieces of text to join.'
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        `print("Age:", age)` does the same job with less effort — commas handle mixed types on
+        their own. Reach for `str()` when you need the pieces joined exactly.
+
+  - type: question
+    question:
+      id: 89444f12-ab43-44e5-a276-b4bab12c8bc8
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        a = 3
+        b = 4
+        print(a + b)
+      payload:
+        input: text
+      answer:
+        value: '7'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Both values are numbers, so `+` adds them. Had they been written "3" and "4" with
+          quotes, the same `+` would have joined them into "34" instead.
+      skill_tags: [variables, arithmetic]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 315015b6-963b-4cfb-acc9-ea68b8e5ae51
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so the number can be joined to the text.
+      code_snippet: |
+        count = 5
+        print("You have " + ___(count) + " messages")
+      payload:
+        input: tokens
+        tokens: [str, int, float, text]
+      answer:
+        value: str
+        match_mode: trimmed
+      explanation:
+        en: >
+          `str()` converts a value to text, which is what `+` needs on both sides here. `int()`
+          would go the other way, and `text()` is not a Python function at all.
+      hint:
+        en: Which kind of value does `+` need on both sides to join them?
+      skill_tags: [variables, data-types]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 94627b6b-6cda-4f26-bdc7-17ce7531e214
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: 'What happens when you run `print("Total: " + 5)`?'
+      payload:
+        options:
+          - id: type-error
+            text:
+              en: A TypeError, because text and a number cannot be joined
+          - id: works
+            text:
+              en: 'It prints `Total: 5`'
+          - id: adds
+            text:
+              en: 'It prints `Total: ` followed by nothing'
+          - id: converts
+            text:
+              en: Python converts the number to text automatically
+      answer:
+        option_id: type-error
+      explanation:
+        en: >
+          Python refuses to guess. Joining text and adding numbers are different operations
+          that share the `+` symbol, so mixing the two is ambiguous — and Python would rather
+          stop than pick the wrong one silently.
+      skill_tags: [data-types, errors]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: b1b87037-2ac7-4068-8dcc-aab0c1172c19
+      type: concept_matching
+      difficulty: hard
+      prompt:
+        en: Match each expression to what it produces.
+      payload:
+        concepts:
+          - id: numbers
+            text:
+              en: 2 + 3
+          - id: strings
+            text:
+              en: '"2" + "3"'
+          - id: mixed
+            text:
+              en: '"2" + 3'
+        definitions:
+          - id: five
+            text:
+              en: The number 5
+          - id: twentythree
+            text:
+              en: The text 23
+          - id: error
+            text:
+              en: A TypeError
+      answer:
+        pairs:
+          numbers: five
+          strings: twentythree
+          mixed: error
+      explanation:
+        en: >
+          The same `+` means three different things depending on what sits either side: add
+          for numbers, join for text, and refuse for a mixture. The quotes are the only visible
+          difference, which is why they repay careful reading.
+      skill_tags: [data-types, arithmetic]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: f178061f-8985-4d79-81f2-e2daf4bfb9ae
+      type: multiple_select
+      difficulty: hard
+      prompt:
+        en: 'Which of these lines print exactly `Score: 9`?'
+      payload:
+        options:
+          - id: comma
+            text:
+              en: 'print("Score:", 9)'
+          - id: str-join
+            text:
+              en: 'print("Score: " + str(9))'
+          - id: plain-join
+            text:
+              en: 'print("Score: " + 9)'
+          - id: no-space
+            text:
+              en: 'print("Score:" + str(9))'
+          - id: two-args
+            text:
+              en: 'print("Score:", "9")'
+      answer:
+        option_ids: [comma, str-join, two-args]
+      explanation:
+        en: >
+          Commas insert exactly one space, so the first and last both give `Score: 9`. The
+          `str()` version supplies its own space inside the quotes. Joining text to a bare
+          number raises a TypeError, and the fourth has no space at all, giving `Score:9`.
+      hint:
+        en: Work out the spaces character by character.
+      skill_tags: [printing, data-types]
+      review_status: reviewed

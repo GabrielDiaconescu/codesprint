@@ -178,6 +178,42 @@ export interface ProfileService extends ServiceIdentity {
   syncSession(timezone: string): Promise<UserProfile>;
 }
 
+/* ------------------------------------------------------------------ Content (Supabase) */
+
+export interface ModuleSummary {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  orderIndex: number;
+  estimatedMinutes: number;
+  lessonCount: number;
+  /** Display only — access is decided by `can_access_module()` on the server (SPEC §40). */
+  isLocked: boolean;
+}
+
+export interface CourseOverview {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  modules: ModuleSummary[];
+}
+
+export interface ContentService extends ServiceIdentity {
+  /**
+   * Course and module metadata for the Learn screen.
+   *
+   * Lesson bodies and questions are NOT here: they are RPC-only and entitlement-checked
+   * (SPEC §40), and arrive with the lesson engine in Phase 7.
+   */
+  getCourseOverview(
+    courseSlug: string,
+    locale: string,
+    freeModuleCount: number,
+  ): Promise<CourseOverview | null>;
+}
+
 /* ------------------------------------------------------------------ Monitoring (Sentry) */
 export interface MonitoringService extends ServiceIdentity {
   initialize(): Promise<void>;

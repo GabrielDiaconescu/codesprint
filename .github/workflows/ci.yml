@@ -72,6 +72,62 @@ jobs:
         if: always()
         run: npx supabase stop --no-backup
 
+  content:
+    name: Content (validate + run on real Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      # D9: every snippet must behave identically on both. The runner has neither by default,
+      # and `verify_python.py` refuses to run rather than silently checking only one.
+      - name: Install Python 3.12
+        id: py312
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install Python 3.14
+        id: py314
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      # Pointed at explicitly rather than trusting PATH order: installing two versions leaves
+      # whichever ran last in front, and a silent fallback to one interpreter would defeat the
+      # entire point of checking both. `verify_python.py` honours these overrides.
+      - name: Point the verifier at both interpreters
+        run: |
+          echo "PYTHON_3_12=${{ steps.py312.outputs.python-path }}" >> "$GITHUB_ENV"
+          echo "PYTHON_3_14=${{ steps.py314.outputs.python-path }}" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Schemas, unique ids, question counts, difficulty mix, placeholder text (SPEC §35.1).
+      - name: Validate content
+        run: npm run content:validate
+
+      # The part that catches content which is well-formed but WRONG: a lesson claiming a
+      # program prints 24 when it prints 25 (SPEC §35.2).
+      - name: Run every snippet on both interpreters
+        run: npm run content:verify
+
+      # The seed is generated, never hand-written (SPEC §52). If it drifts from the content
+      # files, local databases stop matching what the pipeline would publish.
+      - name: Fail if supabase/seed.sql is stale
+        run: |
+          npm run content:seed
+          if ! git diff --quiet -- supabase/seed.sql; then
+            echo "::error::supabase/seed.sql is out of date. Run: npm run content:seed"
+            git diff --stat -- supabase/seed.sql
+            exit 1
+          fi
+
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest

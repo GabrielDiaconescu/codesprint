@@ -1,0 +1,211 @@
+id: e4d23af9-8917-4945-b4aa-a5ec4878dba5
+slug: changing-values
+title:
+  en: Changing what a variable holds
+summary:
+  en: Reassignment, and why the order of lines decides the answer.
+estimated_minutes: 5
+review_status: reviewed
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A variable can be given a new value at any time. The old one is simply replaced.
+
+  - type: code
+    code: |
+      lives = 3
+      lives = 2
+      print(lives)
+    output: '2'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        A variable can also be updated using its own current value. Python works out the right
+        side first, then stores the result in the name on the left.
+
+  - type: code
+    code: |
+      score = 10
+      score = score + 5
+      print(score)
+    output: '15'
+    runnable: true
+    caption:
+      en: '`score = score + 5` reads oddly, until you remember `=` means "gets".'
+
+  - type: text
+    body:
+      en: |
+        Because that pattern is so common, Python has a shorthand: `score += 5` does exactly
+        the same thing.
+
+  - type: code
+    code: |
+      score = 10
+      score += 5
+      score -= 3
+      print(score)
+    output: '12'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Printing before the update shows the old value. The line that prints decides what you
+        see, not the line that assigns.
+
+  - type: question
+    question:
+      id: cd3ed4c6-272d-4c33-bd40-e633e6e1fbff
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        count = 1
+        count = 4
+        print(count)
+      payload:
+        input: text
+      answer:
+        value: '4'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The second assignment replaces the first. A variable holds one value at a time, and
+          the most recent assignment before the print is the one that counts.
+      skill_tags: [variables, reassignment]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 56285afe-a6a1-4276-ba21-e15aa10d47f6
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        total = 7
+        print(total)
+        total = 12
+      payload:
+        input: text
+      answer:
+        value: '7'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The print runs before the second assignment, so it shows 7. The value does become 12
+          — just after the only line that would have shown it.
+      hint:
+        en: Follow the lines strictly in order.
+      skill_tags: [variables, reassignment]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 697c0320-a823-46f5-a1d5-bbcd013107db
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What is `x` after these two lines?
+      code_snippet: |
+        x = 6
+        x = x * 2
+      payload:
+        options:
+          - id: twelve
+            text:
+              en: '12'
+          - id: six
+            text:
+              en: '6'
+          - id: error
+            text:
+              en: An error, because x is used to define itself
+          - id: two
+            text:
+              en: '2'
+      answer:
+        option_id: twelve
+      explanation:
+        en: >
+          Python calculates the right side first, using the current value: 6 times 2 is 12.
+          Only then does it store that result back in `x`. There is no circularity, because
+          the reading happens before the writing.
+      skill_tags: [variables, reassignment]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 51f8fc43-8f18-407a-8c3c-6969ed20a125
+      type: code_ordering
+      difficulty: medium
+      prompt:
+        en: Arrange the lines so the program ends by printing 8.
+      payload:
+        lines:
+          - id: start
+            text: value = 10
+          - id: add
+            text: value += 1
+          - id: subtract
+            text: value -= 3
+          - id: show
+            text: print(value)
+      answer:
+        order: [start, add, subtract, show]
+      runnable: true
+      expected_output: '8'
+      explanation:
+        en: >
+          Ten, plus one, minus three, gives eight — and the print has to come last to see it.
+          Each line changes the value in place, so the order of the arithmetic is the order of
+          the lines.
+      skill_tags: [variables, reassignment]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 184ed59e-ff4f-47c2-a320-351d98580148
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: >
+          This should print the total after the discount, but it prints the price before it.
+          Which line needs to move?
+      code_snippet: |
+        price = 100
+        print(price)
+        price -= 20
+      payload:
+        mode: select_line
+        lines:
+          - id: set
+            text: 'price = 100'
+          - id: show
+            text: 'print(price)'
+          - id: discount
+            text: 'price -= 20'
+      answer:
+        line_id: show
+      runnable: true
+      fixed_code: |
+        price = 100
+        price -= 20
+        print(price)
+      fixed_output: '80'
+      explanation:
+        en: >
+          Nothing here is wrong in isolation — the mistake is the order. The print happens
+          before the discount is applied, so it reports a value that is technically correct
+          and completely useless. Bugs of this kind never raise an error.
+      hint:
+        en: Every line is valid Python. Ask when each one happens.
+      skill_tags: [variables, reassignment, debugging]
+      review_status: reviewed

@@ -1,0 +1,180 @@
+id: a6e49edf-a740-4668-a22d-c1c46a544b0f
+slug: comments
+title:
+  en: Notes to yourself — comments
+summary:
+  en: Writing lines Python ignores, and why you will be glad you did.
+estimated_minutes: 4
+review_status: reviewed
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A `#` tells Python to ignore the rest of the line. What follows is for people reading
+        the code, not for the computer.
+
+  - type: code
+    code: |
+      # Work out the delivery charge
+      print(5)
+    output: '5'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        A comment can also sit at the end of a line, after some real code.
+
+  - type: code
+    code: |
+      print(19)  # the customer's age
+    output: '19'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Explain **why**, not **what**. `# add 1 to the total` repeats what the code already
+        says. `# the list is 1-based in the report` tells the reader something the code cannot.
+
+  - type: text
+    body:
+      en: |
+        Putting a `#` in front of a working line is a common trick while you are experimenting:
+        the line stays in the file but stops running. It is easy to forget one there, though.
+
+  - type: question
+    question:
+      id: ab04f186-d7f8-48e2-8daf-85978472e4bf
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Python runs the text that comes after a `#`.
+      answer:
+        value: false
+      explanation:
+        en: >
+          It ignores it completely. Everything from the `#` to the end of that line is for the
+          reader, which is exactly why commenting out a line stops it working.
+      skill_tags: [comments]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: a08adf6b-69a1-46dd-a631-c199ceddbbb6
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        # print("one")
+        print("two")
+      payload:
+        input: text
+      answer:
+        value: 'two'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The first line is commented out, so it never runs. Only the second line produces
+          output — which is why a stray `#` can make code look broken for no visible reason.
+      skill_tags: [comments, printing]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: bdaf51c1-50b6-4c06-b365-3de70c98ff4b
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: Which comment is the most useful?
+      payload:
+        options:
+          - id: why
+            text:
+              en: '# prices are stored in cents to avoid rounding errors'
+          - id: what
+            text:
+              en: '# print the price'
+          - id: obvious
+            text:
+              en: '# this is a comment'
+          - id: empty
+            text:
+              en: '#'
+      answer:
+        option_id: why
+      explanation:
+        en: >
+          The first says something the code cannot: a decision and its reason. The others
+          repeat what is already visible, which means they add reading work without adding
+          understanding — and they go stale when the code changes.
+      skill_tags: [comments]
+      is_exam_eligible: false
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: c3c78549-af7e-42c7-9962-6c2b9042d5ae
+      type: fill_blank
+      difficulty: easy
+      prompt:
+        en: Complete the line so Python ignores the note at the end.
+      code_snippet: |
+        print("done") ___ finished for today
+      payload:
+        input: tokens
+        tokens: ['#', '//', '--', '**']
+      answer:
+        value: '#'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Python uses `#`. The others start comments in other languages — `//` in JavaScript,
+          `--` in SQL — and Python would try to read them as code and fail.
+      skill_tags: [comments]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: cf7fcce7-ca2c-446d-8acc-a9827967786e
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: >
+          This should greet the user and then show the total, but the greeting never appears.
+          Which line is the problem?
+      code_snippet: |
+        # print("Welcome!")
+        total = 12
+        print(total)
+      payload:
+        mode: select_line
+        lines:
+          - id: greeting
+            text: '# print("Welcome!")'
+          - id: total
+            text: 'total = 12'
+          - id: show
+            text: 'print(total)'
+      answer:
+        line_id: greeting
+      runnable: true
+      fixed_code: |
+        print("Welcome!")
+        total = 12
+        print(total)
+      fixed_output: |-
+        Welcome!
+        12
+      explanation:
+        en: >
+          The greeting is commented out, so it never runs. Nothing reports an error, because a
+          comment is perfectly valid — the line simply does nothing. Silent failures like this
+          are why a forgotten `#` can cost so much time.
+      hint:
+        en: Look for a line that Python is ignoring.
+      skill_tags: [comments, debugging]
+      review_status: reviewed

@@ -1,0 +1,170 @@
+id: a061f1ed-25e6-47db-9bc2-1610f7676d54
+slug: creating-variables
+title:
+  en: Storing a value in a variable
+summary:
+  en: Giving a value a name so you can use it again.
+estimated_minutes: 5
+review_status: reviewed
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A variable is a name that stands for a value. You create one with `=`, putting the
+        name on the left and the value on the right.
+
+  - type: code
+    code: |
+      age = 21
+      print(age)
+    output: '21'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Read `=` as "gets" rather than "equals": `age = 21` means *age gets the value 21*. It
+        is an instruction, not a statement of fact, and the direction matters — the name on
+        the left receives what is on the right.
+
+  - type: text
+    body:
+      en: |
+        Once a name exists you can use it anywhere the value would work.
+
+  - type: code
+    code: |
+      price = 8
+      quantity = 3
+      print(price * quantity)
+    output: '24'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        `21 = age` is an error. Python reads the left side as the thing being named, and 21 is
+        already a number — it cannot be given a value.
+
+  - type: question
+    question:
+      id: 04e705b8-a2ca-4e5e-8821-084eed62ab28
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        city = "Cluj"
+        print(city)
+      payload:
+        input: text
+      answer:
+        value: 'Cluj'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `city` stands for the text "Cluj", so printing the name prints the value. Note there
+          are no quotes around `city` in the print — quotes would make it the literal word.
+      skill_tags: [variables]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: b859ee51-8e4b-4f04-b20c-fc13d23ef29c
+      type: fill_blank
+      difficulty: easy
+      prompt:
+        en: Complete the line so the name `total` stands for the number 50.
+      code_snippet: |
+        total ___ 50
+      payload:
+        input: tokens
+        tokens: ['=', '==', ':', '=>']
+      answer:
+        value: '='
+        match_mode: trimmed
+      explanation:
+        en: >
+          A single `=` assigns. A double `==` is a question — it asks whether two values are
+          the same — and you will meet it when you start writing conditions.
+      skill_tags: [variables]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 57309f58-3482-4930-9a7f-eaa6801b6b43
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: Why does `5 = score` cause an error?
+      payload:
+        options:
+          - id: wrong-side
+            text:
+              en: The name being assigned to must be on the left
+          - id: too-small
+            text:
+              en: 5 is too small to store
+          - id: needs-quotes
+            text:
+              en: Numbers need quotation marks
+          - id: reserved
+            text:
+              en: '`score` is a reserved word in Python'
+      answer:
+        option_id: wrong-side
+      explanation:
+        en: >
+          Assignment always flows right to left: the value on the right is given to the name
+          on the left. `5` is already a number, so there is nothing to name it with.
+      hint:
+        en: Which side of the `=` receives the value?
+      skill_tags: [variables, errors]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: ecc4f458-3c1e-48ba-9f4d-de8125d5c911
+      type: code_ordering
+      difficulty: medium
+      prompt:
+        en: Arrange the lines so the program prints the area of the rectangle.
+      payload:
+        lines:
+          - id: width
+            text: width = 4
+          - id: height
+            text: height = 5
+          - id: area
+            text: area = width * height
+          - id: show
+            text: print(area)
+      answer:
+        order: [width, height, area, show]
+      runnable: true
+      expected_output: '20'
+      explanation:
+        en: >
+          A name has to exist before it can be used. `area` needs both `width` and `height`
+          already defined, and `print(area)` needs `area`. Running them in any other order
+          gives a NameError.
+      skill_tags: [variables, python-basics]
+      review_status: reviewed
+
+  - type: question
+    question:
+      id: 8eb4cb1b-0219-4f10-bffd-6d834b5c220b
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A variable must be created before the line that uses it.
+      answer:
+        value: true
+      explanation:
+        en: >
+          Python runs top to bottom and only knows a name once it has been assigned. Using it
+          earlier gives a NameError, even if the assignment appears further down the file.
+      skill_tags: [variables, errors]
+      review_status: reviewed

@@ -1,7 +1,22 @@
 {
   "title": "Learn",
-  "placeholder": {
-    "title": "Python Fundamentals",
-    "body": "Modules and lessons appear once the content pipeline ships in Phase 6."
+  "module": {
+    "locked": "Premium",
+    "lessons_one": "{{count}} lesson",
+    "lessons_other": "{{count}} lessons",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min"
+  },
+  "empty": {
+    "title": "No lessons yet",
+    "body": "The course is being prepared. Check back shortly."
+  },
+  "error": {
+    "title": "Couldn't load the course",
+    "body": "Check your connection and try again."
+  },
+  "comingSoon": {
+    "title": "Almost there",
+    "body": "Opening a lesson arrives in the next release."
   }
 }
