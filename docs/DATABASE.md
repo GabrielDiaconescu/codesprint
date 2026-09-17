@@ -53,6 +53,7 @@ Local Studio: http://127.0.0.1:54323 · API: http://127.0.0.1:54321
 | `20260917120500_core_functions`         | Entitlements, module gating, the XP ledger, profile RPCs                                                |
 | `20260917120600_auth_support`           | Guest conversion mirror, abandoned-guest purge, the pg_cron schedule                                    |
 | `20260917120700_onboarding`             | Age thresholds, the age gate, server-enforced minor protections                                         |
+| `20260917120800_lesson_engine`          | `get_lesson`, plus the localisation helpers it needs                                                    |
 
 ---
 
@@ -129,6 +130,7 @@ the search path and hijack an unqualified reference while the function runs as o
 | `update_profile(jsonb)`     | authenticated       | The **only** client write path into profiles. Whitelists columns and validates the IANA timezone; `is_anonymous` and moderation flags are deliberately not writable |
 | `sync_session(text)`        | authenticated       | App-open heartbeat; accepts a timezone change. Also what keeps an active guest out of the purge                                                                     |
 | `reject_underage_account()` | authenticated       | Deletes the CALLER. The age gate's only outcome below `min_user_age`                                                                                                |
+| `get_lesson(uuid, text)`    | authenticated       | The only path to lesson bodies and questions. Entitlement-checked; never returns explanations, hints or answer keys                                                 |
 
 ### Internal (no client grant)
 
@@ -148,6 +150,8 @@ the search path and hijack an unqualified reference while the function runs as o
 | `delete_stale_anonymous_users(int)`  | Scheduled purge of abandoned guests. See below                        |
 | `age_from_birth_year(int)`           | Age reached during the current year (SPEC §11: birth year only)       |
 | `is_minor(uuid)`                     | Below `minor_protection_age`. An unknown birth year fails closed      |
+| `localized_text(jsonb, text)`        | Reads a localized field with an English fallback                      |
+| `localize_deep(jsonb, text)`         | Collapses every localized object in a structure to one locale         |
 
 ### The XP ledger
 
@@ -227,6 +231,33 @@ One consequence worth knowing: an access token stays cryptographically valid unt
 so a stale token is still _accepted_ by PostgREST after the delete. It sees nothing, because
 RLS finds no rows, and the app signs out immediately afterwards.
 
+### The lesson engine
+
+`lesson_contents` and `questions` have no grants and no policies at all. `get_lesson` is the
+only way either reaches a client, and it checks two things before returning anything: that the
+lesson and its module are active, and that `can_access_module()` allows it.
+
+**What it does not return matters as much as what it does.** Explanations and hints are the
+reward for answering (SPEC §17, §18); shipping them with the lesson would let anyone read the
+reasoning before attempting anything. Answer keys never appear under any circumstance.
+
+The client is told `has_hint` — whether one exists — so it can decide whether to offer the
+button. Asking for the hint itself is a separate request.
+
+Errors are distinguished on purpose, because they mean different screens:
+
+| Code    | Meaning                     | What the app shows |
+| ------- | --------------------------- | ------------------ |
+| `42501` | Module requires Premium     | The paywall        |
+| `P0002` | Lesson missing or withdrawn | "Lesson not found" |
+| `28000` | Not authenticated           | The sign-in screen |
+
+Text is localised **on the server** via `localize_deep`, which replaces every object carrying
+an `en` string with the string for the requested locale. Applying it to whole blocks rather
+than field by field means option text, concept labels and captions all localise by the same
+rule, and a new field cannot be forgotten. It also keeps the payload inside the 50 KB cap
+(SPEC §45) once a second language exists — a seeded lesson is currently under 4 KB.
+
 ---
 
 ## Auth configuration
@@ -266,6 +297,7 @@ Supabase's built-in sender is not permitted there.
 | `03_xp_ledger.test.sql`           | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                              |
 | `04_auth_support.test.sql`        | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                        |
 | `05_onboarding_age_gate.test.sql` | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it             |
+| `06_lesson_engine.test.sql`       | That `get_lesson` refuses a premium module to free users and guests, opens it for a premium user, reports missing and withdrawn lessons distinctly, and never returns an explanation, hint or answer       |
 
 CI runs these against a fresh database on every push, and fails if
 `src/types/database.types.ts` is out of date.
@@ -276,7 +308,7 @@ CI runs these against a fresh database on every push, and fails if
 
 Phase 3 delivers the foundation. These arrive with the features that need them:
 
-- `get_lesson`, practice and exam RPCs — Phase 7/8/13
+- Practice and exam RPCs — Phase 8/13
 - `submit_answer` with grading, lives and achievements — Phase 8/10
 - `get_leaderboard`, `get_progress_summary` — Phase 9/12
 - `export_my_data`, `delete-account` Edge Function — Phase 18

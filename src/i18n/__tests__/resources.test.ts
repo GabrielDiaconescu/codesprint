@@ -14,6 +14,7 @@ describe('i18n resources', () => {
         'onboarding',
         'home',
         'learn',
+        'lesson',
         'leaderboard',
         'profile',
       ]),

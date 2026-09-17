@@ -3,14 +3,24 @@ import { z } from 'zod';
 import { localize } from '@/lib/content/localize';
 
 import { getSupabaseClient } from '../supabase/client';
-import type { ContentService, CourseOverview, ModuleSummary } from '../types';
+import {
+  LessonUnavailableError,
+  type ContentService,
+  type CourseOverview,
+  type LessonErrorReason,
+  type LessonSummary,
+  type ModuleSummary,
+} from '../types';
+
+import { lessonResponse } from './lessonSchema';
 
 /**
- * Course and module metadata (SPEC §40, access matrix).
+ * Content reads (SPEC §40, access matrix).
  *
- * Only what the client is allowed to read directly: courses, modules and lesson counts.
- * `lesson_contents` and `questions` are RPC-only and arrive in Phase 7 — a direct select on
- * either is refused by the grant layer, which is exactly the intended behaviour.
+ * Courses, modules and lesson metadata are selected directly — the client is allowed to read
+ * them. `lesson_contents` and `questions` are not: they have no grants and no policies, so a
+ * direct select is refused by the grant layer. They come through `get_lesson`, which checks
+ * the entitlement first and never returns explanations or answers.
  */
 
 const SELECT =
@@ -92,7 +102,56 @@ export const SupabaseContentService: ContentService = {
       modules,
     };
   },
+
+  async getModuleLessons(moduleId, locale): Promise<LessonSummary[]> {
+    // `lessons` holds metadata only and is readable directly (SPEC §40 access matrix); the
+    // body lives in `lesson_contents`, which is not.
+    const { data, error } = await getSupabaseClient()
+      .from('lessons')
+      .select('id, slug, title, summary, order_index, estimated_minutes')
+      .eq('module_id', moduleId)
+      .eq('is_active', true)
+      .order('order_index');
+
+    if (error) throw error;
+
+    return (data ?? []).map((row) => ({
+      id: row.id,
+      slug: row.slug,
+      title: localize(row.title, locale),
+      summary: localize(row.summary, locale),
+      orderIndex: row.order_index,
+      estimatedMinutes: row.estimated_minutes,
+    }));
+  },
+
+  async getLesson(lessonId, locale) {
+    const { data, error } = await getSupabaseClient().rpc('get_lesson', {
+      p_lesson_id: lessonId,
+      p_locale: locale,
+    });
+
+    if (error) throw new LessonUnavailableError(toLessonReason(error));
+
+    // Parsed, not trusted: the payload is assembled by hand in SQL, so a shape mistake should
+    // surface here rather than inside a renderer three components deeper.
+    return lessonResponse.parse(data);
+  },
+};
+
+/**
+ * Maps the RPC's error to something the UI can act on.
+ *
+ * `42501` is the paywall and `P0002` is a missing lesson — very different screens. Anything
+ * else is genuinely unexpected and gets the generic retry.
+ */
+const toLessonReason = (error: { code?: string | null } | null): LessonErrorReason => {
+  if (error?.code === '42501') return 'requires-premium';
+  if (error?.code === 'P0002') return 'not-found';
+  return 'unknown';
 };
 
 /** Exported for unit tests — the lock rule is pure and worth pinning. */
 export const moduleIsLocked = isLocked;
+
+export const lessonErrorReason = toLessonReason;

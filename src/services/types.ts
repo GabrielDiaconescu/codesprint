@@ -1,3 +1,5 @@
+import type { LessonResponse } from './content/lessonSchema';
+
 /**
  * Service contracts (SPEC §7).
  *
@@ -180,6 +182,8 @@ export interface ProfileService extends ServiceIdentity {
 
 /* ------------------------------------------------------------------ Content (Supabase) */
 
+export type { LessonResponse, LessonBlock, RenderableQuestion } from './content/lessonSchema';
+
 export interface ModuleSummary {
   id: string;
   slug: string;
@@ -200,18 +204,43 @@ export interface CourseOverview {
   modules: ModuleSummary[];
 }
 
+export interface LessonSummary {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  orderIndex: number;
+  estimatedMinutes: number;
+}
+
+/** Why a lesson could not be opened, as far as the UI needs to distinguish. */
+export type LessonErrorReason = 'requires-premium' | 'not-found' | 'unknown';
+
+export class LessonUnavailableError extends Error {
+  constructor(public readonly reason: LessonErrorReason) {
+    super(`lesson unavailable: ${reason}`);
+    this.name = 'LessonUnavailableError';
+  }
+}
+
 export interface ContentService extends ServiceIdentity {
-  /**
-   * Course and module metadata for the Learn screen.
-   *
-   * Lesson bodies and questions are NOT here: they are RPC-only and entitlement-checked
-   * (SPEC §40), and arrive with the lesson engine in Phase 7.
-   */
+  /** Course and module metadata for the Learn screen. */
   getCourseOverview(
     courseSlug: string,
     locale: string,
     freeModuleCount: number,
   ): Promise<CourseOverview | null>;
+
+  /** Lesson metadata for a module. Bodies are not included — that needs `getLesson`. */
+  getModuleLessons(moduleId: string, locale: string): Promise<LessonSummary[]>;
+
+  /**
+   * A lesson's blocks and questions.
+   *
+   * The only path to `lesson_contents` and `questions`, entitlement-checked on the server.
+   * Throws `LessonUnavailableError` so the caller can tell a paywall from a missing lesson.
+   */
+  getLesson(lessonId: string, locale: string): Promise<LessonResponse>;
 }
 
 /* ------------------------------------------------------------------ Monitoring (Sentry) */

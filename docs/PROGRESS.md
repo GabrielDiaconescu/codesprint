@@ -2,7 +2,7 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 6 complete — awaiting approval for Phase 7 (Course & lesson engine).
+**Current phase:** Phase 7 complete — awaiting approval for Phase 8 (Question engine & grading).
 **Last updated:** 2026-09-17
 
 ---
@@ -18,7 +18,8 @@
 | 4     | Authentication                       | **Complete** — pending device check   |
 | 5     | Onboarding, age gate, consent        | **Complete** — pending device check   |
 | 6     | Content pipeline & development seed  | **Complete** — pending device check   |
-| 7–23  | See `PLAN.md` / SPEC §57             | Not started                           |
+| 7     | Course & lesson engine               | **Complete** — pending device check   |
+| 8–23  | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -566,6 +567,81 @@ bug. It caught all four and exits non-zero.
    `free_module_count` for the padlock; access is decided by `can_access_module()` on the
    server, so a client lying to itself gains only a wrong icon.
 
+## Phase 7 — what was implemented (Course & lesson engine)
+
+**Database** — `20260917120800_lesson_engine.sql`
+
+- `get_lesson(uuid, text)`: the only client path to lesson bodies and questions. Checks
+  `can_access_module()`, resolves question references, and returns **no** explanations, hints
+  or answer keys.
+- `localized_text` and `localize_deep`, which collapse localized JSONB to one locale on the
+  server so the payload stays small once a second language exists.
+- 22 new pgTAP tests (`06_lesson_engine.test.sql`), 115 in total.
+
+**Service layer** — `getLesson` and `getModuleLessons`, with the RPC response parsed by a
+`.strict()` Zod schema. The schema would reject an explanation if the server ever started
+sending one — a second, independent place the leak would surface.
+
+**Screens**
+
+- `module/[id]` — the lessons inside a module, with a Premium banner when locked.
+- `lesson/[id]` — the reader: progress bar, blocks, completion screen. Full-screen and outside
+  the tabs, so there is no tab bar and no banner ad while reading (SPEC §10, §30).
+
+**Block renderers** — prose with a limited Markdown subset, code with output, callouts in
+three variants, and question previews.
+
+**`src/lib/markdown.ts`** — the Markdown subset SPEC §15 allows: bold and inline code, with
+blank lines as paragraph breaks and single newlines unwrapped.
+
+### Phase 7 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 29 suites, 437 tests, all passing
+database    supabase test db ......... 6 files, 115 pgTAP tests, all passing
+content     content:validate ......... unchanged, still valid
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+Checked against the running stack through the real HTTP API:
+
+| Case                                          | Result                               |
+| --------------------------------------------- | ------------------------------------ |
+| Free user, free module                        | opens                                |
+| Free user, premium module (boundary narrowed) | `42501 this module requires premium` |
+| Premium user, premium module                  | opens                                |
+| Explanation / hint / answer in the payload    | none                                 |
+| Payload size for a seeded lesson              | 3.8 KB, against a 50 KB cap          |
+
+## Decisions and interpretations made during Phase 7
+
+1. **Phase 7 is the reader, not the player.** Blocks render and progress tracks reading;
+   answering is Phase 8. Question blocks show the prompt and the code with an honest note,
+   and offer no control at all — a control that looks live and does nothing is worse than one
+   that admits it arrives later (SPEC §59.12).
+2. **The completion screen shows no XP.** XP, streaks and progress are Phase 9. A zero would
+   read as a bug, so the screen says what is not counting yet.
+3. **Reading progress is driven by scroll.** A lesson short enough to fit one screen counts as
+   fully read, rather than sitting at 0% forever.
+4. **Locked modules still list their lessons.** Showing what Premium contains is the honest way
+   to present the boundary; hiding it makes the course look shorter and gives the user nothing
+   to weigh. Tapping through is what the server refuses.
+5. **Errors from `get_lesson` are distinguished by code.** `42501` is a paywall and `P0002` is
+   a withdrawn lesson — different screens, so the service maps them rather than throwing one
+   opaque failure. The lesson query does not retry: neither will ever succeed on a second try.
+6. **Localisation happens on the server.** `localize_deep` applies one rule to whole structures
+   rather than field by field, so a newly added field cannot be forgotten, and the payload
+   carries one language instead of all of them.
+7. **Inline code renders in the monospace face, not merely a colour.** In a programming course
+   the difference between `print` the function and print the English word is the content, and
+   colour alone does not carry it (SPEC §47).
+8. **i18n is initialised in `jest.setup.js`.** Components read copy through `useTranslation`,
+   so without it they rendered raw keys and every assertion on visible text was meaningless.
+   Using the real instance also makes a missing key a failing test rather than a key on screen.
+
 ## Known limitations
 
 - Services other than Config are still no-ops: billing (14), ads (15), analytics and
@@ -583,8 +659,11 @@ bug. It caught all four and exits non-zero.
   file arrives with the content pipeline.
 - Home, Leaderboard and Profile still show honest "ships in Phase N" placeholders. Learn now
   shows real published modules.
-- Tapping a module does nothing yet: opening a lesson is Phase 7. The screen says so rather
-  than leading somewhere unfinished.
+- Questions render but cannot be answered: the renderers per type, the grading RPCs and the
+  feedback panel are Phase 8. The lesson says so where a question appears.
+- Completing a lesson records nothing — no XP, no streak, no progress row. That is Phase 9.
+- The lesson player is a reader, not a stepped player. Phase 8 will restructure it around
+  one question at a time.
 - Onboarding does not yet let an intermediate user choose a starting module (SPEC §11):
   there is no content to choose from until Phase 6. Their answer is stored and will drive
   that choice then.
@@ -623,7 +702,7 @@ bug. It caught all four and exits non-zero.
 
 - None. Docker is running and the Supabase project is in the EU region.
 
-**Before Phase 7 (the next phase):**
+**Before Phase 8 (the next phase):**
 
 - None.
 
@@ -906,3 +985,49 @@ change.
 17. With a screen reader on, a module card announces its title, its lock state and its lesson
     count in one phrase.
 18. Large text and dark mode: the cards stay legible and nothing clips.
+
+---
+
+## Phase 7 device test checklist
+
+### Opening a lesson
+
+1. **Learn** tab → tap **Getting Started**. A list of four lessons appears, numbered, each with
+   a summary and an estimated time.
+2. Tap **What is Python?**. The lesson opens full screen — **no tab bar** along the bottom.
+3. The header shows the module name; the title and summary sit at the top of the content.
+4. Prose reads as continuous paragraphs, not broken mid-sentence at odd points.
+5. Inline code (`print`) is in the monospace font with a tinted background.
+6. A code example shows the code and, under it, its output.
+7. The callout ("Python does not need to be compiled...") is visually distinct from prose.
+8. Questions appear with their difficulty, the kind of question, the prompt, and a note saying
+   answering arrives next. **There is no button to tap** — nothing pretends to accept an answer.
+
+### Progress and completion
+
+9. Scroll down. The bar at the top fills as you go.
+10. At the bottom, tap **Finish lesson** → a completion screen, with a note that XP and streaks
+    are not counting yet.
+11. Tap **Back to the module** → the lesson list.
+
+### The paywall boundary — the part that matters
+
+12. In Studio (`http://127.0.0.1:54323`) → `app_config`, set `free_module_count` to `1`.
+13. Force-quit and reopen the app. In **Learn**, module 02 now shows a **Premium** badge.
+14. Tap module 02. The lesson list still appears, with a banner explaining it is Premium.
+    Content is shown, not hidden.
+15. Tap a lesson inside it → **"This module is Premium"**, not the lesson.
+    This is the one to watch: seeing the lesson content here would mean the server gate failed.
+16. Sign out, sign in as `premium@codesprint.test` (password `sprint2026`), and open the same
+    lesson. It opens.
+17. Set `free_module_count` back to `6`.
+
+### Robustness
+
+18. Stop Supabase and open a lesson: an error with **Try again**, not a blank screen.
+19. In Studio set `lessons.is_active = false` for one lesson, reopen the app, and open it from a
+    stale list → **"Lesson not found"**, distinct from the Premium message.
+20. Rotate the device / use large text: code blocks scroll horizontally rather than wrapping,
+    and no text clips.
+21. Dark mode: syntax colours stay readable and callouts remain distinguishable.
+22. With a screen reader on, a callout announces its kind ("Common mistake") before its text.

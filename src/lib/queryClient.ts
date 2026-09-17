@@ -37,6 +37,8 @@ export const queryKeys = {
       ['content', contentVersion, 'overview', courseSlug, locale] as const,
     lesson: (contentVersion: number, lessonId: string) =>
       ['content', contentVersion, 'lesson', lessonId] as const,
+    moduleLessons: (contentVersion: number, moduleId: string) =>
+      ['content', contentVersion, 'module-lessons', moduleId] as const,
   },
   user: {
     profile: (userId: string) => ['user', userId, 'profile'] as const,

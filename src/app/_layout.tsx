@@ -100,6 +100,10 @@ const ThemedApp = () => {
             name="link-account"
             options={{ headerShown: false, presentation: 'modal' }}
           />
+          {/* Full-screen and outside the tabs: no tab bar and no banner ad while reading
+              or answering (SPEC §10, §30). */}
+          <Stack.Screen name="module/[id]" options={{ title: '' }} />
+          <Stack.Screen name="lesson/[id]" options={{ title: '' }} />
           <Stack.Screen
             name="gallery"
             options={{ title: 'Component gallery', presentation: 'modal' }}

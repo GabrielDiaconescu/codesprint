@@ -992,6 +992,10 @@ export type Database = {
         Returns: number
       }
       get_app_config: { Args: never; Returns: Json }
+      get_lesson: {
+        Args: { p_lesson_id: string; p_locale?: string }
+        Returns: Json
+      }
       has_entitlement: {
         Args: {
           p_entitlement: Database["public"]["Enums"]["entitlement_id"]
@@ -1004,6 +1008,14 @@ export type Database = {
       iso_week_start: { Args: { p_at?: string }; Returns: string }
       local_date_for: {
         Args: { p_at?: string; p_timezone: string }
+        Returns: string
+      }
+      localize_deep: {
+        Args: { p_locale?: string; p_value: Json }
+        Returns: Json
+      }
+      localized_text: {
+        Args: { p_locale?: string; p_value: Json }
         Returns: string
       }
       module_requires_premium: {

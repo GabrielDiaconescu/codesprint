@@ -1,0 +1,53 @@
+{
+  "progress": "{{percent}}% read",
+  "estimated": "{{count}} min",
+  "callout": {
+    "note": "Note",
+    "tip": "Tip",
+    "mistake": "Common mistake"
+  },
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "questionType": {
+    "multiple_choice": "Choose one",
+    "multiple_select": "Choose all that apply",
+    "true_false": "True or false",
+    "predict_output": "Predict the output",
+    "fill_blank": "Fill the blank",
+    "code_ordering": "Put the lines in order",
+    "debugging": "Find the problem",
+    "concept_matching": "Match the pairs",
+    "coding_challenge": "Write the code"
+  },
+  "answering": {
+    "comingSoon": "Answering arrives in the next release. For now, work it out as you read."
+  },
+  "finish": "Finish lesson",
+  "complete": {
+    "title": "Lesson complete",
+    "body": "You've read {{title}}.",
+    "xpPending": "XP, streaks and progress start counting once answering ships.",
+    "next": "Next lesson",
+    "backToModule": "Back to the module"
+  },
+  "error": {
+    "premiumTitle": "This module is Premium",
+    "premiumBody": "Unlock every module, unlimited lives and the full exam.",
+    "premiumAction": "See Premium",
+    "notFoundTitle": "Lesson not found",
+    "notFoundBody": "It may have been withdrawn since you last opened the app.",
+    "unknownTitle": "Couldn't load the lesson",
+    "unknownBody": "Check your connection and try again.",
+    "back": "Go back"
+  },
+  "module": {
+    "lessons_one": "{{count}} lesson",
+    "lessons_other": "{{count}} lessons",
+    "lockedTitle": "Premium module",
+    "lockedBody": "This module is part of Premium. Modules 1 to {{freeCount}} are free for everyone.",
+    "empty": "This module has no lessons yet."
+  }
+}

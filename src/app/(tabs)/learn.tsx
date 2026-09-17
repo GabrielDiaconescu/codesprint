@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { FlatList, StyleSheet, View } from 'react-native';
 
@@ -17,6 +18,7 @@ export default function LearnScreen() {
   const { t } = useTranslation('learn');
   const { t: common } = useTranslation('common');
   const theme = useTheme();
+  const router = useRouter();
 
   const { data: course, isPending, isError, refetch, isRefetching } = useCourseOverview();
 
@@ -82,7 +84,19 @@ export default function LearnScreen() {
             ) : null}
           </View>
         }
-        renderItem={({ item }) => <ModuleCard module={item} />}
+        renderItem={({ item }) => (
+          <ModuleCard
+            module={item}
+            onPress={() =>
+              router.push({
+                pathname: '/module/[id]',
+                // The title and lock state travel with the route so the next screen has a
+                // header immediately, rather than an empty bar until its query resolves.
+                params: { id: item.id, title: item.title, locked: item.isLocked ? '1' : '0' },
+              })
+            }
+          />
+        )}
       />
     </Screen>
   );
