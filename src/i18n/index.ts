@@ -8,6 +8,7 @@ import home from './locales/en/home.json';
 import leaderboard from './locales/en/leaderboard.json';
 import learn from './locales/en/learn.json';
 import navigation from './locales/en/navigation.json';
+import onboarding from './locales/en/onboarding.json';
 import profile from './locales/en/profile.json';
 
 /**
@@ -19,7 +20,7 @@ import profile from './locales/en/profile.json';
 export const FALLBACK_LOCALE = 'en';
 
 export const resources = {
-  en: { common, navigation, auth, home, learn, leaderboard, profile },
+  en: { common, navigation, auth, onboarding, home, learn, leaderboard, profile },
 } as const;
 
 export const NAMESPACES = Object.keys(resources.en) as (keyof typeof resources.en)[];

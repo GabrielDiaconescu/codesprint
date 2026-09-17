@@ -2,7 +2,7 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 4 complete — awaiting approval for Phase 5 (Onboarding).
+**Current phase:** Phase 5 complete — awaiting approval for Phase 6 (Content pipeline).
 **Last updated:** 2026-09-17
 
 ---
@@ -16,7 +16,8 @@
 | 2     | Design system                        | **Complete** — pending device check   |
 | 3     | Database foundation                  | **Complete** — pending device check   |
 | 4     | Authentication                       | **Complete** — pending device check   |
-| 5–23  | See `PLAN.md` / SPEC §57             | Not started                           |
+| 5     | Onboarding, age gate, consent        | **Complete** — pending device check   |
+| 6–23  | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -398,6 +399,90 @@ Beyond the automated suites, the flows were exercised against the running local 
    the Auth container reads it only at startup. The symptom is confusing — anonymous sign-in
    rejected as disabled while the file plainly enables it. Documented in `docs/DATABASE.md`.
 
+## Phase 5 — what was implemented (Onboarding, age gate, consent)
+
+**Database** — `20260917120700_onboarding.sql`
+
+- `min_user_age` (13) and `minor_protection_age` (16) seeded into `app_config`.
+- `age_from_birth_year()` and `is_minor()`, the latter failing closed on an unknown birth year.
+- `update_profile` replaced (not edited — SPEC §59.28) so it **forces** the §41 defaults for
+  minors: analytics off, hidden from the leaderboard, ads restricted to non-personalised.
+- `reject_underage_account()` deletes the caller, because SPEC §41 requires the account not to
+  exist rather than merely be blocked.
+- 26 new pgTAP tests (`05_onboarding_age_gate.test.sql`), 93 in total.
+
+**Service layer** — `src/services/profile/`
+
+`SupabaseProfileService` reads `profiles` directly (RLS scopes it to the caller) and writes
+only through `update_profile`. Rows are validated with Zod on the way in, and unknown enum
+values degrade to `null` so a row written by a newer build cannot lock an older client out of
+its own profile.
+
+**Feature** — `src/features/onboarding/` holds the pure age logic mirroring the server, the
+six-step sequence, a Zustand draft store and the mutations. `src/features/profile/` adds the
+profile query and the session heartbeat.
+
+**Screens** — six steps (`age`, `experience`, `motivation`, `goal`, `reminder`, `consent`)
+plus `blocked`, which sits outside every router guard so it survives the sign-out that
+precedes it.
+
+**Design system** — `Toggle`, and `Card` gained `accessibilityRole` / `selected` so a
+single-select list can be a radio group rather than a row of buttons.
+
+### Phase 5 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 23 suites, 343 tests, all passing
+database    supabase test db ......... 5 files, 93 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly on a fresh database
+bundle      expo export (android) .... succeeds
+```
+
+Exercised against the running stack through the real HTTP API:
+
+| Case                                       | Result                                            |
+| ------------------------------------------ | ------------------------------------------------- |
+| 15-year-old asking for analytics + ranking | forced to `false` / `true` / `restricted`         |
+| the same user trying again later           | refused again                                     |
+| adult making identical requests            | all three granted                                 |
+| 12-year-old writing a profile              | refused with `22023 below the minimum age`        |
+| 12-year-old's account                      | deleted, cascading to `profiles` and `user_stats` |
+
+## Decisions and interpretations made during Phase 5
+
+1. **The birth-year field accepts any four-digit year, including under-age ones.** A picker
+   offering only permitted years teaches a twelve-year-old to pick a different one. A gate
+   nobody can fail is not a gate.
+2. **Input errors and being under age are different outcomes.** `validateBirthYear` handles
+   typos; `classifyAge` handles age. Phrasing "you are twelve" as a validation error would be
+   both wrong and unkind.
+3. **Answers are submitted once, at the end.** Writing each step as it is answered would leave
+   a half-filled profile behind for everyone who abandons the flow, and cost six round trips
+   instead of one. The age gate is the exception: it acts immediately, because the account
+   must not exist.
+4. **The analytics toggle is shown to minors, disabled, with an explanation.** Hiding it would
+   look like a setting that was never offered. The disabling is cosmetic — the database
+   enforces the same result regardless of what the client sends.
+5. **Reminder times are presets, not a wheel picker.** A native date-time picker is a whole
+   extra native dependency for a question whose useful answers are "morning", "after work"
+   and "before bed".
+6. **No notification permission is requested yet.** SPEC §11 requires the explanation before
+   the OS prompt; the prompt belongs to Phase 17, where the notification service becomes real.
+   The copy commits to asking, not to notifying, so nothing is promised that cannot yet be
+   delivered (SPEC §59.11).
+7. **`unstable_settings.initialRouteName` is set on both route groups.** Without it a group
+   opens on whichever route sorts first alphabetically — which would have put
+   `forgot-password` ahead of `sign-in`, and was working only by luck for onboarding.
+8. **The session heartbeat is not optional plumbing.** `profiles.last_seen_at` is what the
+   guest purge reads, so without `sync_session` on app open an active guest would be deleted
+   after thirty days along with their progress.
+9. **A deleted account's token stays valid until it expires.** PostgREST checks the signature,
+   not whether the user still exists, so `reject_underage_account` is always followed by a
+   local sign-out — placed in a `finally`, so even a failed delete cannot leave someone
+   inside the app.
+
 ## Known limitations
 
 - Services other than Config are still no-ops: billing (14), ads (15), analytics and
@@ -414,6 +499,13 @@ Beyond the automated suites, the flows were exercised against the running local 
 - `supabase/seed.sql` does not exist yet, so `db:reset` warns about it. Harmless, and the
   file arrives with the content pipeline.
 - Tab screens show honest "ships in Phase N" placeholders — no mocked data presented as real.
+- Onboarding does not yet let an intermediate user choose a starting module (SPEC §11):
+  there is no content to choose from until Phase 6. Their answer is stored and will drive
+  that choice then.
+- The reminder time is stored, but nothing is scheduled and no notification permission is
+  requested — that is Phase 17.
+- Ads consent (Google UMP) is not asked during onboarding. It belongs with the ads
+  integration in Phase 15, which must show it before the first ad request.
 - Design system exists but is unused by product screens — the tabs still show placeholders
   until Phases 7–13 build the real screens on top of it.
 - Lottie animations and `expo-image` are not installed yet; they arrive when a screen needs
@@ -445,9 +537,11 @@ Beyond the automated suites, the flows were exercised against the running local 
 
 - None. Docker is running and the Supabase project is in the EU region.
 
-**Before Phase 5 (the next phase):**
+**Before Phase 6 (the next phase):**
 
-- None. Onboarding needs no new accounts or keys.
+- **Install Python 3.12 alongside 3.14.** The content pipeline verifies every runnable
+  snippet and every `predict_output` answer on both versions (D9), so Phase 6 cannot be
+  completed without it.
 
 **Still outstanding from Phase 4 — needed before a production release, not before Phase 5:**
 
@@ -620,3 +714,62 @@ or copy it and fire it with `npx uri-scheme open "<link>" --android` (or `--ios`
     registered user does not.
 22. With a screen reader on, each field announces its label, and an invalid field announces the
     error together with it.
+
+---
+
+## Phase 5 device test checklist
+
+Onboarding runs once per account, so use a **fresh guest** for each pass: sign out, then
+"Continue as guest" again.
+
+### The happy path
+
+1. Sign in (or continue as guest) on a new account: the first screen is **the age gate**, not
+   Home and not a welcome carousel.
+2. The progress bar reads "Step 1 of 6" and fills as you advance.
+3. Enter a year that makes you an adult, then answer experience, motivation and daily goal.
+   Continue stays disabled until each screen has an answer.
+4. On the reminder screen, pick a time — or tap **No reminders, thanks**, which is a real
+   answer and must let you continue.
+5. On the consent screen the analytics toggle is **off by default** and you can switch it on.
+6. Tap **Start learning**: you land on Home.
+7. Force-quit and reopen: you go straight to Home. Onboarding does not run again.
+8. In Studio (`http://127.0.0.1:54323`), the `profiles` row holds your answers and
+   `onboarding_completed_at` is set.
+
+### The age gate — the part that matters
+
+9. New guest. Enter `2014` (or whatever makes you 12 this year).
+10. You land on a screen saying you will need to wait. There is **no way onward** — no back
+    button, no swipe back.
+11. In Studio, the `auth.users` row for that account is **gone**, and so are its `profiles` and
+    `user_stats` rows. A surviving row means the deletion did not happen.
+12. Reopen the app: you are signed out, at the sign-in screen.
+
+### Minor protections — the other part that matters
+
+13. New guest. Enter a year that makes you 15.
+14. Answer through to the consent screen. The analytics toggle is **off and greyed out**, with
+    an explanation naming the age.
+15. Finish onboarding. In Studio, that profile has `analytics_consent = false`,
+    `leaderboard_hidden = true` and `ads_consent_status = restricted`.
+16. Now try to defeat it from Studio's SQL editor as that user — the protections live in
+    `update_profile`, so a direct RPC call with `analytics_consent: true` must still come back
+    `false`.
+
+### Input handling
+
+17. On the age screen, try `96`, `2O05` (letter O) and `2030`: each gives its own message, and
+    none of them says you are too young.
+18. Leaving the field empty and tapping Continue says "Enter the year you were born."
+
+### Robustness and accessibility
+
+19. Turn off Wi-Fi and mobile data on the consent screen, then tap **Start learning**: an error
+    appears and the button stays usable. Restore the network and it completes.
+20. With a screen reader on, each option row announces its label, its description, and whether
+    it is selected — not just "button".
+21. Increase the system font size to maximum: no step clips its text or loses its Continue
+    button.
+22. Dark mode: every step is legible, and the selected option is distinguishable by more than
+    colour.

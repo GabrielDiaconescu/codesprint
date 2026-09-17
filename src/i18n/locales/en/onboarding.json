@@ -1,0 +1,83 @@
+{
+  "progress": "Step {{current}} of {{total}}",
+  "age": {
+    "title": "What year were you born?",
+    "subtitle": "We ask so we can set the right privacy defaults. We never ask for your full date of birth.",
+    "label": "Birth year",
+    "placeholder": "2005",
+    "hint": "Four digits, for example 2005.",
+    "errors": {
+      "required": "Enter the year you were born.",
+      "not-a-year": "Enter a four-digit year, like 2005.",
+      "in-the-future": "That year hasn't happened yet.",
+      "implausible": "That doesn't look right. Check the year and try again."
+    }
+  },
+  "blocked": {
+    "title": "You'll need to wait a little",
+    "body": "CodeSprint is for learners aged {{minAge}} and over, so we can't set up an account yet. Nothing has been saved, and you're welcome back when you're old enough.",
+    "action": "Close"
+  },
+  "experience": {
+    "title": "How much programming have you done?",
+    "subtitle": "This only decides where we suggest you start. Every lesson stays open to you.",
+    "options": {
+      "complete_beginner": {
+        "label": "Complete beginner",
+        "description": "I've never written code."
+      },
+      "beginner": {
+        "label": "Beginner",
+        "description": "I've tried a little, but I'm not confident yet."
+      },
+      "intermediate": {
+        "label": "Intermediate",
+        "description": "I've written programs in some language before."
+      }
+    }
+  },
+  "motivation": {
+    "title": "What brings you here?",
+    "subtitle": "We use this to keep the encouragement relevant.",
+    "options": {
+      "university": { "label": "University", "description": "A course, exam or coursework." },
+      "career": { "label": "Career", "description": "Changing jobs or growing in one." },
+      "interview": { "label": "Interview preparation", "description": "I have interviews coming up." },
+      "personal": { "label": "Personal interest", "description": "I just want to learn it." },
+      "improve": { "label": "Getting better", "description": "I code already and want to sharpen up." }
+    }
+  },
+  "goal": {
+    "title": "How much time each day?",
+    "subtitle": "Consistency beats length. You can change this whenever you like.",
+    "options": {
+      "5": { "label": "5 minutes", "description": "A lesson a day. The easiest habit to keep." },
+      "10": { "label": "10 minutes", "description": "A lesson plus some practice." },
+      "15": { "label": "15 minutes", "description": "A serious daily session." }
+    }
+  },
+  "reminder": {
+    "title": "When should we nudge you?",
+    "subtitle": "A reminder at the same time each day is the single biggest thing that keeps a streak alive.",
+    "explanation": "We'll ask permission to send notifications only if you pick a time. You can turn them off in Settings at any point.",
+    "options": {
+      "08:00": { "label": "Morning", "description": "8:00" },
+      "12:00": { "label": "Midday", "description": "12:00" },
+      "18:00": { "label": "After work", "description": "18:00" },
+      "20:00": { "label": "Evening", "description": "20:00" },
+      "21:30": { "label": "Before bed", "description": "21:30" }
+    },
+    "skip": "No reminders, thanks"
+  },
+  "consent": {
+    "title": "A couple of privacy choices",
+    "subtitle": "You can change both of these in Settings later.",
+    "analytics": {
+      "label": "Help improve CodeSprint",
+      "description": "Share anonymous usage data so we can see which lessons confuse people. Never your answers, your email or your name."
+    },
+    "minorNotice": "Because you're under {{protectionAge}}, we've already turned analytics off, kept you off the public leaderboard, and limited ads to non-personalised ones. You don't need to do anything.",
+    "adsNote": "If you're in the EU, UK or Switzerland, we'll ask separately about ads before you see one.",
+    "finish": "Start learning"
+  }
+}

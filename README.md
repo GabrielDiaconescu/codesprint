@@ -113,6 +113,17 @@ from a password recovery and the two must not land on the same screen.
 Sign in with Apple and Google are not built yet — they need credentials that do not exist.
 See `docs/PROGRESS.md` for exactly what is required.
 
+## Onboarding and the age gate
+
+Six screens: birth year, experience, motivation, daily goal, reminder time, privacy. Answers
+are held locally and written in a single call at the end, so abandoning the flow leaves no
+half-filled profile.
+
+The age gate is the exception — it acts immediately. Below `min_user_age` (13) the account is
+**deleted**, not merely blocked, because leaving it would mean storing a child's email address.
+Below `minor_protection_age` (16) the database forces analytics off, the leaderboard hidden and
+ads non-personalised, whatever the client sends. See `docs/DATABASE.md`.
+
 ## Security notes
 
 - `EXPO_PUBLIC_*` variables are embedded in the app bundle and are **public by design**.

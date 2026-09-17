@@ -4,12 +4,14 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
 import { I18nextProvider, useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { ToastHost } from '@/components/ui';
+import { Screen, StateView, ToastHost } from '@/components/ui';
 import { useAuthBootstrap } from '@/features/auth/hooks/useAuthBootstrap';
+import { useProfile } from '@/features/profile/hooks/useProfile';
+import { useSessionHeartbeat } from '@/features/profile/hooks/useSessionHeartbeat';
 import i18n, { initI18n } from '@/i18n';
 import { getEnv } from '@/lib/env';
 import { createQueryClient } from '@/lib/queryClient';
@@ -28,6 +30,17 @@ assertNoNoopServicesInProduction(env.EXPO_PUBLIC_APP_ENV);
 // in the system font nor the wrong screen.
 void SplashScreen.preventAutoHideAsync();
 
+const FullScreenSpinner = () => {
+  const theme = useTheme();
+  return (
+    <Screen>
+      <View style={styles.centre}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    </Screen>
+  );
+};
+
 const ThemedApp = () => {
   const theme = useTheme();
   const { t } = useTranslation('common');
@@ -42,6 +55,34 @@ const ThemedApp = () => {
   // they would land on Home holding a password they do not know (SPEC §12).
   const canUseApp = isSignedIn && !pendingPasswordReset;
 
+  const profileQuery = useProfile();
+  useSessionHeartbeat();
+
+  const onboardingCompleted = profileQuery.data?.onboardingCompleted ?? false;
+  const profileReady = profileQuery.isSuccess;
+
+  // The profile decides between onboarding and the app, so it has to resolve before either can
+  // be shown. This is the only place in the app that blocks on a query, and it does so for one
+  // request on cold start.
+  if (canUseApp && profileQuery.isPending) return <FullScreenSpinner />;
+
+  if (canUseApp && profileQuery.isError) {
+    return (
+      <Screen>
+        <View style={styles.centre}>
+          <StateView
+            icon="cloud-offline-outline"
+            tone="danger"
+            title={t('states.errorTitle')}
+            body={t('states.errorBody')}
+            actionLabel={t('actions.retry')}
+            onAction={() => void profileQuery.refetch()}
+          />
+        </View>
+      </Screen>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
@@ -53,7 +94,7 @@ const ThemedApp = () => {
           contentStyle: { backgroundColor: theme.colors.background },
         }}
       >
-        <Stack.Protected guard={canUseApp}>
+        <Stack.Protected guard={canUseApp && profileReady && onboardingCompleted}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="link-account"
@@ -65,12 +106,18 @@ const ThemedApp = () => {
           />
         </Stack.Protected>
 
+        <Stack.Protected guard={canUseApp && profileReady && !onboardingCompleted}>
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        </Stack.Protected>
+
         <Stack.Protected guard={!canUseApp}>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack.Protected>
 
-        {/* Outside both guards on purpose — an auth email can arrive in either state. */}
+        {/* Outside every guard on purpose. An auth email can arrive in either state, and the
+            age-gate refusal screen has to survive the sign-out that precedes it. */}
         <Stack.Screen name="auth-callback" options={{ headerShown: false }} />
+        <Stack.Screen name="blocked" options={{ headerShown: false, gestureEnabled: false }} />
       </Stack>
       <ToastHost dismissLabel={t('actions.close')} />
     </View>
@@ -122,6 +169,10 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+});
 
 /**
  * Route-level error boundary (SPEC §46): the user never lands on a blank screen.

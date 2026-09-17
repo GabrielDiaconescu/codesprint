@@ -51,6 +51,8 @@ Local Studio: http://127.0.0.1:54323 · API: http://127.0.0.1:54321
 | `20260917120300_app_config`             | Config table plus the seeded default values                                                             |
 | `20260917120400_rls_policies`           | Grant revocation, RLS on every table, all policies                                                      |
 | `20260917120500_core_functions`         | Entitlements, module gating, the XP ledger, profile RPCs                                                |
+| `20260917120600_auth_support`           | Guest conversion mirror, abandoned-guest purge, the pg_cron schedule                                    |
+| `20260917120700_onboarding`             | Age thresholds, the age gate, server-enforced minor protections                                         |
 
 ---
 
@@ -121,11 +123,12 @@ the search path and hijack an unqualified reference while the function runs as o
 
 ### Client-callable
 
-| Function                | Granted to          | Purpose                                                                                                                                                             |
-| ----------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `get_app_config()`      | anon, authenticated | All public config keys in one round trip                                                                                                                            |
-| `update_profile(jsonb)` | authenticated       | The **only** client write path into profiles. Whitelists columns and validates the IANA timezone; `is_anonymous` and moderation flags are deliberately not writable |
-| `sync_session(text)`    | authenticated       | App-open heartbeat; accepts a timezone change                                                                                                                       |
+| Function                    | Granted to          | Purpose                                                                                                                                                             |
+| --------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get_app_config()`          | anon, authenticated | All public config keys in one round trip                                                                                                                            |
+| `update_profile(jsonb)`     | authenticated       | The **only** client write path into profiles. Whitelists columns and validates the IANA timezone; `is_anonymous` and moderation flags are deliberately not writable |
+| `sync_session(text)`        | authenticated       | App-open heartbeat; accepts a timezone change. Also what keeps an active guest out of the purge                                                                     |
+| `reject_underage_account()` | authenticated       | Deletes the CALLER. The age gate's only outcome below `min_user_age`                                                                                                |
 
 ### Internal (no client grant)
 
@@ -141,6 +144,10 @@ the search path and hijack an unqualified reference while the function runs as o
 | `iso_week_start(timestamptz)`        | Leaderboard partition key                                             |
 | `require_auth_uid()`                 | Raises 28000 on an unauthenticated request                            |
 | `handle_new_user()`                  | Trigger: creates profile + stats for every auth user, guests included |
+| `handle_user_updated()`              | Trigger: mirrors `auth.users.is_anonymous` onto `profiles`            |
+| `delete_stale_anonymous_users(int)`  | Scheduled purge of abandoned guests. See below                        |
+| `age_from_birth_year(int)`           | Age reached during the current year (SPEC §11: birth year only)       |
+| `is_minor(uuid)`                     | Below `minor_protection_age`. An unknown birth year fails closed      |
 
 ### The XP ledger
 
@@ -158,17 +165,107 @@ transaction, so the denormalised totals cannot drift from the ledger.
 Rewarded-ad XP passes `counts_for_leaderboard = false`, so it credits the user without
 inflating the ranking (SPEC §19).
 
+### Guest accounts
+
+Guest mode (SPEC §12, D1) is two triggers and one scheduled job.
+
+**Conversion.** Supabase clears `auth.users.is_anonymous` when a guest confirms an email or
+links an identity. `handle_user_updated()` mirrors that onto `profiles`. Without it a converted
+guest would keep `is_anonymous = true` in our own table and stay excluded from the leaderboard
+forever — a silent, permanent bug for exactly the users who just signed up.
+
+Conversion keeps the **same user id**, which is the entire point: every `xp_events` row,
+attempt and streak day earned as a guest still belongs to the user. Creating a second account
+and migrating rows would break foreign keys and double-count XP.
+
+**Purge.** An anonymous user is a billable Supabase MAU and can never sign back in, so
+abandoned ones are deleted after 30 days by `delete_stale_anonymous_users`, scheduled through
+pg_cron at 03:17 UTC.
+
+Activity is measured by `profiles.last_seen_at`, refreshed by `sync_session()` on every app
+open — **not** `auth.users.last_sign_in_at`, which freezes at account creation for anonymous
+sessions because refreshing a token is not a sign-in. Using it would delete guests who are
+still using the app daily.
+
+The function is destructive, so it carries two independent guards: `is_anonymous`, and the
+absence of any row in `auth.identities`. A retention window below one day raises rather than
+being clamped, so a bad cron entry fails loudly instead of deleting every live guest.
+
+### The age gate and minor protections
+
+SPEC §11 collects the **birth year only** — a full date is more personal data than an age gate
+needs. The cost is a ±1 year window, resolved identically on both sides as _the age you reach
+during the current year_, so the boundary is "the year you turn 13" rather than a birthday.
+`src/features/onboarding/logic/__tests__/age.test.ts` reads the migration to prove the client
+copy of the thresholds matches the seeded values.
+
+Two thresholds, both in `app_config`:
+
+| Key                    | Default | Effect                                          |
+| ---------------------- | ------- | ----------------------------------------------- |
+| `min_user_age`         | 13      | Below this, no account exists (SPEC D10)        |
+| `minor_protection_age` | 16      | Below this, the §41 privacy defaults are forced |
+
+**The protections are enforced in `update_profile`, not in the app.** A fourteen-year-old's
+client can send `analytics_consent: true` as easily as anyone else's, so below
+`minor_protection_age` the function overrides three columns whatever arrives:
+
+```
+analytics_consent  -> false
+leaderboard_hidden -> true
+ads_consent_status -> 'restricted'     (Phase 15 reads this before a personalised ad)
+```
+
+`is_minor()` fails closed: a user who has not answered the age gate counts as a minor, because
+guessing wrong is expensive precisely when the answer is missing.
+
+**Below the minimum age the account is deleted**, not merely blocked.
+`reject_underage_account()` removes the caller and cascades. Signing out and leaving the row
+behind would mean storing a child's email address indefinitely.
+
+One consequence worth knowing: an access token stays cryptographically valid until it expires,
+so a stale token is still _accepted_ by PostgREST after the delete. It sees nothing, because
+RLS finds no rows, and the app signs out immediately afterwards.
+
+---
+
+## Auth configuration
+
+`supabase/config.toml` is part of the schema in practice — these settings are what the client
+rules in `src/features/auth/logic/validation.ts` mirror, and `validation.test.ts` reads the
+file to prove the two agree.
+
+| Setting                     | Value               | Why                                                      |
+| --------------------------- | ------------------- | -------------------------------------------------------- |
+| `enable_anonymous_sign_ins` | true                | Guest mode (D1)                                          |
+| `enable_confirmations`      | true                | Email verification (SPEC §12)                            |
+| `enable_manual_linking`     | true                | Guest to account conversion                              |
+| `minimum_password_length`   | 8                   | Mirrored by `validatePassword`                           |
+| `password_requirements`     | `letters_digits`    | Mirrored by `validatePassword`                           |
+| `site_url`                  | `codesprint-dev://` | The app has no website; the scheme is the return address |
+| `additional_redirect_urls`  | scheme wildcards    | The app appends its own `flow` parameter to `redirectTo` |
+
+> **`npm run db:reset` does NOT apply changes to this file.** The Auth container reads it only
+> at startup, so a config change needs `npx supabase stop && npx supabase start`. A reset alone
+> leaves the old settings running, and the symptoms are confusing — anonymous sign-in rejected
+> with `anonymous_provider_disabled` while the file plainly enables it.
+
+Local email goes to Mailpit at http://127.0.0.1:54324. Production requires custom SMTP;
+Supabase's built-in sender is not permitted there.
+
 ---
 
 ## Testing
 
 `npm run db:test` runs the pgTAP suite:
 
-| File                            | Proves                                                                                                                                                                                                     |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `01_schema_invariants.test.sql` | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists |
-| `02_rls_access_matrix.test.sql` | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                         |
-| `03_xp_ledger.test.sql`         | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                              |
+| File                              | Proves                                                                                                                                                                                                     |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `01_schema_invariants.test.sql`   | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists |
+| `02_rls_access_matrix.test.sql`   | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                         |
+| `03_xp_ledger.test.sql`           | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                              |
+| `04_auth_support.test.sql`        | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                        |
+| `05_onboarding_age_gate.test.sql` | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it             |
 
 CI runs these against a fresh database on every push, and fails if
 `src/types/database.types.ts` is out of date.

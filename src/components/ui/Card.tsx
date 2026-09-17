@@ -1,5 +1,12 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type AccessibilityRole,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import { useTheme } from '@/theme';
 
@@ -11,6 +18,10 @@ export interface CardProps {
   padding?: 'none' | 'md' | 'lg';
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
+  /** Defaults to `button` when pressable. Use `radio` inside a single-select list. */
+  accessibilityRole?: AccessibilityRole;
+  /** Selection state for `radio` / `checkbox` roles, so it is announced, not just drawn. */
+  selected?: boolean;
   testID?: string;
 }
 
@@ -22,6 +33,8 @@ export const Card = ({
   padding = 'lg',
   style,
   accessibilityLabel,
+  accessibilityRole,
+  selected,
   testID,
 }: CardProps) => {
   const theme = useTheme();
@@ -60,8 +73,9 @@ export const Card = ({
     <Pressable
       testID={testID}
       onPress={onPress}
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole ?? 'button'}
       accessibilityLabel={accessibilityLabel}
+      accessibilityState={selected === undefined ? undefined : { selected, checked: selected }}
       style={({ pressed }) => [base, pressed && { opacity: theme.pressed.opacity }]}
     >
       {children}

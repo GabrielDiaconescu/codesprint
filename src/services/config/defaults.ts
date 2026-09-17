@@ -22,6 +22,9 @@ export const DEFAULT_APP_CONFIG: AppConfigValues = {
   // SPEC D5: modules 1-6 free.
   free_module_count: 6,
   lives_max: 5,
+  // SPEC D10: minimum age 13; §41 applies privacy defaults below 16.
+  min_user_age: 13,
+  minor_protection_age: 16,
   content_version: 0,
   min_supported_app_version: '0.1.0',
 };

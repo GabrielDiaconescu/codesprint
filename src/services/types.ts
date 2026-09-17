@@ -104,6 +104,80 @@ export interface AuthService extends ServiceIdentity {
   setAppActive(active: boolean): void;
 }
 
+/* ------------------------------------------------------------------ Profile (Supabase) */
+
+/** SPEC §11: the onboarding answers, used only for lightweight personalisation. */
+export const EXPERIENCE_LEVELS = ['complete_beginner', 'beginner', 'intermediate'] as const;
+export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number];
+
+export const MOTIVATIONS = ['university', 'career', 'interview', 'personal', 'improve'] as const;
+export type Motivation = (typeof MOTIVATIONS)[number];
+
+/** Minutes are never measured; they map to an XP target through config (SPEC §11). */
+export const DAILY_GOAL_MINUTES = [5, 10, 15] as const;
+export type DailyGoalMinutes = (typeof DAILY_GOAL_MINUTES)[number];
+
+/**
+ * Ad consent as the SERVER sees it.
+ *
+ * `restricted` is set by the database for users below `minor_protection_age` and cannot be
+ * cleared by the client — it is what Phase 15 checks before requesting a personalised ad.
+ */
+export type AdsConsentStatus = 'unknown' | 'required' | 'obtained' | 'denied' | 'restricted';
+
+export interface UserProfile {
+  id: string;
+  displayName: string | null;
+  avatarKey: string;
+  birthYear: number | null;
+  locale: string;
+  timezone: string;
+  experienceLevel: ExperienceLevel | null;
+  motivation: Motivation | null;
+  dailyGoalMinutes: number;
+  /** 'HH:MM', or null when the user declined a reminder. */
+  reminderTime: string | null;
+  onboardingCompleted: boolean;
+  leaderboardHidden: boolean;
+  analyticsConsent: boolean;
+  adsConsentStatus: AdsConsentStatus;
+  isAnonymous: boolean;
+}
+
+export interface OnboardingAnswers {
+  birthYear: number;
+  experienceLevel: ExperienceLevel;
+  motivation: Motivation;
+  dailyGoalMinutes: DailyGoalMinutes;
+  reminderTime: string | null;
+  analyticsConsent: boolean;
+}
+
+/** The subset of a profile a user may change after onboarding (SPEC §29). */
+export interface ProfilePatch {
+  displayName?: string;
+  avatarKey?: string;
+  locale?: string;
+  timezone?: string;
+  reminderTime?: string | null;
+  dailyGoalMinutes?: DailyGoalMinutes;
+  leaderboardHidden?: boolean;
+  analyticsConsent?: boolean;
+}
+
+export interface ProfileService extends ServiceIdentity {
+  get(): Promise<UserProfile | null>;
+  update(patch: ProfilePatch): Promise<UserProfile>;
+  completeOnboarding(answers: OnboardingAnswers): Promise<UserProfile>;
+  /**
+   * Deletes the caller's account because they are below the minimum age (SPEC §11, §41).
+   * Irreversible, and deliberately so: the account must not exist.
+   */
+  rejectUnderageAccount(): Promise<void>;
+  /** App-open heartbeat; also reports the device timezone (SPEC §21). */
+  syncSession(timezone: string): Promise<UserProfile>;
+}
+
 /* ------------------------------------------------------------------ Monitoring (Sentry) */
 export interface MonitoringService extends ServiceIdentity {
   initialize(): Promise<void>;
@@ -261,6 +335,9 @@ export interface AppConfigValues {
   offline_mode_enabled: boolean;
   free_module_count: number;
   lives_max: number;
+  /** SPEC D10 / §41 — the age gate thresholds. */
+  min_user_age: number;
+  minor_protection_age: number;
   content_version: number;
   min_supported_app_version: string;
 }

@@ -968,6 +968,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      age_from_birth_year: { Args: { p_birth_year: number }; Returns: number }
       award_xp: {
         Args: {
           p_amount: number
@@ -999,6 +1000,7 @@ export type Database = {
         Returns: boolean
       }
       is_ad_free: { Args: { p_user_id: string }; Returns: boolean }
+      is_minor: { Args: { p_user_id: string }; Returns: boolean }
       iso_week_start: { Args: { p_at?: string }; Returns: string }
       local_date_for: {
         Args: { p_at?: string; p_timezone: string }
@@ -1008,6 +1010,7 @@ export type Database = {
         Args: { p_module_id: string }
         Returns: boolean
       }
+      reject_underage_account: { Args: never; Returns: undefined }
       require_auth_uid: { Args: never; Returns: string }
       sync_session: {
         Args: { p_timezone?: string }

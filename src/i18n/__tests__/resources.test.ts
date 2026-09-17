@@ -11,6 +11,7 @@ describe('i18n resources', () => {
         'common',
         'navigation',
         'auth',
+        'onboarding',
         'home',
         'learn',
         'leaderboard',
@@ -72,5 +73,38 @@ describe('auth error coverage', () => {
 
   it('has no message for a code that does not exist', () => {
     expect(Object.keys(resources.en.auth.errors).sort()).toEqual([...CODES].sort());
+  });
+});
+
+/**
+ * Every option the app can offer must have a label. A missing one renders the raw key
+ * ("experience.options.intermediate.label") inside a card the user is asked to choose.
+ */
+describe('onboarding option coverage', () => {
+  it.each(['complete_beginner', 'beginner', 'intermediate'])(
+    'has a label and description for experience level %s',
+    (level) => {
+      const option = resources.en.onboarding.experience.options[
+        level as keyof typeof resources.en.onboarding.experience.options
+      ];
+      expect(Object.keys(option)).toEqual(expect.arrayContaining(['label', 'description']));
+    },
+  );
+
+  it.each(['university', 'career', 'interview', 'personal', 'improve'])(
+    'has a label and description for motivation %s',
+    (motivation) => {
+      const option = resources.en.onboarding.motivation.options[
+        motivation as keyof typeof resources.en.onboarding.motivation.options
+      ];
+      expect(Object.keys(option)).toEqual(expect.arrayContaining(['label', 'description']));
+    },
+  );
+
+  it.each(['5', '10', '15'])('has a label for the %s minute daily goal', (minutes) => {
+    const option = resources.en.onboarding.goal.options[
+      minutes as keyof typeof resources.en.onboarding.goal.options
+    ];
+    expect(option.label.length).toBeGreaterThan(0);
   });
 });
