@@ -1,8 +1,8 @@
+import { SupabaseConfigService } from './config/SupabaseConfigService';
 import {
   NoopAdService,
   NoopAnalyticsService,
   NoopBillingService,
-  NoopConfigService,
   NoopConsentService,
   NoopMonitoringService,
   NoopNotificationService,
@@ -43,7 +43,7 @@ export const services: Services = {
   ads: NoopAdService, // Phase 15
   billing: NoopBillingService, // Phase 14
   notifications: NoopNotificationService, // Phase 17
-  config: NoopConfigService, // Phase 3
+  config: SupabaseConfigService, // Phase 3 — real
 };
 
 /**
@@ -60,7 +60,6 @@ export const PRODUCTION_NOOP_ALLOWLIST: (keyof Services)[] = [
   'ads',
   'billing',
   'notifications',
-  'config',
 ];
 
 export class NoopServiceInProductionError extends Error {

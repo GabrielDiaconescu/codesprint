@@ -2,7 +2,7 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 2 complete — awaiting approval for Phase 3 (Database foundation).
+**Current phase:** Phase 3 complete — awaiting approval for Phase 4 (Authentication).
 **Last updated:** 2026-09-17
 
 ---
@@ -14,7 +14,7 @@
 | 0     | Human prerequisites & open decisions | **In progress** (parallel, see below) |
 | 1     | Project setup & architecture         | **Complete** — device check deferred  |
 | 2     | Design system                        | **Complete** — pending device check   |
-| 3     | Database foundation                  | **Unblocked** — ready to start        |
+| 3     | Database foundation                  | **Complete** — pending device check   |
 | 4–23  | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
@@ -232,12 +232,96 @@ text not colour alone, and the toast queue cap.
 9. **Gallery strings are deliberately not localized.** The screen never ships to a user, and
    adding it to the i18n namespaces would pollute the translation files (SPEC §38).
 
+---
+
+## Phase 3 — what was implemented (Database foundation)
+
+**Six migrations**, applying cleanly on a fresh database: enums and helpers, content tables,
+user tables, `app_config` with seeded defaults, RLS policies, core functions.
+
+**Two independent protection layers, not one.** Supabase's default privileges grant
+`anon`/`authenticated` full DML on new public tables, so the RLS migration revokes that
+wholesale and grants back only the specific reads the client needs. RLS then restricts those
+reads to the caller's own rows. The observable consequence: an unauthorised read fails with a
+**permission error (42501)**, not an empty result — the request is refused before RLS is even
+consulted. A policy mistake alone cannot produce a write.
+
+**`question_answer_keys`** has RLS enabled, `FORCE ROW LEVEL SECURITY`, **zero policies and
+zero grants**. It is readable only from inside SECURITY DEFINER functions. A pgTAP test fails
+if a future migration ever adds a policy.
+
+**The XP ledger** (`award_xp`) is the single write path for XP in the product. Idempotency is
+structural rather than procedural: `ON CONFLICT DO NOTHING` against
+`UNIQUE (user_id, source_type, source_id)` means a replayed request awards nothing and returns
+0 — no caller has to remember to check first. Ledger row, `user_stats.xp_total` and
+`leaderboard_weekly` are written in the same transaction, so they cannot drift.
+
+**Premium gating is computed, not stored.** `module_requires_premium` derives from
+`app_config.free_module_count`, so moving the free boundary (D5) is a config change with no
+migration and no content republish.
+
+**Client-callable RPCs so far:** `get_app_config()`, `update_profile(jsonb)` (the only write
+path into profiles — whitelists columns, validates the IANA timezone, and deliberately does
+not expose `is_anonymous` or moderation flags), `sync_session(text)`. EXECUTE is default-deny;
+internal helpers carry no client grant.
+
+**App side:** real `SupabaseService` with a SecureStore session adapter that chunks values
+around SecureStore's ~2 KB limit; `SupabaseConfigService` replacing the no-op; `useAppConfig`
+TanStack Query hook; a dev-only backend status card on Home; generated
+`src/types/database.types.ts` (1243 lines).
+
+**CI** gained a database job: start Supabase, apply migrations on a fresh database, run pgTAP,
+and fail if the generated types are stale.
+
+### Phase 3 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 13 suites, 114 tests, all passing
+database    supabase test db ......... 3 files, 51 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly on a fresh database
+bundle      expo export (android) .... succeeds
+```
+
+---
+
+## Decisions and interpretations made during Phase 3
+
+1. **Grant revocation as a first-class layer.** SPEC §40 asks for RLS; relying on RLS alone
+   would leave Supabase's permissive default grants in place. Revoking them means a single
+   mistaken policy cannot expose a write path.
+2. **`app_config` is readable by `anon`.** The force-update screen and first-launch flags must
+   work before the guest session exists. Only `is_public` rows are visible, and
+   `get_app_config()` filters private keys.
+3. **Config parsing is forgiving per key.** One malformed row degrades one flag instead of
+   bricking launch; unknown keys are ignored so a newer server does not break an older client
+   (SPEC §51). `offline_mode_enabled` is forced to false client-side whatever the server says.
+4. **SecureStore chunking.** A Supabase session can exceed SecureStore's ~2 KB per-value
+   limit; without chunking the session silently fails to persist and the user is logged out on
+   next launch.
+5. **RPC skeletons interpreted as complete functions.** SPEC §57 calls for "RPC skeletons", but
+   §59.10 forbids TODOs for essential functionality. Rather than stub functions that return
+   nothing, Phase 3 ships the functions it actually needs — config, entitlements, module
+   gating, the XP ledger, profile writes — fully implemented. Feature RPCs arrive in their own
+   phases.
+6. **`questions.payload` carries a CHECK constraint** rejecting `answer`, `correct`,
+   `solution` and similar keys. The payload is client-visible, so an authoring mistake there
+   would leak answers; the constraint is cheap and the failure mode is catastrophic.
+7. **pgTAP assertions on anon reads are `throws_ok`, not empty-set checks.** The first draft
+   asserted zero rows and failed — because the grant layer denies the query outright. The
+   stronger behaviour was correct; the test was updated to assert it.
+
 ## Known limitations
 
-- No backend: `ConfigService` serves bundled defaults only (Phase 3 wires `app_config`).
-- All services are no-ops; nothing touches the network yet.
+- Services other than Config are still no-ops: billing (14), ads (15), analytics and
+  monitoring (16), notifications (17), consent (15).
+- No authentication yet, so every RPC that needs `auth.uid()` is unreachable from the app.
+  Phase 4 makes the client-callable RPCs actually exercisable.
+- No content: the tables exist but are empty until the Phase 6 pipeline seeds them.
+- `supabase/seed.sql` does not exist yet, so `db:reset` warns about it. Harmless, and the
+  file arrives with the content pipeline.
 - Tab screens show honest "ships in Phase N" placeholders — no mocked data presented as real.
-- No authentication, no content, no gameplay.
 - Design system exists but is unused by product screens — the tabs still show placeholders
   until Phases 7–13 build the real screens on top of it.
 - Lottie animations and `expo-image` are not installed yet; they arrive when a screen needs
@@ -346,3 +430,35 @@ development builds.
 11. **Screen reader** (TalkBack / VoiceOver) — the code block is read as one block of source,
     progress announces a percentage, and the answer feedback announces "Correct"/"Not quite"
     as words rather than relying on colour.
+
+---
+
+## Phase 3 device test checklist
+
+**Important:** a physical phone cannot reach `127.0.0.1` — that is the phone itself. Before
+testing on hardware, point `.env` at this PC's LAN address:
+
+```
+EXPO_PUBLIC_SUPABASE_URL=http://192.168.1.32:54321
+```
+
+(This machine's LAN address at the time of writing. Confirm with `ipconfig`; the `172.22.x`
+address is Docker's virtual adapter and will not work.) Phone and PC must be on the same
+Wi-Fi, and Windows Firewall must allow inbound connections on port 54321. Restart Metro after
+editing `.env` — Expo inlines `EXPO_PUBLIC_*` at build time.
+
+1. `npx supabase start` on the PC, then `npm run dev`.
+2. Open the app; the Home tab shows a **BACKEND (DEV)** card.
+3. The badge reads **Database** (green), not **Defaults** (red).
+4. `content_version` shows `0`, `free_module_count` shows `6`, `lives_max` shows `5`.
+5. **Prove it is really reading the database, not the bundled defaults** — they are
+   deliberately identical, so the badge alone is not proof:
+   - Open Studio at http://127.0.0.1:54323 → Table editor → `app_config`
+   - Change `free_module_count` from `6` to `9` and save
+   - Pull to refresh / reopen the app: the card must now show `9`
+   - Change it back to `6`
+6. Set `leaderboard_enabled` to `false` in Studio and reopen the app: the **Leaderboard tab
+   disappears** (SPEC §10). Set it back to `true`.
+7. Stop Supabase (`npx supabase stop`) and reopen the app: the badge turns red and shows
+   **Defaults**, with the explanatory note — the app still works rather than showing a blank
+   screen (SPEC §46).

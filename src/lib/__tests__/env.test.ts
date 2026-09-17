@@ -39,10 +39,23 @@ describe('parseEnv', () => {
     );
   });
 
-  it('allows later-phase variables to be absent while their phase is unshipped', () => {
-    // Phase 3+ variables are optional today; this is what keeps early phases runnable.
+  it('allows unshipped-phase variables to be absent in development', () => {
+    // RevenueCat, AdMob and PostHog are not built yet, so a dev build must still boot
+    // without them. This is what keeps early phases runnable.
     expect(() => parseEnv(minimalDev)).not.toThrow();
-    expect(() => parseEnv({ EXPO_PUBLIC_APP_ENV: 'production' })).not.toThrow();
+    expect(() => parseEnv({ EXPO_PUBLIC_APP_ENV: 'preview' })).not.toThrow();
+  });
+
+  it('requires a SHIPPED integration in production', () => {
+    // Supabase shipped in Phase 3, so a production build without it must fail at startup
+    // rather than at the user. Each phase flips its own flag in SHIPPED.
+    expect(() => parseEnv({ EXPO_PUBLIC_APP_ENV: 'production' })).toThrow(EnvValidationError);
+
+    try {
+      parseEnv({ EXPO_PUBLIC_APP_ENV: 'production' });
+    } catch (error) {
+      expect((error as EnvValidationError).issues.join()).toContain('EXPO_PUBLIC_SUPABASE_URL');
+    }
   });
 
   it('accepts a fully populated production environment', () => {

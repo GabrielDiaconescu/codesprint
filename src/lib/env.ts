@@ -19,7 +19,7 @@ export type AppEnvironment = (typeof APP_ENVIRONMENTS)[number];
  * schema then starts requiring the matching variables.
  */
 const SHIPPED = {
-  supabase: false, // Phase 3
+  supabase: true, // Phase 3 — shipped
   revenueCat: false, // Phase 14
   admob: false, // Phase 15
   postHog: false, // Phase 16

@@ -35,6 +35,43 @@ jobs:
         env:
           EXPO_PUBLIC_APP_ENV: development
 
+  database:
+    name: Database (migrations + pgTAP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Proves migrations apply cleanly on a FRESH database every time — SPEC §54 requires
+      # that, and it is the only way to catch a migration that only works incrementally.
+      - name: Start Supabase and apply migrations
+        run: npx supabase start
+
+      # The RLS access matrix, the XP ledger invariants and the schema guarantees
+      # (SPEC §40, §53). A regression here is a security regression.
+      - name: pgTAP suite
+        run: npx supabase test db
+
+      - name: Fail if generated types are stale
+        run: |
+          npx supabase gen types typescript --local > /tmp/database.types.ts
+          if ! diff -q /tmp/database.types.ts src/types/database.types.ts > /dev/null; then
+            echo "::error::src/types/database.types.ts is out of date. Run: npm run db:types"
+            diff /tmp/database.types.ts src/types/database.types.ts || true
+            exit 1
+          fi
+
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop --no-backup
+
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest
