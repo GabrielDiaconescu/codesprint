@@ -2,7 +2,7 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 3 complete — awaiting approval for Phase 4 (Authentication).
+**Current phase:** Phase 4 complete — awaiting approval for Phase 5 (Onboarding).
 **Last updated:** 2026-09-17
 
 ---
@@ -15,7 +15,8 @@
 | 1     | Project setup & architecture         | **Complete** — device check deferred  |
 | 2     | Design system                        | **Complete** — pending device check   |
 | 3     | Database foundation                  | **Complete** — pending device check   |
-| 4–23  | See `PLAN.md` / SPEC §57             | Not started                           |
+| 4     | Authentication                       | **Complete** — pending device check   |
+| 5–23  | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -312,12 +313,103 @@ bundle      expo export (android) .... succeeds
    asserted zero rows and failed — because the grant layer denies the query outright. The
    stronger behaviour was correct; the test was updated to assert it.
 
+## Phase 4 — what was implemented (Authentication)
+
+**Database** — `20260917120600_auth_support.sql`
+
+- `handle_user_updated()` trigger mirrors `auth.users.is_anonymous` onto `profiles`, so a guest
+  who signs up becomes rankable on the leaderboard.
+- `delete_stale_anonymous_users(days)` purges abandoned guests, scheduled by pg_cron at 03:17
+  UTC. Activity comes from `profiles.last_seen_at`, not `auth.users.last_sign_in_at`.
+- 16 new pgTAP tests (`04_auth_support.test.sql`), 67 in total.
+
+**Auth configuration** — `supabase/config.toml`
+
+Anonymous sign-ins on, email confirmation on, manual linking on, minimum password length 8 with
+`letters_digits`, and the three build-variant schemes allow-listed as redirect targets.
+
+**Service layer** — `src/services/auth/`
+
+- `SupabaseAuthService` implements the full `AuthService` contract. It never leaks a provider
+  error: everything throws `AuthFailure` with one of ten mapped codes.
+- `errors.ts` maps provider codes, network failures and bare HTTP statuses to our vocabulary.
+- `deepLink.ts` parses auth callbacks defensively — first-occurrence-wins on repeated keys,
+  a shape check on the code, errors preferred over a co-present code.
+
+**Feature** — `src/features/auth/`
+
+Pure validation mirroring the server rules, form state, mutations, and the session bootstrap
+that restores the session, subscribes to changes and drives token refresh from foreground state.
+
+**Screens** — `(auth)/sign-in`, `sign-up`, `forgot-password`, `reset-password`, `verify-email`,
+plus `auth-callback` and `link-account` outside the group. Routing is guarded declaratively with
+`Stack.Protected` in the root layout.
+
+**Design system** — `TextField`, with autocapitalisation, autocorrect and spellcheck off, a
+reveal toggle for passwords, and errors announced as part of the field.
+
+### Phase 4 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 18 suites, 241 tests, all passing
+database    supabase test db ......... 4 files, 67 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly on a fresh database
+bundle      expo export (android) .... succeeds
+```
+
+Beyond the automated suites, the flows were exercised against the running local stack:
+
+| Flow                 | Result                                                                |
+| -------------------- | --------------------------------------------------------------------- |
+| Anonymous sign-in    | session issued, `is_anonymous = true`, profile mirrored               |
+| Email sign-up        | no session, confirmation email delivered to Mailpit                   |
+| Weak password        | rejected with `weak_password`, mapping to our `weak-password`         |
+| Custom redirect      | `codesprint-dev://auth-callback?flow=signup` accepted by allow-list   |
+| Password reset       | `type=recovery` email returning `flow=recovery`                       |
+| **Guest to account** | **same user id, XP preserved, `is_anonymous` flipped in both tables** |
+
+## Decisions and interpretations made during Phase 4
+
+1. **A guest account is created on tap, not on launch.** SPEC §12 says anonymous sign-in lets a
+   new user start immediately, which could be read as signing in on first launch. Every
+   anonymous user is a billable Supabase MAU for 30 days (SPEC §60), so auto-creating one for
+   every install — including bounces — costs money for nothing. "Continue as guest" is an
+   explicit button instead.
+2. **Social login is deferred, not faked** (SPEC §59.11). The contract and the UI slot exist;
+   the providers need credentials that do not exist yet. Listed under human actions.
+3. **`flow` is round-tripped through `redirectTo`.** Supabase does not distinguish a signup
+   confirmation from a password recovery in the callback, and the two must not land on the same
+   screen — a recovery link that silently signed the user in would leave them holding a password
+   they do not know. The app appends its own parameter and reads it back.
+4. **`pendingPasswordReset` holds the router.** A recovery link creates a real session, so
+   "signed in" is not sufficient to enter the app. The flag survives token refreshes and is
+   cleared by setting the password or by signing out.
+5. **Account enumeration is not "fixed".** Supabase returns success with no session when an
+   address is already registered. Reporting "email taken" would be friendlier, and would also
+   let anyone test which addresses have accounts. The provider's behaviour is kept.
+6. **Client password rules are a copy of the server's, and a test proves it.**
+   `validation.test.ts` reads `supabase/config.toml`; drift would mean the form accepts what the
+   provider then rejects, with an error the user cannot act on.
+7. **`fireEvent` is async in RNTL v14, like `render`.** A missing `await` asserts against the
+   pre-event state and passes misleadingly. Recorded in `CLAUDE.md`.
+8. **Editing `config.toml` needs a full stack restart.** `npm run db:reset` does not reload it;
+   the Auth container reads it only at startup. The symptom is confusing — anonymous sign-in
+   rejected as disabled while the file plainly enables it. Documented in `docs/DATABASE.md`.
+
 ## Known limitations
 
 - Services other than Config are still no-ops: billing (14), ads (15), analytics and
   monitoring (16), notifications (17), consent (15).
-- No authentication yet, so every RPC that needs `auth.uid()` is unreachable from the app.
-  Phase 4 makes the client-callable RPCs actually exercisable.
+- **Sign in with Apple and Google (D6) are not built.** Both need credentials that do not
+  exist yet: an Apple Developer account with the Sign in with Apple capability, and Google
+  OAuth client ids. Rather than fake them (SPEC §59.11) the contract and the UI slot are
+  ready and the providers are listed under human actions. Email, password and guest are
+  complete and fully exercised.
+- Email verification and password reset use **Mailpit**, the local inbox, because no domain
+  or transactional SMTP exists yet. That is a real integration locally, but production is
+  blocked until SMTP is configured.
 - No content: the tables exist but are empty until the Phase 6 pipeline seeds them.
 - `supabase/seed.sql` does not exist yet, so `db:reset` warns about it. Harmless, and the
   file arrives with the content pipeline.
@@ -353,11 +445,20 @@ bundle      expo export (android) .... succeeds
 
 - None. Docker is running and the Supabase project is in the EU region.
 
-**Before Phase 4:**
+**Before Phase 5 (the next phase):**
+
+- None. Onboarding needs no new accounts or keys.
+
+**Still outstanding from Phase 4 — needed before a production release, not before Phase 5:**
 
 - **Domain + transactional SMTP.** Supabase Auth needs a custom SMTP sender for email
-  verification and password reset — the built-in sender is not permitted in production.
-  _(The user asked to be reminded here.)_
+  verification and password reset; the built-in sender is not permitted in production.
+  Local development uses Mailpit, so this does not block building.
+- **Sign in with Apple** — needs the paid Apple Developer account (gated behind the
+  PFA → D-U-N-S chain above), a Services ID and a signing key.
+- **Sign in with Google** — needs OAuth client ids from Google Cloud Console (free, and
+  can be done before the store accounts exist).
+- If Google sign-in ships on iOS, **Sign in with Apple must ship too** (App Store rule).
 
 **Before Phase 6:** install **Python 3.12** alongside 3.14 (D9 dual-version verification).
 
@@ -462,3 +563,60 @@ editing `.env` — Expo inlines `EXPO_PUBLIC_*` at build time.
 7. Stop Supabase (`npx supabase stop`) and reopen the app: the badge turns red and shows
    **Defaults**, with the explanatory note — the app still works rather than showing a blank
    screen (SPEC §46).
+
+---
+
+## Phase 4 device test checklist
+
+Local Supabase must be reachable from the phone: `EXPO_PUBLIC_SUPABASE_URL` has to be the PC's
+LAN address, not `127.0.0.1`. Restart Metro after editing `.env`.
+
+**Opening an emailed link is the awkward part.** Mailpit runs on the PC, so the link is on the
+wrong device. Either browse to `http://<PC-LAN-IP>:54324` on the phone and tap the link there,
+or copy it and fire it with `npx uri-scheme open "<link>" --android` (or `--ios`).
+
+### Guest
+
+1. Fresh install: the sign-in screen appears — not a blank screen, not the tabs.
+2. **Continue as guest** lands on Home.
+3. Profile tab shows a **Guest** badge and a "Save your progress" button.
+4. Force-quit and reopen: still a guest, no sign-in screen.
+
+### Sign-up and verification
+
+5. Sign out, then **Create an account**, and enter an email with the password `sprint2026`.
+6. Password rules: `short` gives "Use at least 8 characters"; `sprintsprint` gives
+   "Include at least one letter and one number".
+7. Submitting shows the "Confirm your email" screen.
+8. Opening the link from Mailpit on the phone opens the app, signs in, and lands on Home.
+9. Profile shows the email address with no "unconfirmed" badge.
+
+### Sign-in and reset
+
+10. Sign out, then sign in with the same credentials: Home.
+11. A wrong password gives "That email and password don't match an account." and the email
+    field keeps its value.
+12. **Forgot your password?**, enter the address, and the screen says "Check your email".
+13. Opening the reset link opens the app on **Choose a new password** — _not_ on Home.
+    This is the one that matters: landing on Home would mean a recovery session slipped through.
+14. Set a new password: lands on Home. Sign out and sign in again with it.
+
+### Guest to account — the D1 flow
+
+15. Sign out, continue as guest, then Profile and **Create account**.
+16. Enter an email and password: "Confirm your email".
+17. Confirm via the link. Profile now shows the email and the **Guest** badge is gone.
+18. In Studio (`http://127.0.0.1:54323`), `profiles` holds **one** row for that user with
+    `is_anonymous = false`. A second row would mean the conversion created a new account and
+    threw away the guest's progress.
+
+### Robustness
+
+19. With Wi-Fi and mobile data off, signing in says "No internet connection" rather than
+    crashing.
+20. Opening the same confirmation link a second time says "That link has expired or was already
+    used", with a way back to sign in.
+21. Signing out as a **guest** warns that progress will be lost for good; signing out as a
+    registered user does not.
+22. With a screen reader on, each field announces its label, and an invalid field announces the
+    error together with it.

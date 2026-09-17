@@ -15,6 +15,95 @@ export interface ServiceIdentity {
   readonly isNoop: boolean;
 }
 
+/* ------------------------------------------------------------------ Auth (Supabase) */
+
+/**
+ * Normalised auth failures (SPEC §12, §46).
+ *
+ * The UI must never render a raw provider message: they are English-only, change without
+ * notice, and occasionally leak implementation detail. Every failure is mapped to one of
+ * these codes, which map 1:1 to i18n keys.
+ */
+export type AuthErrorCode =
+  | 'invalid-credentials'
+  | 'email-not-confirmed'
+  | 'email-taken'
+  | 'weak-password'
+  | 'same-password'
+  | 'rate-limited'
+  | 'expired-link'
+  | 'guest-disabled'
+  | 'network'
+  | 'unknown';
+
+export interface AuthUser {
+  id: string;
+  email: string | null;
+  /** True while the user is a guest (SPEC §12, D1). */
+  isAnonymous: boolean;
+  emailConfirmed: boolean;
+}
+
+export type AuthChangeReason =
+  | 'initial'
+  | 'signed-in'
+  | 'signed-out'
+  | 'token-refreshed'
+  | 'user-updated'
+  | 'password-recovery';
+
+/** What an auth deep link turned out to be, once consumed. */
+export type DeepLinkOutcome =
+  | { kind: 'ignored' }
+  | { kind: 'signed-in' }
+  | { kind: 'recovery' }
+  | { kind: 'error'; code: AuthErrorCode };
+
+export interface SignUpResult {
+  user: AuthUser | null;
+  /** True when a confirmation email was sent and there is no session yet. */
+  needsConfirmation: boolean;
+}
+
+export interface AuthService extends ServiceIdentity {
+  /** The restored session, if SecureStore still holds a valid refresh token. */
+  getUser(): Promise<AuthUser | null>;
+  onChange(listener: (user: AuthUser | null, reason: AuthChangeReason) => void): () => void;
+
+  /** Guest sign-in, so a new user can start the first lesson immediately (SPEC §12, D1). */
+  signInAnonymously(): Promise<AuthUser>;
+  signUp(email: string, password: string): Promise<SignUpResult>;
+  signIn(email: string, password: string): Promise<AuthUser>;
+
+  /**
+   * Guest -> permanent account. Keeps the SAME user id, so every xp_events row, attempt and
+   * streak day earned as a guest stays with the user (SPEC §12).
+   */
+  linkEmail(email: string, password: string): Promise<SignUpResult>;
+
+  resendConfirmation(email: string): Promise<void>;
+  sendPasswordReset(email: string): Promise<void>;
+  /** Valid only inside a recovery session opened by the reset deep link. */
+  updatePassword(newPassword: string): Promise<void>;
+
+  /**
+   * Consumes the parameters of an auth callback and reports what the link was for.
+   *
+   * Takes router params rather than a raw URL because Expo Router owns deep-link routing:
+   * the callback arrives as a screen with search params, on cold start and warm alike.
+   */
+  consumeAuthCallback(params: Record<string, string | string[] | undefined>):
+    Promise<DeepLinkOutcome>;
+
+  signOut(): Promise<void>;
+
+  /**
+   * Drives Supabase's token auto-refresh from foreground state. Refreshing while
+   * backgrounded wastes battery and fails on a sleeping radio.
+   */
+  setAppActive(active: boolean): void;
+}
+
 /* ------------------------------------------------------------------ Monitoring (Sentry) */
 export interface MonitoringService extends ServiceIdentity {
   initialize(): Promise<void>;

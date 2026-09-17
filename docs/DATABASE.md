@@ -183,5 +183,5 @@ Phase 3 delivers the foundation. These arrive with the features that need them:
 - `submit_answer` with grading, lives and achievements — Phase 8/10
 - `get_leaderboard`, `get_progress_summary` — Phase 9/12
 - `export_my_data`, `delete-account` Edge Function — Phase 18
-- Anonymous-user cleanup `pg_cron` job — Phase 4
+- Sign in with Apple / Google — needs store credentials (SPEC §12, D6)
 - `supabase/seed.sql` — produced by the content pipeline in Phase 6

@@ -2,6 +2,7 @@ import { getLocales } from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import auth from './locales/en/auth.json';
 import common from './locales/en/common.json';
 import home from './locales/en/home.json';
 import leaderboard from './locales/en/leaderboard.json';
@@ -18,7 +19,7 @@ import profile from './locales/en/profile.json';
 export const FALLBACK_LOCALE = 'en';
 
 export const resources = {
-  en: { common, navigation, home, learn, leaderboard, profile },
+  en: { common, navigation, auth, home, learn, leaderboard, profile },
 } as const;
 
 export const NAMESPACES = Object.keys(resources.en) as (keyof typeof resources.en)[];

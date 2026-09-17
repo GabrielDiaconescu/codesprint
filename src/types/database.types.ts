@@ -986,6 +986,10 @@ export type Database = {
         Args: { p_default: number; p_key: string }
         Returns: number
       }
+      delete_stale_anonymous_users: {
+        Args: { p_days?: number }
+        Returns: number
+      }
       get_app_config: { Args: never; Returns: Json }
       has_entitlement: {
         Args: {

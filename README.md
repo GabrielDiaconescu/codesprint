@@ -70,6 +70,15 @@ npm run dev                                               # start Metro for the 
 | `npm run db:test`   | pgTAP suite (Phase 3+)                              |
 | `npm run db:types`  | Regenerate database types after a migration         |
 
+Local services while Supabase is running: Studio on <http://127.0.0.1:54323>, the API on
+<http://127.0.0.1:54321>, and **Mailpit** — the local inbox that catches every verification and
+password-reset email — on <http://127.0.0.1:54324>.
+
+> Changing `supabase/config.toml` needs `npx supabase stop && npx supabase start`.
+> `npm run db:reset` does **not** reload it: the Auth container reads it only at startup, and
+> the symptom of forgetting is confusing (anonymous sign-in rejected as disabled while the file
+> plainly enables it).
+
 ## Build variants
 
 Three variants install side by side on one device:
@@ -88,6 +97,21 @@ enforces this and `src/__tests__/architecture.test.ts` proves it. Server state b
 TanStack Query, client state to Zustand. Gameplay is server-authoritative: XP is written only
 through an append-only ledger inside Postgres security-definer functions, and answer keys never
 leave the database.
+
+## Authentication
+
+Email and password with verification, password reset over a deep link, and guest mode.
+
+A guest is a real Supabase anonymous user created only when someone taps "continue as guest",
+never on launch — each one is a billable MAU for 30 days. Adding an email later keeps the
+**same user id**, so all guest progress carries over; abandoned guests are purged nightly.
+
+Deep links return to `codesprint-dev://auth-callback` (per build variant) carrying a `flow`
+parameter the app adds itself, because the provider does not distinguish a signup confirmation
+from a password recovery and the two must not land on the same screen.
+
+Sign in with Apple and Google are not built yet — they need credentials that do not exist.
+See `docs/PROGRESS.md` for exactly what is required.
 
 ## Security notes
 

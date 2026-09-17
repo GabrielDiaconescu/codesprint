@@ -2,6 +2,7 @@ export { Screen } from './Screen';
 export { Text, type TextProps, type TextVariant, type TextTone } from './Text';
 export { Icon, type IconProps, type IconName, type IconSize } from './Icon';
 export { Button, type ButtonProps, type ButtonVariant, type ButtonSize } from './Button';
+export { TextField, type TextFieldProps } from './TextField';
 export { Card, type CardProps } from './Card';
 export { Badge, type BadgeProps, type BadgeTone } from './Badge';
 export { Chip, type ChipProps } from './Chip';

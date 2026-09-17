@@ -1,3 +1,4 @@
+import { SupabaseAuthService } from './auth/SupabaseAuthService';
 import { SupabaseConfigService } from './config/SupabaseConfigService';
 import {
   NoopAdService,
@@ -9,6 +10,7 @@ import {
 } from './noop';
 import type {
   AdService,
+  AuthService,
   AnalyticsService,
   BillingService,
   ConfigService,
@@ -28,6 +30,7 @@ import type {
 // generically, and only type aliases get an implicit index signature.
 export type Services = {
   monitoring: MonitoringService;
+  auth: AuthService;
   analytics: AnalyticsService;
   consent: ConsentService;
   ads: AdService;
@@ -38,6 +41,7 @@ export type Services = {
 
 export const services: Services = {
   monitoring: NoopMonitoringService, // Phase 16 (earlier if a Sentry DSN is provided)
+  auth: SupabaseAuthService, // Phase 4 — real
   analytics: NoopAnalyticsService, // Phase 16
   consent: NoopConsentService, // Phase 15
   ads: NoopAdService, // Phase 15

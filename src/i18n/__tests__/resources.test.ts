@@ -7,7 +7,15 @@ import { NAMESPACES, resolveLocale, resources } from '..';
 describe('i18n resources', () => {
   it('registers every namespace the app uses', () => {
     expect(NAMESPACES).toEqual(
-      expect.arrayContaining(['common', 'navigation', 'home', 'learn', 'leaderboard', 'profile']),
+      expect.arrayContaining([
+        'common',
+        'navigation',
+        'auth',
+        'home',
+        'learn',
+        'leaderboard',
+        'profile',
+      ]),
     );
   });
 
@@ -37,5 +45,32 @@ describe('i18n resources', () => {
   it('falls back to English for an unsupported device locale', () => {
     // expo-localization is mocked to 'en' in jest.setup.js.
     expect(resolveLocale()).toBe('en');
+  });
+});
+
+/**
+ * Every AuthErrorCode must have a sentence. A missing one renders the raw key ("errors.
+ * network") on screen, which is the failure mode i18n exists to prevent (SPEC §38, §46).
+ */
+describe('auth error coverage', () => {
+  const CODES = [
+    'invalid-credentials',
+    'email-not-confirmed',
+    'email-taken',
+    'weak-password',
+    'same-password',
+    'rate-limited',
+    'expired-link',
+    'guest-disabled',
+    'network',
+    'unknown',
+  ];
+
+  it.each(CODES)('has a message for %s', (code) => {
+    expect(Object.keys(resources.en.auth.errors)).toContain(code);
+  });
+
+  it('has no message for a code that does not exist', () => {
+    expect(Object.keys(resources.en.auth.errors).sort()).toEqual([...CODES].sort());
   });
 });
