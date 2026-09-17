@@ -25,7 +25,7 @@
 
 | Machine           | Role                        | Notes                                                                                                    |
 | ----------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **Windows 11 PC** | Primary development         | Node 24.15.0, npm 11.12.1, git 2.53. Docker and Python 3.12 still to install                             |
+| **Windows 11 PC** | Primary development         | Node 24.15.0, npm 11.12.1, git 2.53, Docker, Python 3.14.4 + 3.12.10 (via the `py` launcher)             |
 | **MacBook**       | iOS builds and verification | Used per phase to build/run iOS. Specs to confirm (macOS, Xcode, chip)                                   |
 | **Android phone** | Device checks               | Primary device target for Phases 1–13                                                                    |
 | **iPhone**        | Device checks               | Available. Free personal-team signing (profile expires every 7 days) until the paid Apple account exists |
@@ -61,7 +61,7 @@ and is green: typecheck, lint, 102 tests, and a gitleaks scan of the full histor
 | D6  | Social login             | Apple + Google (default stands)       | Not re-raised; revisit before Phase 4 if scope needs trimming                                 |
 | D7  | Analytics                | PostHog Cloud EU                      |                                                                                               |
 | D8  | Monitoring               | Sentry                                |                                                                                               |
-| D9  | Python semantics         | 3.12 + latest stable 3.x              | Needs Python 3.12 installed (Phase 6)                                                         |
+| D9  | Python semantics         | 3.12 + latest stable 3.x              | **Resolved** — 3.12.10 and 3.14.4 both present; `py -3.12` / `py -3.14` on Windows            |
 | D10 | Minimum age              | 13                                    |                                                                                               |
 | D11 | Personalized ads         | Consent + 16+ only                    |                                                                                               |
 | D12 | Google Play account type | **Organization**                      | Decided 2026-09-17. Exempt from the 12-tester / 14-day closed test. Requires a D-U-N-S number |
@@ -539,9 +539,7 @@ Exercised against the running stack through the real HTTP API:
 
 **Before Phase 6 (the next phase):**
 
-- **Install Python 3.12 alongside 3.14.** The content pipeline verifies every runnable
-  snippet and every `predict_output` answer on both versions (D9), so Phase 6 cannot be
-  completed without it.
+- None. Both Python versions are installed (3.12.10 and 3.14.4), verified 2026-09-17.
 
 **Still outstanding from Phase 4 — needed before a production release, not before Phase 5:**
 
@@ -554,7 +552,7 @@ Exercised against the running stack through the real HTTP API:
   can be done before the store accounts exist).
 - If Google sign-in ships on iOS, **Sign in with Apple must ship too** (App Store rule).
 
-**Before Phase 6:** install **Python 3.12** alongside 3.14 (D9 dual-version verification).
+**Before Phase 6:** ~~install Python 3.12~~ — **done**: 3.12.10 and 3.14.4 both verified.
 
 **Before Phase 14:** Apple Developer and Google Play accounts fully active, including paid-apps
 agreement, tax and banking. Google Play requires a bundle uploaded to a testing track before
