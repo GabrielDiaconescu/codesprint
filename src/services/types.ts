@@ -1,4 +1,4 @@
-import type { LessonResponse } from './content/lessonSchema';
+import type { AnswerResult, LessonResponse } from './content/lessonSchema';
 
 /**
  * Service contracts (SPEC §7).
@@ -182,7 +182,14 @@ export interface ProfileService extends ServiceIdentity {
 
 /* ------------------------------------------------------------------ Content (Supabase) */
 
-export type { LessonResponse, LessonBlock, RenderableQuestion } from './content/lessonSchema';
+export type {
+  AnswerResult,
+  LessonResponse,
+  LessonBlock,
+  RenderableQuestion,
+} from './content/lessonSchema';
+
+export type AnswerContext = 'lesson' | 'practice' | 'challenge' | 'exam';
 
 export interface ModuleSummary {
   id: string;
@@ -241,6 +248,19 @@ export interface ContentService extends ServiceIdentity {
    * Throws `LessonUnavailableError` so the caller can tell a paywall from a missing lesson.
    */
   getLesson(lessonId: string, locale: string): Promise<LessonResponse>;
+
+  /**
+   * Grades one answer on the server and records the attempt (SPEC §16, §18).
+   *
+   * The verdict, the explanation and any XP come back together; the client never grades.
+   * Throws `LessonUnavailableError` for the paywall and for a withdrawn question.
+   */
+  submitAnswer(
+    questionId: string,
+    answer: Record<string, unknown>,
+    context: AnswerContext,
+    locale: string,
+  ): Promise<AnswerResult>;
 }
 
 /* ------------------------------------------------------------------ Monitoring (Sentry) */

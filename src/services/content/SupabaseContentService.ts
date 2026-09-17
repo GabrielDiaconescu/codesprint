@@ -12,7 +12,7 @@ import {
   type ModuleSummary,
 } from '../types';
 
-import { lessonResponse } from './lessonSchema';
+import { answerResult, lessonResponse } from './lessonSchema';
 
 /**
  * Content reads (SPEC §40, access matrix).
@@ -136,6 +136,18 @@ export const SupabaseContentService: ContentService = {
     // Parsed, not trusted: the payload is assembled by hand in SQL, so a shape mistake should
     // surface here rather than inside a renderer three components deeper.
     return lessonResponse.parse(data);
+  },
+
+  async submitAnswer(questionId, answer, context, locale) {
+    const { data, error } = await getSupabaseClient().rpc('submit_answer', {
+      p_question_id: questionId,
+      p_answer: answer as never,
+      p_context: context,
+      p_locale: locale,
+    });
+
+    if (error) throw new LessonUnavailableError(toLessonReason(error));
+    return answerResult.parse(data);
   },
 };
 

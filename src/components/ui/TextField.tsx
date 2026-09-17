@@ -29,6 +29,8 @@ export interface TextFieldProps {
   returnKeyType?: TextInputProps['returnKeyType'];
   onSubmitEditing?: () => void;
   editable?: boolean;
+  /** Monospace input, for typing code or program output. */
+  mono?: boolean;
   showPasswordLabel?: string;
   hidePasswordLabel?: string;
   testID?: string;
@@ -60,6 +62,7 @@ export const TextField = ({
   returnKeyType,
   onSubmitEditing,
   editable = true,
+  mono = false,
   showPasswordLabel = 'Show password',
   hidePasswordLabel = 'Hide password',
   testID,
@@ -117,7 +120,7 @@ export const TextField = ({
             styles.input,
             {
               color: theme.colors.textPrimary,
-              fontFamily: theme.fontFamily.regular,
+              fontFamily: mono ? theme.fontFamily.mono : theme.fontFamily.regular,
               paddingVertical: theme.spacing.md,
             },
           ]}

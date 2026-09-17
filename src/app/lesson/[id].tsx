@@ -1,23 +1,26 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button, ProgressBar, Screen, SkeletonLines, StateView, Text } from '@/components/ui';
 import { LessonBlockView } from '@/features/lesson/components/LessonBlocks';
+import { QuestionPage } from '@/features/lesson/components/QuestionPage';
 import { useLesson } from '@/features/lesson/hooks/useLesson';
-import { LessonUnavailableError, type LessonErrorReason } from '@/services';
+import { buildLessonPages, countQuestions, pageProgress } from '@/features/lesson/logic/pages';
+import { LessonUnavailableError, type AnswerResult, type LessonErrorReason } from '@/services';
 import { useTheme } from '@/theme';
 
 /**
- * The lesson player (SPEC §15).
+ * The lesson player (SPEC §15, §18).
  *
  * A full-screen route outside the tabs, so there is no tab bar and no banner ad while
- * reading (SPEC §10, §30).
+ * learning (SPEC §10, §30).
  *
- * Phase 7 is the reader: blocks render, progress tracks reading, and the end is a completion
- * screen. Answering, XP and streaks are Phases 8 and 9, and the screen says so rather than
- * showing a zero that looks like a bug.
+ * The lesson is a sequence of pages: runs of explanation, then one question at a time.
+ * Progress is the page index — a thing that can be unit-tested — rather than a scroll
+ * position. Each answer is graded on the server before the learner can continue, and the
+ * running tally shown at the end is the sum of what the server actually awarded.
  */
 export default function LessonScreen() {
   const { t } = useTranslation('lesson');
@@ -30,20 +33,19 @@ export default function LessonScreen() {
 
   const { data: lesson, isPending, isError, error, refetch } = useLesson(lessonId);
 
-  const [progress, setProgress] = useState(0);
+  const pages = useMemo(() => buildLessonPages(lesson?.blocks ?? []), [lesson]);
+  const questionTotal = useMemo(() => countQuestions(pages), [pages]);
+
+  const [index, setIndex] = useState(0);
+  const [results, setResults] = useState<AnswerResult[]>([]);
   const [finished, setFinished] = useState(false);
 
-  /**
-   * Progress is how much of the lesson has been read.
-   *
-   * A short lesson that fits on one screen would otherwise sit at 0% forever, so a layout
-   * with nothing to scroll counts as fully read.
-   */
-  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
-    const scrollable = contentSize.height - layoutMeasurement.height;
-
-    setProgress(scrollable <= 0 ? 1 : Math.min(1, Math.max(0, contentOffset.y / scrollable)));
+  const advance = () => {
+    if (index + 1 >= pages.length) {
+      setFinished(true);
+    } else {
+      setIndex(index + 1);
+    }
   };
 
   if (isPending) {
@@ -105,11 +107,14 @@ export default function LessonScreen() {
     );
   }
 
-  if (finished) {
+  if (finished || pages.length === 0) {
+    const xpEarned = results.reduce((sum, r) => sum + r.xp_awarded, 0);
+    const firstTryCorrect = results.filter((r) => r.correct && r.attempt_no === 1).length;
+
     return (
       <Screen>
         <Stack.Screen options={{ title: lesson.title }} />
-        <View style={styles.centre}>
+        <View style={[styles.centre, { gap: theme.spacing.md }]}>
           <StateView
             testID="lesson-complete"
             icon="checkmark-circle"
@@ -118,6 +123,16 @@ export default function LessonScreen() {
             actionLabel={t('complete.backToModule')}
             onAction={() => router.back()}
           />
+          {questionTotal > 0 && (
+            <Text variant="bodyStrong" align="center">
+              {t('complete.score', { correct: firstTryCorrect, total: questionTotal })}
+            </Text>
+          )}
+          {xpEarned > 0 && (
+            <Text variant="bodyStrong" tone="accent" align="center">
+              {t('complete.xpEarned', { count: xpEarned })}
+            </Text>
+          )}
           <Text variant="caption" tone="secondary" style={styles.pendingNote}>
             {t('complete.xpPending')}
           </Text>
@@ -126,42 +141,65 @@ export default function LessonScreen() {
     );
   }
 
+  const page = pages[index]!;
+
   return (
     <Screen>
       <Stack.Screen options={{ title: lesson.module.title }} />
 
-      <View style={{ paddingTop: theme.spacing.sm, gap: theme.spacing.xs }}>
-        <ProgressBar value={progress} label={t('progress', { percent: Math.round(progress * 100) })} />
+      <View style={{ paddingTop: theme.spacing.sm }}>
+        <ProgressBar
+          value={pageProgress(index, pages.length)}
+          label={t('progress', { percent: Math.round(pageProgress(index, pages.length) * 100) })}
+        />
       </View>
 
       <ScrollView
         testID="lesson-scroll"
         contentContainerStyle={[styles.content, { gap: theme.spacing.lg }]}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={64}
       >
-        <View style={{ gap: theme.spacing.xs }}>
-          <Text variant="title" accessibilityRole="header">
-            {lesson.title}
-          </Text>
-          {lesson.summary.length > 0 && (
-            <Text variant="body" tone="secondary">
-              {lesson.summary}
-            </Text>
-          )}
-        </View>
+        {page.kind === 'reading' ? (
+          <>
+            {index === 0 && (
+              <View style={{ gap: theme.spacing.xs }}>
+                <Text variant="title" accessibilityRole="header">
+                  {lesson.title}
+                </Text>
+                {lesson.summary.length > 0 && (
+                  <Text variant="body" tone="secondary">
+                    {lesson.summary}
+                  </Text>
+                )}
+              </View>
+            )}
 
-        {lesson.blocks.map((block, index) => (
-          <LessonBlockView key={index} block={block} />
-        ))}
+            {page.blocks.map((block, blockIndex) => (
+              <LessonBlockView key={blockIndex} block={block} />
+            ))}
 
-        <Button
-          testID="lesson-finish"
-          label={t('finish')}
-          onPress={() => setFinished(true)}
-          fullWidth
-        />
+            <Button
+              testID="lesson-continue"
+              label={index + 1 >= pages.length ? t('finish') : t('question.continue')}
+              onPress={advance}
+              fullWidth
+            />
+          </>
+        ) : (
+          // Keyed by question id so moving to the next question resets its state entirely.
+          <QuestionPage
+            key={page.question.id}
+            question={page.question}
+            number={page.number}
+            total={questionTotal}
+            onContinue={(result) => {
+              setResults((previous) => [...previous, result]);
+              advance();
+            }}
+            onSkip={advance}
+          />
+        )}
       </ScrollView>
     </Screen>
   );
@@ -169,6 +207,6 @@ export default function LessonScreen() {
 
 const styles = StyleSheet.create({
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  content: { paddingVertical: 16 },
+  content: { paddingVertical: 16, flexGrow: 1 },
   pendingNote: { textAlign: 'center', paddingHorizontal: 24 },
 });

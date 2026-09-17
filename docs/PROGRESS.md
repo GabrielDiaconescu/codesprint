@@ -2,7 +2,7 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 7 complete — awaiting approval for Phase 8 (Question engine & grading).
+**Current phase:** Phase 8 complete — awaiting approval for Phase 9 (XP, levels, progress).
 **Last updated:** 2026-09-17
 
 ---
@@ -19,7 +19,8 @@
 | 5     | Onboarding, age gate, consent        | **Complete** — pending device check   |
 | 6     | Content pipeline & development seed  | **Complete** — pending device check   |
 | 7     | Course & lesson engine               | **Complete** — pending device check   |
-| 8–23  | See `PLAN.md` / SPEC §57             | Not started                           |
+| 8     | Question engine & grading RPCs       | **Complete** — pending device check   |
+| 9–23  | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -642,6 +643,90 @@ Checked against the running stack through the real HTTP API:
    so without it they rendered raw keys and every assertion on visible text was meaningless.
    Using the real instance also makes a missing key a failing test rather than a key on screen.
 
+## Phase 8 — what was implemented (Question engine & grading)
+
+**Database** — `20260917120900_question_grading.sql`
+
+- `submit_answer(uuid, jsonb, answer_context, text)`: grades on the server, records the
+  attempt, awards question XP through the ledger in lesson context, and returns the verdict
+  with the explanation, the hint and — only now — the answer key.
+- `grade_answer` for all eight V1 types; `normalize_answer_text` for curly quotes, dashes and
+  the four match modes; `question_xp` for the first-attempt / retry rule.
+- 57 new pgTAP tests (`07_question_grading.test.sql`), 172 in total.
+
+**Question engine** — `src/features/questions/`
+
+- Payload schemas per type (answer-free), the answer-value union, `isAnswerComplete`, and a
+  seeded shuffle for ordering and matching questions.
+- Renderers: `ChoiceList` (choose-one / choose-many / true-false / predict-output-choice /
+  choose-fix), `CodeLine`, `PredictOutput`, `FillBlank`, `CodeOrdering`, `Debugging`,
+  `ConceptMatching`, and the `QuestionRenderer` dispatcher.
+- `useSubmitAnswer`: one request, no automatic retry, haptics on the verdict.
+
+**Lesson player** — restructured around pages: runs of explanation, then one question at a
+time. `buildLessonPages` is pure and tested, so the progress bar is a page index rather than a
+scroll position. The completion screen shows the first-try score and the XP the server
+actually awarded.
+
+**Design system** — `TextField` gained a monospace mode; `Card` keeps its accessibility label,
+role and state when it is not pressable.
+
+### Phase 8 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 37 suites, 511 tests, all passing
+database    supabase test db ......... 7 files, 172 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+Exercised through the real HTTP API with a fresh guest:
+
+| Case                                  | Result                                                |
+| ------------------------------------- | ----------------------------------------------------- |
+| true_false, right, first try          | correct, 5 XP, attempt 1                              |
+| multiple_choice, wrong                | incorrect, 0 XP, hint returned, solution returned     |
+| the same question, then right         | correct, **2 XP** (5 × 0.5 floored), attempt 2        |
+| predict_output with curly quotes      | incorrect — quotes straightened, still not the output |
+| predict_output padded with whitespace | correct under `trimmed`                               |
+| predict_output choice, by option id   | correct — server resolved the option text             |
+| code_ordering, right                  | correct, 10 XP                                        |
+| a non-object answer                   | `22023 answer must be a JSON object`                  |
+| ledger rows / xp_total                | 5 rows, 24 XP — one row per correct answer            |
+
+## Decisions and interpretations made during Phase 8
+
+1. **One attempt per question inside a lesson; retries happen in Practice.** SPEC §18 says
+   "retry where appropriate" and §19 pays 50% for "correct on a retry". Read together with §23
+   ("Review mistakes: questions the user answered incorrectly"), the coherent model is: answer
+   once in the lesson, see the explanation, move on; the retry — at half XP — is the practice
+   session later. Attempts are therefore counted across contexts.
+2. **The explanation and the key come back after every attempt, right or wrong.** SPEC §17:
+   "returned only after answering"; §18 asks for the explanation on both outcomes and for the
+   correct answer to be shown. The renderers mark the answer sheet from `solution`.
+3. **Malformed answers grade as incorrect; only a non-object raises.** A missing field is
+   "wrong", and recording it as an attempt is the honest outcome. A string where an object was
+   expected is a client bug, and a `22023` makes it visible.
+4. **Choice-style predict_output submits the option id, not its text.** The server resolves the
+   authored English text. Comparing a translated label to a program's output would break the
+   day Romanian ships.
+5. **Tap, never drag.** Ordering and matching are tap-to-place. Dragging is fiddly on a phone,
+   unreliable with a screen reader, and needs a native gesture library for every learner in
+   exchange for a flourish.
+6. **Shuffles are seeded by question id.** Authors write ordering lines and definitions in their
+   natural — i.e. answer — order. A shuffle that changed per render would move lines under a
+   finger; one seeded by the id is stable everywhere and never yields the authored order.
+7. **No automatic retry on a failed submission.** The selection is kept and Check is offered
+   again. An automatic retry could grade one tap twice. On a network error the server never saw
+   the answer, so nothing was recorded or deducted (SPEC §18).
+8. **A non-pressable Card keeps its accessibility.** Found by a test: once an option was graded
+   (and so disabled), it fell back to a bare View and lost its label, silencing the answer
+   sheet for a screen reader. Now fixed at the source.
+9. **XP shown on the completion screen is the sum the server returned**, never a client tally.
+   Lesson-completion XP, streaks and progress rows are Phase 9 and the screen says so.
+
 ## Known limitations
 
 - Services other than Config are still no-ops: billing (14), ads (15), analytics and
@@ -659,11 +744,13 @@ Checked against the running stack through the real HTTP API:
   file arrives with the content pipeline.
 - Home, Leaderboard and Profile still show honest "ships in Phase N" placeholders. Learn now
   shows real published modules.
-- Questions render but cannot be answered: the renderers per type, the grading RPCs and the
-  feedback panel are Phase 8. The lesson says so where a question appears.
-- Completing a lesson records nothing — no XP, no streak, no progress row. That is Phase 9.
-- The lesson player is a reader, not a stepped player. Phase 8 will restructure it around
-  one question at a time.
+- Question XP is awarded and shown, but completing a lesson records no progress row, no
+  lesson-completion XP and no streak day. That is Phase 9, and the completion screen says so.
+- Lives are not consumed on a wrong answer yet (Phase 10). `submit_answer` takes the context
+  that Phase 10 will key lives on, so it slots in without a signature change.
+- Practice mode, where a failed question is retried for half XP, is Phase 11. Until then a
+  question answered wrong in a lesson has no in-app route to a retry.
+- Sounds (SPEC §29) are not wired; haptics are.
 - Onboarding does not yet let an intermediate user choose a starting module (SPEC §11):
   there is no content to choose from until Phase 6. Their answer is stored and will drive
   that choice then.
@@ -702,7 +789,7 @@ Checked against the running stack through the real HTTP API:
 
 - None. Docker is running and the Supabase project is in the EU region.
 
-**Before Phase 8 (the next phase):**
+**Before Phase 9 (the next phase):**
 
 - None.
 
@@ -1031,3 +1118,67 @@ change.
     and no text clips.
 21. Dark mode: syntax colours stay readable and callouts remain distinguishable.
 22. With a screen reader on, a callout announces its kind ("Common mistake") before its text.
+
+---
+
+## Phase 8 device test checklist
+
+Use a **fresh guest** so every question is a first attempt. The dev accounts have history from
+earlier checks.
+
+### Every type, answered
+
+1. Open **Getting Started → What is Python?**. The lesson now moves page by page: a run of
+   explanation, then **Continue**, then a question on its own page with the progress bar
+   advancing per page.
+2. **True/false** — tap True, tap **Check**. Green "Correct!", the explanation, "+5 XP", and a
+   short vibration. Tap **Continue**.
+3. **Multiple choice** — deliberately pick a wrong option. Red "Not quite", the explanation, the
+   **hint**, the correct option marked with a check and yours with a cross. No XP. No "try
+   again" button: one attempt per question inside a lesson.
+4. **Predict output (typed)** — type `Python` with a space before it. Correct: whitespace is
+   forgiven. On another run, type `python` in lower case: wrong, and the expected output is
+   shown underneath.
+5. **Multiple select** — pick two of the three correct options. Wrong (all-or-nothing); the
+   missed one is marked "correct answer, not chosen".
+6. Continue to **Showing output with print**: **predict output (choice)** offers outputs in
+   monospace; **fill the blank** fills the blank live in the code as you tap a token;
+   **code ordering** — tap lines into "Your program", tap a placed line to remove it; Check is
+   disabled until every line is placed.
+7. **Comments** lesson: **debugging** — tap the commented-out line. Correct; the line is marked.
+8. **Reading an error message**: **concept matching** — tap a concept, then a definition. The
+   pair gets a number on both sides; tap the concept again to undo. Check enables only when all
+   three are paired.
+9. Finish the lesson: the completion screen shows "N of M correct on the first try" and the
+   XP total, and says lesson-completion XP and streaks are not counting yet.
+
+### The rules, from the database side
+
+10. In Studio, `xp_events` has one row per correct answer for your user, `source_type =
+'question'`, and `user_stats.xp_total` equals their sum.
+11. Reopen the same lesson and answer a question you got right before. "Correct!" but **0 XP**
+    — and still one ledger row for it.
+12. `user_question_attempts` shows every submission, right and wrong, with `attempt_no`
+    increasing per question.
+
+### Robustness — the part that matters
+
+13. Choose an answer, **turn off Wi-Fi and mobile data**, tap Check. An error line appears,
+    **your selection is still there**, and Check is available again. In Studio, no attempt row
+    was created — the server never saw it.
+14. Turn the network back on, tap Check: graded normally, exactly one attempt row.
+15. Tap Check and immediately tap it again: it is disabled while pending. One attempt row.
+16. On the keyboard, type `‘Python’` with the phone's curly quotes: the server straightens them
+    (you will see this is _still_ wrong, because the quotes themselves are wrong — the point is
+    that a bare `Python` typed with an "improved" apostrophe elsewhere is not penalised).
+
+### Accessibility
+
+17. With a screen reader on, before checking: each option announces as a radio button (or
+    checkbox) with its selected state. After checking: the correct option announces "Correct
+    answer, chosen" / "not chosen", yours "Your answer, incorrect".
+18. Ordering: a placed line announces "Line 2: height = 5. Tap to remove."; a bank line
+    announces "... Tap to add."
+19. Matching: a paired concept announces "SyntaxError matched with ... Tap to undo."
+20. Large text and dark mode: code lines scroll horizontally rather than wrapping; markings are
+    distinguishable by icon, not only colour.

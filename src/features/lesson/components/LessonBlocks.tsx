@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { Badge, Card, CodeBlock, Icon, Text, type IconName } from '@/components/ui';
-import type { LessonBlock, RenderableQuestion } from '@/services';
+import { CodeBlock, Icon, Text, type IconName } from '@/components/ui';
+import type { LessonBlock } from '@/services';
 import { useTheme } from '@/theme';
 
 import { RichText } from './RichText';
@@ -70,43 +70,6 @@ const Callout = ({ variant, body }: { variant: 'note' | 'tip' | 'mistake'; body:
   );
 };
 
-/**
- * A question, as it appears while reading (SPEC §16).
- *
- * Phase 7 shows the prompt and the code so the lesson reads as a whole. Answering — the
- * renderers per type, the grading RPC and the feedback panel — is Phase 8. Nothing here
- * pretends to accept an answer, because a control that looks live and does nothing is worse
- * than one that is honest about arriving later (SPEC §59.12).
- */
-const QuestionPreview = ({ question }: { question: RenderableQuestion }) => {
-  const { t } = useTranslation('lesson');
-  const theme = useTheme();
-
-  return (
-    <Card testID={`question-${question.id}`} appearance="outlined">
-      <View style={{ gap: theme.spacing.md }}>
-        <View style={[styles.questionHeader, { gap: theme.spacing.sm }]}>
-          <Badge label={t(`difficulty.${question.difficulty}`)} tone="neutral" />
-          <Text variant="caption" tone="secondary" style={styles.flex}>
-            {t(`questionType.${question.type}`)}
-          </Text>
-        </View>
-
-        <Text variant="bodyStrong">{question.prompt}</Text>
-
-        {question.code_snippet && <CodeBlock code={question.code_snippet} />}
-
-        <View style={[styles.pending, { gap: theme.spacing.xs }]}>
-          <Icon name="construct-outline" size="sm" color={theme.colors.textSecondary} />
-          <Text variant="caption" tone="secondary" style={styles.flex}>
-            {t('answering.comingSoon')}
-          </Text>
-        </View>
-      </View>
-    </Card>
-  );
-};
-
 export const LessonBlockView = ({ block }: { block: LessonBlock }) => {
   switch (block.type) {
     case 'text':
@@ -119,14 +82,14 @@ export const LessonBlockView = ({ block }: { block: LessonBlock }) => {
       return <Callout variant={block.variant} body={block.body} />;
 
     case 'question':
-      return <QuestionPreview question={block.question} />;
+      // Questions are pages of their own in the player (see lesson/logic/pages.ts); one
+      // reaching a reading page is a bug, and rendering nothing is safer than rendering a
+      // question that cannot be answered.
+      return null;
   }
 };
 
 const styles = StyleSheet.create({
   callout: { borderLeftWidth: 3 },
   calloutHeader: { flexDirection: 'row', alignItems: 'center' },
-  questionHeader: { flexDirection: 'row', alignItems: 'center' },
-  pending: { flexDirection: 'row', alignItems: 'center' },
-  flex: { flex: 1 },
 });

@@ -62,8 +62,18 @@ export const Card = ({
   ];
 
   if (!onPress) {
+    // A card that has stopped being pressable — a graded answer, a disabled option — keeps
+    // its label, role and state. Otherwise the moment the learner submits, every option on
+    // the answer sheet goes silent for a screen reader (SPEC §47).
     return (
-      <View style={base} testID={testID}>
+      <View
+        style={base}
+        testID={testID}
+        accessible={accessibilityLabel !== undefined}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole={accessibilityLabel !== undefined ? accessibilityRole : undefined}
+        accessibilityState={selected === undefined ? undefined : { selected, checked: selected, disabled: true }}
+      >
         {children}
       </View>
     );

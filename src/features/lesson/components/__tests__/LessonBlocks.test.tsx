@@ -38,46 +38,22 @@ describe('LessonBlockView', () => {
     ).toBeOnTheScreen();
   });
 
-  describe('a question block', () => {
-    const questionBlock: LessonBlock = {
+  it('renders nothing for a question block, which belongs to its own page', async () => {
+    const block: LessonBlock = {
       type: 'question',
       question: {
         id: 'q-1',
-        type: 'predict_output',
-        difficulty: 'medium',
-        prompt: 'What does this print?',
-        code_snippet: 'print(2 + 2)',
-        payload: { input: 'text' },
-        has_hint: true,
+        type: 'true_false',
+        difficulty: 'easy',
+        prompt: 'Is it?',
+        code_snippet: null,
+        payload: {},
+        has_hint: false,
         skill_tags: ['printing'],
       },
     };
+    await renderWithTheme(<LessonBlockView block={block} />);
 
-    it('shows the prompt and the code', async () => {
-      await renderWithTheme(<LessonBlockView block={questionBlock} />);
-
-      expect(screen.getByText('What does this print?')).toBeOnTheScreen();
-      expect(screen.getByTestId('question-q-1')).toBeOnTheScreen();
-    });
-
-    it('labels the difficulty and the kind of question', async () => {
-      await renderWithTheme(<LessonBlockView block={questionBlock} />);
-
-      expect(screen.getByText('Medium')).toBeOnTheScreen();
-      expect(screen.getByText('Predict the output')).toBeOnTheScreen();
-    });
-
-    it('says plainly that answering is not available yet', async () => {
-      // A control that looks live and does nothing is worse than an honest note (SPEC §59.12).
-      await renderWithTheme(<LessonBlockView block={questionBlock} />);
-
-      expect(screen.getByText(/Answering arrives in the next release/)).toBeOnTheScreen();
-    });
-
-    it('offers no way to answer, so nothing can be submitted into a void', async () => {
-      await renderWithTheme(<LessonBlockView block={questionBlock} />);
-
-      expect(screen.queryByRole('button')).toBeNull();
-    });
+    expect(screen.queryByText('Is it?')).toBeNull();
   });
 });

@@ -987,6 +987,10 @@ export type Database = {
         Args: { p_default: number; p_key: string }
         Returns: number
       }
+      config_numeric: {
+        Args: { p_default: number; p_key: string }
+        Returns: number
+      }
       delete_stale_anonymous_users: {
         Args: { p_days?: number }
         Returns: number
@@ -995,6 +999,10 @@ export type Database = {
       get_lesson: {
         Args: { p_lesson_id: string; p_locale?: string }
         Returns: Json
+      }
+      grade_answer: {
+        Args: { p_question_id: string; p_submitted: Json }
+        Returns: boolean
       }
       has_entitlement: {
         Args: {
@@ -1022,8 +1030,28 @@ export type Database = {
         Args: { p_module_id: string }
         Returns: boolean
       }
+      normalize_answer_text: {
+        Args: {
+          p_mode: Database["public"]["Enums"]["answer_match_mode"]
+          p_text: string
+        }
+        Returns: string
+      }
+      question_xp: {
+        Args: { p_attempt_no: number; p_question_id: string }
+        Returns: number
+      }
       reject_underage_account: { Args: never; Returns: undefined }
       require_auth_uid: { Args: never; Returns: string }
+      submit_answer: {
+        Args: {
+          p_answer: Json
+          p_context?: Database["public"]["Enums"]["answer_context"]
+          p_locale?: string
+          p_question_id: string
+        }
+        Returns: Json
+      }
       sync_session: {
         Args: { p_timezone?: string }
         Returns: {

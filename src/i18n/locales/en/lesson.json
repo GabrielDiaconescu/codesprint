@@ -22,16 +22,15 @@
     "concept_matching": "Match the pairs",
     "coding_challenge": "Write the code"
   },
-  "answering": {
-    "comingSoon": "Answering arrives in the next release. For now, work it out as you read."
-  },
   "finish": "Finish lesson",
   "complete": {
     "title": "Lesson complete",
     "body": "You've read {{title}}.",
-    "xpPending": "XP, streaks and progress start counting once answering ships.",
+    "xpPending": "Lesson-completion XP, streaks and progress start counting in the next release.",
     "next": "Next lesson",
-    "backToModule": "Back to the module"
+    "backToModule": "Back to the module",
+    "xpEarned": "+{{count}} XP earned in this lesson",
+    "score": "{{correct}} of {{total}} correct on the first try"
   },
   "error": {
     "premiumTitle": "This module is Premium",
@@ -49,5 +48,58 @@
     "lockedTitle": "Premium module",
     "lockedBody": "This module is part of Premium. Modules 1 to {{freeCount}} are free for everyone.",
     "empty": "This module has no lessons yet."
+  },
+  "pages": {
+    "reading": "Reading",
+    "questionOf": "Question {{current}} of {{total}}"
+  },
+  "question": {
+    "check": "Check",
+    "continue": "Continue",
+    "correct": "Correct!",
+    "incorrect": "Not quite",
+    "hint": "Hint",
+    "trueLabel": "True",
+    "falseLabel": "False",
+    "outputPlaceholder": "What does it print?",
+    "blankPlaceholder": "What goes in the blank?",
+    "instructions": {
+      "multiple_choice": "Choose one answer.",
+      "multiple_select": "Choose every answer that applies.",
+      "true_false": "True or false?",
+      "predict_output_text": "Type exactly what the program prints.",
+      "predict_output_choice": "Choose what the program prints.",
+      "fill_blank_tokens": "Tap the piece that fits the blank.",
+      "fill_blank_text": "Type what goes in the blank.",
+      "code_ordering": "Tap the lines in the order they should run.",
+      "debugging_select_line": "Tap the line with the problem.",
+      "debugging_choose_fix": "Choose the fix.",
+      "debugging_both": "Tap the faulty line, then choose the fix.",
+      "concept_matching": "Tap a concept, then tap its definition."
+    },
+    "ordering": {
+      "answer": "Your program",
+      "bank": "Available lines",
+      "empty": "Tap lines below to add them here.",
+      "position": "Line {{position}}: {{line}}. Tap to remove.",
+      "add": "{{line}}. Tap to add."
+    },
+    "matching": {
+      "concepts": "Concepts",
+      "definitions": "Definitions",
+      "pairSelected": "{{concept}}, waiting for a definition",
+      "paired": "{{concept}} matched with {{definition}}. Tap to undo."
+    },
+    "blankMarker": "blank",
+    "submitError": "Couldn't check your answer. Your selection is kept — try again.",
+    "unrenderable": "This question could not be displayed and has been skipped.",
+    "expected": "Expected:",
+    "outputLabel": "Output",
+    "blankLabel": "The blank"
+  },
+  "choice": {
+    "correctChosen": "Correct answer, chosen",
+    "correctMissed": "Correct answer, not chosen",
+    "wrongChosen": "Your answer, incorrect"
   }
 }

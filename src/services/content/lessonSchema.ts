@@ -92,3 +92,22 @@ export const lessonResponse = z
 export type LessonResponse = z.infer<typeof lessonResponse>;
 export type LessonBlock = z.infer<typeof lessonBlock>;
 export type RenderableQuestion = z.infer<typeof renderableQuestion>;
+
+/**
+ * What `submit_answer` returns (SPEC §18).
+ *
+ * `solution` is the answer key, released only now that an attempt has been recorded. It is
+ * kept as `unknown` here and narrowed by the renderer that knows its own shape.
+ */
+export const answerResult = z
+  .object({
+    correct: z.boolean(),
+    attempt_no: z.number().int().positive(),
+    xp_awarded: z.number().int().nonnegative(),
+    explanation: z.string(),
+    hint: z.string().nullable(),
+    solution: z.unknown(),
+  })
+  .strict();
+
+export type AnswerResult = z.infer<typeof answerResult>;
