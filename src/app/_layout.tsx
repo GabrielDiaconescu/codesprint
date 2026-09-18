@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Screen, StateView, ToastHost } from '@/components/ui';
 import { useAuthBootstrap } from '@/features/auth/hooks/useAuthBootstrap';
+import { useBillingBootstrap } from '@/features/paywall/hooks/useBillingBootstrap';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useSessionHeartbeat } from '@/features/profile/hooks/useSessionHeartbeat';
 import i18n, { initI18n } from '@/i18n';
@@ -44,6 +45,10 @@ const FullScreenSpinner = () => {
 const ThemedApp = () => {
   const theme = useTheme();
   const { t } = useTranslation('common');
+
+  // Inside the QueryClientProvider, because it clears the cached offerings when the customer
+  // changes — and after `useAuthBootstrap`, so there is a session to identify with (SPEC §12).
+  useBillingBootstrap();
 
   const status = useSessionStore((state) => state.status);
   const pendingPasswordReset = useSessionStore((state) => state.pendingPasswordReset);

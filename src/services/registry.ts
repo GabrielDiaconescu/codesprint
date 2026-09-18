@@ -1,4 +1,5 @@
 import { SupabaseAuthService } from './auth/SupabaseAuthService';
+import { RevenueCatBillingService } from './billing/RevenueCatBillingService';
 import { SupabaseEntitlementService } from './billing/SupabaseEntitlementService';
 import { SupabaseConfigService } from './config/SupabaseConfigService';
 import { SupabaseContentService } from './content/SupabaseContentService';
@@ -10,7 +11,6 @@ import { SupabaseProgressService } from './progress/SupabaseProgressService';
 import {
   NoopAdService,
   NoopAnalyticsService,
-  NoopBillingService,
   NoopConsentService,
   NoopMonitoringService,
   NoopNotificationService,
@@ -72,7 +72,7 @@ export const services: Services = {
   analytics: NoopAnalyticsService, // Phase 16
   consent: NoopConsentService, // Phase 15
   ads: NoopAdService, // Phase 15
-  billing: NoopBillingService, // Phase 14 — waiting on RevenueCat credentials
+  billing: RevenueCatBillingService, // Phase 14 — real
   entitlements: SupabaseEntitlementService, // Phase 14 — real; the server is the authority
   notifications: NoopNotificationService, // Phase 17
   config: SupabaseConfigService, // Phase 3 — real
@@ -90,7 +90,6 @@ export const PRODUCTION_NOOP_ALLOWLIST: (keyof Services)[] = [
   'analytics',
   'consent',
   'ads',
-  'billing',
   'notifications',
 ];
 

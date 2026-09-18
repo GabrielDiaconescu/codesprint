@@ -2,8 +2,8 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 14 complete **in code**, blocked on store credentials for its device
-check — awaiting approval for Phase 15 (Ads + consent).
+**Current phase:** Phase 14 complete and **switched on** via the RevenueCat Test Store —
+awaiting approval for Phase 15 (Ads + consent).
 **Last updated:** 2026-09-18
 
 ---
@@ -26,7 +26,7 @@ check — awaiting approval for Phase 15 (Ads + consent).
 | 11    | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
 | 12    | Leaderboard, display names, reports  | **Complete** — pending device check   |
 | 13    | Exam mode                            | **Complete** — pending device check   |
-| 14    | Billing, entitlements, paywall       | **Code complete** — blocked on stores |
+| 14    | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
 | 15–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
@@ -1297,15 +1297,17 @@ Rewritten at the end of each phase, so this describes the product as it stands t
 
 **Integrations not built yet** (SPEC §59.11 — no fakes; the contract and the UI slot exist):
 
-- **RevenueCat is written but not switched on.** `RevenueCatBillingService` is complete and
-  type-checked against the real SDK; the registry still points at `NoopBillingService`
-  because there are no API keys, no store products and therefore nothing to verify against.
-  Flipping it is one line, listed as step 10 of `docs/MONETIZATION.md`. Until then the
-  paywall loads no offerings and shows its "could not load the plans" state — which is the
-  correct behaviour, not a placeholder.
-- Ads and UMP consent (15), analytics and monitoring (16), local notifications (17), plus
-  billing above. Those six services are still the no-op implementations listed in
-  `PRODUCTION_NOOP_ALLOWLIST`, which must be **empty** before the first production release.
+- **RevenueCat runs on the Test Store, not a real one.** `RevenueCatBillingService` is wired
+  in and purchases work end to end — including the webhook and the server sync — but the
+  storefront behind them is simulated. What it cannot prove: that the real store products are
+  configured right, Apple's subscription-group ranking (which is what makes the No Ads →
+  Premium upgrade a prorated change rather than two charges), and Google's replacement mode.
+  Those need a real sandbox, which needs the store accounts.
+- **Expo Go no longer runs the app.** The RevenueCat SDK is native and is now in the bundle,
+  so a development build is required from here on (SPEC §0.1.10).
+- Ads and UMP consent (15), analytics and monitoring (16), local notifications (17). Those
+  five services are still the no-op implementations listed in `PRODUCTION_NOOP_ALLOWLIST`,
+  which must be **empty** before the first production release. Billing has left that list.
 - **Sign in with Apple and Google (D6).** Both need credentials that do not exist yet: an
   Apple Developer account with the Sign in with Apple capability, and Google OAuth client ids.
   Email, password and guest are complete and fully exercised.
@@ -1317,9 +1319,9 @@ Rewritten at the end of each phase, so this describes the product as it stands t
 
 - Out of lives there is nowhere to go: the wait is explained, but the rewarded-ad restore
   needs Phase 15 and the upgrade needs a working store account.
-- The paywall exists and is reachable, but nothing can be bought on it until RevenueCat is
-  configured. The funnel triggers from SPEC §34 are implemented and unit-tested; wiring
-  them to the screens that fire them is part of Phase 15, where the ad triggers arrive.
+- The funnel triggers from SPEC §34 are implemented and unit-tested, but nothing calls
+  `shouldPrompt` yet — the paywall is reached deliberately, not suggested. Wiring the
+  triggers to the screens that fire them is part of Phase 15, where the ad trigger arrives.
 - Ads consent (Google UMP) is not asked during onboarding. It belongs with the ads
   integration, which must show it before the first ad request.
 - The reminder time is stored, but nothing is scheduled and no notification permission is
@@ -2079,40 +2081,41 @@ Two accounts, because half of this is about the Premium boundary: **free@codespr
 Apple Developer account and a Google Play account, which need the PFA and a D-U-N-S number
 (see _Human actions_). What follows is split into what works today and what waits.
 
-### Today, with no store account at all
+### With the Test Store (no Apple or Google account needed)
+
+First: `npx expo run:android` (or an EAS development build). **Expo Go will not work from here
+on** — the RevenueCat SDK is native and is in the bundle now.
 
 1. Sign in as **premium@codesprint.test** (`sprint2026`). Every Premium gate is open: all
    modules in Learn, the full exam, hard practice, unlimited lives. That is `user_entitlements`
-   doing its job with no RevenueCat anywhere in the picture.
-2. Sign in as **free@codesprint.test**. The same screens are locked, with their own
-   explanations.
-3. Sign in as **noads@codesprint.test**. Content is locked exactly as for Free — No Ads buys
-   no lessons. This is the single most misunderstood thing about the tier, so check it.
-4. Open the paywall from Profile. It shows **"Could not load the plans"** with a **Try again**
-   button. That is correct: there is no store to quote a price, and the app will not invent
-   one.
-5. Confirm the close control is visible the moment the paywall opens, before anything loads.
-6. Read the No Ads card copy once the plans do load (after step 7 below) — it must say it does
-   not unlock Premium lessons or unlimited lives.
+   doing its job.
+2. Sign in as **noads@codesprint.test**. Content is locked exactly as for Free — No Ads buys no
+   lessons. This is the single most misunderstood thing about the tier, so check it.
+3. Sign in as **free@codesprint.test** and open the paywall from Profile. Three plans, each
+   with a price. The close control is visible from the first frame.
+4. Read the No Ads card: it must say it does not unlock Premium lessons or unlimited lives.
+5. Buy **No Ads**. Watch the console for `[billing] RevenueCat Test Store` — a reminder the
+   purchase is simulated.
+6. Learn is still locked past module 6. Premium content did **not** unlock, which is the point
+   of the tier.
+7. Open the paywall again: No Ads reads **your current plan**, and Premium offers **"Upgrade to
+   Premium"** with the note that it replaces rather than adds.
+8. Upgrade. Premium content unlocks **after the server sync**, not the instant the store
+   returns — that is `user_entitlements` being the authority, not the SDK.
+9. In Supabase Studio, `billing_events` has a row per delivery with `processed_at` set, and
+   `user_entitlements` shows `store` and `product_id`.
+10. Kill the app mid-purchase and reopen it. The entitlement still arrives, via the webhook.
+11. **Restore purchases** from the paywall. Everything comes back.
+12. Sign out and back in as a different account. The subscription does not follow it.
 
 ### Once the store accounts exist
 
-7. Set the RevenueCat keys, create the products, and flip `billing` to
-   `RevenueCatBillingService` (`docs/MONETIZATION.md` has the ten steps).
-8. Build a **development build** — `npx expo run:android` or an EAS dev build. Expo Go cannot
-   load native modules (SPEC §0.1.10), so this is the point where it stops being an option.
-9. Open the paywall. Three plans, each with a price **formatted by the store in your own
-   currency**, and the annual one showing its per-month equivalent.
-10. Buy **No Ads** with a sandbox account. Ads stop. Learn is still locked past module 6.
-11. Open the paywall again: No Ads shows as **your current plan**, and Premium offers
-    **"Upgrade to Premium"** with the note that it replaces rather than adds.
-12. Upgrade. Check the store receipt — you are charged a prorated upgrade, **not twice**.
-13. Premium content unlocks **only after the server sync**, not the instant the store returns.
-    That is the point: kill the app mid-purchase and reopen it, and the entitlement still
-    arrives via the webhook.
-14. **Delete and reinstall** the app, sign in, tap **Restore purchases**. Everything comes
-    back.
-15. Sign in as a _different_ account on the same device. Confirm the subscription does not
-    silently follow it — and if it does transfer, that the first account loses access.
-16. In Supabase Studio, look at `billing_events`: one row per delivery, each with
-    `processed_at` set.
+The Test Store proves the plumbing. These need a real sandbox:
+
+13. Set the real SDK keys, create the products, and remove
+    `EXPO_PUBLIC_REVENUECAT_TEST_KEY` from `.env`.
+14. Buy **No Ads** with a sandbox account, then upgrade to Premium. Check the store receipt —
+    a **prorated upgrade, not two charges**. This is what Apple's subscription-group ranking
+    buys you, and the Test Store cannot exercise it.
+15. **Delete and reinstall** the app, sign in, tap **Restore purchases**.
+16. Let a subscription lapse (or cancel it in the sandbox) and confirm access closes.

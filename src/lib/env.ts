@@ -20,7 +20,7 @@ export type AppEnvironment = (typeof APP_ENVIRONMENTS)[number];
  */
 const SHIPPED = {
   supabase: true, // Phase 3 — shipped
-  revenueCat: false, // Phase 14
+  revenueCat: true, // Phase 14 — shipped
   admob: false, // Phase 15
   postHog: false, // Phase 16
   sentry: false, // Phase 16 (optional earlier if a DSN exists)
@@ -32,61 +32,86 @@ const whenShipped = (shipped: boolean, schema: z.ZodString, isProduction: boolea
   shipped && isProduction ? schema : schema.optional();
 
 const buildSchema = (isProduction: boolean) =>
-  z.object({
-    EXPO_PUBLIC_APP_ENV: z.enum(APP_ENVIRONMENTS),
+  z
+    .object({
+      EXPO_PUBLIC_APP_ENV: z.enum(APP_ENVIRONMENTS),
 
-    // Phase 3 — Supabase
-    EXPO_PUBLIC_SUPABASE_URL: whenShipped(SHIPPED.supabase, z.string().url(), isProduction),
-    EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: whenShipped(
-      SHIPPED.supabase,
-      z.string().min(1),
-      isProduction,
-    ),
+      // Phase 3 — Supabase
+      EXPO_PUBLIC_SUPABASE_URL: whenShipped(SHIPPED.supabase, z.string().url(), isProduction),
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: whenShipped(
+        SHIPPED.supabase,
+        z.string().min(1),
+        isProduction,
+      ),
 
-    // Phase 14 — RevenueCat (public SDK keys only; secret keys live server-side)
-    EXPO_PUBLIC_REVENUECAT_IOS_KEY: whenShipped(
-      SHIPPED.revenueCat,
-      z.string().min(1),
-      isProduction,
-    ),
-    EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: whenShipped(
-      SHIPPED.revenueCat,
-      z.string().min(1),
-      isProduction,
-    ),
+      // Phase 14 — RevenueCat (public SDK keys only; secret keys live server-side)
+      EXPO_PUBLIC_REVENUECAT_IOS_KEY: whenShipped(
+        SHIPPED.revenueCat,
+        z.string().min(1),
+        isProduction,
+      ),
+      EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: whenShipped(
+        SHIPPED.revenueCat,
+        z.string().min(1),
+        isProduction,
+      ),
+      /**
+       * RevenueCat's Test Store — purchases that behave like real ones with no App Store or
+       * Play account behind them. One key for both platforms, because there is no platform.
+       *
+       * Development and preview ONLY. The refinement below makes a production build carrying
+       * this key fail to start, which is the point: a released app whose purchases are fake
+       * would take real money for nothing, or take none at all and look broken.
+       */
+      EXPO_PUBLIC_REVENUECAT_TEST_KEY: z.string().min(1).optional(),
 
-    // Phase 15 — AdMob production unit ids (dev/preview always use Google test ids, SPEC §59.31)
-    EXPO_PUBLIC_ADMOB_BANNER_ID_IOS: whenShipped(SHIPPED.admob, z.string().min(1), isProduction),
-    EXPO_PUBLIC_ADMOB_BANNER_ID_ANDROID: whenShipped(
-      SHIPPED.admob,
-      z.string().min(1),
-      isProduction,
-    ),
-    EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_IOS: whenShipped(
-      SHIPPED.admob,
-      z.string().min(1),
-      isProduction,
-    ),
-    EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_ANDROID: whenShipped(
-      SHIPPED.admob,
-      z.string().min(1),
-      isProduction,
-    ),
-    EXPO_PUBLIC_ADMOB_REWARDED_ID_IOS: whenShipped(SHIPPED.admob, z.string().min(1), isProduction),
-    EXPO_PUBLIC_ADMOB_REWARDED_ID_ANDROID: whenShipped(
-      SHIPPED.admob,
-      z.string().min(1),
-      isProduction,
-    ),
+      // Phase 15 — AdMob production unit ids (dev/preview always use Google test ids, SPEC §59.31)
+      EXPO_PUBLIC_ADMOB_BANNER_ID_IOS: whenShipped(SHIPPED.admob, z.string().min(1), isProduction),
+      EXPO_PUBLIC_ADMOB_BANNER_ID_ANDROID: whenShipped(
+        SHIPPED.admob,
+        z.string().min(1),
+        isProduction,
+      ),
+      EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_IOS: whenShipped(
+        SHIPPED.admob,
+        z.string().min(1),
+        isProduction,
+      ),
+      EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_ANDROID: whenShipped(
+        SHIPPED.admob,
+        z.string().min(1),
+        isProduction,
+      ),
+      EXPO_PUBLIC_ADMOB_REWARDED_ID_IOS: whenShipped(
+        SHIPPED.admob,
+        z.string().min(1),
+        isProduction,
+      ),
+      EXPO_PUBLIC_ADMOB_REWARDED_ID_ANDROID: whenShipped(
+        SHIPPED.admob,
+        z.string().min(1),
+        isProduction,
+      ),
 
-    // Phase 16 — analytics + monitoring
-    EXPO_PUBLIC_POSTHOG_KEY: whenShipped(SHIPPED.postHog, z.string().min(1), isProduction),
-    EXPO_PUBLIC_POSTHOG_HOST: whenShipped(SHIPPED.postHog, z.string().url(), isProduction),
-    EXPO_PUBLIC_SENTRY_DSN: whenShipped(SHIPPED.sentry, z.string().url(), isProduction),
+      // Phase 16 — analytics + monitoring
+      EXPO_PUBLIC_POSTHOG_KEY: whenShipped(SHIPPED.postHog, z.string().min(1), isProduction),
+      EXPO_PUBLIC_POSTHOG_HOST: whenShipped(SHIPPED.postHog, z.string().url(), isProduction),
+      EXPO_PUBLIC_SENTRY_DSN: whenShipped(SHIPPED.sentry, z.string().url(), isProduction),
 
-    // Phase 18 — static legal/support pages
-    EXPO_PUBLIC_LEGAL_BASE_URL: whenShipped(SHIPPED.legalPages, z.string().url(), isProduction),
-  });
+      // Phase 18 — static legal/support pages
+      EXPO_PUBLIC_LEGAL_BASE_URL: whenShipped(SHIPPED.legalPages, z.string().url(), isProduction),
+    })
+    .superRefine((env, ctx) => {
+      if (isProduction && env.EXPO_PUBLIC_REVENUECAT_TEST_KEY) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['EXPO_PUBLIC_REVENUECAT_TEST_KEY'],
+          message:
+            'The RevenueCat Test Store key must never reach production — its purchases are ' +
+            'simulated. Remove it from the production environment.',
+        });
+      }
+    });
 
 export type Env = z.infer<ReturnType<typeof buildSchema>>;
 
@@ -100,6 +125,7 @@ const readRawEnv = (): Record<string, string | undefined> => ({
   EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   EXPO_PUBLIC_REVENUECAT_IOS_KEY: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY,
   EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY,
+  EXPO_PUBLIC_REVENUECAT_TEST_KEY: process.env.EXPO_PUBLIC_REVENUECAT_TEST_KEY,
   EXPO_PUBLIC_ADMOB_BANNER_ID_IOS: process.env.EXPO_PUBLIC_ADMOB_BANNER_ID_IOS,
   EXPO_PUBLIC_ADMOB_BANNER_ID_ANDROID: process.env.EXPO_PUBLIC_ADMOB_BANNER_ID_ANDROID,
   EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_IOS: process.env.EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_IOS,

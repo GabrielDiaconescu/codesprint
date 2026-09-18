@@ -87,3 +87,33 @@ export const isUpgradeFrom = (current: EntitlementId[], role: PackageRole): bool
   current.includes('no_ads') &&
   !current.includes('premium') &&
   PACKAGES[role].entitlements.includes('premium');
+
+/**
+ * Which RevenueCat SDK key to configure with.
+ *
+ * Pure, so the rule that keeps simulated purchases out of a released app is a unit test rather
+ * than a thing to remember. The Test Store key wins outside production because that is the
+ * whole point of having it — one key, no platform, no store account — and it is rejected by
+ * env validation in production before this is ever reached.
+ */
+export interface SdkKeys {
+  ios?: string | undefined;
+  android?: string | undefined;
+  test?: string | undefined;
+}
+
+export type SdkKeyChoice =
+  { key: string; source: 'test-store' | 'store' } | { key: null; source: 'missing' };
+
+export const selectSdkKey = (
+  platform: 'ios' | 'android',
+  keys: SdkKeys,
+  isProduction: boolean,
+): SdkKeyChoice => {
+  if (!isProduction && keys.test) {
+    return { key: keys.test, source: 'test-store' };
+  }
+
+  const storeKey = platform === 'ios' ? keys.ios : keys.android;
+  return storeKey ? { key: storeKey, source: 'store' } : { key: null, source: 'missing' };
+};

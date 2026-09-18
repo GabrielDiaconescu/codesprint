@@ -4,8 +4,10 @@ module.exports = {
   // runtime. This resolver (shipped by the package) makes Jest pick the JS implementation.
   resolver: 'react-native-worklets/jest/resolver',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  // `@revenuecat/*` ships modern ESM that Jest cannot parse untransformed. It arrives as a
+  // transitive dependency of react-native-purchases, which the registry now imports.
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*|@revenuecat/.*)',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',

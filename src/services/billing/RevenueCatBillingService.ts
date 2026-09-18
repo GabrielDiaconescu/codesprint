@@ -5,11 +5,11 @@ import Purchases, {
   type PurchasesPackage,
 } from 'react-native-purchases';
 
-import { getEnv } from '@/lib/env';
+import { getEnv, isProduction } from '@/lib/env';
 
 import type { BillingService, CustomerEntitlements, EntitlementId, StoreProduct } from '../types';
 
-import { ENTITLEMENTS, OFFERING_ID, roleForPackage } from './config';
+import { ENTITLEMENTS, OFFERING_ID, roleForPackage, selectSdkKey } from './config';
 
 /**
  * RevenueCat (SPEC §31).
@@ -21,15 +21,19 @@ import { ENTITLEMENTS, OFFERING_ID, roleForPackage } from './config';
  * reports what the store believes; `user_entitlements` decides what unlocks (SPEC §31). That
  * split is why every purchase here is followed by a server sync before anything opens up.
  *
- * ## Enabling it
+ * ## Keys
  *
- * The registry deliberately still points at `NoopBillingService`. Flipping that one line is
- * the whole activation, and it needs:
+ * Two ways to configure it, and `selectSdkKey` decides which:
  *
- *   * `EXPO_PUBLIC_REVENUECAT_IOS_KEY` and `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` — the PUBLIC
- *     SDK keys, which are safe in the bundle (SPEC §56);
- *   * products created in App Store Connect and Google Play with the ids in `config.ts`;
- *   * a development build, because this is native code and Expo Go cannot load it (SPEC §0.1.10).
+ *   * **Test Store** — `EXPO_PUBLIC_REVENUECAT_TEST_KEY`. One key, no platform, no App Store
+ *     or Play account. Purchases are simulated but behave like real ones all the way through
+ *     the webhook, so the whole chain can be exercised before either store account exists.
+ *     Development and preview only; env validation refuses it in production.
+ *   * **The real stores** — `EXPO_PUBLIC_REVENUECAT_IOS_KEY` and
+ *     `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`, the PUBLIC SDK keys, safe in the bundle (SPEC §56).
+ *
+ * Either way this is native code, so it needs a development build — Expo Go cannot load it
+ * (SPEC §0.1.10).
  */
 
 const asEntitlements = (info: CustomerInfo): CustomerEntitlements => {
@@ -88,21 +92,32 @@ export const RevenueCatBillingService: BillingService = {
   async initialize() {
     const env = getEnv();
 
-    const apiKey =
-      Platform.OS === 'ios'
-        ? env.EXPO_PUBLIC_REVENUECAT_IOS_KEY
-        : env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY;
+    const choice = selectSdkKey(
+      Platform.OS === 'ios' ? 'ios' : 'android',
+      {
+        ios: env.EXPO_PUBLIC_REVENUECAT_IOS_KEY,
+        android: env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY,
+        test: env.EXPO_PUBLIC_REVENUECAT_TEST_KEY,
+      },
+      isProduction(),
+    );
 
-    if (!apiKey) {
+    if (choice.key === null) {
       // Loud, because a silent failure here looks exactly like "nobody wants to subscribe".
       throw new Error(
         `No RevenueCat SDK key for ${Platform.OS}. Set EXPO_PUBLIC_REVENUECAT_${
           Platform.OS === 'ios' ? 'IOS' : 'ANDROID'
-        }_KEY.`,
+        }_KEY, or EXPO_PUBLIC_REVENUECAT_TEST_KEY to use the Test Store.`,
       );
     }
 
-    Purchases.configure({ apiKey });
+    if (choice.source === 'test-store' && __DEV__) {
+      // Said out loud, because a purchase that costs nothing and grants everything is exactly
+      // what a broken production build would also look like.
+      console.warn('[billing] RevenueCat Test Store — purchases here are simulated.');
+    }
+
+    Purchases.configure({ apiKey: choice.key });
   },
 
   /** Called after authentication, so purchases attach to the Supabase user id (SPEC §12). */

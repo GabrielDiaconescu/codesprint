@@ -46,6 +46,16 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ EXPO_PUBLIC_APP_ENV: 'preview' })).not.toThrow();
   });
 
+  /** Everything a production build must carry, as of the phases shipped so far. */
+  const productionEnv = {
+    EXPO_PUBLIC_APP_ENV: 'production',
+    EXPO_PUBLIC_SUPABASE_URL: 'https://example.supabase.co',
+    EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'pk_test',
+    EXPO_PUBLIC_REVENUECAT_IOS_KEY: 'appl_ios',
+    EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: 'goog_android',
+    EXPO_PUBLIC_POSTHOG_HOST: 'https://eu.i.posthog.com',
+  };
+
   it('requires a SHIPPED integration in production', () => {
     // Supabase shipped in Phase 3, so a production build without it must fail at startup
     // rather than at the user. Each phase flips its own flag in SHIPPED.
@@ -58,14 +68,44 @@ describe('parseEnv', () => {
     }
   });
 
-  it('accepts a fully populated production environment', () => {
-    expect(() =>
+  it('requires the RevenueCat SDK keys in production, now that billing has shipped', () => {
+    try {
       parseEnv({
         EXPO_PUBLIC_APP_ENV: 'production',
         EXPO_PUBLIC_SUPABASE_URL: 'https://example.supabase.co',
         EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'pk_test',
-        EXPO_PUBLIC_POSTHOG_HOST: 'https://eu.i.posthog.com',
-      }),
+      });
+      throw new Error('expected validation to fail');
+    } catch (error) {
+      expect((error as EnvValidationError).issues.join()).toContain(
+        'EXPO_PUBLIC_REVENUECAT_IOS_KEY',
+      );
+    }
+  });
+
+  /**
+   * The Test Store is RevenueCat's simulated storefront: real-looking purchases with no App
+   * Store or Play account behind them. Wonderful for development, catastrophic in a release —
+   * the app would either charge real money for nothing or charge none at all and look broken.
+   */
+  it('REFUSES the Test Store key in production', () => {
+    try {
+      parseEnv({ ...productionEnv, EXPO_PUBLIC_REVENUECAT_TEST_KEY: 'test_abc' });
+      throw new Error('expected validation to fail');
+    } catch (error) {
+      expect((error as EnvValidationError).issues.join()).toContain(
+        'EXPO_PUBLIC_REVENUECAT_TEST_KEY',
+      );
+    }
+  });
+
+  it.each(['development', 'preview'])('allows the Test Store key in %s', (appEnv) => {
+    expect(() =>
+      parseEnv({ EXPO_PUBLIC_APP_ENV: appEnv, EXPO_PUBLIC_REVENUECAT_TEST_KEY: 'test_abc' }),
     ).not.toThrow();
+  });
+
+  it('accepts a fully populated production environment', () => {
+    expect(() => parseEnv(productionEnv)).not.toThrow();
   });
 });

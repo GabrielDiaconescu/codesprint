@@ -79,6 +79,63 @@ subscription rather than adding to it (SPEC §5, §33).
 
 ---
 
+---
+
+## Testing before the stores exist — the Test Store
+
+RevenueCat's **Test Store** is a simulated storefront that needs no Apple Developer account, no
+Play Console and no products in either. Purchases behave like real ones all the way through:
+they update the subscriber, fire the webhook, and land in `user_entitlements`. That is enough
+to exercise the entire chain — buy, restore, upgrade, server sync, gates opening — while the
+PFA and D-U-N-S paperwork is still in flight.
+
+### Setting it up
+
+1. In the RevenueCat dashboard create the two entitlements, **named exactly**: `no_ads` and
+   `premium`.
+2. Create three Test Store products. Their ids are free-form here — the app matches on
+   _package_ identifiers, not product ids — but keeping them the same as the real ones is less
+   confusing later.
+3. Attach them to entitlements: the No Ads product to `no_ads`; **both** Premium products to
+   `no_ads` **and** `premium`.
+4. Create an offering with identifier `default` and three packages whose identifiers are
+   exactly:
+
+   | Package identifier   | Product         |
+   | -------------------- | --------------- |
+   | `$rc_monthly_no_ads` | No Ads monthly  |
+   | `$rc_monthly`        | Premium monthly |
+   | `$rc_annual`         | Premium yearly  |
+
+   **These three strings are what the app matches on** (`roleForPackage` in `config.ts`). A
+   package with any other identifier is dropped from the paywall rather than rendered with no
+   copy.
+
+5. Put the Test Store key in `.env`:
+   ```
+   EXPO_PUBLIC_REVENUECAT_TEST_KEY=test_...
+   ```
+6. Build a development build. `npx expo run:android`, or EAS. Expo Go cannot load native
+   modules (SPEC §0.1.10), and from this phase on the RevenueCat SDK is in the bundle.
+
+### The guard rail
+
+A production build carrying `EXPO_PUBLIC_REVENUECAT_TEST_KEY` **fails to start**. Env
+validation rejects it, and `selectSdkKey` ignores it in production as a second lock, both
+covered by unit tests. A released app taking simulated purchases would either charge real
+money for nothing or charge none at all and look broken; neither is a thing to find out from a
+review.
+
+### What the Test Store cannot tell you
+
+- Whether your real store products are configured correctly.
+- Apple's subscription-group ranking, which is what makes the No Ads → Premium upgrade a
+  prorated change rather than two charges. **This still has to be tested in a real sandbox.**
+- Google's base-plan and replacement-mode behaviour.
+- Anything about App Review, pricing per country, or tax.
+
+It proves the plumbing. The store paperwork still has to be proved separately.
+
 ## RevenueCat setup
 
 1. Create the project. **EU region** where offered (SPEC §41).
