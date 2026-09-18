@@ -17,6 +17,7 @@ describe('i18n resources', () => {
         'lesson',
         'leaderboard',
         'profile',
+        'progress',
       ]),
     );
   });

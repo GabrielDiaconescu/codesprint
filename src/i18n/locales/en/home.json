@@ -2,6 +2,8 @@
   "title": "Home",
   "placeholder": {
     "title": "Your daily session lands here",
-    "body": "Streak, XP, today's goal and the next lesson appear once the learning engine ships in Phase 7."
-  }
+    "body": "Today's goal, the daily challenge and your next lesson arrive in Phase 11."
+  },
+  "continueLearning": "Keep learning",
+  "openLearn": "Go to Learn"
 }

@@ -2,7 +2,7 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 8 complete — awaiting approval for Phase 9 (XP, levels, progress).
+**Current phase:** Phase 9 complete — awaiting approval for Phase 10 (Streak, lives, achievements).
 **Last updated:** 2026-09-17
 
 ---
@@ -20,7 +20,8 @@
 | 6     | Content pipeline & development seed  | **Complete** — pending device check   |
 | 7     | Course & lesson engine               | **Complete** — pending device check   |
 | 8     | Question engine & grading RPCs       | **Complete** — pending device check   |
-| 9–23  | See `PLAN.md` / SPEC §57             | Not started                           |
+| 9     | XP, levels, progress                 | **Complete** — pending device check   |
+| 10–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -727,6 +728,79 @@ Exercised through the real HTTP API with a fresh guest:
 9. **XP shown on the completion screen is the sum the server returned**, never a client tally.
    Lesson-completion XP, streaks and progress rows are Phase 9 and the screen says so.
 
+## Phase 9 — what was implemented (XP, levels, progress)
+
+**Database** — `20260917121000_progress.sql`
+
+- `complete_lesson(uuid)`: records the lesson, pays `xp_lesson_completion` **once**, computes
+  whether it was perfect from the attempts table.
+- `get_progress_summary(text)`: the whole Progress screen in one round trip, with per-skill
+  accuracy omitted server-side for non-Premium users (SPEC §28).
+- `get_user_stats()`: the small, hot one for the header on Home and Profile.
+- `submit_answer` replaced (not edited) so every attempt now moves the counters Progress reads.
+- `touch_daily_activity`: accumulates a day keyed on the user's **local** date.
+- 36 new pgTAP tests (`08_progress.test.sql`), 208 in total.
+
+**Level system** — `src/features/progress/logic/levels.ts`
+
+Pure and unit-tested, because SPEC §20 makes the level a derived value that the server never
+stores. It extends the configured curve past its last entry, so a learner who passes level 20
+keeps levelling instead of sitting at a permanent maximum.
+
+**Screens**
+
+- `progress` — level and XP, four headline numbers, course completion, per-module bars, skill
+  areas, and an honest Premium explanation instead of a blurred number.
+- Home and Profile now carry the XP/level card and a route into Progress.
+- The lesson player calls `complete_lesson` when the last page is reached, and the completion
+  screen shows the first-try score, the XP the **server** awarded, and a perfect-lesson line.
+
+### Phase 9 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 39 suites, 555 tests, all passing
+database    supabase test db ......... 8 files, 208 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+A fresh guest answering all five questions of lesson 1.1 correctly, through the real HTTP API:
+
+| Step                        | Result                                         |
+| --------------------------- | ---------------------------------------------- |
+| five correct answers        | 5 + 5 + 5 + 10 + 5 = 30 XP                     |
+| `complete_lesson`, first    | +20 XP, perfect, 5/5 first try, total **50**   |
+| `complete_lesson`, again    | **+0 XP**, `already_completed`, total still 50 |
+| progress summary            | 1 lesson, 5/5 questions, course 1/8            |
+| skills with accuracy (free) | **0** — Premium-only, omitted server-side      |
+| daily activity              | 1 lesson, 5 questions, 50 XP on the local date |
+
+## Decisions and interpretations made during Phase 9
+
+1. **`questions_answered` counts attempts, not distinct questions.** Accuracy then means what
+   it says: answer one question wrong and then right, and you have answered twice and been
+   right once.
+2. **A lesson pays once, but can be completed many times.** Re-reading is worth encouraging, so
+   `complete_lesson` stays callable; the ledger simply refuses to pay again, and
+   `lessons_completed` and `completed_at` do not move.
+3. **Perfect is sticky.** Once every question has been right first time, a later re-read with a
+   wrong answer does not revoke it — it is a record of something that happened.
+4. **Course completion counts only reachable lessons.** Counting Premium modules a free learner
+   cannot open would pin them below 50% forever, which is discouraging and not informative.
+5. **Per-skill accuracy is withheld by the server, not by the client.** A free user's response
+   simply has nulls, and the screen explains what Premium adds rather than blurring a number
+   that is already on the device.
+6. **The level curve is extrapolated past its last configured entry.** SPEC §20 says increments
+   grow by ~100 per level; without that a learner past level 20 would stop levelling.
+7. **`complete_lesson` retries once; `submit_answer` does not.** Completion is idempotent by
+   construction, so a retry after a dropped response can only produce the right answer. Grading
+   is not, so an automatic retry there could record two attempts for one tap.
+8. **Home gained the XP card now, not in Phase 11.** The phase's whole point is that XP visibly
+   moves, and the device check asks to see it. Today's goal, the daily challenge and the
+   next-lesson card remain Phase 11, and the screen says so.
+
 ## Known limitations
 
 - Services other than Config are still no-ops: billing (14), ads (15), analytics and
@@ -744,10 +818,14 @@ Exercised through the real HTTP API with a fresh guest:
   file arrives with the content pipeline.
 - Home, Leaderboard and Profile still show honest "ships in Phase N" placeholders. Learn now
   shows real published modules.
-- Question XP is awarded and shown, but completing a lesson records no progress row, no
-  lesson-completion XP and no streak day. That is Phase 9, and the completion screen says so.
+- Streaks are stored and displayed but never advance: `user_daily_activity.qualified` is
+  written by Phase 10, which decides what makes a day count. The Progress screen says so.
 - Lives are not consumed on a wrong answer yet (Phase 10). `submit_answer` takes the context
   that Phase 10 will key lives on, so it slots in without a signature change.
+- Achievements are not evaluated (Phase 10), though `is_perfect` and the counters they will
+  read are now recorded.
+- Home shows XP and level only. The daily goal, the challenge card and the next-lesson CTA
+  are Phase 11.
 - Practice mode, where a failed question is retried for half XP, is Phase 11. Until then a
   question answered wrong in a lesson has no in-app route to a retry.
 - Sounds (SPEC §29) are not wired; haptics are.
@@ -789,7 +867,7 @@ Exercised through the real HTTP API with a fresh guest:
 
 - None. Docker is running and the Supabase project is in the EU region.
 
-**Before Phase 9 (the next phase):**
+**Before Phase 10 (the next phase):**
 
 - None.
 
@@ -1182,3 +1260,62 @@ earlier checks.
 19. Matching: a paired concept announces "SyntaxError matched with ... Tap to undo."
 20. Large text and dark mode: code lines scroll horizontally rather than wrapping; markings are
     distinguishable by icon, not only colour.
+
+---
+
+## Phase 9 device test checklist
+
+Use a **fresh guest**: the point is to watch numbers move from zero.
+
+### XP moves, visibly
+
+1. Continue as guest. **Home** shows a level ring at **Level 1** and **0 XP**.
+2. Open **Learn → Getting Started → What is Python?** and answer all five questions correctly.
+   Each feedback panel shows the XP it earned.
+3. Finish the lesson. The completion screen shows **5 of 5 correct on the first try**, the XP
+   total including the +20 for completing, and **"Perfect lesson"**.
+4. Go back to Home. The ring now reads **Level 1, 50 XP**, and the bar towards level 2 has
+   moved. It updates without restarting the app.
+5. Complete a second lesson to cross 100 XP: the ring flips to **Level 2** and the bar resets
+   near the start.
+
+### It pays once
+
+6. Reopen the same lesson and walk to the end again. The completion screen shows **no XP**
+   (or only XP from questions you had not answered before).
+7. In Studio (`http://127.0.0.1:54323`), `xp_events` holds **one** row with
+   `source_type = 'lesson'` per lesson, and `user_stats.xp_total` equals the sum of all rows.
+8. `user_lesson_progress.completed_at` for that lesson has **not** changed.
+
+### The Progress screen
+
+9. From Home or Profile, tap **See your progress**.
+10. Level and XP match Home. The four numbers — lessons, questions, accuracy, streak — match
+    what you did. Accuracy is correct ÷ answered, so a wrong answer lowers it.
+11. **Course completion** reads "N of 8 lessons". Modules show their own bars, Premium ones
+    with a padlock.
+12. **Skill areas** lists tags with a bar each. Areas you have not reached read 0%.
+13. As a free user, the skills card ends with the Premium explanation and **no per-skill
+    accuracy numbers**.
+14. Sign in as `premium@codesprint.test` (`sprint2026`) and reopen Progress: the skill rows now
+    carry "N of M attempts correct".
+
+### The rules, checked in the database
+
+15. Set `free_module_count` to `1` in `app_config`, reopen Progress: **course completion total
+    drops to 4** — a free learner is measured against what they can reach, not the whole
+    catalogue. Set it back to `6`.
+16. In `user_daily_activity` there is one row for today with your lessons, questions and XP.
+17. Change `profiles.timezone` to `Pacific/Auckland` for your user, answer one more question,
+    and a **second row** appears on Auckland's date. (Set it back afterwards.)
+
+### Robustness
+
+18. Stop Supabase and open Progress: an error state with **Try again**, not a blank screen.
+19. Finish a lesson with the network off: the completion screen still appears, and the XP line
+    shows only what was already graded. Reconnect, reopen the lesson and finish it — the
+    completion is recorded then, and still only pays once.
+20. Large text and dark mode: the level ring, the four stat tiles and the skill bars stay
+    legible and nothing clips.
+21. With a screen reader on, each stat tile announces "Accuracy: 80%" as one phrase rather than
+    an icon and a number separately.

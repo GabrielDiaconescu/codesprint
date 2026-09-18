@@ -29,6 +29,7 @@ const KEY_SCHEMAS = {
   lives_max: z.number().int().positive(),
   min_user_age: z.number().int().min(13).max(21),
   minor_protection_age: z.number().int().min(13).max(21),
+  level_thresholds: z.array(z.number().int().nonnegative()).min(2),
   content_version: z.number().int().nonnegative(),
   min_supported_app_version: z.string().min(1),
 } as const satisfies { [K in keyof AppConfigValues]: z.ZodType<AppConfigValues[K]> };

@@ -32,6 +32,7 @@ export const useAppConfig = () =>
           lives_max: services.config.get('lives_max'),
           min_user_age: services.config.get('min_user_age'),
           minor_protection_age: services.config.get('minor_protection_age'),
+          level_thresholds: services.config.get('level_thresholds'),
           content_version: services.config.get('content_version'),
           min_supported_app_version: services.config.get('min_supported_app_version'),
       }) satisfies AppConfigValues,

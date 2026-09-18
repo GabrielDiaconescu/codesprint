@@ -11,6 +11,7 @@ import lesson from './locales/en/lesson.json';
 import navigation from './locales/en/navigation.json';
 import onboarding from './locales/en/onboarding.json';
 import profile from './locales/en/profile.json';
+import progress from './locales/en/progress.json';
 
 /**
  * i18n setup (SPEC §38).
@@ -21,7 +22,7 @@ import profile from './locales/en/profile.json';
 export const FALLBACK_LOCALE = 'en';
 
 export const resources = {
-  en: { common, navigation, auth, onboarding, home, learn, lesson, leaderboard, profile },
+  en: { common, navigation, auth, onboarding, home, learn, lesson, leaderboard, profile, progress },
 } as const;
 
 export const NAMESPACES = Object.keys(resources.en) as (keyof typeof resources.en)[];

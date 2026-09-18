@@ -983,6 +983,7 @@ export type Database = {
         Args: { p_module_id: string; p_user_id: string }
         Returns: boolean
       }
+      complete_lesson: { Args: { p_lesson_id: string }; Returns: Json }
       config_int: {
         Args: { p_default: number; p_key: string }
         Returns: number
@@ -1000,6 +1001,8 @@ export type Database = {
         Args: { p_lesson_id: string; p_locale?: string }
         Returns: Json
       }
+      get_progress_summary: { Args: { p_locale?: string }; Returns: Json }
+      get_user_stats: { Args: never; Returns: Json }
       grade_answer: {
         Args: { p_question_id: string; p_submitted: Json }
         Returns: boolean
@@ -1080,6 +1083,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      touch_daily_activity: {
+        Args: {
+          p_lessons?: number
+          p_questions?: number
+          p_user_id: string
+          p_xp?: number
+        }
+        Returns: undefined
       }
       update_profile: {
         Args: { p_patch: Json }

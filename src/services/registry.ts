@@ -2,6 +2,7 @@ import { SupabaseAuthService } from './auth/SupabaseAuthService';
 import { SupabaseConfigService } from './config/SupabaseConfigService';
 import { SupabaseContentService } from './content/SupabaseContentService';
 import { SupabaseProfileService } from './profile/SupabaseProfileService';
+import { SupabaseProgressService } from './progress/SupabaseProgressService';
 import {
   NoopAdService,
   NoopAnalyticsService,
@@ -21,6 +22,7 @@ import type {
   MonitoringService,
   NotificationService,
   ProfileService,
+  ProgressService,
   ServiceIdentity,
 } from './types';
 
@@ -37,6 +39,7 @@ export type Services = {
   auth: AuthService;
   profile: ProfileService;
   content: ContentService;
+  progress: ProgressService;
   analytics: AnalyticsService;
   consent: ConsentService;
   ads: AdService;
@@ -50,6 +53,7 @@ export const services: Services = {
   auth: SupabaseAuthService, // Phase 4 — real
   profile: SupabaseProfileService, // Phase 5 — real
   content: SupabaseContentService, // Phase 6 — real
+  progress: SupabaseProgressService, // Phase 9 — real
   analytics: NoopAnalyticsService, // Phase 16
   consent: NoopConsentService, // Phase 15
   ads: NoopAdService, // Phase 15

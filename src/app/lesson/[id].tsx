@@ -7,6 +7,7 @@ import { Button, ProgressBar, Screen, SkeletonLines, StateView, Text } from '@/c
 import { LessonBlockView } from '@/features/lesson/components/LessonBlocks';
 import { QuestionPage } from '@/features/lesson/components/QuestionPage';
 import { useLesson } from '@/features/lesson/hooks/useLesson';
+import { useCompleteLesson } from '@/features/progress/hooks/useProgress';
 import { buildLessonPages, countQuestions, pageProgress } from '@/features/lesson/logic/pages';
 import { LessonUnavailableError, type AnswerResult, type LessonErrorReason } from '@/services';
 import { useTheme } from '@/theme';
@@ -40,8 +41,15 @@ export default function LessonScreen() {
   const [results, setResults] = useState<AnswerResult[]>([]);
   const [finished, setFinished] = useState(false);
 
+  const completeLesson = useCompleteLesson();
+
   const advance = () => {
     if (index + 1 >= pages.length) {
+      // The server decides what completing is worth. It is idempotent, so a second call
+      // after a dropped response pays nothing rather than paying twice.
+      if (lessonId && !completeLesson.isPending && !completeLesson.isSuccess) {
+        completeLesson.mutate({ lessonId });
+      }
       setFinished(true);
     } else {
       setIndex(index + 1);
@@ -108,8 +116,10 @@ export default function LessonScreen() {
   }
 
   if (finished || pages.length === 0) {
-    const xpEarned = results.reduce((sum, r) => sum + r.xp_awarded, 0);
-    const firstTryCorrect = results.filter((r) => r.correct && r.attempt_no === 1).length;
+    // Question XP from the answers, plus whatever the server paid for completing the lesson.
+    const questionXp = results.reduce((sum, r) => sum + r.xp_awarded, 0);
+    const xpEarned = questionXp + (completeLesson.data?.xp_awarded ?? 0);
+    const firstTryCorrect = completeLesson.data?.first_try_correct ?? 0;
 
     return (
       <Screen>
@@ -131,6 +141,11 @@ export default function LessonScreen() {
           {xpEarned > 0 && (
             <Text variant="bodyStrong" tone="accent" align="center">
               {t('complete.xpEarned', { count: xpEarned })}
+            </Text>
+          )}
+          {completeLesson.data?.is_perfect && (
+            <Text variant="bodyStrong" tone="success" align="center">
+              {t('complete.perfect')}
             </Text>
           )}
           <Text variant="caption" tone="secondary" style={styles.pendingNote}>

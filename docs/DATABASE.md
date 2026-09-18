@@ -55,6 +55,7 @@ Local Studio: http://127.0.0.1:54323 · API: http://127.0.0.1:54321
 | `20260917120700_onboarding`             | Age thresholds, the age gate, server-enforced minor protections                                         |
 | `20260917120800_lesson_engine`          | `get_lesson`, plus the localisation helpers it needs                                                    |
 | `20260917120900_question_grading`       | `submit_answer`, the grader for all eight types, normalisation, question XP                             |
+| `20260917121000_progress`               | `complete_lesson`, `get_progress_summary`, `get_user_stats`, and the counters they read                 |
 
 ---
 
@@ -133,31 +134,35 @@ the search path and hijack an unqualified reference while the function runs as o
 | `reject_underage_account()`                        | authenticated       | Deletes the CALLER. The age gate's only outcome below `min_user_age`                                                                                                |
 | `get_lesson(uuid, text)`                           | authenticated       | The only path to lesson bodies and questions. Entitlement-checked; never returns explanations, hints or answer keys                                                 |
 | `submit_answer(uuid, jsonb, answer_context, text)` | authenticated       | Grades one answer, records the attempt, awards question XP in lesson context. Returns the verdict, explanation, hint and — only now — the key                       |
+| `complete_lesson(uuid)`                            | authenticated       | Records a lesson as complete and pays completion XP once                                                                                                            |
+| `get_progress_summary(text)`                       | authenticated       | The whole Progress screen in one round trip. Per-skill accuracy is Premium                                                                                          |
+| `get_user_stats()`                                 | authenticated       | XP, streak and lives for the header on Home and Profile                                                                                                             |
 
 ### Internal (no client grant)
 
-| Function                             | Purpose                                                                               |
-| ------------------------------------ | ------------------------------------------------------------------------------------- |
-| `award_xp(...)`                      | **The only write path for XP.** See below                                             |
-| `has_entitlement(uuid, entitlement)` | The authority for paid access (SPEC §31)                                              |
-| `is_ad_free(uuid)`                   | `no_ads OR premium`                                                                   |
-| `module_requires_premium(uuid)`      | Computed from `free_module_count`                                                     |
-| `can_access_module(uuid, uuid)`      | Free boundary + entitlement                                                           |
-| `config_int(text, integer)`          | Numeric config read with a fallback                                                   |
-| `local_date_for(text, timestamptz)`  | Server-side local date; unknown timezone degrades to UTC                              |
-| `iso_week_start(timestamptz)`        | Leaderboard partition key                                                             |
-| `require_auth_uid()`                 | Raises 28000 on an unauthenticated request                                            |
-| `handle_new_user()`                  | Trigger: creates profile + stats for every auth user, guests included                 |
-| `handle_user_updated()`              | Trigger: mirrors `auth.users.is_anonymous` onto `profiles`                            |
-| `delete_stale_anonymous_users(int)`  | Scheduled purge of abandoned guests. See below                                        |
-| `age_from_birth_year(int)`           | Age reached during the current year (SPEC §11: birth year only)                       |
-| `is_minor(uuid)`                     | Below `minor_protection_age`. An unknown birth year fails closed                      |
-| `localized_text(jsonb, text)`        | Reads a localized field with an English fallback                                      |
-| `localize_deep(jsonb, text)`         | Collapses every localized object in a structure to one locale                         |
-| `grade_answer(uuid, jsonb)`          | Compares a submission with its key. Malformed input grades as incorrect, never raises |
-| `normalize_answer_text(text, mode)`  | Straightens curly quotes and dashes, then applies the match mode                      |
-| `question_xp(uuid, integer)`         | XP for a correct answer; halved and floored on a retry                                |
-| `config_numeric(text, numeric)`      | Decimal config read with a fallback (the retry multiplier)                            |
+| Function                                    | Purpose                                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `award_xp(...)`                             | **The only write path for XP.** See below                                             |
+| `has_entitlement(uuid, entitlement)`        | The authority for paid access (SPEC §31)                                              |
+| `is_ad_free(uuid)`                          | `no_ads OR premium`                                                                   |
+| `module_requires_premium(uuid)`             | Computed from `free_module_count`                                                     |
+| `can_access_module(uuid, uuid)`             | Free boundary + entitlement                                                           |
+| `config_int(text, integer)`                 | Numeric config read with a fallback                                                   |
+| `local_date_for(text, timestamptz)`         | Server-side local date; unknown timezone degrades to UTC                              |
+| `iso_week_start(timestamptz)`               | Leaderboard partition key                                                             |
+| `require_auth_uid()`                        | Raises 28000 on an unauthenticated request                                            |
+| `handle_new_user()`                         | Trigger: creates profile + stats for every auth user, guests included                 |
+| `handle_user_updated()`                     | Trigger: mirrors `auth.users.is_anonymous` onto `profiles`                            |
+| `delete_stale_anonymous_users(int)`         | Scheduled purge of abandoned guests. See below                                        |
+| `age_from_birth_year(int)`                  | Age reached during the current year (SPEC §11: birth year only)                       |
+| `is_minor(uuid)`                            | Below `minor_protection_age`. An unknown birth year fails closed                      |
+| `localized_text(jsonb, text)`               | Reads a localized field with an English fallback                                      |
+| `localize_deep(jsonb, text)`                | Collapses every localized object in a structure to one locale                         |
+| `grade_answer(uuid, jsonb)`                 | Compares a submission with its key. Malformed input grades as incorrect, never raises |
+| `normalize_answer_text(text, mode)`         | Straightens curly quotes and dashes, then applies the match mode                      |
+| `question_xp(uuid, integer)`                | XP for a correct answer; halved and floored on a retry                                |
+| `config_numeric(text, numeric)`             | Decimal config read with a fallback (the retry multiplier)                            |
+| `touch_daily_activity(uuid, int, int, int)` | Accumulates one day of activity, keyed on the user's LOCAL date                       |
 
 ### The XP ledger
 
@@ -296,6 +301,35 @@ floored on a retry. Attempts are counted across every context, so a question fai
 lesson and answered later in practice is a retry. The ledger's unique reward key means a
 question can never pay twice, whatever the attempt count says.
 
+### XP, levels and progress
+
+**The ledger is the truth; the counters are for speed.** `user_stats` and
+`user_daily_activity` hold denormalised totals so Home and Progress do not aggregate the whole
+history on every open (SPEC §45). They are only ever written inside the same transaction as
+the thing they count.
+
+**`complete_lesson` pays once.** `award_xp` refuses a second payment for the same lesson, and
+`lessons_completed` and `completed_at` only move on the first completion. Re-reading a lesson
+is something to encourage, not to pay for twice.
+
+A lesson is **perfect** when every question was answered correctly on the first attempt
+(SPEC §25). It is computed from `user_question_attempts`, never trusted from the client, and
+once earned it is kept — a later re-read with a wrong answer does not revoke it.
+
+**There is no level column anywhere.** SPEC §20 makes the level a derived display value, so
+the server stores XP and every server-side rule keys on XP. The curve lives in
+`app_config.level_thresholds` and is computed in `src/features/progress/logic/levels.ts`,
+which extends it past the last configured entry so an active learner keeps levelling.
+
+**Daily activity is keyed on the user's LOCAL date**, from `profiles.timezone`. A session at
+23:30 in Bucharest belongs to that day, not to tomorrow. Phase 10 reads `qualified` from these
+rows to decide whether a day extends a streak.
+
+**Per-skill accuracy is Premium** (SPEC §28), and `get_progress_summary` omits it server-side
+for everyone else rather than the client hiding it. Course completion counts only lessons the
+user can actually reach, so a free learner is not permanently stuck below 50% because Premium
+modules exist.
+
 ---
 
 ## Auth configuration
@@ -328,15 +362,16 @@ Supabase's built-in sender is not permitted there.
 
 `npm run db:test` runs the pgTAP suite:
 
-| File                              | Proves                                                                                                                                                                                                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `01_schema_invariants.test.sql`   | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists                                              |
-| `02_rls_access_matrix.test.sql`   | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                                                                      |
-| `03_xp_ledger.test.sql`           | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                                                                           |
-| `04_auth_support.test.sql`        | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                                                                     |
-| `05_onboarding_age_gate.test.sql` | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it                                                          |
-| `06_lesson_engine.test.sql`       | That `get_lesson` refuses a premium module to free users and guests, opens it for a premium user, reports missing and withdrawn lessons distinctly, and never returns an explanation, hint or answer                                                    |
-| `07_question_grading.test.sql`    | Every grader right, wrong and malformed against the real seeded questions; quote and dash normalisation per match mode; accepted alternatives; XP first time, on retry, never twice, and not in practice; attempts recorded; the paywall and the grants |
+| File                              | Proves                                                                                                                                                                                                                                                                                                           |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `01_schema_invariants.test.sql`   | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists                                                                                                       |
+| `02_rls_access_matrix.test.sql`   | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                                                                                                                               |
+| `03_xp_ledger.test.sql`           | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                                                                                                                                    |
+| `04_auth_support.test.sql`        | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                                                                                                                              |
+| `05_onboarding_age_gate.test.sql` | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it                                                                                                                   |
+| `06_lesson_engine.test.sql`       | That `get_lesson` refuses a premium module to free users and guests, opens it for a premium user, reports missing and withdrawn lessons distinctly, and never returns an explanation, hint or answer                                                                                                             |
+| `07_question_grading.test.sql`    | Every grader right, wrong and malformed against the real seeded questions; quote and dash normalisation per match mode; accepted alternatives; XP first time, on retry, never twice, and not in practice; attempts recorded; the paywall and the grants                                                          |
+| `08_progress.test.sql`            | That a lesson pays once however often it is completed, that `lessons_completed` and the completion timestamp move only the first time, that a perfect lesson is computed from attempts and never revoked, that daily activity follows the user's timezone, and that per-skill accuracy is absent for a free user |
 
 CI runs these against a fresh database on every push, and fails if
 `src/types/database.types.ts` is out of date.

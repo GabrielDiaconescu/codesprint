@@ -1,14 +1,19 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { Button, PlaceholderState, Screen } from '@/components/ui';
+import { Button, PlaceholderState, Screen, SkeletonLines } from '@/components/ui';
 import { SessionCard } from '@/features/auth/components/SessionCard';
+import { LevelCard } from '@/features/progress/components/LevelCard';
+import { useUserStats } from '@/features/progress/hooks/useProgress';
 import { useTheme } from '@/theme';
 
 export default function ProfileScreen() {
   const { t } = useTranslation('profile');
+  const { t: progress } = useTranslation('progress');
   const theme = useTheme();
+  const router = useRouter();
+  const { data: stats, isPending } = useUserStats();
 
   return (
     <Screen>
@@ -17,6 +22,21 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         <SessionCard />
+
+        {isPending ? (
+          <SkeletonLines lines={3} />
+        ) : (
+          <LevelCard xpTotal={stats?.xp_total ?? 0} streak={stats?.current_streak} compact />
+        )}
+
+        <Button
+          testID="profile-progress"
+          variant="secondary"
+          label={progress('open')}
+          icon="stats-chart-outline"
+          onPress={() => router.push('/progress')}
+          fullWidth
+        />
 
         <PlaceholderState title={t('placeholder.title')} body={t('placeholder.body')} />
       </ScrollView>

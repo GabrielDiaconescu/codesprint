@@ -1,3 +1,8 @@
+import type {
+  LessonCompletion,
+  ProgressSummary,
+  UserStats,
+} from './progress/schema';
 import type { AnswerResult, LessonResponse } from './content/lessonSchema';
 
 /**
@@ -263,6 +268,32 @@ export interface ContentService extends ServiceIdentity {
   ): Promise<AnswerResult>;
 }
 
+/* ------------------------------------------------------------------ Progress (Supabase) */
+
+export type {
+  UserStats,
+  ProgressSummary,
+  ModuleProgress,
+  SkillProgress,
+  LessonCompletion,
+} from './progress/schema';
+
+export interface ProgressService extends ServiceIdentity {
+  /** XP, streak and lives for the header on Home and Profile. */
+  getStats(): Promise<UserStats>;
+
+  /** The whole Progress screen in one round trip (SPEC §28). */
+  getSummary(locale: string): Promise<ProgressSummary>;
+
+  /**
+   * Records a lesson as complete and pays completion XP once (SPEC §19).
+   *
+   * Idempotent: the ledger refuses a second payment for the same lesson, and the completion
+   * timestamp only moves the first time.
+   */
+  completeLesson(lessonId: string): Promise<LessonCompletion>;
+}
+
 /* ------------------------------------------------------------------ Monitoring (Sentry) */
 export interface MonitoringService extends ServiceIdentity {
   initialize(): Promise<void>;
@@ -423,6 +454,8 @@ export interface AppConfigValues {
   /** SPEC D10 / §41 — the age gate thresholds. */
   min_user_age: number;
   minor_protection_age: number;
+  /** Cumulative XP per level, index 0 = level 1 (SPEC §20). */
+  level_thresholds: number[];
   content_version: number;
   min_supported_app_version: string;
 }

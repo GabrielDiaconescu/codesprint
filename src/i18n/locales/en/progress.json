@@ -1,0 +1,39 @@
+{
+  "title": "Progress",
+  "open": "See your progress",
+  "level": "Level {{level}}",
+  "levelProgress": "{{current}} / {{total}} XP to level {{next}}",
+  "xpTotal": "{{count}} XP",
+  "xpTotal_one": "{{count}} XP",
+  "stats": {
+    "lessons": "Lessons",
+    "questions": "Questions",
+    "accuracy": "Accuracy",
+    "streak": "Streak",
+    "streakDays_one": "{{count}} day",
+    "streakDays_other": "{{count}} days"
+  },
+  "course": {
+    "title": "Course completion",
+    "lessons": "{{completed}} of {{total}} lessons",
+    "emptyBody": "Finish your first lesson and it will appear here."
+  },
+  "modules": {
+    "title": "Modules",
+    "lessons": "{{completed}} / {{total}}",
+    "locked": "Premium"
+  },
+  "skills": {
+    "title": "Skill areas",
+    "body": "How much of each area you have answered correctly.",
+    "accuracy": "{{correct}} of {{attempts}} attempts correct",
+    "untouched": "Not started",
+    "premiumTitle": "Per-skill accuracy is a Premium feature",
+    "premiumBody": "Premium shows how accurate you are in each area and which ones need work."
+  },
+  "error": {
+    "title": "Couldn't load your progress",
+    "body": "Check your connection and try again."
+  },
+  "pending": "Streaks begin counting in the next release."
+}

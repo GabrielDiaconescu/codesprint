@@ -26,11 +26,12 @@
   "complete": {
     "title": "Lesson complete",
     "body": "You've read {{title}}.",
-    "xpPending": "Lesson-completion XP, streaks and progress start counting in the next release.",
+    "xpPending": "Streaks and achievements begin counting in the next release.",
     "next": "Next lesson",
     "backToModule": "Back to the module",
     "xpEarned": "+{{count}} XP earned in this lesson",
-    "score": "{{correct}} of {{total}} correct on the first try"
+    "score": "{{correct}} of {{total}} correct on the first try",
+    "perfect": "Perfect lesson — every question right first time."
   },
   "error": {
     "premiumTitle": "This module is Premium",
