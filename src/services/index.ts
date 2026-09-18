@@ -2,3 +2,4 @@ export { services, assertNoNoopServicesInProduction, type Services } from './reg
 export * from './types';
 export { AuthFailure, toAuthErrorCode } from './auth/errors';
 export { DisplayNameRejected, toDisplayNameProblem } from './leaderboard/errors';
+export { ExamUnavailable, toExamUnavailableReason } from './exams/errors';

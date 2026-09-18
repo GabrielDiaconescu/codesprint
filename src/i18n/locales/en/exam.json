@@ -1,0 +1,88 @@
+{
+  "title": "Exams",
+  "intro": "Put the whole course together. Exams are graded on the server and never show an answer until you hand in.",
+  "bankedXp": "{{xp, number}} XP banked from exams so far",
+  "premium": "Premium",
+  "entry": {
+    "title": "Final Exam",
+    "body": "Ready to test everything? Take the sample exam free, or the full 30-question paper with Premium.",
+    "action": "Go to exams"
+  },
+  "facts": {
+    "questions": "{{count}} question",
+    "questions_other": "{{count}} questions",
+    "minutes": "{{count}} minute",
+    "minutes_other": "{{count}} minutes",
+    "untimed": "No time limit",
+    "pass": "Pass at {{pct}}%"
+  },
+  "best": {
+    "passed": "Passed — your best is {{pct}}%",
+    "notYet": "Your best so far: {{pct}}%"
+  },
+  "action": {
+    "start": "Start exam",
+    "resume": "Resume exam",
+    "retry": "Take it again",
+    "locked": "Not available"
+  },
+  "locked": {
+    "requires_premium": "The full exam is part of Premium, along with every module and unlimited lives.",
+    "requires_premiumTitle": "Premium exam",
+    "no_attempts_left": "You have used this week's attempt. It resets on Monday.",
+    "no_attempts_leftTitle": "Come back Monday",
+    "cooldown": "You have just taken this one. It will be available again shortly.",
+    "cooldownTitle": "Give it a moment",
+    "pool_too_small": "There are not enough questions for this exam yet. More lessons are on the way.",
+    "pool_too_smallTitle": "Not ready yet",
+    "disabled": "Exams are temporarily unavailable. Please try again later.",
+    "disabledTitle": "Temporarily unavailable",
+    "not_found": "This exam is no longer available.",
+    "not_foundTitle": "Exam not found",
+    "unknown": "This exam could not be started. Please try again.",
+    "unknownTitle": "Something went wrong"
+  },
+  "disabled": {
+    "title": "Exams are paused",
+    "body": "They are temporarily switched off. Your progress is untouched — please check back later."
+  },
+  "error": {
+    "title": "Could not load the exams",
+    "body": "Check your connection and try again."
+  },
+  "progress": "Question {{current}} of {{total}}",
+  "answeredOf": "{{answered}} of {{total}} answered",
+  "previous": "Back",
+  "next": "Next",
+  "handIn": "Hand in",
+  "unrenderable": "This question cannot be shown in this version of the app. It will be marked as unanswered.",
+  "timer": {
+    "untimed": "No time limit",
+    "accessibility": "{{time}} remaining"
+  },
+  "results": {
+    "title": "Results",
+    "accessibility": "You scored {{pct}} percent",
+    "passed": "Passed",
+    "notPassed": "Not passed yet",
+    "correctOf": "{{correct}} of {{total}} correct",
+    "short": "One more correct answer and you would have passed.",
+    "short_other": "{{count}} more correct answers and you would have passed.",
+    "xp": "+{{xp}} XP",
+    "xpExplainer": "Exams pay on your best score, so beating it earns the difference.",
+    "weakAreas": "Worth another look",
+    "weakAreasHint": "The topics that cost you the most marks.",
+    "review": "Review every question",
+    "done": "Done"
+  },
+  "review": {
+    "title": "Review",
+    "subtitle": "You answered {{correct}} of {{total}} correctly. Every question is here, with why.",
+    "number": "Question {{number}}",
+    "correct": "Correct",
+    "wrong": "Incorrect",
+    "accessibilityCorrect": "Question {{number}}, correct. {{prompt}}",
+    "accessibilityWrong": "Question {{number}}, incorrect. {{prompt}}",
+    "done": "Back to results"
+  }
+}

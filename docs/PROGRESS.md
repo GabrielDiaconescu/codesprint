@@ -2,7 +2,8 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 12 complete — awaiting approval for Phase 13 (Exam mode).
+**Current phase:** Phase 13 complete — awaiting approval for Phase 14 (Billing: RevenueCat,
+entitlements, webhook, paywall).
 **Last updated:** 2026-09-18
 
 ---
@@ -24,7 +25,8 @@
 | 10    | Streak, lives, achievements          | **Complete** — pending device check   |
 | 11    | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
 | 12    | Leaderboard, display names, reports  | **Complete** — pending device check   |
-| 13–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 13    | Exam mode                            | **Complete** — pending device check   |
+| 14–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -1066,6 +1068,107 @@ Through the real HTTP API, signed in as the seeded accounts:
     `leaderboard_weekly`, which is the one place the seed departs from real gameplay, and the
     honest trade against 1,200 ledger rows on every reset.
 
+## Phase 13 — what was implemented (Exam mode)
+
+**Database** — `20260917121400_exams.sql`
+
+- `start_exam(exam_id)`: freezes the question set on the attempt and returns the paper — no
+  explanation, no hint text, no answer key. An attempt already open is **resumed**, with the
+  same questions and the same clock; one whose clock has run out is graded on the way past.
+- `exam_question_set`: draws from the exam-eligible pool, filtered by `can_access_module` and
+  the premium flag, filling `exam_difficulty_mix` (30/45/25) per bucket and topping up at
+  random where a bucket is short. Shuffled across buckets so the paper does not run
+  easy-to-hard.
+- `save_exam_progress(attempt, answers)`: merges answers into the attempt as the learner moves
+  through the paper, so a crash costs a question rather than 45 minutes.
+- `submit_exam(attempt, answers)`: grades every question, computes the per-skill breakdown,
+  records `user_question_attempts` in `exam` context, pays score XP, evaluates the streak and
+  the exam achievements, and returns the results page. Idempotent.
+- `get_exam_results(attempt)`: reopens a graded attempt without regrading or repaying. The
+  four-argument builder behind it is internal, so a client cannot hand itself an XP figure.
+- `exam_unavailable_reason`: the single definition of why an exam is locked — Premium, the
+  free weekly limit, the retry cooldown, the kill switch, or too few questions. Both the
+  overview and `start_exam` call it, so a card can never offer what the RPC would refuse.
+- `config_bool`, `exam_submit_grace_seconds` (60) and `exam_difficulty_mix` added to config.
+- 64 new pgTAP tests (`12_exams.test.sql`), 433 in total.
+
+**App**
+
+- **Exam list** at `/exam`, reached from the foot of Learn — the Final Exam is an exam, not
+  the eighteenth module (SPEC §14). Locked exams are shown with the reason, not hidden.
+- **`ExamRunner`**: deliberately not built on the lesson's `QuestionPage`, whose whole job is
+  to check an answer and show a verdict. No Check button, no feedback panel, no hint, no
+  lives — just the eight renderers, free movement back and forth, and one hand-in.
+- **`ExamTimer`**: reads the server's deadline, ticks once a minute until the last five and
+  every second after that, and submits at zero.
+- **Results**: the score as a ring, how many questions short of a pass, the three weakest
+  skills, the XP, any achievements — then a full review with every explanation.
+- `ExamService` in the registry — real, not a no-op.
+
+### Phase 13 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+format      prettier --check ......... clean
+unit        jest ..................... 52 suites, 749 tests, all passing
+database    supabase test db ......... 12 files, 433 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+Through the real HTTP API, signed in as the seeded accounts:
+
+| Step                                        | Result                                            |
+| ------------------------------------------- | ------------------------------------------------- |
+| free learner opens the full exam            | `42501 exam unavailable: requires_premium`        |
+| premium opens it                            | 30 questions, deadline set                        |
+| the paper searched for an explanation / key | **neither present**                               |
+| sample exam answered perfectly              | 100%, passed, +100 XP                             |
+| achievements it unlocked                    | `first-100-xp`, `first-exam`, `exam-passed`       |
+| resubmitting the same attempt               | +0 XP, still one ledger row                       |
+| free learner starts a second one            | `22023 exam unavailable: no_attempts_left`        |
+| 60% → 90% → 70% on the full exam            | +60, then **+30**, then **+0** — total exam XP 90 |
+| 30 correct answers sent 10 minutes late     | scored 3.33% — only the one saved in time counted |
+| killing the app and reopening               | same attempt, same paper, saved answers returned  |
+| 30 wrong answers                            | lives 5 → 5                                       |
+| another learner's attempt                   | `P0002 attempt not found`                         |
+
+## Decisions and interpretations made during Phase 13
+
+1. **Answers are saved mid-exam.** SPEC §27 submits everything at once and that has not
+   changed, but `exam_attempts.answers` already existed and a 45-minute exam evaporating when
+   the app is killed would be the worst experience in the product (SPEC §36). One small RPC,
+   called on each move between questions.
+2. **Past the grace period the saved answers are marked, and the late payload ignored.** The
+   alternatives were to reject the submission — throwing away real work — or to accept it,
+   which makes the time limit decorative.
+3. **An expired open attempt is graded, not resumed.** Time running out is a result. Grading
+   it at the next `start_exam` means the learner's next action tells them the truth.
+4. **A resumed attempt is the same paper.** Which also means force-quitting because you
+   disliked the questions gets you the same questions back. The two are the same rule.
+5. **XP is the improvement over the best across ALL exams**, not per exam. SPEC §19 says "the
+   user's best previous exam XP", and the cross-exam reading is the one that stops a learner
+   farming 100 XP a week off the ten-question sample.
+6. **Difficulty is a target, not a guarantee.** With 38 eligible questions the buckets are
+   often short, so the mix is filled where it can be and topped up at random — a short paper
+   would be worse than an imperfect mix.
+7. **The exam runner is not the lesson player.** `QuestionPage` exists to check an answer and
+   show the verdict; reusing it and disabling half of it would have left the grading call one
+   prop away from firing during an exam.
+8. **No back button while an exam is running.** Leaving is "hand in", not "undo" — and since
+   the clock keeps running server-side either way, a stray swipe should not look like an exit.
+9. **A question this build cannot render is shown as such and marked unanswered**, rather than
+   crashing the exam. The other 29 still count.
+10. **Locked exams are listed, with the reason.** Hiding the Premium exam from a free learner
+    would make the tier harder to understand, not easier to sell (SPEC §33).
+11. **The results page is written for somebody who has just failed**: how many questions short
+    rather than the arithmetic, three things to revise rather than a table, and a "warning"
+    tone rather than "danger" — nobody is being told off (SPEC §9).
+12. **`exam_results` is internal; `get_exam_results` is the grant.** The builder takes the XP
+    and unlocked achievements as arguments because `submit_exam` has just computed them, and a
+    client must not be able to pass its own.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -1096,10 +1199,11 @@ Rewritten at the end of each phase, so this describes the product as it stands t
 **Content and features still to come:**
 
 - The seed carries 2 modules, 8 lessons and 40 questions — enough to exercise every feature,
-  not launch volume. The remaining 15 modules are Phase 19.
+  not launch volume. The remaining 15 modules are Phase 19. The exam pool is 38 against a
+  30-question full exam, so two sittings overlap heavily; SPEC §35 wants 60+ at launch.
 - Two achievements name modules whose content arrives in Phase 19 and cannot unlock before
-  then. The exam achievements wait on Phase 13.
-- Exam mode is Phase 13; the `exams` and `exam_attempts` tables are seeded and waiting.
+  then. "10 Exams Completed" needs ten sittings, which the free weekly limit makes a
+  Premium-only achievement in practice.
 - `daily_challenges` supports scheduling a specific set or bonus per date. Nothing is
   scheduled; the deterministic pick covers it.
 - Onboarding does not let an intermediate learner choose a starting module (SPEC §11). Their
@@ -1769,3 +1873,71 @@ which is the only way to see the neighbour slice.
 25. Turn it back on and tap Try again. The board loads.
 26. Sign out and continue as a **guest**. The Leaderboard says **"Guests are not ranked"** and
     still lets you browse. Profile offers no display name — there is nothing to name.
+
+---
+
+## Phase 13 device test checklist
+
+Two accounts, because half of this is about the Premium boundary: **free@codesprint.test** and
+**premium@codesprint.test** (password `sprint2026`).
+
+### The list
+
+1. **Learn** → scroll to the bottom. A **Final Exam** card sits below the modules. Tap **Go to
+   exams**.
+2. Two exams: the 10-question sample and the 30-question full paper. Each shows its question
+   count, its timer (or "No time limit") and its pass mark.
+3. As the free learner, the full exam is marked **Premium**, its button is disabled, and it
+   says so in words — not just greyed out.
+
+### Sitting the sample exam (free)
+
+4. Tap **Start exam**. Ten questions, one per screen, with **no Check button** and no feedback
+   panel anywhere.
+5. Answer one, tap **Next**, then **Back**. Your answer is still there.
+6. Get to the end. The button reads **Hand in**, and the progress line above says how many of
+   the ten you have answered.
+7. Hand in. The results page shows a percentage ring, passed or not, and how many you got
+   right.
+8. If you failed, it tells you **how many more correct answers you needed** — a number, not a
+   percentage sum.
+9. Tap **Review every question**. Every question is listed with a tick or a cross **and the
+   word**, plus the explanation.
+10. Go back to the exam list. The sample exam now says **you have used this week's attempt**
+    and offers nothing to tap.
+
+### The clock (premium)
+
+11. Sign in as **premium@codesprint.test** and start the **full** exam. A countdown appears at
+    the top reading about **45:00**.
+12. Answer a few questions, then **force-quit the app**. Reopen it, go back to the exam and
+    tap **Resume exam**.
+13. It is the **same paper**, the countdown has kept running, and the answers you gave are
+    still selected. You open on the first question you had not answered.
+14. Answer everything and hand in. The XP line says what you earned.
+15. Take it again and score **lower**. The results page shows the lower score, and the XP line
+    is **absent** — an exam pays only on improvement.
+16. Take it again and score **higher**. The XP is the **difference**, not the whole score.
+
+### Lives and limits
+
+17. Deliberately get several questions wrong in an exam. Check the hearts on Home afterwards:
+    **unchanged**. Exams never cost a life.
+18. As the free learner, confirm the sample exam is still locked until Monday.
+
+### Accessibility
+
+19. Turn the screen reader on during an exam. The countdown announces **"12:34 remaining"**,
+    not a bare number — and it only interrupts you in the last minute.
+20. On the results page, "Passed" / "Not passed yet" is spoken, and each reviewed question
+    announces **"Question 3, incorrect"** rather than relying on a red icon.
+21. Turn text size to the largest setting. The question, the options and the countdown all
+    stay readable with nothing clipped.
+
+### Robustness
+
+22. Turn airplane mode on mid-exam and tap **Next** a few times. Nothing breaks, and your
+    answers stay on screen.
+23. Turn it back on and hand in. The exam submits.
+24. Turn airplane mode on and try to open the exam list: **"Could not load the exams"** with a
+    **Try again** button, never a blank screen.

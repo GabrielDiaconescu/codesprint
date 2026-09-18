@@ -59,6 +59,7 @@ Local Studio: http://127.0.0.1:54323 · API: http://127.0.0.1:54321
 | `20260917121100_streak_lives_achievements` | Lazy streaks, lazy lives, the achievement catalogue and its engine                                      |
 | `20260917121200_practice_and_challenge`    | Practice XP and sets, the Daily Challenge, and the Home summary                                         |
 | `20260917121300_leaderboard`               | Display names, the weekly ranking, reports, and the per-day ranking cap                                 |
+| `20260917121400_exams`                     | Exam attempts: the frozen paper, the server-side clock, grading, and score XP                           |
 
 ---
 
@@ -148,6 +149,11 @@ the search path and hijack an unqualified reference while the function runs as o
 | `set_display_name(text)`                           | authenticated       | Claims a display name. Validated and unique case-insensitively                                                                                                      |
 | `get_leaderboard(int)`                             | authenticated       | The weekly ranking: top rows, the caller's position, ±5 neighbours. Never returns an email address or an auth identifier                                            |
 | `report_user(uuid, text, text)`                    | authenticated       | Files a moderation report. Write-only — no client can read the queue back                                                                                           |
+| `get_exam_overview(text)`                          | authenticated       | Every active exam with this learner's state, and why a locked one is locked                                                                                         |
+| `start_exam(uuid, text)`                           | authenticated       | Starts or RESUMES an attempt. Freezes the question set; returns no explanation, hint or answer                                                                      |
+| `save_exam_progress(uuid, jsonb)`                  | authenticated       | Merges answers into an open attempt, so a crash does not cost 45 minutes                                                                                            |
+| `submit_exam(uuid, jsonb, text)`                   | authenticated       | Grades the attempt, enforces the clock, pays score XP once. Idempotent                                                                                              |
+| `get_exam_results(uuid, text)`                     | authenticated       | Reopens a graded attempt's results without regrading or repaying                                                                                                    |
 
 ### Internal (no client grant)
 
@@ -189,6 +195,11 @@ the search path and hijack an unqualified reference while the function runs as o
 | `validate_display_name()`                   | Trigger: applies that rule to every write into `profiles.display_name`                |
 | `leaderboard_eligible(uuid)`                | Named, registered, not hidden. The single definition of "appears on the board"        |
 | `leaderboard_xp_today(uuid)`                | Leaderboard-eligible XP in the ledger for the user's local day, for the cap           |
+| `config_bool(text, boolean)`                | Boolean config read with a fallback                                                   |
+| `exam_unavailable_reason(uuid, uuid)`       | Why an exam cannot be started, as a code. Null means it can                           |
+| `exam_question_set(uuid, uuid)`             | Picks and shuffles one attempt's questions, honouring the difficulty mix              |
+| `exam_questions(uuid, text)`                | The frozen paper, rendered — no explanation, no hint text, no key                     |
+| `exam_results(uuid, text, integer, jsonb)`  | Builds the results page. Internal, so a client cannot pass its own XP figure          |
 
 ### The XP ledger
 
@@ -485,6 +496,71 @@ board — with the same `P0002` a genuinely unknown id produces, so it cannot be
 which user ids exist. A second open report from the same reporter is accepted and files
 nothing. Moderation happens in Supabase Studio (SPEC §49).
 
+### Exam mode
+
+An exam is the only place a learner answers a batch of questions with no feedback until the
+end, against a clock the server owns. Five rules follow from that, and each one lives in the
+database rather than the app:
+
+- **the paper is frozen.** `start_exam` writes `question_ids` once. Force-quitting and
+  reopening resumes that attempt — same questions, same clock — rather than dealing a new hand.
+- **nothing marks the answer while the exam runs.** `exam_questions` returns the same shape a
+  lesson does: prompt, payload, `has_hint` as a boolean, and no explanation, hint text or key.
+- **the clock is `expires_at`**, set from the exam's own `time_limit_minutes` at start, and
+  re-checked at submission. `exam_submit_grace_seconds` (60) is how late a payload is still
+  taken at face value.
+- **no life is ever spent** (SPEC §22). `lives_consume_in` does not list `exam`, and
+  `submit_exam` never calls `consume_life`. An exam limits attempts instead.
+- **XP is paid on the score, once** (SPEC §19).
+
+#### Choosing the questions
+
+`exam_question_set` draws from `is_exam_eligible and is_active`, filtered by
+`can_access_module` and the per-question premium flag — an exam must not become a way to read
+content the learner has not unlocked. `exam_difficulty_mix` (30/45/25) is a target filled per
+bucket and topped up at random where a bucket falls short, because thirty easy questions is
+not the same exam as thirty hard ones (SPEC §37). The result is shuffled across buckets so the
+paper does not run easy-to-hard.
+
+#### Saving, and the clock
+
+`save_exam_progress` merges answers into `exam_attempts.answers` as the learner moves through
+the paper. SPEC §27 still submits everything at once — this only means a 45-minute exam
+survives the app being killed (SPEC §36).
+
+It is also what makes the deadline enforceable without being cruel. Inside the grace period a
+submitted payload counts. Past it, the payload is **ignored** and the saved answers are
+marked — what the learner had when time ran out. Rejecting the submission outright would throw
+away work they genuinely did.
+
+An attempt found expired and unsubmitted by a later `start_exam` is graded on the way past.
+Time running out is a result, not a pause.
+
+#### Attempt limits
+
+| Learner | Rule                                                                        |
+| ------- | --------------------------------------------------------------------------- |
+| Free    | `free_exam_attempts_per_week` (1) submitted attempts per exam, per ISO week |
+| Premium | `exam_retry_cooldown_hours` (0 — none) between submitted attempts           |
+| Anyone  | The full exam needs the `premium` entitlement (`requires_entitlement`)      |
+
+`exam_unavailable_reason` is the single definition, and both `get_exam_overview` and
+`start_exam` call it — so a card is greyed out for exactly the reason the RPC would refuse,
+and the learner never taps something that was going to say no.
+
+#### XP
+
+`round(score_pct / 100 × exam_xp_max)`, paid as the **improvement over the learner's best exam
+result so far** (SPEC §19). Because every exam award is itself an improvement, the running
+total of `exam` ledger rows IS that best — there is no high-score column to keep in step.
+
+The consequence, stated plainly: resitting an exam and doing worse pays nothing, and doing
+better pays only the difference. An exam cannot be farmed.
+
+Achievements (`exams_completed`, `exam_passed`) and the streak are evaluated in the same call,
+and the questions are recorded in `user_question_attempts` with `context = 'exam'`, so exam
+mistakes reach the review set and per-skill accuracy like any other answer.
+
 ---
 
 ## Auth configuration
@@ -517,19 +593,20 @@ Supabase's built-in sender is not permitted there.
 
 `npm run db:test` runs the pgTAP suite:
 
-| File                                    | Proves                                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `01_schema_invariants.test.sql`         | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists                                                                                                                                                                                      |
-| `02_rls_access_matrix.test.sql`         | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                                                                                                                                                                                                              |
-| `03_xp_ledger.test.sql`                 | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                                                                                                                                                                                                                   |
-| `04_auth_support.test.sql`              | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                                                                                                                                                                                                             |
-| `05_onboarding_age_gate.test.sql`       | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it                                                                                                                                                                                                  |
-| `06_lesson_engine.test.sql`             | That `get_lesson` refuses a premium module to free users and guests, opens it for a premium user, reports missing and withdrawn lessons distinctly, and never returns an explanation, hint or answer                                                                                                                                                                                            |
-| `07_question_grading.test.sql`          | Every grader right, wrong and malformed against the real seeded questions; quote and dash normalisation per match mode; accepted alternatives; XP first time, on retry, never twice, and not in practice; attempts recorded; the paywall and the grants                                                                                                                                         |
-| `08_progress.test.sql`                  | That a lesson pays once however often it is completed, that `lessons_completed` and the completion timestamp move only the first time, that a perfect lesson is computed from attempts and never revoked, that daily activity follows the user's timezone, and that per-skill accuracy is absent for a free user                                                                                |
-| `09_streak_lives_achievements.test.sql` | Streak qualification, continuation, reset and lazy breakage; date-line and DST boundaries; the beginner grace, per-context consumption, Premium immunity and lazy regeneration; and that an achievement unlocks once, pays through the ledger, and never fires on a stale streak                                                                                                                |
-| `10_practice_and_challenge.test.sql`    | Home for a new and a returning learner; review sets that clear as questions are answered correctly; practice never reaching past the paywall; the daily XP cap truncating rather than refusing; a deterministic challenge that is the same for a date and different across dates; and a bonus claimable once, by someone who actually finished it                                               |
-| `11_leaderboard.test.sql`               | Display-name validation on every path into the column, including a direct owner write; that a guest, a hidden user, an unnamed user and last week's score are all absent from the ranking; that no email address appears anywhere in the payload; the ±5 neighbour slice; the daily ranking cap clamping the board while the learner keeps every point; and a report queue nobody can read back |
+| File                                    | Proves                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `01_schema_invariants.test.sql`         | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists                                                                                                                                                                                                                                                   |
+| `02_rls_access_matrix.test.sql`         | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                                                                                                                                                                                                                                                                           |
+| `03_xp_ledger.test.sql`                 | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                                                                                                                                                                                                                                                                                |
+| `04_auth_support.test.sql`              | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                                                                                                                                                                                                                                                                          |
+| `05_onboarding_age_gate.test.sql`       | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it                                                                                                                                                                                                                                                               |
+| `06_lesson_engine.test.sql`             | That `get_lesson` refuses a premium module to free users and guests, opens it for a premium user, reports missing and withdrawn lessons distinctly, and never returns an explanation, hint or answer                                                                                                                                                                                                                                                         |
+| `07_question_grading.test.sql`          | Every grader right, wrong and malformed against the real seeded questions; quote and dash normalisation per match mode; accepted alternatives; XP first time, on retry, never twice, and not in practice; attempts recorded; the paywall and the grants                                                                                                                                                                                                      |
+| `08_progress.test.sql`                  | That a lesson pays once however often it is completed, that `lessons_completed` and the completion timestamp move only the first time, that a perfect lesson is computed from attempts and never revoked, that daily activity follows the user's timezone, and that per-skill accuracy is absent for a free user                                                                                                                                             |
+| `09_streak_lives_achievements.test.sql` | Streak qualification, continuation, reset and lazy breakage; date-line and DST boundaries; the beginner grace, per-context consumption, Premium immunity and lazy regeneration; and that an achievement unlocks once, pays through the ledger, and never fires on a stale streak                                                                                                                                                                             |
+| `10_practice_and_challenge.test.sql`    | Home for a new and a returning learner; review sets that clear as questions are answered correctly; practice never reaching past the paywall; the daily XP cap truncating rather than refusing; a deterministic challenge that is the same for a date and different across dates; and a bonus claimable once, by someone who actually finished it                                                                                                            |
+| `11_leaderboard.test.sql`               | Display-name validation on every path into the column, including a direct owner write; that a guest, a hidden user, an unnamed user and last week's score are all absent from the ranking; that no email address appears anywhere in the payload; the ±5 neighbour slice; the daily ranking cap clamping the board while the learner keeps every point; and a report queue nobody can read back                                                              |
+| `12_exams.test.sql`                     | That the paper is frozen and resumed rather than redealt; that it carries no explanation, hint or key while the exam runs and does carry both afterwards; the difficulty mix; that a payload past the grace period is ignored in favour of what was saved in time; the free weekly limit, the premium cooldown and the Premium gate; that score XP is the improvement over the learner's best and a worse resit pays nothing; and that no life is ever spent |
 
 CI runs these against a fresh database on every push, and fails if
 `src/types/database.types.ts` is out of date.
@@ -540,7 +617,6 @@ CI runs these against a fresh database on every push, and fails if
 
 These arrive with the features that need them:
 
-- `start_exam`, `submit_exam` and the attempt rules — Phase 13
 - `revenuecat-webhook` and `sync-entitlements` Edge Functions; `user_entitlements` is written
   by hand from the seed until then — Phase 14
 - `rewarded_ad_grants` and the RPC that pays a rewarded life — Phase 15

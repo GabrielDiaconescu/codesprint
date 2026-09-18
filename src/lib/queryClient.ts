@@ -50,6 +50,9 @@ export const queryKeys = {
     stats: (userId: string) => ['user', userId, 'stats'] as const,
     achievements: (userId: string, locale: string) =>
       ['user', userId, 'achievements', locale] as const,
+    exams: (userId: string, locale: string) => ['user', userId, 'exams', locale] as const,
+    examResults: (userId: string, attemptId: string) =>
+      ['user', userId, 'exam-results', attemptId] as const,
   },
   // Keyed by user: the payload carries the caller's own rank, so one cache entry cannot be
   // shared between two accounts on the same device.

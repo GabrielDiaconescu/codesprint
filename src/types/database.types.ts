@@ -993,6 +993,10 @@ export type Database = {
       }
       claim_daily_challenge: { Args: never; Returns: Json }
       complete_lesson: { Args: { p_lesson_id: string }; Returns: Json }
+      config_bool: {
+        Args: { p_default: boolean; p_key: string }
+        Returns: boolean
+      }
       config_int: {
         Args: { p_default: number; p_key: string }
         Returns: number
@@ -1023,9 +1027,35 @@ export type Database = {
         Returns: Json
       }
       evaluate_streak: { Args: { p_user_id: string }; Returns: number }
+      exam_question_set: {
+        Args: { p_exam_id: string; p_user_id: string }
+        Returns: string[]
+      }
+      exam_questions: {
+        Args: { p_attempt_id: string; p_locale: string }
+        Returns: Json
+      }
+      exam_results: {
+        Args: {
+          p_attempt_id: string
+          p_locale?: string
+          p_unlocked?: Json
+          p_xp_awarded?: number
+        }
+        Returns: Json
+      }
+      exam_unavailable_reason: {
+        Args: { p_exam_id: string; p_user_id: string }
+        Returns: string
+      }
       get_achievements: { Args: { p_locale?: string }; Returns: Json }
       get_app_config: { Args: never; Returns: Json }
       get_daily_challenge: { Args: { p_locale?: string }; Returns: Json }
+      get_exam_overview: { Args: { p_locale?: string }; Returns: Json }
+      get_exam_results: {
+        Args: { p_attempt_id: string; p_locale?: string }
+        Returns: Json
+      }
       get_home_summary: { Args: { p_locale?: string }; Returns: Json }
       get_leaderboard: { Args: { p_limit?: number }; Returns: Json }
       get_lesson: {
@@ -1091,7 +1121,15 @@ export type Database = {
         Returns: undefined
       }
       require_auth_uid: { Args: never; Returns: string }
+      save_exam_progress: {
+        Args: { p_answers: Json; p_attempt_id: string }
+        Returns: undefined
+      }
       set_display_name: { Args: { p_name: string }; Returns: Json }
+      start_exam: {
+        Args: { p_exam_id: string; p_locale?: string }
+        Returns: Json
+      }
       submit_answer: {
         Args: {
           p_answer: Json
@@ -1099,6 +1137,10 @@ export type Database = {
           p_locale?: string
           p_question_id: string
         }
+        Returns: Json
+      }
+      submit_exam: {
+        Args: { p_answers?: Json; p_attempt_id: string; p_locale?: string }
         Returns: Json
       }
       sync_session: {

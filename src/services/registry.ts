@@ -1,6 +1,7 @@
 import { SupabaseAuthService } from './auth/SupabaseAuthService';
 import { SupabaseConfigService } from './config/SupabaseConfigService';
 import { SupabaseContentService } from './content/SupabaseContentService';
+import { SupabaseExamService } from './exams/SupabaseExamService';
 import { SupabaseHomeService } from './home/SupabaseHomeService';
 import { SupabaseLeaderboardService } from './leaderboard/SupabaseLeaderboardService';
 import { SupabaseProfileService } from './profile/SupabaseProfileService';
@@ -21,6 +22,7 @@ import type {
   ConfigService,
   ConsentService,
   ContentService,
+  ExamService,
   HomeService,
   LeaderboardService,
   MonitoringService,
@@ -45,6 +47,7 @@ export type Services = {
   content: ContentService;
   progress: ProgressService;
   home: HomeService;
+  exams: ExamService;
   leaderboard: LeaderboardService;
   analytics: AnalyticsService;
   consent: ConsentService;
@@ -61,6 +64,7 @@ export const services: Services = {
   content: SupabaseContentService, // Phase 6 — real
   progress: SupabaseProgressService, // Phase 9 — real
   home: SupabaseHomeService, // Phase 11 — real
+  exams: SupabaseExamService, // Phase 13 — real
   leaderboard: SupabaseLeaderboardService, // Phase 12 — real
   analytics: NoopAnalyticsService, // Phase 16
   consent: NoopConsentService, // Phase 15

@@ -5,6 +5,7 @@ import type {
   PracticeMode,
   PracticeSet,
 } from './home/schema';
+import type { ExamOverview, ExamPaper, ExamResults } from './exams/schema';
 import type { Leaderboard, ReportReason } from './leaderboard/schema';
 import type {
   AchievementEntry,
@@ -338,6 +339,47 @@ export interface HomeService extends ServiceIdentity {
 
   /** Pays the day's bonus. Idempotent: a second claim pays nothing (SPEC §24). */
   claimDailyChallenge(): Promise<ChallengeClaim>;
+}
+
+/* --------------------------------------------------------------------- Exams (Supabase) */
+
+export type {
+  ExamOverview,
+  ExamPaper,
+  ExamResults,
+  ExamSummary,
+  ExamQuestion,
+  ReviewedQuestion,
+  ExamUnavailableReason,
+} from './exams/schema';
+export { EXAM_UNAVAILABLE_REASONS } from './exams/schema';
+
+export interface ExamService extends ServiceIdentity {
+  /** Every active exam with this learner's state and, where it applies, why it is locked. */
+  getOverview(locale: string): Promise<ExamOverview>;
+
+  /**
+   * Starts an attempt, or hands back one already in progress (SPEC §27).
+   *
+   * The question set is frozen server-side, so a resumed attempt is the same paper with the
+   * same clock. Throws `ExamUnavailable`, whose `reason` distinguishes the paywall from the
+   * weekly limit from the retry cooldown.
+   */
+  start(examId: string, locale: string): Promise<ExamPaper>;
+
+  /**
+   * Saves answers mid-exam so a crash does not cost the whole sitting (SPEC §36).
+   *
+   * Fire-and-forget from the UI's point of view: the authoritative copy is still the payload
+   * sent to `submit`, and these are what get marked if the clock runs out first.
+   */
+  saveProgress(attemptId: string, answers: Record<string, unknown>): Promise<void>;
+
+  /** Grades the attempt and returns the results page. Idempotent (SPEC §27). */
+  submit(attemptId: string, answers: Record<string, unknown>, locale: string): Promise<ExamResults>;
+
+  /** Reopens a graded attempt's results without regrading or repaying anything. */
+  getResults(attemptId: string, locale: string): Promise<ExamResults>;
 }
 
 /* -------------------------------------------------------------- Leaderboard (Supabase) */

@@ -4,6 +4,7 @@ import { initReactI18next } from 'react-i18next';
 
 import auth from './locales/en/auth.json';
 import common from './locales/en/common.json';
+import exam from './locales/en/exam.json';
 import home from './locales/en/home.json';
 import leaderboard from './locales/en/leaderboard.json';
 import learn from './locales/en/learn.json';
@@ -35,6 +36,7 @@ export const resources = {
     practice,
     challenge,
     leaderboard,
+    exam,
     profile,
     progress,
   },
