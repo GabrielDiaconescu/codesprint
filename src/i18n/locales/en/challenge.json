@@ -1,0 +1,23 @@
+{
+  "title": "Daily Challenge",
+  "subtitle": "Three questions. Finish them all for the bonus.",
+  "progress": "Question {{current}} of {{total}}",
+  "claimed": {
+    "title": "Already done today",
+    "body": "Come back tomorrow for a new challenge.",
+    "back": "Back to Home"
+  },
+  "done": {
+    "title": "Challenge complete",
+    "score": "{{correct}} of {{total}} correct",
+    "bonus": "+{{count}} XP bonus",
+    "noBonus": "You have already claimed today’s bonus.",
+    "claim": "Claim your bonus",
+    "back": "Back to Home"
+  },
+  "error": {
+    "title": "Couldn't load today's challenge",
+    "body": "Check your connection and try again.",
+    "claimFailed": "Couldn't claim the bonus. Try again."
+  }
+}

@@ -43,6 +43,8 @@ export const queryKeys = {
   user: {
     profile: (userId: string) => ['user', userId, 'profile'] as const,
     home: (userId: string) => ['user', userId, 'home'] as const,
+    practice: (userId: string) => ['user', userId, 'practice'] as const,
+    challenge: (userId: string) => ['user', userId, 'challenge'] as const,
     progress: (userId: string) => ['user', userId, 'progress'] as const,
     summary: (userId: string, locale: string) => ['user', userId, 'summary', locale] as const,
     stats: (userId: string) => ['user', userId, 'stats'] as const,

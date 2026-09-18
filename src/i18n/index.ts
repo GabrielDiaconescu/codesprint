@@ -8,7 +8,9 @@ import home from './locales/en/home.json';
 import leaderboard from './locales/en/leaderboard.json';
 import learn from './locales/en/learn.json';
 import lesson from './locales/en/lesson.json';
+import challenge from './locales/en/challenge.json';
 import navigation from './locales/en/navigation.json';
+import practice from './locales/en/practice.json';
 import onboarding from './locales/en/onboarding.json';
 import profile from './locales/en/profile.json';
 import progress from './locales/en/progress.json';
@@ -22,7 +24,20 @@ import progress from './locales/en/progress.json';
 export const FALLBACK_LOCALE = 'en';
 
 export const resources = {
-  en: { common, navigation, auth, onboarding, home, learn, lesson, leaderboard, profile, progress },
+  en: {
+    common,
+    navigation,
+    auth,
+    onboarding,
+    home,
+    learn,
+    lesson,
+    practice,
+    challenge,
+    leaderboard,
+    profile,
+    progress,
+  },
 } as const;
 
 export const NAMESPACES = Object.keys(resources.en) as (keyof typeof resources.en)[];

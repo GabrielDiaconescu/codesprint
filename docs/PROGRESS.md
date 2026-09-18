@@ -2,7 +2,7 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 10 complete — awaiting approval for Phase 11 (Home, Practice, Daily Challenge).
+**Current phase:** Phase 11 complete — awaiting approval for Phase 12 (Leaderboard, display names, reports).
 **Last updated:** 2026-09-17
 
 ---
@@ -22,7 +22,8 @@
 | 8     | Question engine & grading RPCs       | **Complete** — pending device check   |
 | 9     | XP, levels, progress                 | **Complete** — pending device check   |
 | 10    | Streak, lives, achievements          | **Complete** — pending device check   |
-| 11–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 11    | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
+| 12–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -876,6 +877,81 @@ A fresh guest through the real HTTP API:
    as impure — and a countdown frozen at the value it had when the screen opened is wrong
    anyway, since someone waiting for a life is watching that number.
 
+## Phase 11 — what was implemented (Home, Practice, Daily Challenge)
+
+**Database** — `20260917121200_practice_and_challenge.sql`
+
+- `get_home_summary`: stats, lives, daily goal, next lesson, course progress, mistake count
+  and challenge state in **one** round trip.
+- Practice: `get_practice_set` (review / mixed / hard), `mistake_count`, `award_practice_xp`
+  and `practice_xp_today` for the daily cap.
+- Daily Challenge: `daily_challenge_questions` (scheduled row, else a deterministic pick),
+  `get_daily_challenge` and `claim_daily_challenge`.
+- `submit_answer` replaced so a correct answer pays by its **context** — lesson rate, flat
+  practice rate, or nothing for a challenge, whose bonus is paid on claim.
+- 48 new pgTAP tests (`10_practice_and_challenge.test.sql`), 311 in total.
+
+**App**
+
+- **Home** rebuilt: greeting, level card with streak and lives, today's goal as an XP bar, the
+  next-lesson CTA (an invitation for a new learner), the Daily Challenge card, course progress
+  and the practice CTA with its badge.
+- **Practice** and **Challenge** screens, both full-screen and outside the tabs.
+- `QuestionRunner`, shared by both: they differ in what the server does with the answers, not
+  in how the questions are asked, so the eight renderers and the feedback panel are identical
+  to a lesson.
+
+### Phase 11 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 42 suites, 604 tests, all passing
+database    supabase test db ......... 10 files, 311 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+A fresh guest through the real HTTP API:
+
+| Step                                   | Result                                        |
+| -------------------------------------- | --------------------------------------------- |
+| Home, brand new                        | `is_new`, first lesson offered, goal 0/30     |
+| after one lesson with one mistake      | next lesson moves on, goal met, 1 to review   |
+| review set                             | 1 question, **no explanation, no answer key** |
+| answering it correctly                 | 2 XP, and the review count drops to 0         |
+| a free learner asking for a hard set   | `42501 hard practice requires premium`        |
+| claiming the challenge before doing it | `22023 the challenge is not finished yet`     |
+| claiming after finishing               | 25 XP, streak 1                               |
+| claiming again                         | 0 XP, `already_claimed`, still one claim row  |
+| practice XP from 39 of 40              | paid `1, 0, 0` — truncates, then stops        |
+
+## Decisions and interpretations made during Phase 11
+
+1. **The practice cap truncates rather than refusing.** A learner one point short of the cap
+   gets that one point. Refusing outright would be arbitrary and would feel like a bug.
+2. **Practice XP is keyed by question AND date.** A question can be practised again tomorrow,
+   unlike the lesson reward, which is once per question forever (SPEC §19).
+3. **Review means mistakes, and clears.** A question leaves the review set the moment it is
+   answered correctly, so the Home badge counts down rather than accumulating forever.
+4. **Practice never reaches past the paywall.** Filtered on `can_access_module` and the
+   per-question premium flag, so a mixed set can only contain questions the learner could
+   already have answered in a lesson.
+5. **The challenge is deterministic, not scheduled.** Ordering the eligible pool on
+   `md5(date || question id)` means there is always a challenge, it is the same for everyone
+   on that local date, and nobody has to remember to create one. A scheduled row still wins.
+6. **The bonus is claimed, not paid automatically**, so the learner sees what they earned —
+   and `claim_daily_challenge` checks that every question was actually answered today in
+   challenge context, so the card cannot be opened and closed for 25 XP.
+7. **Home is one RPC.** Five parallel requests on a cold connection is five chances to show a
+   spinner where an answer should be (SPEC §45).
+8. **A new learner gets an invitation, not a resume button.** `is_new` drives the greeting and
+   the CTA copy, so the first screen reads "Start your first lesson" rather than "Continue"
+   next to a row of zeroes (SPEC §13).
+9. **Practice and the Challenge share one runner.** They differ in what the server does with
+   the answers, never in how a question is asked — a question should not behave differently
+   depending on where the learner met it.
+
 ## Known limitations
 
 - Services other than Config are still no-ops: billing (14), ads (15), analytics and
@@ -896,12 +972,13 @@ A fresh guest through the real HTTP API:
 - Out of lives there is nowhere to go yet: the wait is explained, but the rewarded-ad
   restore needs the ads integration (Phase 15) and the upgrade needs the paywall (Phase 14).
   `rewarded_ad_grants` and the daily cap config are in place for it.
-- Practice mode — where a question answered wrong is retried for half XP — is Phase 11, so
-  a wrong answer in a lesson still has no in-app route to a retry.
 - Two achievements name modules whose content arrives in Phase 19 and cannot unlock before
   then. The exam achievements wait on Phase 13.
-- Home shows XP, level, streak and lives. The daily goal, the challenge card and the
-  next-lesson CTA are Phase 11.
+- The Leaderboard tab is still a placeholder (Phase 12), as are display names and reports.
+- Hard practice sets are gated correctly but there is no paywall to send a free learner to
+  yet — the screen explains what Premium adds and closes (Phase 14).
+- The Daily Challenge draws three questions. `daily_challenges` supports scheduling a
+  different set or bonus per date; nothing is scheduled, and the deterministic pick covers it.
 - Practice mode, where a failed question is retried for half XP, is Phase 11. Until then a
   question answered wrong in a lesson has no in-app route to a retry.
 - Sounds (SPEC §29) are not wired; haptics are.
@@ -943,7 +1020,7 @@ A fresh guest through the real HTTP API:
 
 - None. Docker is running and the Supabase project is in the EU region.
 
-**Before Phase 11 (the next phase):**
+**Before Phase 12 (the next phase):**
 
 - None.
 
@@ -1449,3 +1526,63 @@ Use a **fresh guest**. Most of this is about watching numbers that only move onc
     hours." — rather than five separate icons.
 21. Large text and dark mode: the level card, the hearts row and the achievement list stay
     legible and nothing clips.
+
+---
+
+## Phase 11 device test checklist
+
+Use a **fresh guest**: half of this is about what a brand-new learner sees.
+
+### Home, from empty to full
+
+1. Continue as guest. Home greets you with **"Ready to start?"** and the primary card reads
+   **Start your first lesson** — not "Continue" next to a row of zeroes.
+2. Today's goal shows **0 / 30 XP**. Course progress reads 0 of 8. The review button is
+   disabled, with "Nothing to review".
+3. Tap **Start** and finish the lesson, getting **one question wrong** on purpose.
+4. Back on Home: the greeting is **"Welcome back"**, the next lesson has moved to _Showing
+   output with print_, the goal bar is full and says the goal is met, and the review card now
+   offers **1 question to revisit**.
+
+### Practice
+
+5. Tap **Practice**. The question you got wrong appears, with the same renderer, Check button
+   and feedback panel as in the lesson.
+6. Answer it **correctly**. The feedback shows **+2 XP** — the flat practice rate, not the
+   lesson rate for that difficulty.
+7. Finish the set. The summary shows your score and the XP earned.
+8. Back on Home, the review card reads **"Nothing to review"** — getting it right cleared it.
+9. Tap **Mixed practice**: questions from lessons you have finished, in a fresh order each
+   time you open it.
+10. In Studio, set `app_config.xp_practice_daily_cap` to `2`, then practise two more correct
+    answers: the first pays, the second pays **0**. The answers still count towards the
+    streak. Set the cap back to `40`.
+
+### The Daily Challenge
+
+11. On Home the challenge card shows **+25 XP** and a **Start challenge** button.
+12. Open it: **three** questions.
+13. Leave without finishing, then reopen: it is still claimable, and it is **the same three
+    questions** — the pick is deterministic for the date.
+14. Finish all three, then tap **Claim your bonus**: **+25 XP**, and the streak line updates.
+15. Tap back into the challenge: it now says **"Already done today"** before showing any
+    questions.
+16. Home shows the challenge card as **Done for today**, disabled.
+17. In Studio, `user_daily_challenge_claims` has exactly **one** row for you, and `xp_events`
+    exactly one row with `source_type = 'challenge'`.
+
+### The rules
+
+18. In Studio set `free_module_count` to `1`. Reopen Home: course progress counts only the
+    four reachable lessons. Open Mixed practice: **no question comes from module 2**. Set it
+    back to `6`.
+19. Sign in as `premium@codesprint.test` (`sprint2026`), finish a lesson, then open Practice:
+    the **Hard set** option works. As a free learner it shows the Premium explanation instead.
+
+### Robustness
+
+20. Stop Supabase and open Home: an error state with **Try again**, not a blank screen or a
+    half-empty layout.
+21. Lose your lives (answer wrong repeatedly after the grace), then practise: the hearts show
+    on the question screen and the wait is explained.
+22. Large text and dark mode: every Home card stays legible, and nothing clips.

@@ -300,10 +300,12 @@ select is(
   'a hard question correct first time pays 15 XP'
 );
 
+-- Practice pays by its own rule, not the question's: 2 XP flat, capped daily (SPEC §19, §23).
+-- Phase 11 introduced it; before then this paid nothing.
 select is(
   (public.submit_answer(pg_temp.q('fill_blank'), '{"value": "print"}', 'practice') ->> 'xp_awarded')::integer,
-  0,
-  'question XP is for the lesson context only; practice pays by its own rule later (SPEC §19)'
+  2,
+  'practice pays the flat practice rate, not the question difficulty rate'
 );
 
 select is(

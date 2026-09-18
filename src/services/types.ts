@@ -1,4 +1,11 @@
 import type {
+  ChallengeClaim,
+  DailyChallenge,
+  HomeSummary,
+  PracticeMode,
+  PracticeSet,
+} from './home/schema';
+import type {
   AchievementEntry,
   LessonCompletion,
   ProgressSummary,
@@ -299,6 +306,40 @@ export interface ProgressService extends ServiceIdentity {
    * timestamp only moves the first time.
    */
   completeLesson(lessonId: string): Promise<LessonCompletion>;
+}
+
+/* ------------------------------------------------------------------ Home (Supabase) */
+
+export type {
+  HomeSummary,
+  NextLesson,
+  PracticeMode,
+  PracticeSet,
+  DailyChallenge,
+  ChallengeClaim,
+} from './home/schema';
+
+export { PRACTICE_MODES } from './home/schema';
+
+export interface HomeService extends ServiceIdentity {
+  /**
+   * Everything the Home screen needs, in one round trip (SPEC §13, §45).
+   *
+   * One request rather than five: Home is the most-opened screen in the product, and each
+   * extra request on a cold connection is another chance to show a spinner.
+   */
+  getHome(locale: string): Promise<HomeSummary>;
+
+  /**
+   * A practice set (SPEC §23). Throws `LessonUnavailableError` with `requires-premium` when
+   * a free learner asks for a hard set.
+   */
+  getPracticeSet(mode: PracticeMode, size: number, locale: string): Promise<PracticeSet>;
+
+  getDailyChallenge(locale: string): Promise<DailyChallenge>;
+
+  /** Pays the day's bonus. Idempotent: a second claim pays nothing (SPEC §24). */
+  claimDailyChallenge(): Promise<ChallengeClaim>;
 }
 
 /* ------------------------------------------------------------------ Monitoring (Sentry) */

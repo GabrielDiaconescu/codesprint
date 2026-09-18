@@ -973,6 +973,10 @@ export type Database = {
         Returns: boolean
       }
       age_from_birth_year: { Args: { p_birth_year: number }; Returns: number }
+      award_practice_xp: {
+        Args: { p_question_id: string; p_user_id: string }
+        Returns: number
+      }
       award_xp: {
         Args: {
           p_amount: number
@@ -987,6 +991,7 @@ export type Database = {
         Args: { p_module_id: string; p_user_id: string }
         Returns: boolean
       }
+      claim_daily_challenge: { Args: never; Returns: Json }
       complete_lesson: { Args: { p_lesson_id: string }; Returns: Json }
       config_int: {
         Args: { p_default: number; p_key: string }
@@ -1004,6 +1009,10 @@ export type Database = {
         Returns: number
       }
       current_streak_for: { Args: { p_user_id: string }; Returns: number }
+      daily_challenge_questions: {
+        Args: { p_date: string; p_user_id: string }
+        Returns: string[]
+      }
       delete_stale_anonymous_users: {
         Args: { p_days?: number }
         Returns: number
@@ -1015,8 +1024,14 @@ export type Database = {
       evaluate_streak: { Args: { p_user_id: string }; Returns: number }
       get_achievements: { Args: { p_locale?: string }; Returns: Json }
       get_app_config: { Args: never; Returns: Json }
+      get_daily_challenge: { Args: { p_locale?: string }; Returns: Json }
+      get_home_summary: { Args: { p_locale?: string }; Returns: Json }
       get_lesson: {
         Args: { p_lesson_id: string; p_locale?: string }
+        Returns: Json
+      }
+      get_practice_set: {
+        Args: { p_locale?: string; p_mode?: string; p_size?: number }
         Returns: Json
       }
       get_progress_summary: { Args: { p_locale?: string }; Returns: Json }
@@ -1048,6 +1063,7 @@ export type Database = {
         Args: { p_locale?: string; p_value: Json }
         Returns: string
       }
+      mistake_count: { Args: { p_user_id: string }; Returns: number }
       module_requires_premium: {
         Args: { p_module_id: string }
         Returns: boolean
@@ -1059,6 +1075,7 @@ export type Database = {
         }
         Returns: string
       }
+      practice_xp_today: { Args: { p_user_id: string }; Returns: number }
       question_xp: {
         Args: { p_attempt_no: number; p_question_id: string }
         Returns: number

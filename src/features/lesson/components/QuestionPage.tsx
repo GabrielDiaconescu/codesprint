@@ -9,13 +9,15 @@ import { useSubmitAnswer } from '@/features/questions/hooks/useSubmitAnswer';
 import { isAnswerComplete } from '@/features/questions/logic/answers';
 import { parseQuestion } from '@/features/questions/payloads';
 import { emptyAnswer, type AnswerValue, type Solution } from '@/features/questions/types';
-import type { AnswerResult, RenderableQuestion } from '@/services';
+import type { AnswerContext, AnswerResult, RenderableQuestion } from '@/services';
 import { useTheme } from '@/theme';
 
 interface QuestionPageProps {
   question: RenderableQuestion;
   number: number;
   total: number;
+  /** Decides the server-side rules: lesson XP, practice XP, or a challenge attempt. */
+  context?: AnswerContext;
   /** Called once the learner has seen the result and moves on. */
   onContinue: (result: AnswerResult) => void;
   /** Called when the question cannot be rendered at all, so the player can skip it. */
@@ -33,7 +35,14 @@ interface QuestionPageProps {
  * A network failure never loses the selection and never records anything: the server did
  * not see the answer, so nothing was graded, deducted or counted (SPEC §18).
  */
-export const QuestionPage = ({ question, number, total, onContinue, onSkip }: QuestionPageProps) => {
+export const QuestionPage = ({
+  question,
+  number,
+  total,
+  context = 'lesson',
+  onContinue,
+  onSkip,
+}: QuestionPageProps) => {
   const { t } = useTranslation('lesson');
   const theme = useTheme();
 
@@ -41,7 +50,7 @@ export const QuestionPage = ({ question, number, total, onContinue, onSkip }: Qu
   const [value, setValue] = useState<AnswerValue>(() => emptyAnswer(question.type as AnswerValue['type']));
   const [result, setResult] = useState<AnswerResult | null>(null);
 
-  const submit = useSubmitAnswer('lesson');
+  const submit = useSubmitAnswer(context);
 
   if (!parsed) {
     // A payload the renderer cannot understand. Said out loud and skipped, rather than an

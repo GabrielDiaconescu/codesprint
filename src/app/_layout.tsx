@@ -103,6 +103,8 @@ const ThemedApp = () => {
           {/* Full-screen and outside the tabs: no tab bar and no banner ad while reading
               or answering (SPEC §10, §30). */}
           <Stack.Screen name="progress" options={{ title: '' }} />
+          <Stack.Screen name="practice" options={{ title: '' }} />
+          <Stack.Screen name="challenge" options={{ title: '' }} />
           <Stack.Screen name="module/[id]" options={{ title: '' }} />
           <Stack.Screen name="lesson/[id]" options={{ title: '' }} />
           <Stack.Screen

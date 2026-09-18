@@ -15,6 +15,8 @@ describe('i18n resources', () => {
         'home',
         'learn',
         'lesson',
+        'practice',
+        'challenge',
         'leaderboard',
         'profile',
         'progress',

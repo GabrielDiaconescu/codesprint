@@ -1,0 +1,38 @@
+{
+  "title": "Practice",
+  "modes": {
+    "review": "Review mistakes",
+    "mixed": "Mixed practice",
+    "hard": "Hard set"
+  },
+  "subtitle": {
+    "review": "The questions you got wrong. Get one right and it leaves this list.",
+    "mixed": "A mix from the lessons you have finished.",
+    "hard": "The difficult questions from what you have finished."
+  },
+  "progress": "Question {{current}} of {{total}}",
+  "empty": {
+    "reviewTitle": "Nothing to review",
+    "reviewBody": "Everything you have answered is correct. Try mixed practice instead.",
+    "mixedTitle": "Nothing to practise yet",
+    "mixedBody": "Finish a lesson first, then its questions appear here.",
+    "hardTitle": "No hard questions yet",
+    "hardBody": "Finish more lessons to unlock harder practice."
+  },
+  "premium": {
+    "title": "Hard sets are Premium",
+    "body": "Premium unlocks the difficult practice sets, unlimited lives and every module."
+  },
+  "done": {
+    "title": "Practice complete",
+    "score": "{{correct}} of {{total}} correct",
+    "xp": "+{{count}} XP earned",
+    "capped": "You have reached today's practice XP cap. Answers still count towards your streak.",
+    "again": "Practise again",
+    "back": "Back to Home"
+  },
+  "error": {
+    "title": "Couldn't load your practice set",
+    "body": "Check your connection and try again."
+  }
+}

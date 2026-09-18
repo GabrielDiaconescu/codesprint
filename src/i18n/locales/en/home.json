@@ -1,9 +1,40 @@
 {
   "title": "Home",
-  "placeholder": {
-    "title": "Your daily session lands here",
-    "body": "Today's goal, the daily challenge and your next lesson arrive in Phase 11."
+  "greetingNew": "Ready to start?",
+  "greetingBack": "Welcome back",
+  "startFirst": "Start your first lesson",
+  "startFirstBody": "Five minutes is all it takes. Your first lesson is waiting.",
+  "continueTitle": "Today's learning",
+  "continueCta": "Continue",
+  "startCta": "Start",
+  "allDoneTitle": "You have finished everything available",
+  "allDoneBody": "More modules are on the way. Practice what you know in the meantime.",
+  "goal": {
+    "title": "Today's goal",
+    "progress": "{{earned}} / {{target}} XP today",
+    "met": "Goal met. Anything more is a bonus."
   },
-  "continueLearning": "Keep learning",
-  "openLearn": "Go to Learn"
+  "course": {
+    "title": "Python Fundamentals",
+    "progress": "{{completed}} of {{total}} lessons"
+  },
+  "challenge": {
+    "title": "Daily Challenge",
+    "body": "Three questions, once a day.",
+    "reward": "+{{count}} XP",
+    "cta": "Start challenge",
+    "done": "Done for today"
+  },
+  "practice": {
+    "title": "Review mistakes",
+    "body_one": "{{count}} question to revisit",
+    "body_other": "{{count}} questions to revisit",
+    "cta": "Practice",
+    "none": "Nothing to review — everything you have answered is correct.",
+    "mixed": "Mixed practice"
+  },
+  "error": {
+    "title": "Couldn't load your home screen",
+    "body": "Check your connection and try again."
+  }
 }

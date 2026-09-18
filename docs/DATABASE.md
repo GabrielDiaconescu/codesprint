@@ -57,6 +57,7 @@ Local Studio: http://127.0.0.1:54323 · API: http://127.0.0.1:54321
 | `20260917120900_question_grading`          | `submit_answer`, the grader for all eight types, normalisation, question XP                             |
 | `20260917121000_progress`                  | `complete_lesson`, `get_progress_summary`, `get_user_stats`, and the counters they read                 |
 | `20260917121100_streak_lives_achievements` | Lazy streaks, lazy lives, the achievement catalogue and its engine                                      |
+| `20260917121200_practice_and_challenge`    | Practice XP and sets, the Daily Challenge, and the Home summary                                         |
 
 ---
 
@@ -139,6 +140,10 @@ the search path and hijack an unqualified reference while the function runs as o
 | `get_progress_summary(text)`                       | authenticated       | The whole Progress screen in one round trip. Per-skill accuracy is Premium                                                                                          |
 | `get_user_stats()`                                 | authenticated       | XP, streak and lives for the header on Home and Profile                                                                                                             |
 | `get_achievements(text)`                           | authenticated       | The catalogue with this user's unlock dates. Locked ones are listed too                                                                                             |
+| `get_home_summary(text)`                           | authenticated       | Everything the Home screen needs, in one round trip                                                                                                                 |
+| `get_practice_set(text, int, text)`                | authenticated       | Review, mixed or hard practice. Never returns answers                                                                                                               |
+| `get_daily_challenge(text)`                        | authenticated       | Today's challenge and its claim state                                                                                                                               |
+| `claim_daily_challenge()`                          | authenticated       | Pays the bonus once per local date                                                                                                                                  |
 
 ### Internal (no client grant)
 
@@ -172,6 +177,10 @@ the search path and hijack an unqualified reference while the function runs as o
 | `lives_state(uuid)`                         | Lives plus when the next one arrives                                                  |
 | `achievement_rule_met(uuid, jsonb)`         | Evaluates one rule. An unknown type never unlocks                                     |
 | `evaluate_achievements(uuid, text[])`       | Unlocks what the given kinds of event could have earned                               |
+| `practice_xp_today(uuid)`                   | Practice XP earned on the current local day, for the cap                              |
+| `award_practice_xp(uuid, uuid)`             | Pays a correct practice answer up to the daily cap                                    |
+| `mistake_count(uuid)`                       | How many questions are waiting to be reviewed                                         |
+| `daily_challenge_questions(uuid, date)`     | A scheduled challenge, or a deterministic pick                                        |
 
 ### The XP ledger
 
@@ -372,6 +381,41 @@ Achievement XP goes through the same ledger as everything else, so an unlock can
 twice. Streak rules read the **live** streak, so a broken one unlocks nothing whatever the
 stored number says.
 
+### Practice and the Daily Challenge
+
+**Practice XP is capped per local day** (SPEC §19). The cap _truncates_ rather than refusing:
+a learner one point short of forty gets that one point, not nothing. The ledger key includes
+the date (`question:date`), so a question can be practised again tomorrow — unlike the lesson
+reward, which is once per question forever.
+
+**Practice can never reach past the paywall.** `get_practice_set` filters on
+`can_access_module` and on the per-question premium flag, so a free learner's mixed set can
+only contain questions they could already have answered in a lesson. Hard sets are Premium and
+refused with `42501` rather than quietly returned empty.
+
+**Review means mistakes.** A question appears in the review set when it has been answered
+wrongly and _never since_ answered correctly. Getting it right removes it — which is what
+makes the Home badge count down instead of accumulating forever.
+
+**There is always a Daily Challenge** (SPEC §24). A scheduled row in `daily_challenges` wins
+if one exists; otherwise the questions are chosen deterministically by ordering the eligible
+pool on `md5(date || question id)`. The same local date always yields the same challenge, a
+different date a different one, and nobody has to schedule anything.
+
+Free learners are only ever offered non-Premium questions from unlocked modules, so the
+challenge cannot become a daily preview of paid content.
+
+**The bonus is claimed once per local date.** The primary key on
+`user_daily_challenge_claims (user_id, local_date)` makes that structural rather than
+procedural — a replayed request inserts nothing and pays nothing. `claim_daily_challenge`
+additionally verifies that every question was actually answered _today, in challenge context_,
+so the bonus cannot be collected by opening the card and closing it.
+
+**Home is one RPC.** It is the most-opened screen in the product, and each extra request on a
+cold mobile connection is another chance to show a spinner where an answer should be
+(SPEC §45). `get_home_summary` returns stats, lives, the daily goal, the next lesson, course
+progress, the mistake count and the challenge state together.
+
 ---
 
 ## Auth configuration
@@ -404,17 +448,18 @@ Supabase's built-in sender is not permitted there.
 
 `npm run db:test` runs the pgTAP suite:
 
-| File                                    | Proves                                                                                                                                                                                                                                                                                                           |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `01_schema_invariants.test.sql`         | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists                                                                                                       |
-| `02_rls_access_matrix.test.sql`         | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                                                                                                                               |
-| `03_xp_ledger.test.sql`                 | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                                                                                                                                    |
-| `04_auth_support.test.sql`              | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                                                                                                                              |
-| `05_onboarding_age_gate.test.sql`       | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it                                                                                                                   |
-| `06_lesson_engine.test.sql`             | That `get_lesson` refuses a premium module to free users and guests, opens it for a premium user, reports missing and withdrawn lessons distinctly, and never returns an explanation, hint or answer                                                                                                             |
-| `07_question_grading.test.sql`          | Every grader right, wrong and malformed against the real seeded questions; quote and dash normalisation per match mode; accepted alternatives; XP first time, on retry, never twice, and not in practice; attempts recorded; the paywall and the grants                                                          |
-| `08_progress.test.sql`                  | That a lesson pays once however often it is completed, that `lessons_completed` and the completion timestamp move only the first time, that a perfect lesson is computed from attempts and never revoked, that daily activity follows the user's timezone, and that per-skill accuracy is absent for a free user |
-| `09_streak_lives_achievements.test.sql` | Streak qualification, continuation, reset and lazy breakage; date-line and DST boundaries; the beginner grace, per-context consumption, Premium immunity and lazy regeneration; and that an achievement unlocks once, pays through the ledger, and never fires on a stale streak                                 |
+| File                                    | Proves                                                                                                                                                                                                                                                                                                                                            |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `01_schema_invariants.test.sql`         | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists                                                                                                                                        |
+| `02_rls_access_matrix.test.sql`         | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                                                                                                                                                                |
+| `03_xp_ledger.test.sql`                 | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                                                                                                                                                                     |
+| `04_auth_support.test.sql`              | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                                                                                                                                                               |
+| `05_onboarding_age_gate.test.sql`       | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it                                                                                                                                                    |
+| `06_lesson_engine.test.sql`             | That `get_lesson` refuses a premium module to free users and guests, opens it for a premium user, reports missing and withdrawn lessons distinctly, and never returns an explanation, hint or answer                                                                                                                                              |
+| `07_question_grading.test.sql`          | Every grader right, wrong and malformed against the real seeded questions; quote and dash normalisation per match mode; accepted alternatives; XP first time, on retry, never twice, and not in practice; attempts recorded; the paywall and the grants                                                                                           |
+| `08_progress.test.sql`                  | That a lesson pays once however often it is completed, that `lessons_completed` and the completion timestamp move only the first time, that a perfect lesson is computed from attempts and never revoked, that daily activity follows the user's timezone, and that per-skill accuracy is absent for a free user                                  |
+| `09_streak_lives_achievements.test.sql` | Streak qualification, continuation, reset and lazy breakage; date-line and DST boundaries; the beginner grace, per-context consumption, Premium immunity and lazy regeneration; and that an achievement unlocks once, pays through the ledger, and never fires on a stale streak                                                                  |
+| `10_practice_and_challenge.test.sql`    | Home for a new and a returning learner; review sets that clear as questions are answered correctly; practice never reaching past the paywall; the daily XP cap truncating rather than refusing; a deterministic challenge that is the same for a date and different across dates; and a bonus claimable once, by someone who actually finished it |
 
 CI runs these against a fresh database on every push, and fails if
 `src/types/database.types.ts` is out of date.
