@@ -51,7 +51,6 @@ export const SupabaseProfileService: ProfileService = {
     // Only keys the caller actually set are sent: `update_profile` distinguishes an absent
     // key from an explicit null, and sending undefined would clear a value by accident.
     const payload: ProfilePatchPayload = {};
-    if (patch.displayName !== undefined) payload.display_name = patch.displayName;
     if (patch.avatarKey !== undefined) payload.avatar_key = patch.avatarKey;
     if (patch.locale !== undefined) payload.locale = patch.locale;
     if (patch.timezone !== undefined) payload.timezone = patch.timezone;

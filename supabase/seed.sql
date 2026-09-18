@@ -265,6 +265,10 @@ insert into auth.identities (
   '{"sub":"00000000-0000-4000-8000-000000000001","email":"free@codesprint.test","email_verified":true}'::jsonb,
   now(), now(), now()
 ) on conflict (provider, provider_id) do nothing;
+update public.profiles
+set display_name = 'Free Tester',
+    birth_year = 1996
+where id = '00000000-0000-4000-8000-000000000001';
 
 -- noads@codesprint.test
 insert into auth.users (
@@ -296,6 +300,10 @@ insert into auth.identities (
   '{"sub":"00000000-0000-4000-8000-000000000002","email":"noads@codesprint.test","email_verified":true}'::jsonb,
   now(), now(), now()
 ) on conflict (provider, provider_id) do nothing;
+update public.profiles
+set display_name = 'No Ads Tester',
+    birth_year = 1992
+where id = '00000000-0000-4000-8000-000000000002';
 insert into public.user_entitlements (user_id, entitlement, is_active, store)
 values ('00000000-0000-4000-8000-000000000002', 'no_ads'::public.entitlement_id, true, 'dev-seed')
 on conflict (user_id, entitlement) do update set is_active = true, store = 'dev-seed';
@@ -330,11 +338,55 @@ insert into auth.identities (
   '{"sub":"00000000-0000-4000-8000-000000000003","email":"premium@codesprint.test","email_verified":true}'::jsonb,
   now(), now(), now()
 ) on conflict (provider, provider_id) do nothing;
+update public.profiles
+set display_name = 'Premium Tester',
+    birth_year = 1988
+where id = '00000000-0000-4000-8000-000000000003';
 insert into public.user_entitlements (user_id, entitlement, is_active, store)
 values ('00000000-0000-4000-8000-000000000003', 'no_ads'::public.entitlement_id, true, 'dev-seed')
 on conflict (user_id, entitlement) do update set is_active = true, store = 'dev-seed';
 insert into public.user_entitlements (user_id, entitlement, is_active, store)
 values ('00000000-0000-4000-8000-000000000003', 'premium'::public.entitlement_id, true, 'dev-seed')
 on conflict (user_id, entitlement) do update set is_active = true, store = 'dev-seed';
+
+-- ============================================================ leaderboard fixtures
+
+-- 60 ranked fixture accounts. They cannot sign in (no identity row).
+insert into auth.users (
+  id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new,
+  email_change_token_current, phone_change, phone_change_token, reauthentication_token
+)
+select
+  ('00000000-0000-4000-8000-0000000100' || to_char(n, 'FM00'))::uuid,
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated',
+  'authenticated',
+  'rival' || to_char(n, 'FM00') || '@codesprint.test',
+  extensions.crypt('sprint2026', extensions.gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}'::jsonb,
+  '{}'::jsonb,
+  now(), now(),
+  '', '', '', '', '', '', '', ''
+from generate_series(1, 60) as n
+on conflict (id) do nothing;
+
+update public.profiles p
+set display_name = 'Sprinter ' || to_char(n.n, 'FM00'),
+    avatar_key = 'avatar-' || to_char(1 + (n.n % 8), 'FM0')
+from generate_series(1, 60) as n(n)
+where p.id = ('00000000-0000-4000-8000-0000000100' || to_char(n.n, 'FM00'))::uuid;
+
+-- A descending spread, so ranks 1..60 are distinct and a developer who has just
+-- finished a lesson or two lands near the bottom.
+insert into public.leaderboard_weekly (week_start, user_id, xp)
+select
+  public.iso_week_start(),
+  ('00000000-0000-4000-8000-0000000100' || to_char(n, 'FM00'))::uuid,
+  1520 - 24 * n
+from generate_series(1, 60) as n
+on conflict (week_start, user_id) do update set xp = excluded.xp;
 
 commit;

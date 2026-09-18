@@ -58,6 +58,7 @@ Local Studio: http://127.0.0.1:54323 · API: http://127.0.0.1:54321
 | `20260917121000_progress`                  | `complete_lesson`, `get_progress_summary`, `get_user_stats`, and the counters they read                 |
 | `20260917121100_streak_lives_achievements` | Lazy streaks, lazy lives, the achievement catalogue and its engine                                      |
 | `20260917121200_practice_and_challenge`    | Practice XP and sets, the Daily Challenge, and the Home summary                                         |
+| `20260917121300_leaderboard`               | Display names, the weekly ranking, reports, and the per-day ranking cap                                 |
 
 ---
 
@@ -144,6 +145,9 @@ the search path and hijack an unqualified reference while the function runs as o
 | `get_practice_set(text, int, text)`                | authenticated       | Review, mixed or hard practice. Never returns answers                                                                                                               |
 | `get_daily_challenge(text)`                        | authenticated       | Today's challenge and its claim state                                                                                                                               |
 | `claim_daily_challenge()`                          | authenticated       | Pays the bonus once per local date                                                                                                                                  |
+| `set_display_name(text)`                           | authenticated       | Claims a display name. Validated and unique case-insensitively                                                                                                      |
+| `get_leaderboard(int)`                             | authenticated       | The weekly ranking: top rows, the caller's position, ±5 neighbours. Never returns an email address or an auth identifier                                            |
+| `report_user(uuid, text, text)`                    | authenticated       | Files a moderation report. Write-only — no client can read the queue back                                                                                           |
 
 ### Internal (no client grant)
 
@@ -181,6 +185,10 @@ the search path and hijack an unqualified reference while the function runs as o
 | `award_practice_xp(uuid, uuid)`             | Pays a correct practice answer up to the daily cap                                    |
 | `mistake_count(uuid)`                       | How many questions are waiting to be reviewed                                         |
 | `daily_challenge_questions(uuid, date)`     | A scheduled challenge, or a deterministic pick                                        |
+| `display_name_problem(text)`                | Validates a name, returning a code the client localizes. Null means acceptable        |
+| `validate_display_name()`                   | Trigger: applies that rule to every write into `profiles.display_name`                |
+| `leaderboard_eligible(uuid)`                | Named, registered, not hidden. The single definition of "appears on the board"        |
+| `leaderboard_xp_today(uuid)`                | Leaderboard-eligible XP in the ledger for the user's local day, for the cap           |
 
 ### The XP ledger
 
@@ -416,6 +424,67 @@ cold mobile connection is another chance to show a spinner where an answer shoul
 (SPEC §45). `get_home_summary` returns stats, lives, the daily goal, the next lesson, course
 progress, the mistake count and the challenge state together.
 
+### The leaderboard
+
+`leaderboard_weekly (week_start, user_id, xp)` is written inside `award_xp`, in the same
+transaction as the ledger row. A new week is a new key — there is no reset job, and last
+week's rows simply stop being selected (SPEC §26, §60).
+
+Four rules decide who appears, and all four live in `leaderboard_eligible`:
+
+- guests are excluded (they have no identity to attach a name to, and are purged after 30 days);
+- a user with no display name is excluded — the alternative is showing an identifier;
+- `leaderboard_hidden` excludes, whether the user set it in Settings or moderation did;
+- a row with zero XP this week is not a ranking.
+
+`get_leaderboard(limit)` returns the top `limit` (clamped to 1..100), the caller's own row and
+the ±5 around them when they fall outside the slice. It returns a display name, an avatar key,
+an XP figure and the pseudonymous user id — nothing else, ever. The `.strict()` Zod schema on
+the client is the second lock: if a future migration widens the query, the app fails loudly
+instead of quietly rendering a field nobody meant to send.
+
+When the caller is absent, the payload says **which** of the four reasons applies, because
+"choose a name", "you hid yourself", "guests are not ranked" and "no XP yet" have four
+different fixes.
+
+#### Display names
+
+`display_name_problem(text)` is the single definition: 3–20 characters, `[[:alnum:]]` (which
+is locale-aware, so "Mărioară" and "Δημήτρης" are fine) with space, underscore, dot and hyphen
+allowed _between_ alphanumerics, then two config-driven lists — `display_name_blocklist`
+(exact match) and `display_name_profanity` (substring). Both are compared after folding case
+and stripping separators, so `M O D` and `m.o.d` are the word `mod`.
+
+It returns a **code**, not a sentence: the database holds no user-facing English (SPEC §38).
+
+The rule is enforced by the `profiles_validate_display_name` trigger rather than only inside
+`set_display_name`, so `update_profile` and a future moderation rename are covered by the same
+one copy. Uniqueness is the pre-existing `profiles_display_name_unique_idx` on
+`lower(display_name)`; `set_display_name` pre-checks it for a clean `23505`, and the index
+still settles a race.
+
+#### The per-day ranking cap
+
+`leaderboard_daily_xp_cap` (default 2000, **private**) limits how much of one local day can
+count towards the RANKING. The learner always keeps every point: the ledger row and
+`user_stats.xp_total` are untouched, so levels and achievements are unaffected. Only the
+`leaderboard_weekly` increment is clamped.
+
+`award_xp` clamps against the day's _uncapped_ running total, which makes the credited total
+come to exactly `least(earned_today, cap)`: awards below the line count in full, the one that
+crosses it counts partially, and every award after it counts nothing. XP written with
+`counts_for_leaderboard = false` — rewarded-ad bonuses (SPEC §19, §30) — never reaches the
+board at all, cap or no cap.
+
+#### Reports
+
+`reports` is insert-only for clients: an insert policy, no read policy, no `SELECT` grant.
+Reading it as a client fails with `42501`, which is asserted in pgTAP. `report_user` exists so
+the reporter cannot choose their own `reporter_id`, and refuses a target who is not on the
+board — with the same `P0002` a genuinely unknown id produces, so it cannot be used to probe
+which user ids exist. A second open report from the same reporter is accepted and files
+nothing. Moderation happens in Supabase Studio (SPEC §49).
+
 ---
 
 ## Auth configuration
@@ -448,18 +517,19 @@ Supabase's built-in sender is not permitted there.
 
 `npm run db:test` runs the pgTAP suite:
 
-| File                                    | Proves                                                                                                                                                                                                                                                                                                                                            |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `01_schema_invariants.test.sql`         | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists                                                                                                                                        |
-| `02_rls_access_matrix.test.sql`         | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                                                                                                                                                                |
-| `03_xp_ledger.test.sql`                 | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                                                                                                                                                                     |
-| `04_auth_support.test.sql`              | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                                                                                                                                                               |
-| `05_onboarding_age_gate.test.sql`       | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it                                                                                                                                                    |
-| `06_lesson_engine.test.sql`             | That `get_lesson` refuses a premium module to free users and guests, opens it for a premium user, reports missing and withdrawn lessons distinctly, and never returns an explanation, hint or answer                                                                                                                                              |
-| `07_question_grading.test.sql`          | Every grader right, wrong and malformed against the real seeded questions; quote and dash normalisation per match mode; accepted alternatives; XP first time, on retry, never twice, and not in practice; attempts recorded; the paywall and the grants                                                                                           |
-| `08_progress.test.sql`                  | That a lesson pays once however often it is completed, that `lessons_completed` and the completion timestamp move only the first time, that a perfect lesson is computed from attempts and never revoked, that daily activity follows the user's timezone, and that per-skill accuracy is absent for a free user                                  |
-| `09_streak_lives_achievements.test.sql` | Streak qualification, continuation, reset and lazy breakage; date-line and DST boundaries; the beginner grace, per-context consumption, Premium immunity and lazy regeneration; and that an achievement unlocks once, pays through the ledger, and never fires on a stale streak                                                                  |
-| `10_practice_and_challenge.test.sql`    | Home for a new and a returning learner; review sets that clear as questions are answered correctly; practice never reaching past the paywall; the daily XP cap truncating rather than refusing; a deterministic challenge that is the same for a date and different across dates; and a bonus claimable once, by someone who actually finished it |
+| File                                    | Proves                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `01_schema_invariants.test.sql`         | RLS on every table; answer keys have zero policies and force RLS; no client write grants anywhere but `reports`; every SECURITY DEFINER function pins `search_path`; the XP unique constraint still exists                                                                                                                                                                                      |
+| `02_rls_access_matrix.test.sql`         | The full matrix above for anon / guest / free / premium / other user, including the negative cases                                                                                                                                                                                                                                                                                              |
+| `03_xp_ledger.test.sql`                 | Award, replay, inflated replay, accumulation across sources, and rewarded-ad XP excluded from the leaderboard                                                                                                                                                                                                                                                                                   |
+| `04_auth_support.test.sql`              | Guest bootstrapping, conversion mirroring and id stability, and that the purge deletes abandoned guests only — never an active guest, a converted one, or a dormant registered user                                                                                                                                                                                                             |
+| `05_onboarding_age_gate.test.sql`       | That a minor's client cannot buy past the §41 defaults on the first attempt or a later one, that an adult keeps full control, and that an under-age account is deleted and nobody else with it                                                                                                                                                                                                  |
+| `06_lesson_engine.test.sql`             | That `get_lesson` refuses a premium module to free users and guests, opens it for a premium user, reports missing and withdrawn lessons distinctly, and never returns an explanation, hint or answer                                                                                                                                                                                            |
+| `07_question_grading.test.sql`          | Every grader right, wrong and malformed against the real seeded questions; quote and dash normalisation per match mode; accepted alternatives; XP first time, on retry, never twice, and not in practice; attempts recorded; the paywall and the grants                                                                                                                                         |
+| `08_progress.test.sql`                  | That a lesson pays once however often it is completed, that `lessons_completed` and the completion timestamp move only the first time, that a perfect lesson is computed from attempts and never revoked, that daily activity follows the user's timezone, and that per-skill accuracy is absent for a free user                                                                                |
+| `09_streak_lives_achievements.test.sql` | Streak qualification, continuation, reset and lazy breakage; date-line and DST boundaries; the beginner grace, per-context consumption, Premium immunity and lazy regeneration; and that an achievement unlocks once, pays through the ledger, and never fires on a stale streak                                                                                                                |
+| `10_practice_and_challenge.test.sql`    | Home for a new and a returning learner; review sets that clear as questions are answered correctly; practice never reaching past the paywall; the daily XP cap truncating rather than refusing; a deterministic challenge that is the same for a date and different across dates; and a bonus claimable once, by someone who actually finished it                                               |
+| `11_leaderboard.test.sql`               | Display-name validation on every path into the column, including a direct owner write; that a guest, a hidden user, an unnamed user and last week's score are all absent from the ranking; that no email address appears anywhere in the payload; the ±5 neighbour slice; the daily ranking cap clamping the board while the learner keeps every point; and a report queue nobody can read back |
 
 CI runs these against a fresh database on every push, and fails if
 `src/types/database.types.ts` is out of date.
@@ -468,11 +538,11 @@ CI runs these against a fresh database on every push, and fails if
 
 ## Not built yet
 
-Phase 3 delivers the foundation. These arrive with the features that need them:
+These arrive with the features that need them:
 
-- Practice and exam RPCs — Phase 11/13
-- `submit_answer` with grading, lives and achievements — Phase 8/10
-- `get_leaderboard`, `get_progress_summary` — Phase 9/12
-- `export_my_data`, `delete-account` Edge Function — Phase 18
+- `start_exam`, `submit_exam` and the attempt rules — Phase 13
+- `revenuecat-webhook` and `sync-entitlements` Edge Functions; `user_entitlements` is written
+  by hand from the seed until then — Phase 14
+- `rewarded_ad_grants` and the RPC that pays a rewarded life — Phase 15
+- `export_my_data`, and the `delete-account` Edge Function — Phase 18
 - Sign in with Apple / Google — needs store credentials (SPEC §12, D6)
-- `supabase/seed.sql` — produced by the content pipeline in Phase 6

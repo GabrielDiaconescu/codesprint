@@ -171,6 +171,20 @@ It contains the real content plus three test accounts (SPEC §52). Password for 
 | `noads@codesprint.test`   | `no_ads` entitlement                          |
 | `premium@codesprint.test` | `no_ads` + `premium`: every module, full exam |
 
+All three are named and carry a birth year. The birth year is not decoration: an unknown one
+is treated as a minor, and minors are hidden from the leaderboard (SPEC §41), so without it
+the "hide me" toggle could never be switched off.
+
+It also creates **60 ranked fixture accounts** (`Sprinter 01`…`Sprinter 60`) on the current
+ISO week's leaderboard. A ranking with one row proves nothing — the top-50 slice and the ±5
+neighbours only behave differently once there are more competitors than the slice holds. They
+have no `auth.identities` row, so they cannot sign in; they are rows that exist to be ranked.
+Their XP is written straight to `leaderboard_weekly` rather than through the ledger, which is
+the one place this seed departs from real gameplay.
+
+`iso_week_start()` is evaluated at reset time, so they always land in the current week. A
+database left unreset across a Monday shows an empty board until the next reset.
+
 Their entitlement rows are tagged `store = 'dev-seed'` so a fixture is never mistaken for a
 real purchase. **They must never exist in production** (SPEC §31) — `seed.sql` is only ever
 applied to a local database, and `publish.ts` writes content and nothing else.

@@ -1,13 +1,19 @@
-import { useTranslation } from 'react-i18next';
+import { Screen } from '@/components/ui';
+import { LeaderboardBoard } from '@/features/leaderboard/components/LeaderboardBoard';
+import { useProfile } from '@/features/profile/hooks/useProfile';
 
-import { PlaceholderState, Screen } from '@/components/ui';
-
+/**
+ * Leaderboard tab (SPEC §10, §26).
+ *
+ * The tab itself is hidden when `leaderboard_enabled` is off — that is handled in the tabs
+ * layout, so this route never has to think about the flag.
+ */
 export default function LeaderboardScreen() {
-  const { t } = useTranslation('leaderboard');
+  const { data: profile } = useProfile();
 
   return (
     <Screen>
-      <PlaceholderState title={t('placeholder.title')} body={t('placeholder.body')} />
+      <LeaderboardBoard currentName={profile?.displayName ?? null} />
     </Screen>
   );
 }

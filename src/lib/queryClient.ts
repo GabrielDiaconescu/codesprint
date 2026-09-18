@@ -51,6 +51,8 @@ export const queryKeys = {
     achievements: (userId: string, locale: string) =>
       ['user', userId, 'achievements', locale] as const,
   },
-  leaderboard: (weekStart: string) => ['leaderboard', weekStart] as const,
+  // Keyed by user: the payload carries the caller's own rank, so one cache entry cannot be
+  // shared between two accounts on the same device.
+  leaderboard: (userId: string) => ['leaderboard', userId] as const,
   entitlements: (userId: string) => ['entitlements', userId] as const,
 } as const;

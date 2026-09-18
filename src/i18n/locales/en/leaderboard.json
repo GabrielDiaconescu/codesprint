@@ -1,7 +1,91 @@
 {
   "title": "Leaderboard",
-  "placeholder": {
-    "title": "Weekly ranking",
-    "body": "The weekly XP leaderboard ships in Phase 12."
+  "week": "{{count}} learner ranked this week",
+  "week_other": "{{count}} learners ranked this week",
+  "gap": "{{count}} learner in between",
+  "gap_other": "{{count}} learners in between",
+  "row": {
+    "xp": "{{xp, number}} XP",
+    "you": "You",
+    "accessibility": "Rank {{rank}}, {{name}}, {{xp, number}} XP",
+    "accessibilityMe": "Rank {{rank}}, {{name}}, {{xp, number}} XP. This is you."
+  },
+  "empty": {
+    "title": "Nobody has scored yet",
+    "body": "The board resets every Monday. Answer a few questions and you will be the first name on it."
+  },
+  "error": {
+    "title": "Could not load the leaderboard",
+    "body": "Check your connection and try again.",
+    "retry": "Try again"
+  },
+  "absence": {
+    "guest": {
+      "title": "Guests are not ranked",
+      "body": "Create an account to keep your progress and take your place on the weekly board."
+    },
+    "no-name": {
+      "title": "Choose a display name",
+      "body": "The board shows a name, not an email address. Pick one and you are in.",
+      "action": "Choose a name"
+    },
+    "hidden": {
+      "title": "You are hidden from the leaderboard",
+      "body": "You are still earning XP and levels — you just do not appear in the ranking. You can change this in Profile."
+    },
+    "no-xp": {
+      "title": "No XP yet this week",
+      "body": "The board covers this week only. Finish a lesson and your name appears."
+    }
+  },
+  "name": {
+    "title": "Display name",
+    "close": "Close",
+    "body": "This is the only thing other learners see of you. Your email address is never shown.",
+    "label": "Display name",
+    "placeholder": "Ada Lovelace",
+    "hint": "{{min}} to {{max}} characters. Letters, numbers, spaces, and . _ -",
+    "save": "Save name",
+    "saved": "You are now {{name}}",
+    "problem": {
+      "required": "Enter a name.",
+      "too_short": "A bit longer, please — at least 3 characters.",
+      "too_long": "That is too long. Keep it to 20 characters.",
+      "invalid_characters": "Use letters, numbers, spaces, and . _ - only.",
+      "reserved": "That name is reserved. Please pick another.",
+      "not_allowed": "That name is not allowed. Please pick another.",
+      "taken": "Someone already has that name. Try a different one.",
+      "unknown": "That name could not be saved. Please try again."
+    }
+  },
+  "report": {
+    "action": "Report {{name}}",
+    "title": "Report this name",
+    "close": "Close",
+    "body": "Tell us what is wrong with \"{{name}}\" and we will review it.",
+    "reason": {
+      "offensive_name": "Offensive or inappropriate name",
+      "impersonation": "Pretending to be someone else",
+      "spam": "Spam or advertising",
+      "other": "Something else"
+    },
+    "note": "Anything to add? (optional)",
+    "notePlaceholder": "A short note helps us review it faster",
+    "noteHint": "Up to 500 characters",
+    "submit": "Send report",
+    "thanks": "Thanks — we will take a look.",
+    "failed": "The report could not be sent. Please try again."
+  },
+  "settings": {
+    "title": "Leaderboard",
+    "noName": "No display name yet",
+    "nameHint": "Shown on the weekly leaderboard",
+    "noNameHint": "Needed to appear on the weekly leaderboard",
+    "chooseName": "Choose a display name",
+    "changeName": "Change display name",
+    "hide": "Hide me from the leaderboard",
+    "hideDescription": "You keep every point, level and achievement — your name just does not appear in the ranking.",
+    "hideFailed": "That setting could not be saved. Please try again.",
+    "hideMinor": "Learners under {{age}} are always hidden from the leaderboard. You still earn every point, level and achievement."
   }
 }

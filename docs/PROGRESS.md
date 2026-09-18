@@ -2,8 +2,8 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 11 complete — awaiting approval for Phase 12 (Leaderboard, display names, reports).
-**Last updated:** 2026-09-17
+**Current phase:** Phase 12 complete — awaiting approval for Phase 13 (Exam mode).
+**Last updated:** 2026-09-18
 
 ---
 
@@ -23,7 +23,8 @@
 | 9     | XP, levels, progress                 | **Complete** — pending device check   |
 | 10    | Streak, lives, achievements          | **Complete** — pending device check   |
 | 11    | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
-| 12–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 12    | Leaderboard, display names, reports  | **Complete** — pending device check   |
+| 13–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -952,55 +953,174 @@ A fresh guest through the real HTTP API:
    the answers, never in how a question is asked — a question should not behave differently
    depending on where the learner met it.
 
+## Phase 12 — what was implemented (Leaderboard, display names, reports)
+
+**Database** — `20260917121300_leaderboard.sql`
+
+- `get_leaderboard(limit)`: the weekly ranking — top rows, the caller's own position, and the
+  ±5 around them when they fall outside the slice. A row carries a display name, an avatar key,
+  an XP figure and the pseudonymous user id. Nothing else, ever.
+- `display_name_problem(text)`: the single definition of an acceptable name — 3–20 characters,
+  locale-aware `[[:alnum:]]` plus `. _ -` between them, then the `display_name_blocklist` and
+  `display_name_profanity` config lists, compared after folding case and separators.
+- `profiles_validate_display_name`: a trigger, so `set_display_name`, `update_profile` and any
+  future moderation rename all go through that one rule.
+- `set_display_name(text)`: its own RPC with its own error codes, because the screen has to
+  tell "too short" apart from "already taken".
+- `report_user(uuid, text, text)`: files a moderation report. A second open report from the
+  same reporter files nothing, and an ineligible target gives the same `P0002` as an unknown
+  id, so it cannot be used to probe which user ids exist.
+- `award_xp` replaced to apply `leaderboard_daily_xp_cap` (2000): the learner keeps every
+  point in the ledger and in `user_stats`; only the `leaderboard_weekly` increment is clamped.
+- 58 new pgTAP tests (`11_leaderboard.test.sql`), 369 in total.
+
+**Seed**
+
+- The three dev accounts now have display names and a birth year, and 60 fixture accounts
+  populate the current week's board — a ranking with one row proves nothing, and the neighbour
+  slice only renders for somebody the top 50 does not reach.
+
+**App**
+
+- **Leaderboard tab**: the ranking, pull-to-refresh, the caller's row highlighted and
+  announced, medals on the top three beside the rank rather than instead of it, and an
+  explicit gap marker between the top slice and a distant caller.
+- **Absence states**: guest / no display name / hidden / no XP yet, each with its own copy and,
+  where there is one, its own fix.
+- **Display-name sheet**: validates locally while typing, and renders the server's verdict as
+  a sentence per rule rather than "invalid".
+- **Report sheet**: four reasons plus an optional note. Closes with a thank-you and no status,
+  because the queue is write-only by design.
+- **Profile**: display name, avatar and "Hide me from the leaderboard" together in one card.
+- `LeaderboardService` in the registry — real, not a no-op.
+
+### Phase 12 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 47 suites, 664 tests, all passing
+database    supabase test db ......... 11 files, 369 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+Through the real HTTP API, signed in as the seeded accounts:
+
+| Step                                 | Result                                                  |
+| ------------------------------------ | ------------------------------------------------------- |
+| the seeded board                     | 60 ranked, 50 returned, `#1 Sprinter 01 (1496 XP)`      |
+| the payload searched for `@`         | **not present**; row keys are exactly the five expected |
+| earning 200 XP                       | `me: #55`, neighbours 51–60                             |
+| `set_display_name('ad')`             | `22023 display name rejected: too_short`                |
+| `set_display_name('Ana<b>')`         | `22023 ... invalid_characters`                          |
+| `set_display_name('m.o.d')`          | `22023 ... reserved`                                    |
+| `set_display_name('Sprinter 01')`    | `23505 display name taken`                              |
+| `set_display_name('Ada Mărioară')`   | accepted — diacritics are a name, not a bad character   |
+| hiding yourself                      | `hidden`, `me: null`, absent from another user's board  |
+| ...and the board still loads for you | 50 rows — hiding removes you from it, not it from you   |
+| a guest with 5000 XP                 | `is_guest`, not ranked, can still look                  |
+| reporting, then reporting again      | one row in the queue, not two                           |
+| reporting yourself                   | `22023 invalid report target`                           |
+| reading `reports` as a client        | `42501 permission denied for table reports`             |
+| +1500, +400, +300, +200 in one day   | ledger 1500/1900/2200/2400, ranked 1500/1900/2000/2000  |
+
+## Decisions and interpretations made during Phase 12
+
+1. **The cap limits the ranking, never the learner.** SPEC §42 asks for a per-day leaderboard
+   XP cap. Taking XP away would also take levels and achievements, which punishes a long
+   study session. The ledger and `user_stats` get the full amount; only `leaderboard_weekly`
+   is clamped.
+2. **The cap clamps against the uncapped running total**, which makes the day's credited total
+   come to exactly `least(earned_today, cap)` without storing a second counter.
+3. **Validation lives in a trigger, not only in the RPC.** `update_profile` already accepted a
+   display name and moderation will eventually write one directly; one rule on the column
+   beats three copies at three entry points.
+4. **The blocklist is short and the profanity list is shorter.** A real profanity filter
+   cannot be won in one language, let alone the several this will ship in, and a false
+   positive blocks a real person from their own name. The Report action and Studio are the
+   answer to the rest (SPEC §26, §49).
+5. **Names are validated as `[[:alnum:]]`, not as ASCII.** "Mărioară" and "Δημήτρης" are
+   ordinary names. What is excluded is markup, control characters and the invisible
+   codepoints used to clone somebody else's name.
+6. **A rejection is a code, not a sentence** (SPEC §38) — and the client has a local copy of
+   the length and character rules only, because those never change. The blocklists stay in
+   `app_config`, where they can be edited without an app release.
+7. **The user id is returned for ranked rows.** The Report action needs a target. It is the
+   pseudonymous Supabase id that analytics already uses (SPEC §43), it identifies nobody
+   outside this database, and it is never rendered.
+8. **Absence has four answers, not one.** "Choose a name", "you hid yourself", "guests are not
+   ranked" and "no XP yet" have four different fixes; one empty state would leave a learner
+   who hid themselves months ago with no idea why they are missing.
+9. **The report queue is write-only, including for the reporter.** A readable list would tell
+   anyone who had been reported, and by how many people.
+10. **The hide-me toggle is disabled, with the reason, for a learner under
+    `minor_protection_age`.** The server forces `leaderboard_hidden` for them whatever the
+    client sends (SPEC §41), so a live switch would flick on and snap back — which reads as a
+    broken app rather than as a protection. It fails closed on an unknown birth year, exactly
+    as `public.is_minor()` does.
+11. **`profiles.display_name` is no longer in `ProfilePatch`.** One client path, with error
+    codes a name field can actually use.
+12. **The seed fills the board.** 60 fixture accounts with no `auth.identities` row, so they
+    cannot sign in — rows that exist to be ranked. Their XP is written straight to
+    `leaderboard_weekly`, which is the one place the seed departs from real gameplay, and the
+    honest trade against 1,200 ledger rows on every reset.
+
 ## Known limitations
 
-- Services other than Config are still no-ops: billing (14), ads (15), analytics and
-  monitoring (16), notifications (17), consent (15).
-- **Sign in with Apple and Google (D6) are not built.** Both need credentials that do not
-  exist yet: an Apple Developer account with the Sign in with Apple capability, and Google
-  OAuth client ids. Rather than fake them (SPEC §59.11) the contract and the UI slot are
-  ready and the providers are listed under human actions. Email, password and guest are
-  complete and fully exercised.
-- Email verification and password reset use **Mailpit**, the local inbox, because no domain
-  or transactional SMTP exists yet. That is a real integration locally, but production is
-  blocked until SMTP is configured.
-- No content: the tables exist but are empty until the Phase 6 pipeline seeds them.
-- `supabase/seed.sql` does not exist yet, so `db:reset` warns about it. Harmless, and the
-  file arrives with the content pipeline.
-- Home, Leaderboard and Profile still show honest "ships in Phase N" placeholders. Learn now
-  shows real published modules.
-- Out of lives there is nowhere to go yet: the wait is explained, but the rewarded-ad
-  restore needs the ads integration (Phase 15) and the upgrade needs the paywall (Phase 14).
-  `rewarded_ad_grants` and the daily cap config are in place for it.
+Rewritten at the end of each phase, so this describes the product as it stands today.
+
+**Integrations not built yet** (SPEC §59.11 — no fakes; the contract and the UI slot exist):
+
+- Billing and the paywall (14), ads and UMP consent (15), analytics and monitoring (16),
+  local notifications (17). Those six services are still the no-op implementations listed in
+  `PRODUCTION_NOOP_ALLOWLIST`, which must be **empty** before the first production release.
+- **Sign in with Apple and Google (D6).** Both need credentials that do not exist yet: an
+  Apple Developer account with the Sign in with Apple capability, and Google OAuth client ids.
+  Email, password and guest are complete and fully exercised.
+- Email verification and password reset use **Mailpit**, the local inbox, because no domain or
+  transactional SMTP exists yet. That is a real integration locally; production is blocked
+  until SMTP is configured.
+
+**Consequences of the above, visible in the app:**
+
+- Out of lives there is nowhere to go: the wait is explained, but the rewarded-ad restore
+  needs Phase 15 and the upgrade needs Phase 14.
+- Hard practice sets are gated correctly, but a free learner who asks for one gets an
+  explanation rather than a paywall (Phase 14).
+- Ads consent (Google UMP) is not asked during onboarding. It belongs with the ads
+  integration, which must show it before the first ad request.
+- The reminder time is stored, but nothing is scheduled and no notification permission is
+  requested (Phase 17).
+
+**Content and features still to come:**
+
+- The seed carries 2 modules, 8 lessons and 40 questions — enough to exercise every feature,
+  not launch volume. The remaining 15 modules are Phase 19.
 - Two achievements name modules whose content arrives in Phase 19 and cannot unlock before
   then. The exam achievements wait on Phase 13.
-- The Leaderboard tab is still a placeholder (Phase 12), as are display names and reports.
-- Hard practice sets are gated correctly but there is no paywall to send a free learner to
-  yet — the screen explains what Premium adds and closes (Phase 14).
-- The Daily Challenge draws three questions. `daily_challenges` supports scheduling a
-  different set or bonus per date; nothing is scheduled, and the deterministic pick covers it.
-- Practice mode, where a failed question is retried for half XP, is Phase 11. Until then a
-  question answered wrong in a lesson has no in-app route to a retry.
+- Exam mode is Phase 13; the `exams` and `exam_attempts` tables are seeded and waiting.
+- `daily_challenges` supports scheduling a specific set or bonus per date. Nothing is
+  scheduled; the deterministic pick covers it.
+- Onboarding does not let an intermediate learner choose a starting module (SPEC §11). Their
+  answer is stored and unused; every module up to the free boundary is reachable anyway.
+- Profile still shows a placeholder for the rest of Settings (SPEC §29) — theme, sound,
+  notifications, account management and the legal links arrive with Phases 17, 18 and 20.
+- Avatars are an initial on a colour derived from `avatar_key`, not preset artwork. No photo
+  uploads in V1 by design (SPEC §29); the preset set is a content decision, not a code one.
 - Sounds (SPEC §29) are not wired; haptics are.
-- Onboarding does not yet let an intermediate user choose a starting module (SPEC §11):
-  there is no content to choose from until Phase 6. Their answer is stored and will drive
-  that choice then.
-- The reminder time is stored, but nothing is scheduled and no notification permission is
-  requested — that is Phase 17.
-- Ads consent (Google UMP) is not asked during onboarding. It belongs with the ads
-  integration in Phase 15, which must show it before the first ad request.
-- Design system exists but is unused by product screens — the tabs still show placeholders
-  until Phases 7–13 build the real screens on top of it.
-- Lottie animations and `expo-image` are not installed yet; they arrive when a screen needs
-  them (achievements in Phase 10, avatars in Phase 12).
+- `lottie-react-native` and `expo-image` are still not installed. Nothing has needed them:
+  Reanimated covers the achievement unlock, and there are no remote images to load.
+
+**Housekeeping:**
+
 - `npm audit` reports **14 moderate** advisories, all inside Expo's own build tooling
   (`@expo/cli` and its `query-string` / `decode-uri-component` / `uuid` / `xcode` chain).
   They are build-time code, not shipped app code, and cannot be resolved without an Expo
   release — `npm audit fix --force` would downgrade Expo itself. Recheck each SDK upgrade.
-- **The app has not been run on a physical device yet.** Phase 1 and Phase 2 device checks are
-  both outstanding, deferred by agreement. Fonts, contrast, dynamic type and reduce-motion in
-  particular can only be verified on hardware.
-- GitHub repository not created yet, so CI has never actually run.
+- **The app has not been run on a physical device yet.** Every device checklist from Phase 1
+  onward is outstanding, deferred by agreement. Fonts, contrast, dynamic type and
+  reduce-motion in particular can only be verified on hardware.
 
 ---
 
@@ -1586,3 +1706,66 @@ Use a **fresh guest**: half of this is about what a brand-new learner sees.
 21. Lose your lives (answer wrong repeatedly after the grace), then practise: the hearts show
     on the question screen and the wait is explained.
 22. Large text and dark mode: every Home card stays legible, and nothing clips.
+
+---
+
+## Phase 12 device test checklist
+
+Sign in as **free@codesprint.test** (password `sprint2026`). The seed puts 60 fixture learners
+on this week's board, so there is a real ranking to look at — and you start below the top 50,
+which is the only way to see the neighbour slice.
+
+### The ranking
+
+1. Open the **Leaderboard** tab. The list loads with **Sprinter 01** at the top on 1,496 XP,
+   medals on the first three, and 50 rows.
+2. Pull down to refresh. The list reloads without flashing an empty state.
+3. Finish a lesson, then come back. Your own row appears, **outlined and labelled "You"**, in
+   the lower group — with a line above it saying how many learners are in between.
+4. Scroll. The highlight and the "… in between" marker survive scrolling; there are no
+   duplicated names where the two groups meet.
+
+### Your name
+
+5. The header card says **"Choose a display name"**. Tap it.
+6. Type `ad` → _"A bit longer, please — at least 3 characters."_ appears as you type, with an
+   icon, not colour alone.
+7. Type `Ana<b>` → _"Use letters, numbers, spaces, and . \_ - only."_
+8. Type `admin` → nothing locally, but **Save** returns _"That name is reserved."_ — the
+   blocklist is on the server.
+9. Type `Sprinter 07` → _"Someone already has that name."_
+10. Type `Ana Mărioară` → saves. Romanian diacritics are a name, not an invalid character.
+11. Go back to the Leaderboard. You are now ranked, under that name.
+
+### Hide me from the leaderboard
+
+12. **Profile** → the Leaderboard card shows your avatar, your name and the toggle.
+13. Turn **"Hide me from the leaderboard"** on. Go to the Leaderboard tab: it now says **"You
+    are hidden from the leaderboard"** — and the list is still there to browse.
+14. Check your XP and level on Profile: **unchanged**. Hiding costs nothing but the ranking.
+15. Turn it back off. Your row returns at the same rank.
+
+### Reporting
+
+16. On any other learner's row, tap the **…** control. The sheet names them.
+17. Pick a reason, add a note, send. A toast says thank you and the sheet closes — there is no
+    status to check afterwards, by design.
+18. Report the same person again. It is accepted quietly; nothing is filed twice.
+19. Your own row has **no** … control at all.
+
+### Accessibility
+
+20. Turn the screen reader on (TalkBack / VoiceOver). Swipe through the list: each row reads
+    as **one** item — _"Rank 3, Ada Lovelace, 1,240 XP"_ — and your own adds _"This is you."_
+21. The … control announces _"Report Ada Lovelace"_, not "button".
+22. Turn text size up to the largest setting. Rows grow; the rank, name and XP stay readable
+    and nothing is clipped.
+23. Switch to dark mode. The highlighted row is still clearly yours.
+
+### Robustness
+
+24. Turn airplane mode on and open the Leaderboard. You get **"Could not load the
+    leaderboard"** with a **Try again** button — never a blank screen.
+25. Turn it back on and tap Try again. The board loads.
+26. Sign out and continue as a **guest**. The Leaderboard says **"Guests are not ranked"** and
+    still lets you browse. Profile offers no display name — there is nothing to name.

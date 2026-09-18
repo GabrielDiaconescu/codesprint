@@ -4,7 +4,9 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button, PlaceholderState, Screen, SkeletonLines } from '@/components/ui';
 import { SessionCard } from '@/features/auth/components/SessionCard';
+import { LeaderboardSettingsCard } from '@/features/leaderboard/components/LeaderboardSettingsCard';
 import { LevelCard } from '@/features/progress/components/LevelCard';
+import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useUserStats } from '@/features/progress/hooks/useProgress';
 import { useTheme } from '@/theme';
 
@@ -14,6 +16,7 @@ export default function ProfileScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { data: stats, isPending } = useUserStats();
+  const { data: profile } = useProfile();
 
   return (
     <Screen>
@@ -42,6 +45,8 @@ export default function ProfileScreen() {
             compact
           />
         )}
+
+        {profile && <LeaderboardSettingsCard profile={profile} />}
 
         <Button
           testID="profile-progress"

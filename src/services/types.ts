@@ -5,6 +5,7 @@ import type {
   PracticeMode,
   PracticeSet,
 } from './home/schema';
+import type { Leaderboard, ReportReason } from './leaderboard/schema';
 import type {
   AchievementEntry,
   LessonCompletion,
@@ -60,12 +61,7 @@ export interface AuthUser {
 }
 
 export type AuthChangeReason =
-  | 'initial'
-  | 'signed-in'
-  | 'signed-out'
-  | 'token-refreshed'
-  | 'user-updated'
-  | 'password-recovery';
+  'initial' | 'signed-in' | 'signed-out' | 'token-refreshed' | 'user-updated' | 'password-recovery';
 
 /** What an auth deep link turned out to be, once consumed. */
 export type DeepLinkOutcome =
@@ -107,8 +103,9 @@ export interface AuthService extends ServiceIdentity {
    * Takes router params rather than a raw URL because Expo Router owns deep-link routing:
    * the callback arrives as a screen with search params, on cold start and warm alike.
    */
-  consumeAuthCallback(params: Record<string, string | string[] | undefined>):
-    Promise<DeepLinkOutcome>;
+  consumeAuthCallback(
+    params: Record<string, string | string[] | undefined>,
+  ): Promise<DeepLinkOutcome>;
 
   signOut(): Promise<void>;
 
@@ -170,7 +167,8 @@ export interface OnboardingAnswers {
 
 /** The subset of a profile a user may change after onboarding (SPEC §29). */
 export interface ProfilePatch {
-  displayName?: string;
+  /** Not here: the display name. It goes through `LeaderboardService.setDisplayName`, which
+   *  reports WHY a name was refused — something a generic patch cannot do (SPEC §26). */
   avatarKey?: string;
   locale?: string;
   timezone?: string;
@@ -340,6 +338,41 @@ export interface HomeService extends ServiceIdentity {
 
   /** Pays the day's bonus. Idempotent: a second claim pays nothing (SPEC §24). */
   claimDailyChallenge(): Promise<ChallengeClaim>;
+}
+
+/* -------------------------------------------------------------- Leaderboard (Supabase) */
+
+export type {
+  Leaderboard,
+  LeaderboardRow,
+  DisplayNameProblem,
+  ReportReason,
+} from './leaderboard/schema';
+export { DISPLAY_NAME_PROBLEMS, REPORT_REASONS } from './leaderboard/schema';
+
+export interface LeaderboardService extends ServiceIdentity {
+  /**
+   * The weekly ranking (SPEC §26).
+   *
+   * Returns the top `limit` rows, the caller's own position and their neighbours. It never
+   * contains an email address or an auth identifier — the schema is strict so that a future
+   * server change cannot start leaking one unnoticed.
+   */
+  get(limit?: number): Promise<Leaderboard>;
+
+  /**
+   * Claims a display name. Throws `DisplayNameRejected`, whose `problem` says which rule the
+   * name broke, so the field can explain itself rather than saying "invalid".
+   */
+  setDisplayName(name: string): Promise<string>;
+
+  /**
+   * Reports a name for moderation (SPEC §26, §49).
+   *
+   * Write-only by design: nobody — including the reporter — can read the queue back, so this
+   * resolves with nothing and the UI thanks the user rather than reporting a status.
+   */
+  report(userId: string, reason: ReportReason, note?: string): Promise<void>;
 }
 
 /* ------------------------------------------------------------------ Monitoring (Sentry) */

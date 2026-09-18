@@ -33,9 +33,7 @@ const bool = (value: boolean | null): string => (value === null ? 'null' : Strin
 const num = (value: number | null): string => (value === null ? 'null' : String(value));
 
 const textArray = (values: string[]): string =>
-  values.length === 0
-    ? "'{}'::text[]"
-    : `array[${values.map((v) => text(v)).join(', ')}]::text[]`;
+  values.length === 0 ? "'{}'::text[]" : `array[${values.map((v) => text(v)).join(', ')}]::text[]`;
 
 /** `insert ... on conflict do update` so re-running the seed is idempotent. */
 const upsert = (
@@ -252,6 +250,10 @@ const contentSql = (rows: ContentRows): string => {
 interface DevUser {
   id: string;
   email: string;
+  /** Needed to appear on the leaderboard at all (SPEC §26). */
+  displayName: string;
+  /** Adults. An unknown birth year is treated as a minor, and minors are hidden (SPEC §41). */
+  birthYear: number;
   label: string;
   entitlements: ('no_ads' | 'premium')[];
 }
@@ -262,18 +264,24 @@ const DEV_USERS: DevUser[] = [
   {
     id: '00000000-0000-4000-8000-000000000001',
     email: 'free@codesprint.test',
+    birthYear: 1996,
+    displayName: 'Free Tester',
     label: 'Free tier: ads, lives, modules up to the free boundary',
     entitlements: [],
   },
   {
     id: '00000000-0000-4000-8000-000000000002',
     email: 'noads@codesprint.test',
+    birthYear: 1992,
+    displayName: 'No Ads Tester',
     label: 'No Ads: same content as free, without advertising',
     entitlements: ['no_ads'],
   },
   {
     id: '00000000-0000-4000-8000-000000000003',
     email: 'premium@codesprint.test',
+    birthYear: 1988,
+    displayName: 'Premium Tester',
     label: 'Premium: every module, unlimited lives, full exam',
     entitlements: ['no_ads', 'premium'],
   },
@@ -326,6 +334,14 @@ const devUsersSql = (): string => {
   now(), now(), now()
 ) on conflict (provider, provider_id) do nothing;`);
 
+    // `handle_new_user` has already created the profile; this names it. Going through the
+    // table rather than `set_display_name` is deliberate — the seed runs as the database
+    // owner, with no `auth.uid()` to be the caller. The validation trigger still applies.
+    lines.push(`update public.profiles
+set display_name = ${text(user.displayName)},
+    birth_year = ${user.birthYear}
+where id = ${text(user.id)};`);
+
     for (const entitlement of user.entitlements) {
       // `store` is tagged so a fixture is obvious in Studio and impossible to mistake for a
       // real purchase (SPEC §31: these must never exist in production).
@@ -339,6 +355,71 @@ on conflict (user_id, entitlement) do update set is_active = true, store = 'dev-
 
   return lines.join('\n');
 };
+
+/* ------------------------------------------------------------------ leaderboard */
+
+/** How many fixture accounts populate the weekly ranking. */
+const RIVAL_COUNT = 60;
+
+/**
+ * A populated weekly leaderboard for local development (SPEC §26, §52).
+ *
+ * The device check for this phase is "weekly ranking with test users", and a ranking with one
+ * row proves nothing: the top-50 slice, the caller's own position and the ±5 neighbours only
+ * behave differently once there are more competitors than the slice holds. Sixty of them puts
+ * a freshly seeded developer account below the cut, where the neighbour path is what renders.
+ *
+ * These accounts have no `auth.identities` row, so they cannot sign in. They are rows that
+ * exist to be ranked, and nothing else.
+ *
+ * The XP is written straight into `leaderboard_weekly` rather than through the ledger. That
+ * is the one place this seed departs from real gameplay, and it is the honest trade: 60 users
+ * x 20 ledger rows to reproduce a number the ranking reads directly would slow every reset
+ * down for no extra truth. Their `user_stats` stay at zero, which is correct — they have not
+ * answered anything.
+ *
+ * `iso_week_start()` is evaluated at reset time, so the fixtures always land in the current
+ * week. A database left unreset across a Monday shows an empty board until the next reset.
+ */
+const leaderboardSql = (): string =>
+  `-- ${RIVAL_COUNT} ranked fixture accounts. They cannot sign in (no identity row).
+insert into auth.users (
+  id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new,
+  email_change_token_current, phone_change, phone_change_token, reauthentication_token
+)
+select
+  ('00000000-0000-4000-8000-0000000100' || to_char(n, 'FM00'))::uuid,
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated',
+  'authenticated',
+  'rival' || to_char(n, 'FM00') || '@codesprint.test',
+  extensions.crypt(${text(DEV_PASSWORD)}, extensions.gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}'::jsonb,
+  '{}'::jsonb,
+  now(), now(),
+  '', '', '', '', '', '', '', ''
+from generate_series(1, ${RIVAL_COUNT}) as n
+on conflict (id) do nothing;
+
+update public.profiles p
+set display_name = 'Sprinter ' || to_char(n.n, 'FM00'),
+    avatar_key = 'avatar-' || to_char(1 + (n.n % 8), 'FM0')
+from generate_series(1, ${RIVAL_COUNT}) as n(n)
+where p.id = ('00000000-0000-4000-8000-0000000100' || to_char(n.n, 'FM00'))::uuid;
+
+-- A descending spread, so ranks 1..${RIVAL_COUNT} are distinct and a developer who has just
+-- finished a lesson or two lands near the bottom.
+insert into public.leaderboard_weekly (week_start, user_id, xp)
+select
+  public.iso_week_start(),
+  ('00000000-0000-4000-8000-0000000100' || to_char(n, 'FM00'))::uuid,
+  1520 - 24 * n
+from generate_series(1, ${RIVAL_COUNT}) as n
+on conflict (week_start, user_id) do update set xp = excluded.xp;
+`;
 
 /* ------------------------------------------------------------------ main */
 
@@ -365,6 +446,9 @@ begin;
     '-- ============================================================ development accounts',
     '',
     devUsersSql(),
+    '-- ============================================================ leaderboard fixtures',
+    '',
+    leaderboardSql(),
     'commit;',
     '',
   ].join('\n');
@@ -378,6 +462,7 @@ begin;
       `${rows.answerKeys.length} answer keys, ${rows.exams.length} exams`,
   );
   console.log(`  ${DEV_USERS.length} test accounts (password: ${DEV_PASSWORD})`);
+  console.log(`  ${RIVAL_COUNT} leaderboard fixture accounts`);
 };
 
 if (process.argv[1]?.includes('seed')) main();
