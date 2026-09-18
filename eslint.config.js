@@ -47,6 +47,10 @@ module.exports = [
       'android/**',
       'ios/**',
       'expo-env.d.ts',
+      // Deno, not React Native: Deno.serve, Deno.env and jsr: imports, which this config's
+      // parser and resolver know nothing about. The logic they wrap lives in
+      // supabase/functions/_shared and is linted, type-checked and unit-tested normally.
+      'supabase/functions/*/index.ts',
     ],
   },
   {

@@ -5,6 +5,7 @@ import type {
   PracticeMode,
   PracticeSet,
 } from './home/schema';
+import type { ServerEntitlements } from './billing/entitlementSchema';
 import type { ExamOverview, ExamPaper, ExamResults } from './exams/schema';
 import type { Leaderboard, ReportReason } from './leaderboard/schema';
 import type {
@@ -530,6 +531,30 @@ export interface CustomerEntitlements {
   active: EntitlementId[];
   isAdFree: boolean;
   isPremium: boolean;
+}
+
+export type { ServerEntitlements } from './billing/entitlementSchema';
+export { NO_SERVER_ENTITLEMENTS, ENTITLEMENT_IDS } from './billing/entitlementSchema';
+
+/**
+ * What the SERVER says the learner has paid for (SPEC §31).
+ *
+ * Separate from `BillingService` because the two become real at different moments: this one
+ * works as soon as `user_entitlements` exists, while the store SDK waits for RevenueCat
+ * credentials. Every gate in the product already reads the same table server-side; this is
+ * only so the UI can reflect it.
+ */
+export interface EntitlementService extends ServiceIdentity {
+  /** The caller's entitlements, straight from the database. */
+  get(): Promise<ServerEntitlements>;
+
+  /**
+   * Asks the `sync-entitlements` Edge Function to re-fetch from RevenueCat and reconcile.
+   *
+   * Called after a purchase, after a restore, and on app open (throttled). A failure means
+   * "unchanged", never "nothing" — a lapsed network must not lock a paying customer out.
+   */
+  refresh(): Promise<ServerEntitlements>;
 }
 
 export interface BillingService extends ServiceIdentity {

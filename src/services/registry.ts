@@ -1,4 +1,5 @@
 import { SupabaseAuthService } from './auth/SupabaseAuthService';
+import { SupabaseEntitlementService } from './billing/SupabaseEntitlementService';
 import { SupabaseConfigService } from './config/SupabaseConfigService';
 import { SupabaseContentService } from './content/SupabaseContentService';
 import { SupabaseExamService } from './exams/SupabaseExamService';
@@ -22,6 +23,7 @@ import type {
   ConfigService,
   ConsentService,
   ContentService,
+  EntitlementService,
   ExamService,
   HomeService,
   LeaderboardService,
@@ -53,6 +55,7 @@ export type Services = {
   consent: ConsentService;
   ads: AdService;
   billing: BillingService;
+  entitlements: EntitlementService;
   notifications: NotificationService;
   config: ConfigService;
 };
@@ -69,7 +72,8 @@ export const services: Services = {
   analytics: NoopAnalyticsService, // Phase 16
   consent: NoopConsentService, // Phase 15
   ads: NoopAdService, // Phase 15
-  billing: NoopBillingService, // Phase 14
+  billing: NoopBillingService, // Phase 14 — waiting on RevenueCat credentials
+  entitlements: SupabaseEntitlementService, // Phase 14 — real; the server is the authority
   notifications: NoopNotificationService, // Phase 17
   config: SupabaseConfigService, // Phase 3 — real
 };

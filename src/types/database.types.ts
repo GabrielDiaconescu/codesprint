@@ -973,6 +973,10 @@ export type Database = {
         Returns: boolean
       }
       age_from_birth_year: { Args: { p_birth_year: number }; Returns: number }
+      apply_entitlements: {
+        Args: { p_entitlements: Json; p_user_id: string }
+        Returns: Json
+      }
       award_practice_xp: {
         Args: { p_question_id: string; p_user_id: string }
         Returns: number
@@ -1022,6 +1026,7 @@ export type Database = {
         Returns: number
       }
       display_name_problem: { Args: { p_name: string }; Returns: string }
+      entitlement_state: { Args: { p_user_id: string }; Returns: Json }
       evaluate_achievements: {
         Args: { p_rule_types: string[]; p_user_id: string }
         Returns: Json
@@ -1051,6 +1056,7 @@ export type Database = {
       get_achievements: { Args: { p_locale?: string }; Returns: Json }
       get_app_config: { Args: never; Returns: Json }
       get_daily_challenge: { Args: { p_locale?: string }; Returns: Json }
+      get_entitlements: { Args: never; Returns: Json }
       get_exam_overview: { Args: { p_locale?: string }; Returns: Json }
       get_exam_results: {
         Args: { p_attempt_id: string; p_locale?: string }
@@ -1097,6 +1103,10 @@ export type Database = {
         Args: { p_locale?: string; p_value: Json }
         Returns: string
       }
+      mark_billing_event_processed: {
+        Args: { p_event_id: string }
+        Returns: undefined
+      }
       mistake_count: { Args: { p_user_id: string }; Returns: number }
       module_requires_premium: {
         Args: { p_module_id: string }
@@ -1113,6 +1123,15 @@ export type Database = {
       question_xp: {
         Args: { p_attempt_no: number; p_question_id: string }
         Returns: number
+      }
+      record_billing_event: {
+        Args: {
+          p_event_id: string
+          p_event_type: string
+          p_payload: Json
+          p_user_id: string
+        }
+        Returns: Json
       }
       regenerate_lives: { Args: { p_user_id: string }; Returns: number }
       reject_underage_account: { Args: never; Returns: undefined }

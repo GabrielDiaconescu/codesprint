@@ -1,0 +1,66 @@
+{
+  "title": "Go ad-free or Premium",
+  "heading": "Keep learning, your way",
+  "recommended": "Most popular",
+  "saving": "Save {{percent}}%",
+  "perMonth": "{{price}} per month, billed yearly",
+  "included": "Included in your plan",
+  "current": "Your current plan",
+  "upgradeNote": "This replaces your current subscription — you are not charged for both.",
+  "trigger": {
+    "manual": "Here is exactly what each plan includes, and what it does not.",
+    "module_locked": "You have reached the end of the free modules.",
+    "out_of_lives": "Out of lives? Premium never runs out.",
+    "premium_feature": "That is a Premium feature. Here is what it includes.",
+    "after_ad": "Ads keep CodeSprint free. You can turn them off."
+  },
+  "period": {
+    "monthly": "per month",
+    "annual": "per year",
+    "lifetime": "one-off"
+  },
+  "plans": {
+    "no_ads_monthly": {
+      "name": "No Ads",
+      "body": "Everything in Free, without advertising.",
+      "limits": "It does not unlock Premium lessons or unlimited lives. Those are Premium."
+    },
+    "premium_monthly": {
+      "name": "Premium",
+      "body": "Every module, the full 30-question exam with retries, hard practice sets, unlimited lives, detailed statistics, and no ads."
+    },
+    "premium_annual": {
+      "name": "Premium, yearly",
+      "body": "Everything in Premium, paid once a year."
+    }
+  },
+  "free": {
+    "name": "Free",
+    "body": "Modules 1 to {{modules}}, the daily challenge, practice, XP, streaks, achievements and the weekly leaderboard — with lives and ads."
+  },
+  "action": {
+    "subscribe": "Subscribe",
+    "upgrade": "Upgrade to Premium"
+  },
+  "purchase": {
+    "done": "You are all set — enjoy.",
+    "failed": "The purchase could not be completed. Nothing was charged."
+  },
+  "restore": {
+    "action": "Restore purchases",
+    "done": "Your purchases are back.",
+    "nothing": "No previous purchases found for this account.",
+    "failed": "Could not restore purchases. Please try again."
+  },
+  "manage": "Manage subscription",
+  "manageUrl": "https://apps.apple.com/account/subscriptions",
+  "unavailable": {
+    "title": "Could not load the plans",
+    "body": "We show prices straight from the store, so there is nothing to show until it answers. Check your connection and try again."
+  },
+  "terms": "Subscriptions renew automatically until cancelled. You can cancel any time from your store account, at least 24 hours before the period ends. Payment is charged to your store account on confirmation.",
+  "legal": {
+    "terms": "Terms",
+    "privacy": "Privacy Policy"
+  }
+}

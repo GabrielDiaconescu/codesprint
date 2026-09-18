@@ -58,4 +58,5 @@ export const queryKeys = {
   // shared between two accounts on the same device.
   leaderboard: (userId: string) => ['leaderboard', userId] as const,
   entitlements: (userId: string) => ['entitlements', userId] as const,
+  offerings: () => ['offerings'] as const,
 } as const;

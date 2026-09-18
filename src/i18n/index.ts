@@ -13,6 +13,7 @@ import challenge from './locales/en/challenge.json';
 import navigation from './locales/en/navigation.json';
 import practice from './locales/en/practice.json';
 import onboarding from './locales/en/onboarding.json';
+import paywall from './locales/en/paywall.json';
 import profile from './locales/en/profile.json';
 import progress from './locales/en/progress.json';
 
@@ -37,6 +38,7 @@ export const resources = {
     challenge,
     leaderboard,
     exam,
+    paywall,
     profile,
     progress,
   },

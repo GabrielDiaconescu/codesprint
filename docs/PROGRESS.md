@@ -2,8 +2,8 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 13 complete — awaiting approval for Phase 14 (Billing: RevenueCat,
-entitlements, webhook, paywall).
+**Current phase:** Phase 14 complete **in code**, blocked on store credentials for its device
+check — awaiting approval for Phase 15 (Ads + consent).
 **Last updated:** 2026-09-18
 
 ---
@@ -26,7 +26,8 @@ entitlements, webhook, paywall).
 | 11    | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
 | 12    | Leaderboard, display names, reports  | **Complete** — pending device check   |
 | 13    | Exam mode                            | **Complete** — pending device check   |
-| 14–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 14    | Billing, entitlements, paywall       | **Code complete** — blocked on stores |
+| 15–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -1169,14 +1170,141 @@ Through the real HTTP API, signed in as the seeded accounts:
     and unlocked achievements as arguments because `submit_exam` has just computed them, and a
     client must not be able to pass its own.
 
+## Phase 14 — what was implemented (Billing, entitlements, paywall)
+
+The first phase that genuinely depends on credentials nobody has yet. It was built in two
+halves: everything that does not need a store account, and then the RevenueCat service itself —
+written, type-checked against the real SDK, and deliberately **not wired in**, because a
+service configured with no API key cannot be verified and must not pretend otherwise
+(SPEC §59.11).
+
+**Database** — `20260917121500_billing.sql`
+
+- `apply_entitlements(user, payload)`: reconciles a user against the **full** set RevenueCat
+  reports. Anything absent is revoked — deactivated rather than deleted, so the row keeps which
+  store it came from. This is what makes webhook ordering irrelevant.
+- `entitlement_state(user)` / `get_entitlements()`: what the server says somebody holds.
+  `is_ad_free` is computed as `no_ads OR premium` in one place (SPEC §32).
+- `record_billing_event(...)`: the idempotency log, returning `recorded` **and**
+  `already_processed` separately — so a retry of a delivery that _failed_ is not mistaken for
+  a duplicate and quietly dropped.
+- `config_bool`, plus explicit `service_role` grants: revoking from `PUBLIC` removes the
+  privilege from `service_role` too, which would have made every Edge Function call fail.
+- 45 new pgTAP tests (`13_billing.test.sql`), 478 in total.
+
+**Edge Functions** — `supabase/functions/`
+
+- `revenuecat-webhook`: authenticates with a shared secret compared in constant time and
+  **failing closed** when unset, logs the delivery, then **re-fetches the whole subscriber**
+  from the REST API and reconciles it. Status codes chosen for RevenueCat's retry behaviour.
+  A `TRANSFER` re-syncs **both** accounts, since a subscription moving changes what each holds.
+- `sync-entitlements`: the same reconciliation for the caller, whose id comes from their
+  verified JWT — there is no user id parameter to forge.
+- `config.toml` sets `verify_jwt = false` for the webhook (RevenueCat holds no Supabase
+  session) and `true` for the sync.
+- Their logic lives in `_shared/`, free of Deno globals, so it is type-checked and unit-tested
+  by the ordinary `npm test` run: 48 tests.
+
+**App**
+
+- `EntitlementService` — **real**, and separate from `BillingService` on purpose: knowing what
+  somebody has paid for must work now, while the store SDK waits for keys.
+- `src/services/billing/config.ts` — every product identifier in the codebase, and nothing
+  else. No price anywhere.
+- The **paywall**: plans from Offerings, localized prices from the store, the per-month
+  equivalent of the annual plan, an explicit "No Ads does not unlock Premium lessons or
+  unlimited lives", restore, manage, terms, and an immediate close control.
+- `RevenueCatBillingService` — written and type-checked, registry still on the no-op.
+
+### Phase 14 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+format      prettier --check ......... clean
+unit        jest ..................... 56 suites, 830 tests, all passing
+database    supabase test db ......... 13 files, 478 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+The Edge Functions, probed over real HTTP against the local stack:
+
+| Request                                    | Result                                          |
+| ------------------------------------------ | ----------------------------------------------- |
+| webhook, no `Authorization`, secret unset  | `500 webhook not configured` — **fails closed** |
+| webhook, wrong secret                      | `401 unauthorized`                              |
+| webhook, correct secret, no RevenueCat key | `500 webhook not configured`                    |
+| webhook, `Bearer <secret>`                 | accepted past auth                              |
+| webhook, `GET`                             | `405 method not allowed`                        |
+| `sync-entitlements`, no token              | `401 unauthorized`                              |
+
+Reconciliation, through the database:
+
+| Step                                    | Result                                      |
+| --------------------------------------- | ------------------------------------------- |
+| premium + no_ads applied                | both active, `is_ad_free` true              |
+| empty payload applied                   | both revoked, rows kept with their history  |
+| downgrade to no_ads only                | premium gone, no_ads active                 |
+| expiry in the past, `is_active: true`   | grants nothing                              |
+| unknown entitlement id                  | skipped, nothing written, no error          |
+| duplicate webhook delivery, unprocessed | `recorded: false, already_processed: false` |
+| duplicate after processing              | `recorded: false, already_processed: true`  |
+
+## Decisions and interpretations made during Phase 14
+
+1. **`EntitlementService` is separate from `BillingService`.** The obvious design puts them
+   together; it is wrong. The store SDK is a no-op without keys, but reading what the server
+   says somebody holds must work today — otherwise the seeded Premium account looks free.
+2. **The registry still points at `NoopBillingService`.** A service configured with no API key
+   cannot be verified, and shipping it wired-in would be claiming an integration works when
+   nobody has run it once. `PRODUCTION_NOOP_ALLOWLIST` still lists `billing`.
+3. **`react-native-purchases` is installed but not imported by anything.** So it is
+   type-checked against the real SDK, and it is **not in the bundle** — which was confirmed by
+   grepping the export. Expo Go still runs the app. Flipping one registry line changes both.
+4. **The webhook fails CLOSED with no secret.** "Not configured" must never mean "let
+   everything through": an unauthenticated endpoint that writes entitlements is a way for
+   anyone who finds the URL to grant themselves Premium.
+5. **`record_billing_event` returns two facts, not one.** "Already seen" is not "already
+   done". With a single boolean, a delivery whose sync failed halfway would be waved through
+   as a duplicate on the retry and the entitlement would never land.
+6. **Reconciliation, never deltas.** Absence in the re-fetched subscriber revokes. Applying
+   events as a sequence eventually produces a subscriber state that never existed.
+7. **A `TRANSFER` syncs both accounts.** Syncing only the destination would leave the previous
+   owner with access they no longer have (SPEC §31, account switching).
+8. **The informational-event list has exactly one entry (`TEST`).** It is an allow-list of
+   things to SKIP, so an event type RevenueCat adds later causes a harmless extra API call
+   rather than a subscriber whose access silently never updates.
+9. **Edge Function logic lives in `_shared/`, free of Deno globals.** Deno is not installed
+   here and adding a second toolchain to test forty lines would be the wrong trade. The
+   result is better anyway: the code that decides who has paid is covered by the same
+   `npm test` everything else is. The Deno entry points are excluded from `tsconfig` and
+   ESLint, and are thin enough to read in one screen.
+10. **An unknown entitlement id is skipped at both ends.** A dashboard can be configured with
+    tiers an installed app predates; an old client must not fail its whole sync over one.
+11. **The paywall has no fallback price, anywhere.** Offerings that fail to load produce an
+    error state with a retry (SPEC §31). Inventing a price is worse than showing none.
+12. **A cancelled purchase produces no message at all.** The customer knows what they just
+    did; a toast saying "purchase failed" reads as an error they caused.
+13. **No Ads is shown to a Premium subscriber as "included", not "owned" and never as
+    buyable.** They do hold it — Premium grants both — but the honest word is different.
+14. **`MONETIZATION.md` was written now**, not at launch: it is the setup checklist for the
+    store paperwork that has to happen before this phase can be device-tested at all.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
 
 **Integrations not built yet** (SPEC §59.11 — no fakes; the contract and the UI slot exist):
 
-- Billing and the paywall (14), ads and UMP consent (15), analytics and monitoring (16),
-  local notifications (17). Those six services are still the no-op implementations listed in
+- **RevenueCat is written but not switched on.** `RevenueCatBillingService` is complete and
+  type-checked against the real SDK; the registry still points at `NoopBillingService`
+  because there are no API keys, no store products and therefore nothing to verify against.
+  Flipping it is one line, listed as step 10 of `docs/MONETIZATION.md`. Until then the
+  paywall loads no offerings and shows its "could not load the plans" state — which is the
+  correct behaviour, not a placeholder.
+- Ads and UMP consent (15), analytics and monitoring (16), local notifications (17), plus
+  billing above. Those six services are still the no-op implementations listed in
   `PRODUCTION_NOOP_ALLOWLIST`, which must be **empty** before the first production release.
 - **Sign in with Apple and Google (D6).** Both need credentials that do not exist yet: an
   Apple Developer account with the Sign in with Apple capability, and Google OAuth client ids.
@@ -1188,9 +1316,10 @@ Rewritten at the end of each phase, so this describes the product as it stands t
 **Consequences of the above, visible in the app:**
 
 - Out of lives there is nowhere to go: the wait is explained, but the rewarded-ad restore
-  needs Phase 15 and the upgrade needs Phase 14.
-- Hard practice sets are gated correctly, but a free learner who asks for one gets an
-  explanation rather than a paywall (Phase 14).
+  needs Phase 15 and the upgrade needs a working store account.
+- The paywall exists and is reachable, but nothing can be bought on it until RevenueCat is
+  configured. The funnel triggers from SPEC §34 are implemented and unit-tested; wiring
+  them to the screens that fire them is part of Phase 15, where the ad triggers arrive.
 - Ads consent (Google UMP) is not asked during onboarding. It belongs with the ads
   integration, which must show it before the first ad request.
 - The reminder time is stored, but nothing is scheduled and no notification permission is
@@ -1941,3 +2070,49 @@ Two accounts, because half of this is about the Premium boundary: **free@codespr
 23. Turn it back on and hand in. The exam submits.
 24. Turn airplane mode on and try to open the exam list: **"Could not load the exams"** with a
     **Try again** button, never a blank screen.
+
+---
+
+## Phase 14 device test checklist
+
+**Most of this cannot be done yet.** The sandbox purchase, restore and upgrade all need an
+Apple Developer account and a Google Play account, which need the PFA and a D-U-N-S number
+(see _Human actions_). What follows is split into what works today and what waits.
+
+### Today, with no store account at all
+
+1. Sign in as **premium@codesprint.test** (`sprint2026`). Every Premium gate is open: all
+   modules in Learn, the full exam, hard practice, unlimited lives. That is `user_entitlements`
+   doing its job with no RevenueCat anywhere in the picture.
+2. Sign in as **free@codesprint.test**. The same screens are locked, with their own
+   explanations.
+3. Sign in as **noads@codesprint.test**. Content is locked exactly as for Free — No Ads buys
+   no lessons. This is the single most misunderstood thing about the tier, so check it.
+4. Open the paywall from Profile. It shows **"Could not load the plans"** with a **Try again**
+   button. That is correct: there is no store to quote a price, and the app will not invent
+   one.
+5. Confirm the close control is visible the moment the paywall opens, before anything loads.
+6. Read the No Ads card copy once the plans do load (after step 7 below) — it must say it does
+   not unlock Premium lessons or unlimited lives.
+
+### Once the store accounts exist
+
+7. Set the RevenueCat keys, create the products, and flip `billing` to
+   `RevenueCatBillingService` (`docs/MONETIZATION.md` has the ten steps).
+8. Build a **development build** — `npx expo run:android` or an EAS dev build. Expo Go cannot
+   load native modules (SPEC §0.1.10), so this is the point where it stops being an option.
+9. Open the paywall. Three plans, each with a price **formatted by the store in your own
+   currency**, and the annual one showing its per-month equivalent.
+10. Buy **No Ads** with a sandbox account. Ads stop. Learn is still locked past module 6.
+11. Open the paywall again: No Ads shows as **your current plan**, and Premium offers
+    **"Upgrade to Premium"** with the note that it replaces rather than adds.
+12. Upgrade. Check the store receipt — you are charged a prorated upgrade, **not twice**.
+13. Premium content unlocks **only after the server sync**, not the instant the store returns.
+    That is the point: kill the app mid-purchase and reopen it, and the entitlement still
+    arrives via the webhook.
+14. **Delete and reinstall** the app, sign in, tap **Restore purchases**. Everything comes
+    back.
+15. Sign in as a _different_ account on the same device. Confirm the subscription does not
+    silently follow it — and if it does transfer, that the first account loses access.
+16. In Supabase Studio, look at `billing_events`: one row per delivery, each with
+    `processed_at` set.

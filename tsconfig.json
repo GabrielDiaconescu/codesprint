@@ -24,5 +24,8 @@
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "exclude": ["node_modules", "dist", "coverage"]
+  // The Edge Function ENTRY POINTS are Deno: `Deno.serve`, `Deno.env`, `jsr:` imports. Their
+  // logic lives in supabase/functions/_shared, which is deliberately runtime-agnostic and IS
+  // type-checked here.
+  "exclude": ["node_modules", "dist", "coverage", "supabase/functions/*/index.ts"]
 }

@@ -60,6 +60,7 @@ Local Studio: http://127.0.0.1:54323 · API: http://127.0.0.1:54321
 | `20260917121200_practice_and_challenge`    | Practice XP and sets, the Daily Challenge, and the Home summary                                         |
 | `20260917121300_leaderboard`               | Display names, the weekly ranking, reports, and the per-day ranking cap                                 |
 | `20260917121400_exams`                     | Exam attempts: the frozen paper, the server-side clock, grading, and score XP                           |
+| `20260917121500_billing`                   | Entitlement reconciliation, the webhook idempotency log, and the client's view of it                    |
 
 ---
 
@@ -154,6 +155,7 @@ the search path and hijack an unqualified reference while the function runs as o
 | `save_exam_progress(uuid, jsonb)`                  | authenticated       | Merges answers into an open attempt, so a crash does not cost 45 minutes                                                                                            |
 | `submit_exam(uuid, jsonb, text)`                   | authenticated       | Grades the attempt, enforces the clock, pays score XP once. Idempotent                                                                                              |
 | `get_exam_results(uuid, text)`                     | authenticated       | Reopens a graded attempt's results without regrading or repaying                                                                                                    |
+| `get_entitlements()`                               | authenticated       | The caller's own paid access, for the UI to reflect. Never an input to a gate                                                                                       |
 
 ### Internal (no client grant)
 
@@ -200,6 +202,11 @@ the search path and hijack an unqualified reference while the function runs as o
 | `exam_question_set(uuid, uuid)`             | Picks and shuffles one attempt's questions, honouring the difficulty mix              |
 | `exam_questions(uuid, text)`                | The frozen paper, rendered — no explanation, no hint text, no key                     |
 | `exam_results(uuid, text, integer, jsonb)`  | Builds the results page. Internal, so a client cannot pass its own XP figure          |
+| `config_bool(text, boolean)`                | (listed above)                                                                        |
+| `apply_entitlements(uuid, jsonb)`           | **service_role only.** Reconciles one user against the full RevenueCat subscriber     |
+| `entitlement_state(uuid)`                   | What a user currently holds, as the server sees it                                    |
+| `record_billing_event(text, uuid, …)`       | **service_role only.** Logs a delivery; says whether it still needs work              |
+| `mark_billing_event_processed(text)`        | **service_role only.** Marks a delivery finished                                      |
 
 ### The XP ledger
 
@@ -561,6 +568,73 @@ Achievements (`exams_completed`, `exam_passed`) and the streak are evaluated in 
 and the questions are recorded in `user_question_attempts` with `context = 'exam'`, so exam
 mistakes reach the review set and per-skill accuracy like any other answer.
 
+### Billing and entitlements
+
+One rule governs this whole area, and everything else follows from it:
+
+> `user_entitlements` is the **only** authority for paid access. It is written exclusively by
+> Edge Functions holding the service role, never by the app, and every gate in the product
+> reads it through `has_entitlement` (SPEC §31).
+
+RevenueCat's `CustomerInfo` may make the UI react the instant a purchase completes — a purchase
+should feel finished when it is — but it decides nothing. A client that lies about its
+`CustomerInfo` gets a nicer-looking paywall and not one extra lesson. `13_billing.test.sql`
+proves a client cannot insert, update or delete an entitlement, cannot call
+`apply_entitlements`, and cannot read another learner's rows.
+
+#### Reconciliation, not deltas
+
+`apply_entitlements(user, payload)` takes the **full** set RevenueCat reports and makes the
+database match it. Anything absent is deactivated — not deleted, so the row keeps which store
+it came from and when it last changed.
+
+That is what makes webhook ordering irrelevant. The webhook never applies the event it
+received; it re-fetches the whole subscriber and passes that here. A RENEWAL arriving after the
+CANCELLATION it precedes cannot resurrect a lapsed subscription, because neither event is what
+is being applied.
+
+An entitlement id this build has never heard of is skipped rather than fatal: a dashboard can
+be configured with tiers an installed app predates, and an old client must not fail its whole
+sync over one.
+
+#### The webhook log
+
+`billing_events.event_id` is the primary key, so a replayed delivery inserts nothing —
+idempotency is structural rather than remembered. But "already seen" is not "already done", so
+`record_billing_event` returns both facts:
+
+| Returns                                           | Meaning                                   |
+| ------------------------------------------------- | ----------------------------------------- |
+| `{"recorded": true, "already_processed": false}`  | New. Do the work                          |
+| `{"recorded": false, "already_processed": false}` | A retry of something that failed. Redo it |
+| `{"recorded": false, "already_processed": true}`  | Genuinely done. Acknowledge and stop      |
+
+Without that distinction, a delivery whose sync failed halfway would be waved through as a
+duplicate on RevenueCat's retry and the entitlement would never land.
+
+`billing_events` has RLS with **no read policy at all** — it holds raw webhook payloads, and no
+client can read it.
+
+#### Edge Functions
+
+| Function             | `verify_jwt` | Who calls it                                                  |
+| -------------------- | ------------ | ------------------------------------------------------------- |
+| `revenuecat-webhook` | **false**    | RevenueCat, authenticated by a shared secret it checks itself |
+| `sync-entitlements`  | true         | The app, for the user in its own token                        |
+
+The webhook cannot use `verify_jwt`: RevenueCat holds no Supabase session. It authenticates
+with `REVENUECAT_WEBHOOK_AUTH`, compared in constant time, and **fails closed** when that
+secret is unset — an unauthenticated endpoint that writes entitlements is a way for anyone who
+finds the URL to grant themselves Premium.
+
+`sync-entitlements` takes no user id parameter at all. It reads the caller from their verified
+token, so the worst a malicious client can do with it is ask for its own entitlements to be
+recalculated correctly.
+
+Their logic — authorisation, subscriber mapping, which events matter — lives in
+`supabase/functions/_shared/`, which is deliberately free of Deno globals so it is type-checked
+and unit-tested by the ordinary `npm test` run rather than by a toolchain nobody has installed.
+
 ---
 
 ## Auth configuration
@@ -607,6 +681,7 @@ Supabase's built-in sender is not permitted there.
 | `10_practice_and_challenge.test.sql`    | Home for a new and a returning learner; review sets that clear as questions are answered correctly; practice never reaching past the paywall; the daily XP cap truncating rather than refusing; a deterministic challenge that is the same for a date and different across dates; and a bonus claimable once, by someone who actually finished it                                                                                                            |
 | `11_leaderboard.test.sql`               | Display-name validation on every path into the column, including a direct owner write; that a guest, a hidden user, an unnamed user and last week's score are all absent from the ranking; that no email address appears anywhere in the payload; the ±5 neighbour slice; the daily ranking cap clamping the board while the learner keeps every point; and a report queue nobody can read back                                                              |
 | `12_exams.test.sql`                     | That the paper is frozen and resumed rather than redealt; that it carries no explanation, hint or key while the exam runs and does carry both afterwards; the difficulty mix; that a payload past the grace period is ignored in favour of what was saved in time; the free weekly limit, the premium cooldown and the Premium gate; that score XP is the improvement over the learner's best and a worse resit pays nothing; and that no life is ever spent |
+| `13_billing.test.sql`                   | That reconciliation revokes what the payload omits and keeps the history; that a lapsed expiry grants nothing however it is flagged; that an unknown entitlement id is skipped rather than fatal; that a client can neither insert, update, delete nor call its way to an entitlement; that a retry of a FAILED delivery is not mistaken for a duplicate; and that the webhook log is readable by nobody                                                     |
 
 CI runs these against a fresh database on every push, and fails if
 `src/types/database.types.ts` is out of date.
@@ -617,8 +692,6 @@ CI runs these against a fresh database on every push, and fails if
 
 These arrive with the features that need them:
 
-- `revenuecat-webhook` and `sync-entitlements` Edge Functions; `user_entitlements` is written
-  by hand from the seed until then — Phase 14
 - `rewarded_ad_grants` and the RPC that pays a rewarded life — Phase 15
 - `export_my_data`, and the `delete-account` Edge Function — Phase 18
 - Sign in with Apple / Google — needs store credentials (SPEC §12, D6)
