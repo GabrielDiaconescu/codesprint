@@ -5,7 +5,8 @@ import type { ParsedQuestion } from '../../payloads';
  * `isAnswerComplete` gates the Check button. Too strict and a valid answer cannot be
  * submitted; too loose and a mis-tap burns an attempt on an empty answer.
  */
-const opts = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `o${i}`, text: `Option ${i}` }));
+const opts = (n: number) =>
+  Array.from({ length: n }, (_, i) => ({ id: `o${i}`, text: `Option ${i}` }));
 
 describe('isAnswerComplete', () => {
   it('rejects a value of the wrong type outright', () => {
@@ -49,7 +50,10 @@ describe('isAnswerComplete', () => {
   });
 
   it('fill_blank needs non-blank text', () => {
-    const q: ParsedQuestion = { type: 'fill_blank', payload: { input: 'tokens', tokens: ['a', 'b'] } };
+    const q: ParsedQuestion = {
+      type: 'fill_blank',
+      payload: { input: 'tokens', tokens: ['a', 'b'] },
+    };
     expect(isAnswerComplete(q, { type: 'fill_blank', value: '' })).toBe(false);
     expect(isAnswerComplete(q, { type: 'fill_blank', value: 'a' })).toBe(true);
   });
@@ -57,14 +61,23 @@ describe('isAnswerComplete', () => {
   it('code_ordering needs every line placed', () => {
     const q: ParsedQuestion = {
       type: 'code_ordering',
-      payload: { lines: [{ id: 'a', text: '' }, { id: 'b', text: '' }, { id: 'c', text: '' }] },
+      payload: {
+        lines: [
+          { id: 'a', text: '' },
+          { id: 'b', text: '' },
+          { id: 'c', text: '' },
+        ],
+      },
     };
     expect(isAnswerComplete(q, { type: 'code_ordering', order: ['a', 'b'] })).toBe(false);
     expect(isAnswerComplete(q, { type: 'code_ordering', order: ['c', 'a', 'b'] })).toBe(true);
   });
 
   describe('debugging', () => {
-    const lines = [{ id: 'a', text: '' }, { id: 'b', text: '' }];
+    const lines = [
+      { id: 'a', text: '' },
+      { id: 'b', text: '' },
+    ];
 
     it('select_line needs a line', () => {
       const q: ParsedQuestion = { type: 'debugging', payload: { mode: 'select_line', lines } };
@@ -73,7 +86,10 @@ describe('isAnswerComplete', () => {
     });
 
     it('choose_fix needs an option', () => {
-      const q: ParsedQuestion = { type: 'debugging', payload: { mode: 'choose_fix', options: opts(2) } };
+      const q: ParsedQuestion = {
+        type: 'debugging',
+        payload: { mode: 'choose_fix', options: opts(2) },
+      };
       expect(isAnswerComplete(q, { type: 'debugging', line_id: 'a' })).toBe(false);
       expect(isAnswerComplete(q, { type: 'debugging', option_id: 'o0' })).toBe(true);
     });
@@ -94,8 +110,12 @@ describe('isAnswerComplete', () => {
       type: 'concept_matching',
       payload: { concepts: opts(3), definitions: opts(3) },
     };
-    expect(isAnswerComplete(q, { type: 'concept_matching', pairs: { o0: 'o0', o1: 'o1' } })).toBe(false);
-    expect(isAnswerComplete(q, { type: 'concept_matching', pairs: { o0: 'o2', o1: 'o1', o2: 'o0' } })).toBe(true);
+    expect(isAnswerComplete(q, { type: 'concept_matching', pairs: { o0: 'o0', o1: 'o1' } })).toBe(
+      false,
+    );
+    expect(
+      isAnswerComplete(q, { type: 'concept_matching', pairs: { o0: 'o2', o1: 'o1', o2: 'o0' } }),
+    ).toBe(true);
   });
 });
 

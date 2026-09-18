@@ -29,7 +29,8 @@ export const SupabaseHomeService: HomeService = {
       p_locale: locale,
     });
     // 42501 here means a free learner asked for a hard set — the paywall, not a failure.
-    if (error) throw new LessonUnavailableError(error.code === '42501' ? 'requires-premium' : 'unknown');
+    if (error)
+      throw new LessonUnavailableError(error.code === '42501' ? 'requires-premium' : 'unknown');
     return practiceSet.parse(data);
   },
 

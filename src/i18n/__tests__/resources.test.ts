@@ -88,9 +88,10 @@ describe('onboarding option coverage', () => {
   it.each(['complete_beginner', 'beginner', 'intermediate'])(
     'has a label and description for experience level %s',
     (level) => {
-      const option = resources.en.onboarding.experience.options[
-        level as keyof typeof resources.en.onboarding.experience.options
-      ];
+      const option =
+        resources.en.onboarding.experience.options[
+          level as keyof typeof resources.en.onboarding.experience.options
+        ];
       expect(Object.keys(option)).toEqual(expect.arrayContaining(['label', 'description']));
     },
   );
@@ -98,17 +99,19 @@ describe('onboarding option coverage', () => {
   it.each(['university', 'career', 'interview', 'personal', 'improve'])(
     'has a label and description for motivation %s',
     (motivation) => {
-      const option = resources.en.onboarding.motivation.options[
-        motivation as keyof typeof resources.en.onboarding.motivation.options
-      ];
+      const option =
+        resources.en.onboarding.motivation.options[
+          motivation as keyof typeof resources.en.onboarding.motivation.options
+        ];
       expect(Object.keys(option)).toEqual(expect.arrayContaining(['label', 'description']));
     },
   );
 
   it.each(['5', '10', '15'])('has a label for the %s minute daily goal', (minutes) => {
-    const option = resources.en.onboarding.goal.options[
-      minutes as keyof typeof resources.en.onboarding.goal.options
-    ];
+    const option =
+      resources.en.onboarding.goal.options[
+        minutes as keyof typeof resources.en.onboarding.goal.options
+      ];
     expect(option.label.length).toBeGreaterThan(0);
   });
 });

@@ -51,7 +51,10 @@ export const OptionList = <T extends string | number>({
             }
             style={
               isSelected
-                ? { borderColor: theme.colors.primary, backgroundColor: theme.colors.surfaceElevated }
+                ? {
+                    borderColor: theme.colors.primary,
+                    backgroundColor: theme.colors.surfaceElevated,
+                  }
                 : undefined
             }
           >

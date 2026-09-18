@@ -28,8 +28,8 @@ export const DEFAULT_APP_CONFIG: AppConfigValues = {
   // SPEC §20. Extended past the last entry by the level logic, so a very active learner
   // keeps levelling instead of sitting at a permanent maximum.
   level_thresholds: [
-    0, 100, 250, 500, 850, 1300, 1850, 2500, 3250, 4100, 5050, 6100, 7250, 8500, 9850, 11300,
-    12850, 14500, 16250, 18100,
+    0, 100, 250, 500, 850, 1300, 1850, 2500, 3250, 4100, 5050, 6100, 7250, 8500, 9850, 11300, 12850,
+    14500, 16250, 18100,
   ],
   content_version: 0,
   min_supported_app_version: '0.1.0',

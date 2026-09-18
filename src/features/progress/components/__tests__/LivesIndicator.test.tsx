@@ -35,8 +35,7 @@ describe('LivesIndicator', () => {
   });
 
   describe('the countdown', () => {
-    const inMinutes = (minutes: number) =>
-      new Date(Date.now() + minutes * 60_000).toISOString();
+    const inMinutes = (minutes: number) => new Date(Date.now() + minutes * 60_000).toISOString();
 
     it('shows minutes when the next life is close', async () => {
       await renderWithTheme(
@@ -72,7 +71,9 @@ describe('LivesIndicator', () => {
     });
 
     it('shows no countdown when the server sent none', async () => {
-      await renderWithTheme(<LivesIndicator lives={2} max={5} unlimited={false} nextLifeAt={null} />);
+      await renderWithTheme(
+        <LivesIndicator lives={2} max={5} unlimited={false} nextLifeAt={null} />,
+      );
 
       expect(screen.queryByText(/^in /)).toBeNull();
     });

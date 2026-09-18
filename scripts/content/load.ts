@@ -153,7 +153,9 @@ const loadModule = (dir: string, issues: Issue[]): LoadedModule | null => {
   // A lesson file nobody lists is invisible to the pipeline — almost always a forgotten
   // entry in module.yaml rather than a deliberate draft.
   if (existsSync(lessonsDir)) {
-    const listed = new Set(data.lessons.map((s, i) => `${String(i + 1).padStart(2, '0')}-${s}.yaml`));
+    const listed = new Set(
+      data.lessons.map((s, i) => `${String(i + 1).padStart(2, '0')}-${s}.yaml`),
+    );
     for (const name of readdirSync(lessonsDir)) {
       if (name.endsWith('.yaml') && !listed.has(name)) {
         issues.push({

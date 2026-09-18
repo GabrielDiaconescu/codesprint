@@ -53,7 +53,9 @@ const main = async () => {
   // Publishing invalid content is worse than not publishing: the app would serve it.
   const problems = runValidation();
   if (problems.length > 0) {
-    fail(`Refusing to publish: content has ${problems.length} problem(s). Run npm run content:validate.`);
+    fail(
+      `Refusing to publish: content has ${problems.length} problem(s). Run npm run content:validate.`,
+    );
     return;
   }
 
@@ -141,10 +143,22 @@ const main = async () => {
   };
 
   console.log('\nWithdrawing content no longer in the files:');
-  await deactivate('modules', rows.modules.map((r) => r.id));
-  await deactivate('lessons', rows.lessons.map((r) => r.id));
-  await deactivate('questions', rows.questions.map((r) => r.id));
-  await deactivate('exams', rows.exams.map((r) => r.id));
+  await deactivate(
+    'modules',
+    rows.modules.map((r) => r.id),
+  );
+  await deactivate(
+    'lessons',
+    rows.lessons.map((r) => r.id),
+  );
+  await deactivate(
+    'questions',
+    rows.questions.map((r) => r.id),
+  );
+  await deactivate(
+    'exams',
+    rows.exams.map((r) => r.id),
+  );
 
   /* -------------------------------------------------- invalidate client caches */
 

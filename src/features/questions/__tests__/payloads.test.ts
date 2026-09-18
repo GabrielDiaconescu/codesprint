@@ -18,7 +18,8 @@ const base = (type: RenderableQuestion['type'], payload: unknown): RenderableQue
   skill_tags: ['tag'],
 });
 
-const opts = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `o${i}`, text: `Option ${i}` }));
+const opts = (n: number) =>
+  Array.from({ length: n }, (_, i) => ({ id: `o${i}`, text: `Option ${i}` }));
 
 describe('parseQuestion', () => {
   it('parses multiple_choice with its options', () => {
@@ -32,7 +33,9 @@ describe('parseQuestion', () => {
 
   it('requires at least three options for multiple_select', () => {
     expect(parseQuestion(base('multiple_select', { options: opts(2) }))).toBeNull();
-    expect(parseQuestion(base('multiple_select', { options: opts(3) }))?.type).toBe('multiple_select');
+    expect(parseQuestion(base('multiple_select', { options: opts(3) }))?.type).toBe(
+      'multiple_select',
+    );
   });
 
   it('accepts an empty payload for true_false', () => {
@@ -50,7 +53,9 @@ describe('parseQuestion', () => {
 
     it('requires options in choice mode', () => {
       expect(parseQuestion(base('predict_output', { input: 'choice' }))).toBeNull();
-      expect(parseQuestion(base('predict_output', { input: 'choice', options: opts(2) }))).not.toBeNull();
+      expect(
+        parseQuestion(base('predict_output', { input: 'choice', options: opts(2) })),
+      ).not.toBeNull();
     });
 
     it('rejects an unknown input mode', () => {
@@ -61,7 +66,9 @@ describe('parseQuestion', () => {
   describe('fill_blank', () => {
     it('requires tokens in token mode', () => {
       expect(parseQuestion(base('fill_blank', { input: 'tokens' }))).toBeNull();
-      expect(parseQuestion(base('fill_blank', { input: 'tokens', tokens: ['a', 'b'] }))).not.toBeNull();
+      expect(
+        parseQuestion(base('fill_blank', { input: 'tokens', tokens: ['a', 'b'] })),
+      ).not.toBeNull();
     });
 
     it('needs no tokens in text mode', () => {
@@ -70,13 +77,17 @@ describe('parseQuestion', () => {
   });
 
   it('requires at least three lines for code_ordering', () => {
-    const lines = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `l${i}`, text: `line ${i}` }));
+    const lines = (n: number) =>
+      Array.from({ length: n }, (_, i) => ({ id: `l${i}`, text: `line ${i}` }));
     expect(parseQuestion(base('code_ordering', { lines: lines(2) }))).toBeNull();
     expect(parseQuestion(base('code_ordering', { lines: lines(3) }))?.type).toBe('code_ordering');
   });
 
   describe('debugging', () => {
-    const lines = [{ id: 'a', text: 'x = 1' }, { id: 'b', text: 'print(y)' }];
+    const lines = [
+      { id: 'a', text: 'x = 1' },
+      { id: 'b', text: 'print(y)' },
+    ];
 
     it('needs lines to select a line', () => {
       expect(parseQuestion(base('debugging', { mode: 'select_line' }))).toBeNull();
@@ -85,17 +96,23 @@ describe('parseQuestion', () => {
 
     it('needs options to choose a fix', () => {
       expect(parseQuestion(base('debugging', { mode: 'choose_fix' }))).toBeNull();
-      expect(parseQuestion(base('debugging', { mode: 'choose_fix', options: opts(2) }))).not.toBeNull();
+      expect(
+        parseQuestion(base('debugging', { mode: 'choose_fix', options: opts(2) })),
+      ).not.toBeNull();
     });
 
     it('needs both for the combined mode', () => {
       expect(parseQuestion(base('debugging', { mode: 'both', lines }))).toBeNull();
-      expect(parseQuestion(base('debugging', { mode: 'both', lines, options: opts(2) }))).not.toBeNull();
+      expect(
+        parseQuestion(base('debugging', { mode: 'both', lines, options: opts(2) })),
+      ).not.toBeNull();
     });
   });
 
   it('parses concept_matching with both columns', () => {
-    const parsed = parseQuestion(base('concept_matching', { concepts: opts(3), definitions: opts(3) }));
+    const parsed = parseQuestion(
+      base('concept_matching', { concepts: opts(3), definitions: opts(3) }),
+    );
     expect(parsed?.type).toBe('concept_matching');
   });
 

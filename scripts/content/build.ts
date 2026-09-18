@@ -190,9 +190,7 @@ export const buildRows = (courses: LoadedCourse[]): ContentRows => {
         // (SPEC §45 caps it at 50 KB) and makes it impossible for an answer to ride along
         // inside a block.
         const storedBlocks = blocks.map((block) =>
-          block.type === 'question'
-            ? { type: 'question', question_id: block.question.id }
-            : block,
+          block.type === 'question' ? { type: 'question', question_id: block.question.id } : block,
         );
 
         rows.lessons.push({

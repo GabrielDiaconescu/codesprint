@@ -48,7 +48,8 @@ export const ConceptMatching = ({
   const pairs = value.pairs;
 
   /** The number shown on a matched concept and its definition: its position in the concept list. */
-  const numberFor = (conceptId: string): number => payload.concepts.findIndex((c) => c.id === conceptId) + 1;
+  const numberFor = (conceptId: string): number =>
+    payload.concepts.findIndex((c) => c.id === conceptId) + 1;
   const conceptOfDefinition = (definitionId: string): string | undefined =>
     Object.keys(pairs).find((conceptId) => pairs[conceptId] === definitionId);
 
@@ -80,7 +81,11 @@ export const ConceptMatching = ({
     return expected[conceptId] === pairs[conceptId] ? 'correct' : 'wrong';
   };
 
-  const borderFor = (marking: 'correct' | 'wrong' | undefined, isActive: boolean, paired: boolean) => {
+  const borderFor = (
+    marking: 'correct' | 'wrong' | undefined,
+    isActive: boolean,
+    paired: boolean,
+  ) => {
     if (marking === 'correct') return theme.colors.success;
     if (marking === 'wrong') return theme.colors.danger;
     if (isActive || paired) return theme.colors.primary;
@@ -112,7 +117,10 @@ export const ConceptMatching = ({
               selected={isActive}
               accessibilityLabel={
                 paired
-                  ? t('question.matching.paired', { concept: concept.text, definition: definitionText })
+                  ? t('question.matching.paired', {
+                      concept: concept.text,
+                      definition: definitionText,
+                    })
                   : isActive
                     ? t('question.matching.pairSelected', { concept: concept.text })
                     : concept.text
@@ -126,11 +134,21 @@ export const ConceptMatching = ({
                 {paired && (
                   <Badge
                     label={String(numberFor(concept.id))}
-                    tone={marking === 'correct' ? 'success' : marking === 'wrong' ? 'danger' : 'accent'}
-                    icon={marking === 'correct' ? 'checkmark' : marking === 'wrong' ? 'close' : undefined}
+                    tone={
+                      marking === 'correct' ? 'success' : marking === 'wrong' ? 'danger' : 'accent'
+                    }
+                    icon={
+                      marking === 'correct'
+                        ? 'checkmark'
+                        : marking === 'wrong'
+                          ? 'close'
+                          : undefined
+                    }
                   />
                 )}
-                {isActive && !paired && <Icon name="arrow-forward" size="md" color={theme.colors.primary} />}
+                {isActive && !paired && (
+                  <Icon name="arrow-forward" size="md" color={theme.colors.primary} />
+                )}
               </View>
             </Card>
           );
@@ -164,7 +182,9 @@ export const ConceptMatching = ({
                 {owner && (
                   <Badge
                     label={String(numberFor(owner))}
-                    tone={marking === 'correct' ? 'success' : marking === 'wrong' ? 'danger' : 'accent'}
+                    tone={
+                      marking === 'correct' ? 'success' : marking === 'wrong' ? 'danger' : 'accent'
+                    }
                   />
                 )}
                 <Text variant="body" style={styles.text}>

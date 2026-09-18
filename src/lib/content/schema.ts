@@ -31,7 +31,12 @@ export const localizedText = z
 export type LocalizedText = z.infer<typeof localizedText>;
 
 export const DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
-export const MATCH_MODES = ['exact', 'trimmed', 'whitespace_insensitive', 'case_insensitive'] as const;
+export const MATCH_MODES = [
+  'exact',
+  'trimmed',
+  'whitespace_insensitive',
+  'case_insensitive',
+] as const;
 export const REVIEW_STATUSES = ['draft', 'reviewed'] as const;
 
 /* ------------------------------------------------------------------ Lesson blocks (§15) */
@@ -161,9 +166,12 @@ const fillBlank = z
   .object({
     ...baseQuestion,
     type: z.literal('fill_blank'),
-    code_snippet: z.string().min(1).refine((code) => code.includes('___'), {
-      message: 'mark the blank with ___ so the renderer knows where it goes',
-    }),
+    code_snippet: z
+      .string()
+      .min(1)
+      .refine((code) => code.includes('___'), {
+        message: 'mark the blank with ___ so the renderer knows where it goes',
+      }),
     payload: z
       .object({
         /** Default is a tap-to-place token bank (SPEC §16), not a keyboard. */
@@ -184,10 +192,13 @@ const fillBlank = z
     message: 'a token-bank blank needs tokens to choose from',
     path: ['payload', 'tokens'],
   })
-  .refine((q) => q.payload.input !== 'tokens' || (q.payload.tokens ?? []).includes(q.answer.value), {
-    message: 'the correct token must be present in the token bank',
-    path: ['payload', 'tokens'],
-  });
+  .refine(
+    (q) => q.payload.input !== 'tokens' || (q.payload.tokens ?? []).includes(q.answer.value),
+    {
+      message: 'the correct token must be present in the token bank',
+      path: ['payload', 'tokens'],
+    },
+  );
 
 const codeOrdering = z
   .object({
@@ -196,7 +207,10 @@ const codeOrdering = z
     payload: z
       .object({
         /** Presented shuffled by the client; this is the authoring order, not the answer. */
-        lines: z.array(z.object({ id: slug, text: z.string() }).strict()).min(3).max(8),
+        lines: z
+          .array(z.object({ id: slug, text: z.string() }).strict())
+          .min(3)
+          .max(8),
       })
       .strict(),
     answer: z.object({ order: z.array(slug).min(3) }).strict(),
@@ -213,10 +227,10 @@ const codeOrdering = z
     message: 'the answer order repeats a line id',
     path: ['answer', 'order'],
   })
-  .refine(
-    (q) => q.answer.order.every((id) => q.payload.lines.some((line) => line.id === id)),
-    { message: 'the answer order names a line that does not exist', path: ['answer', 'order'] },
-  )
+  .refine((q) => q.answer.order.every((id) => q.payload.lines.some((line) => line.id === id)), {
+    message: 'the answer order names a line that does not exist',
+    path: ['answer', 'order'],
+  })
   .refine((q) => !q.runnable || q.expected_output !== undefined, {
     message: 'a runnable ordering question must declare the output of the correct order',
     path: ['expected_output'],
@@ -231,7 +245,10 @@ const debugging = z
       .object({
         /** Select the faulty line, choose the fix, or both (SPEC §16). */
         mode: z.enum(['select_line', 'choose_fix', 'both']),
-        lines: z.array(z.object({ id: slug, text: z.string() }).strict()).min(2).optional(),
+        lines: z
+          .array(z.object({ id: slug, text: z.string() }).strict())
+          .min(2)
+          .optional(),
         options: z.array(option).min(2).max(5).optional(),
       })
       .strict(),
@@ -278,8 +295,14 @@ const conceptMatching = z
     type: z.literal('concept_matching'),
     payload: z
       .object({
-        concepts: z.array(z.object({ id: slug, text: localizedText }).strict()).min(3).max(6),
-        definitions: z.array(z.object({ id: slug, text: localizedText }).strict()).min(3).max(6),
+        concepts: z
+          .array(z.object({ id: slug, text: localizedText }).strict())
+          .min(3)
+          .max(6),
+        definitions: z
+          .array(z.object({ id: slug, text: localizedText }).strict())
+          .min(3)
+          .max(6),
       })
       .strict(),
     answer: z.object({ pairs: z.record(slug, slug) }).strict(),
@@ -296,7 +319,10 @@ const conceptMatching = z
           q.payload.concepts.some((c) => c.id === conceptId) &&
           q.payload.definitions.some((d) => d.id === definitionId),
       ),
-    { message: 'a pair names a concept or definition that does not exist', path: ['answer', 'pairs'] },
+    {
+      message: 'a pair names a concept or definition that does not exist',
+      path: ['answer', 'pairs'],
+    },
   )
   .refine(
     (q) => new Set(Object.values(q.answer.pairs)).size === Object.values(q.answer.pairs).length,

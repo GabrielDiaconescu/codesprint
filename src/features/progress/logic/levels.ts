@@ -43,9 +43,7 @@ const thresholdAt = (thresholds: number[], index: number): number => {
 
   // Sum of an arithmetic series: baseStep + growth, baseStep + 2*growth, ...
   return (
-    last +
-    stepsBeyond * baseStep +
-    EXTRAPOLATION_GROWTH * ((stepsBeyond * (stepsBeyond + 1)) / 2)
+    last + stepsBeyond * baseStep + EXTRAPOLATION_GROWTH * ((stepsBeyond * (stepsBeyond + 1)) / 2)
   );
 };
 

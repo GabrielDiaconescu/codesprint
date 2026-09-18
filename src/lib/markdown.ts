@@ -26,7 +26,13 @@ export const toParagraphs = (text: string): string[] => {
   return text
     .replace(/\r\n/g, '\n')
     .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.split('\n').map((line) => line.trim()).join(' ').trim())
+    .map((paragraph) =>
+      paragraph
+        .split('\n')
+        .map((line) => line.trim())
+        .join(' ')
+        .trim(),
+    )
     .filter((paragraph) => paragraph.length > 0);
 };
 

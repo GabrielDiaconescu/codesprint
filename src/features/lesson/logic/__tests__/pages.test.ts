@@ -32,7 +32,9 @@ describe('buildLessonPages', () => {
 
   it('numbers questions from one, in order', () => {
     const pages = buildLessonPages([q('a'), text, q('b'), text, q('c')]);
-    const numbers = pages.filter((p) => p.kind === 'question').map((p) => (p as { number: number }).number);
+    const numbers = pages
+      .filter((p) => p.kind === 'question')
+      .map((p) => (p as { number: number }).number);
     expect(numbers).toEqual([1, 2, 3]);
   });
 

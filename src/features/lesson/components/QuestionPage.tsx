@@ -47,7 +47,9 @@ export const QuestionPage = ({
   const theme = useTheme();
 
   const parsed = useMemo(() => parseQuestion(question), [question]);
-  const [value, setValue] = useState<AnswerValue>(() => emptyAnswer(question.type as AnswerValue['type']));
+  const [value, setValue] = useState<AnswerValue>(() =>
+    emptyAnswer(question.type as AnswerValue['type']),
+  );
   const [result, setResult] = useState<AnswerResult | null>(null);
 
   const submit = useSubmitAnswer(context);
@@ -70,10 +72,7 @@ export const QuestionPage = ({
   const canCheck = !graded && !submit.isPending && isAnswerComplete(parsed, value);
 
   const check = () => {
-    submit.mutate(
-      { questionId: question.id, value },
-      { onSuccess: (graded) => setResult(graded) },
-    );
+    submit.mutate({ questionId: question.id, value }, { onSuccess: (graded) => setResult(graded) });
   };
 
   return (

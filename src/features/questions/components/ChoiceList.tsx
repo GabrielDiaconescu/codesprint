@@ -57,10 +57,26 @@ export const ChoiceList = ({
   };
 
   const visuals: Record<Marking, { border: string; icon: IconName; iconColor: string }> = {
-    none: { border: theme.colors.border, icon: multi ? 'square-outline' : 'ellipse-outline', iconColor: theme.colors.border },
-    selected: { border: theme.colors.primary, icon: multi ? 'checkbox' : 'checkmark-circle', iconColor: theme.colors.primary },
-    correct: { border: theme.colors.success, icon: 'checkmark-circle', iconColor: theme.colors.success },
-    missed: { border: theme.colors.success, icon: 'checkmark-circle-outline', iconColor: theme.colors.success },
+    none: {
+      border: theme.colors.border,
+      icon: multi ? 'square-outline' : 'ellipse-outline',
+      iconColor: theme.colors.border,
+    },
+    selected: {
+      border: theme.colors.primary,
+      icon: multi ? 'checkbox' : 'checkmark-circle',
+      iconColor: theme.colors.primary,
+    },
+    correct: {
+      border: theme.colors.success,
+      icon: 'checkmark-circle',
+      iconColor: theme.colors.success,
+    },
+    missed: {
+      border: theme.colors.success,
+      icon: 'checkmark-circle-outline',
+      iconColor: theme.colors.success,
+    },
     wrong: { border: theme.colors.danger, icon: 'close-circle', iconColor: theme.colors.danger },
   };
 
@@ -102,10 +118,7 @@ export const ChoiceList = ({
             accessibilityRole={multi ? 'checkbox' : 'radio'}
             selected={selected}
             accessibilityLabel={suffix ? `${option.text}. ${suffix}` : option.text}
-            style={[
-              { borderColor: visual.border },
-              graded && marking === 'none' && styles.dimmed,
-            ]}
+            style={[{ borderColor: visual.border }, graded && marking === 'none' && styles.dimmed]}
           >
             <View style={[styles.row, { gap: theme.spacing.md }]}>
               <Icon name={visual.icon} size="lg" color={visual.iconColor} />

@@ -33,6 +33,7 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
   setMotivation: (motivation) => set((s) => ({ draft: { ...s.draft, motivation } })),
   setDailyGoal: (dailyGoalMinutes) => set((s) => ({ draft: { ...s.draft, dailyGoalMinutes } })),
   setReminderTime: (reminderTime) => set((s) => ({ draft: { ...s.draft, reminderTime } })),
-  setAnalyticsConsent: (analyticsConsent) => set((s) => ({ draft: { ...s.draft, analyticsConsent } })),
+  setAnalyticsConsent: (analyticsConsent) =>
+    set((s) => ({ draft: { ...s.draft, analyticsConsent } })),
   reset: () => set({ draft: {} }),
 }));

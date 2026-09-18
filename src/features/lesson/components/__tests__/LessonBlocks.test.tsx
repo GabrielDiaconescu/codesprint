@@ -33,9 +33,7 @@ describe('LessonBlockView', () => {
     await renderWithTheme(<LessonBlockView block={block} />);
 
     // A tinted box conveys nothing without sight (SPEC §47).
-    expect(
-      screen.getByLabelText('Common mistake. Watch the quotes.'),
-    ).toBeOnTheScreen();
+    expect(screen.getByLabelText('Common mistake. Watch the quotes.')).toBeOnTheScreen();
   });
 
   it('renders nothing for a question block, which belongs to its own page', async () => {

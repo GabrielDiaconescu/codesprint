@@ -69,7 +69,12 @@ describe('the payload / answer split', () => {
         ...baseFields,
         id: id('10'),
         type: 'multiple_choice',
-        payload: { options: [{ id: 'a', text: { en: 'A' } }, { id: 'b', text: { en: 'B' } }] },
+        payload: {
+          options: [
+            { id: 'a', text: { en: 'A' } },
+            { id: 'b', text: { en: 'B' } },
+          ],
+        },
         answer: { option_id: 'a' },
       },
       {
@@ -157,7 +162,9 @@ describe('fill_blank', () => {
 
   it('requires the correct answer to be among the tokens', () => {
     // Otherwise the question is unanswerable, and no schema check below this would notice.
-    expect(build({ payload: { input: 'tokens', tokens: ['show', 'display'] } }).success).toBe(false);
+    expect(build({ payload: { input: 'tokens', tokens: ['show', 'display'] } }).success).toBe(
+      false,
+    );
   });
 });
 
@@ -227,9 +234,9 @@ describe('debugging', () => {
   });
 
   it('requires options when the learner chooses a fix', () => {
-    expect(
-      build({ payload: { mode: 'choose_fix' }, answer: { option_id: 'a' } }).success,
-    ).toBe(false);
+    expect(build({ payload: { mode: 'choose_fix' }, answer: { option_id: 'a' } }).success).toBe(
+      false,
+    );
   });
 
   it('requires the fixed version when it is marked runnable', () => {

@@ -72,7 +72,10 @@ describe('homeSummary', () => {
   });
 
   it('rejects a zero XP target, which would make the goal bar divide by zero', () => {
-    expect(homeSummary.safeParse({ ...home, daily_goal: { target_xp: 0, earned_xp: 0, met: false } }).success).toBe(false);
+    expect(
+      homeSummary.safeParse({ ...home, daily_goal: { target_xp: 0, earned_xp: 0, met: false } })
+        .success,
+    ).toBe(false);
   });
 
   it('rejects an unexpected field rather than passing it through', () => {
@@ -131,7 +134,9 @@ describe('dailyChallenge', () => {
   });
 
   it('accepts a claimed one with its award', () => {
-    expect(dailyChallenge.parse({ ...challenge, claimed: true, xp_awarded: 25 }).xp_awarded).toBe(25);
+    expect(dailyChallenge.parse({ ...challenge, claimed: true, xp_awarded: 25 }).xp_awarded).toBe(
+      25,
+    );
   });
 
   it('rejects a challenge question carrying an answer', () => {

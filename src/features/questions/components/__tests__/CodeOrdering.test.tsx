@@ -73,8 +73,14 @@ describe('CodeOrdering', () => {
       />,
     );
 
-    expect(screen.getByTestId('placed-show')).toHaveProp('accessibilityLabel', 'Line 1: print(area). Tap to remove.');
-    expect(screen.getByTestId('placed-width')).toHaveProp('accessibilityLabel', 'Line 2: width = 4. Tap to remove.');
+    expect(screen.getByTestId('placed-show')).toHaveProp(
+      'accessibilityLabel',
+      'Line 1: print(area). Tap to remove.',
+    );
+    expect(screen.getByTestId('placed-width')).toHaveProp(
+      'accessibilityLabel',
+      'Line 2: width = 4. Tap to remove.',
+    );
   });
 
   it('hides the bank once every line is placed', async () => {
@@ -108,7 +114,9 @@ describe('CodeOrdering', () => {
     );
     // Each exists; the order on screen is checked through the accessibility tree order.
     expect(bankTexts).toHaveLength(4);
-    const rendered = screen.getAllByLabelText(/Tap to add\.$/).map((node) => node.props.accessibilityLabel);
+    const rendered = screen
+      .getAllByLabelText(/Tap to add\.$/)
+      .map((node) => node.props.accessibilityLabel);
     expect(rendered).not.toEqual(payload.lines.map((l) => `${l.text}. Tap to add.`));
   });
 });

@@ -39,15 +39,33 @@ export const QuestionRenderer = ({
   switch (parsed.type) {
     case 'multiple_choice':
       if (value.type !== 'multiple_choice') return null;
-      return <MultipleChoice payload={parsed.payload} value={value} onChange={onChange} disabled={disabled} solution={solution} />;
+      return (
+        <MultipleChoice
+          payload={parsed.payload}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          solution={solution}
+        />
+      );
 
     case 'multiple_select':
       if (value.type !== 'multiple_select') return null;
-      return <MultipleSelect payload={parsed.payload} value={value} onChange={onChange} disabled={disabled} solution={solution} />;
+      return (
+        <MultipleSelect
+          payload={parsed.payload}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          solution={solution}
+        />
+      );
 
     case 'true_false':
       if (value.type !== 'true_false') return null;
-      return <TrueFalse value={value} onChange={onChange} disabled={disabled} solution={solution} />;
+      return (
+        <TrueFalse value={value} onChange={onChange} disabled={disabled} solution={solution} />
+      );
 
     case 'predict_output':
       if (value.type !== 'predict_output') return null;

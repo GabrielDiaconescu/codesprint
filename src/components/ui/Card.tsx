@@ -72,7 +72,9 @@ export const Card = ({
         accessible={accessibilityLabel !== undefined}
         accessibilityLabel={accessibilityLabel}
         accessibilityRole={accessibilityLabel !== undefined ? accessibilityRole : undefined}
-        accessibilityState={selected === undefined ? undefined : { selected, checked: selected, disabled: true }}
+        accessibilityState={
+          selected === undefined ? undefined : { selected, checked: selected, disabled: true }
+        }
       >
         {children}
       </View>

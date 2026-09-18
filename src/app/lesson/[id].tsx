@@ -48,8 +48,7 @@ export default function LessonScreen() {
   // The catalogue is only needed to put a NAME on an unlock: the RPC returns ids and icons,
   // and the localized names live in one place rather than being duplicated into the response.
   const { data: catalogue } = useAchievements();
-  const nameFor = (slug: string) =>
-    catalogue?.find((entry) => entry.slug === slug)?.name ?? slug;
+  const nameFor = (slug: string) => catalogue?.find((entry) => entry.slug === slug)?.name ?? slug;
 
   // Everything unlocked during this lesson — by an answer or by finishing it.
   const unlocked = [

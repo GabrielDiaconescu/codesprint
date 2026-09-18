@@ -1,11 +1,6 @@
 import { z } from 'zod';
 
-import {
-  DAILY_GOAL_MINUTES,
-  EXPERIENCE_LEVELS,
-  MOTIVATIONS,
-  type UserProfile,
-} from '../types';
+import { DAILY_GOAL_MINUTES, EXPERIENCE_LEVELS, MOTIVATIONS, type UserProfile } from '../types';
 
 /**
  * The profile row, validated on the way in (SPEC §6: Zod for RPC responses).

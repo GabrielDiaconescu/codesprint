@@ -18,7 +18,9 @@ describe('answerResult', () => {
   });
 
   it('accepts a hint when present', () => {
-    expect(answerResult.parse({ ...result, hint: 'Think about order.' }).hint).toBe('Think about order.');
+    expect(answerResult.parse({ ...result, hint: 'Think about order.' }).hint).toBe(
+      'Think about order.',
+    );
   });
 
   it('accepts zero XP', () => {

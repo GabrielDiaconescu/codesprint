@@ -57,11 +57,8 @@ const courseRow = z.object({
  * This is for DISPLAY only — showing a padlock. Access is decided by `can_access_module()` on
  * the server, so a client that lies to itself here gains nothing but a misleading icon.
  */
-const isLocked = (
-  orderIndex: number,
-  override: boolean | null,
-  freeModuleCount: number,
-): boolean => override ?? orderIndex > freeModuleCount;
+const isLocked = (orderIndex: number, override: boolean | null, freeModuleCount: number): boolean =>
+  override ?? orderIndex > freeModuleCount;
 
 export const SupabaseContentService: ContentService = {
   serviceName: 'SupabaseContentService',

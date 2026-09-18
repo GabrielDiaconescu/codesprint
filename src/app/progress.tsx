@@ -2,7 +2,17 @@ import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { Badge, Card, Divider, Icon, ProgressBar, Screen, SkeletonLines, StateView, Text } from '@/components/ui';
+import {
+  Badge,
+  Card,
+  Divider,
+  Icon,
+  ProgressBar,
+  Screen,
+  SkeletonLines,
+  StateView,
+  Text,
+} from '@/components/ui';
 import { AchievementList } from '@/features/progress/components/AchievementList';
 import { LevelCard } from '@/features/progress/components/LevelCard';
 import { useAchievements } from '@/features/progress/hooks/useAchievements';
@@ -79,7 +89,11 @@ export default function ProgressScreen() {
         <Card appearance="outlined">
           <View style={styles.statsRow}>
             <Stat label={t('stats.lessons')} value={String(data.lessons_completed)} icon="book" />
-            <Stat label={t('stats.questions')} value={String(data.questions_answered)} icon="help-circle" />
+            <Stat
+              label={t('stats.questions')}
+              value={String(data.questions_answered)}
+              icon="help-circle"
+            />
             <Stat label={t('stats.accuracy')} value={`${accuracy}%`} icon="checkmark-circle" />
             <Stat
               label={t('stats.streak')}
@@ -93,7 +107,9 @@ export default function ProgressScreen() {
           <View style={{ gap: theme.spacing.sm }}>
             <Text variant="subheading">{t('course.title')}</Text>
             <ProgressBar
-              value={data.lessons_total > 0 ? data.lessons_completed_unlocked / data.lessons_total : 0}
+              value={
+                data.lessons_total > 0 ? data.lessons_completed_unlocked / data.lessons_total : 0
+              }
               tone="success"
               label={t('course.lessons', {
                 completed: data.lessons_completed_unlocked,
@@ -118,9 +134,14 @@ export default function ProgressScreen() {
                   <Text variant="bodySmall" style={styles.flex} numberOfLines={1}>
                     {module.title}
                   </Text>
-                  {!module.is_unlocked && <Badge label={t('modules.locked')} tone="neutral" icon="lock-closed" />}
+                  {!module.is_unlocked && (
+                    <Badge label={t('modules.locked')} tone="neutral" icon="lock-closed" />
+                  )}
                   <Text variant="caption" tone="secondary">
-                    {t('modules.lessons', { completed: module.completed_count, total: module.lesson_count })}
+                    {t('modules.lessons', {
+                      completed: module.completed_count,
+                      total: module.lesson_count,
+                    })}
                   </Text>
                 </View>
                 <ProgressBar
@@ -196,10 +217,22 @@ export default function ProgressScreen() {
   );
 }
 
-const Stat = ({ label, value, icon }: { label: string; value: string; icon: 'book' | 'help-circle' | 'checkmark-circle' | 'flame' }) => {
+const Stat = ({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon: 'book' | 'help-circle' | 'checkmark-circle' | 'flame';
+}) => {
   const theme = useTheme();
   return (
-    <View style={[styles.stat, { gap: theme.spacing.xs }]} accessible accessibilityLabel={`${label}: ${value}`}>
+    <View
+      style={[styles.stat, { gap: theme.spacing.xs }]}
+      accessible
+      accessibilityLabel={`${label}: ${value}`}
+    >
       <Icon name={icon} size="md" color={theme.colors.textSecondary} />
       <Text variant="bodyStrong">{value}</Text>
       <Text variant="caption" tone="secondary" align="center">
@@ -227,7 +260,11 @@ const SkillRow = ({ skill }: { skill: SkillProgress }) => {
           {mastery}%
         </Text>
       </View>
-      <ProgressBar value={mastery / 100} tone={mastery === 0 ? 'accent' : 'success'} label={`${skill.tag}: ${mastery}%`} />
+      <ProgressBar
+        value={mastery / 100}
+        tone={mastery === 0 ? 'accent' : 'success'}
+        label={`${skill.tag}: ${mastery}%`}
+      />
       {hasAccuracy && (
         <Text variant="caption" tone="secondary">
           {t('skills.accuracy', { correct: skill.correct_attempts, attempts: skill.attempts })}

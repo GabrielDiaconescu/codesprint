@@ -54,7 +54,9 @@ describe('the rows that would be written', () => {
    */
   it('never puts an answer in a payload', () => {
     const leaks = rows.questions
-      .filter((q) => /"(answer|correct|correct_answer|is_correct|solution)"/i.test(JSON.stringify(q.payload)))
+      .filter((q) =>
+        /"(answer|correct|correct_answer|is_correct|solution)"/i.test(JSON.stringify(q.payload)),
+      )
       .map((q) => q.id);
 
     expect(leaks).toEqual([]);

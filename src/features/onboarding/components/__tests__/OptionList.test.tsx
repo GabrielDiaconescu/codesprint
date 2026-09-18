@@ -5,7 +5,11 @@ import { renderWithTheme } from '@/test-utils';
 import { OptionList } from '../OptionList';
 
 const options = [
-  { value: 'complete_beginner', label: 'Complete beginner', description: "I've never written code." },
+  {
+    value: 'complete_beginner',
+    label: 'Complete beginner',
+    description: "I've never written code.",
+  },
   { value: 'beginner', label: 'Beginner' },
   { value: 'intermediate', label: 'Intermediate' },
 ];

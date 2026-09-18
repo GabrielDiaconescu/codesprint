@@ -92,6 +92,12 @@ export const AchievementToast = ({ achievement, name }: AchievementToastProps) =
 
 const styles = StyleSheet.create({
   card: { flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth * 2 },
-  badge: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  badge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   text: { flex: 1, gap: 2 },
 });

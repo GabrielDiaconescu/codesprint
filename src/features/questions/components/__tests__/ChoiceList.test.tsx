@@ -20,15 +20,25 @@ describe('ChoiceList', () => {
   });
 
   it('exposes single-choice rows as radios with their selected state', async () => {
-    await renderWithTheme(<ChoiceList options={options} selectedIds={['b']} onSelect={jest.fn()} />);
+    await renderWithTheme(
+      <ChoiceList options={options} selectedIds={['b']} onSelect={jest.fn()} />,
+    );
 
     expect(screen.getAllByRole('radio')).toHaveLength(3);
-    expect(screen.getByTestId('choice-b')).toHaveProp('accessibilityState', { selected: true, checked: true });
-    expect(screen.getByTestId('choice-a')).toHaveProp('accessibilityState', { selected: false, checked: false });
+    expect(screen.getByTestId('choice-b')).toHaveProp('accessibilityState', {
+      selected: true,
+      checked: true,
+    });
+    expect(screen.getByTestId('choice-a')).toHaveProp('accessibilityState', {
+      selected: false,
+      checked: false,
+    });
   });
 
   it('exposes multi-choice rows as checkboxes', async () => {
-    await renderWithTheme(<ChoiceList multi options={options} selectedIds={[]} onSelect={jest.fn()} />);
+    await renderWithTheme(
+      <ChoiceList multi options={options} selectedIds={[]} onSelect={jest.fn()} />,
+    );
 
     expect(screen.getAllByRole('checkbox')).toHaveLength(3);
   });
@@ -50,24 +60,51 @@ describe('ChoiceList', () => {
      */
     it('names the correct answer the learner chose', async () => {
       await renderWithTheme(
-        <ChoiceList options={options} selectedIds={['a']} onSelect={jest.fn()} disabled correctIds={['a']} />,
+        <ChoiceList
+          options={options}
+          selectedIds={['a']}
+          onSelect={jest.fn()}
+          disabled
+          correctIds={['a']}
+        />,
       );
 
-      expect(screen.getByTestId('choice-a')).toHaveProp('accessibilityLabel', 'Alpha. Correct answer, chosen');
+      expect(screen.getByTestId('choice-a')).toHaveProp(
+        'accessibilityLabel',
+        'Alpha. Correct answer, chosen',
+      );
     });
 
     it('names the wrong choice and the missed correct answer', async () => {
       await renderWithTheme(
-        <ChoiceList options={options} selectedIds={['b']} onSelect={jest.fn()} disabled correctIds={['a']} />,
+        <ChoiceList
+          options={options}
+          selectedIds={['b']}
+          onSelect={jest.fn()}
+          disabled
+          correctIds={['a']}
+        />,
       );
 
-      expect(screen.getByTestId('choice-b')).toHaveProp('accessibilityLabel', 'Beta. Your answer, incorrect');
-      expect(screen.getByTestId('choice-a')).toHaveProp('accessibilityLabel', 'Alpha. Correct answer, not chosen');
+      expect(screen.getByTestId('choice-b')).toHaveProp(
+        'accessibilityLabel',
+        'Beta. Your answer, incorrect',
+      );
+      expect(screen.getByTestId('choice-a')).toHaveProp(
+        'accessibilityLabel',
+        'Alpha. Correct answer, not chosen',
+      );
     });
 
     it('leaves an untouched wrong option unlabelled', async () => {
       await renderWithTheme(
-        <ChoiceList options={options} selectedIds={['b']} onSelect={jest.fn()} disabled correctIds={['a']} />,
+        <ChoiceList
+          options={options}
+          selectedIds={['b']}
+          onSelect={jest.fn()}
+          disabled
+          correctIds={['a']}
+        />,
       );
 
       expect(screen.getByTestId('choice-c')).toHaveProp('accessibilityLabel', 'Gamma');

@@ -82,7 +82,7 @@ blocks:
       type: multiple_choice
       difficulty: medium
       prompt:
-        en: 'Python says: `NameError: name ''totl'' is not defined`. What has most likely happened?'
+        en: "Python says: `NameError: name 'totl' is not defined`. What has most likely happened?"
       payload:
         options:
           - id: typo

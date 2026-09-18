@@ -78,9 +78,7 @@ export default function ModuleScreen() {
             <Card
               testID={`lesson-${item.slug}`}
               appearance="outlined"
-              onPress={() =>
-                router.push({ pathname: '/lesson/[id]', params: { id: item.id } })
-              }
+              onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: item.id } })}
               accessibilityLabel={`${item.orderIndex}. ${item.title}. ${t('estimated', { count: item.estimatedMinutes })}`}
             >
               <View style={[styles.row, { gap: theme.spacing.md }]}>

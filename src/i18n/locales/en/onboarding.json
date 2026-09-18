@@ -42,9 +42,15 @@
     "options": {
       "university": { "label": "University", "description": "A course, exam or coursework." },
       "career": { "label": "Career", "description": "Changing jobs or growing in one." },
-      "interview": { "label": "Interview preparation", "description": "I have interviews coming up." },
+      "interview": {
+        "label": "Interview preparation",
+        "description": "I have interviews coming up."
+      },
       "personal": { "label": "Personal interest", "description": "I just want to learn it." },
-      "improve": { "label": "Getting better", "description": "I code already and want to sharpen up." }
+      "improve": {
+        "label": "Getting better",
+        "description": "I code already and want to sharpen up."
+      }
     }
   },
   "goal": {

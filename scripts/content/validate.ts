@@ -238,7 +238,10 @@ export const summarise = (courses: LoadedCourse[]) => {
   return {
     courses: courses.length,
     modules: courses.reduce((sum, c) => sum + c.modules.length, 0),
-    lessons: courses.reduce((sum, c) => sum + c.modules.reduce((n, m) => n + m.lessons.length, 0), 0),
+    lessons: courses.reduce(
+      (sum, c) => sum + c.modules.reduce((n, m) => n + m.lessons.length, 0),
+      0,
+    ),
     questions: questions.length,
     types: new Set(questions.map((q) => q.question.type)).size,
     examPool: questions.filter((q) => q.question.is_exam_eligible).length,

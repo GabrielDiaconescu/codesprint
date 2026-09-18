@@ -89,7 +89,10 @@ describe('ConceptMatching', () => {
 
     await fireEvent.press(screen.getByTestId('concept-name'));
     await fireEvent.press(screen.getByTestId('definition-not-valid'));
-    expect(onChange).toHaveBeenCalledWith({ type: 'concept_matching', pairs: { name: 'not-valid' } });
+    expect(onChange).toHaveBeenCalledWith({
+      type: 'concept_matching',
+      pairs: { name: 'not-valid' },
+    });
   });
 
   it('names a pairing for a screen reader', async () => {

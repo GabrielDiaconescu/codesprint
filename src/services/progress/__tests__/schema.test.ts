@@ -71,8 +71,9 @@ describe('userStats', () => {
   });
 
   it('accepts a pending regeneration timestamp', () => {
-    expect(userStats.parse({ ...stats, lives: 2, next_life_at: '2026-09-18T14:00:00Z' }).next_life_at)
-      .toBe('2026-09-18T14:00:00Z');
+    expect(
+      userStats.parse({ ...stats, lives: 2, next_life_at: '2026-09-18T14:00:00Z' }).next_life_at,
+    ).toBe('2026-09-18T14:00:00Z');
   });
 });
 
@@ -109,8 +110,13 @@ describe('progressSummary', () => {
 
   it('accepts a brand-new user with nothing done', () => {
     expect(
-      progressSummary.parse({ ...summary, lessons_completed: 0, questions_answered: 0, modules: [], skills: [] })
-        .skills,
+      progressSummary.parse({
+        ...summary,
+        lessons_completed: 0,
+        questions_answered: 0,
+        modules: [],
+        skills: [],
+      }).skills,
     ).toEqual([]);
   });
 
@@ -148,7 +154,11 @@ describe('lessonCompletion', () => {
   });
 
   it('accepts a repeat completion paying nothing', () => {
-    const repeat = lessonCompletion.parse({ ...completion, xp_awarded: 0, already_completed: true });
+    const repeat = lessonCompletion.parse({
+      ...completion,
+      xp_awarded: 0,
+      already_completed: true,
+    });
     expect(repeat.xp_awarded).toBe(0);
     expect(repeat.already_completed).toBe(true);
   });
