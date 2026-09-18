@@ -99,6 +99,27 @@ export type RenderableQuestion = z.infer<typeof renderableQuestion>;
  * `solution` is the answer key, released only now that an attempt has been recorded. It is
  * kept as `unknown` here and narrowed by the renderer that knows its own shape.
  */
+/** Lives as the server sees them (SPEC §22). Premium reports `unlimited`. */
+export const livesState = z
+  .object({
+    lives: z.number().int().nonnegative(),
+    max: z.number().int().positive(),
+    unlimited: z.boolean(),
+    /** ISO timestamp, or null when full or unlimited. */
+    next_life_at: z.string().nullable(),
+  })
+  .strict();
+
+/** An achievement unlocked by whatever just happened (SPEC §25). */
+export const unlockedAchievement = z
+  .object({
+    id: z.string(),
+    slug: z.string(),
+    icon_key: z.string(),
+    xp_reward: z.number().int().nonnegative(),
+  })
+  .strict();
+
 export const answerResult = z
   .object({
     correct: z.boolean(),
@@ -107,7 +128,12 @@ export const answerResult = z
     explanation: z.string(),
     hint: z.string().nullable(),
     solution: z.unknown(),
+    lives: livesState,
+    current_streak: z.number().int().nonnegative(),
+    unlocked: z.array(unlockedAchievement),
   })
   .strict();
 
 export type AnswerResult = z.infer<typeof answerResult>;
+export type LivesState = z.infer<typeof livesState>;
+export type UnlockedAchievement = z.infer<typeof unlockedAchievement>;

@@ -968,6 +968,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      achievement_rule_met: {
+        Args: { p_rule: Json; p_user_id: string }
+        Returns: boolean
+      }
       age_from_birth_year: { Args: { p_birth_year: number }; Returns: number }
       award_xp: {
         Args: {
@@ -992,10 +996,24 @@ export type Database = {
         Args: { p_default: number; p_key: string }
         Returns: number
       }
+      consume_life: {
+        Args: {
+          p_context: Database["public"]["Enums"]["answer_context"]
+          p_user_id: string
+        }
+        Returns: number
+      }
+      current_streak_for: { Args: { p_user_id: string }; Returns: number }
       delete_stale_anonymous_users: {
         Args: { p_days?: number }
         Returns: number
       }
+      evaluate_achievements: {
+        Args: { p_rule_types: string[]; p_user_id: string }
+        Returns: Json
+      }
+      evaluate_streak: { Args: { p_user_id: string }; Returns: number }
+      get_achievements: { Args: { p_locale?: string }; Returns: Json }
       get_app_config: { Args: never; Returns: Json }
       get_lesson: {
         Args: { p_lesson_id: string; p_locale?: string }
@@ -1017,6 +1035,7 @@ export type Database = {
       is_ad_free: { Args: { p_user_id: string }; Returns: boolean }
       is_minor: { Args: { p_user_id: string }; Returns: boolean }
       iso_week_start: { Args: { p_at?: string }; Returns: string }
+      lives_state: { Args: { p_user_id: string }; Returns: Json }
       local_date_for: {
         Args: { p_at?: string; p_timezone: string }
         Returns: string
@@ -1044,6 +1063,7 @@ export type Database = {
         Args: { p_attempt_no: number; p_question_id: string }
         Returns: number
       }
+      regenerate_lives: { Args: { p_user_id: string }; Returns: number }
       reject_underage_account: { Args: never; Returns: undefined }
       require_auth_uid: { Args: never; Returns: string }
       submit_answer: {

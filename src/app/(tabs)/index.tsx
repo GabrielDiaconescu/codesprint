@@ -29,7 +29,24 @@ export default function HomeScreen() {
         contentContainerStyle={[styles.content, { gap: theme.spacing.lg }]}
         showsVerticalScrollIndicator={false}
       >
-        {isPending ? <SkeletonLines lines={3} /> : <LevelCard xpTotal={stats?.xp_total ?? 0} />}
+        {isPending ? (
+          <SkeletonLines lines={3} />
+        ) : (
+          <LevelCard
+            xpTotal={stats?.xp_total ?? 0}
+            streak={stats?.current_streak}
+            lives={
+              stats
+                ? {
+                    lives: stats.lives,
+                    max: stats.lives_max,
+                    unlimited: stats.lives_unlimited,
+                    nextLifeAt: stats.next_life_at,
+                  }
+                : undefined
+            }
+          />
+        )}
 
         <Button
           testID="home-progress"

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { AnswerFeedback, Badge, Button, Icon, Text } from '@/components/ui';
+import { LivesIndicator } from '@/features/progress/components/LivesIndicator';
 import { QuestionRenderer, instructionKey } from '@/features/questions/components/QuestionRenderer';
 import { useSubmitAnswer } from '@/features/questions/hooks/useSubmitAnswer';
 import { isAnswerComplete } from '@/features/questions/logic/answers';
@@ -74,6 +75,17 @@ export const QuestionPage = ({ question, number, total, onContinue, onSkip }: Qu
         </Text>
         <Badge label={t(`difficulty.${question.difficulty}`)} tone="neutral" />
       </View>
+
+      {/* Lives appear only once they are in play: showing five full hearts to a beginner in
+          the grace period would imply a threat that does not exist (SPEC §22). */}
+      {result && !result.lives.unlimited && result.lives.lives < result.lives.max && (
+        <LivesIndicator
+          lives={result.lives.lives}
+          max={result.lives.max}
+          unlimited={false}
+          nextLifeAt={result.lives.next_life_at}
+        />
+      )}
 
       <View style={{ gap: theme.spacing.xs }}>
         <Text variant="heading" accessibilityRole="header">

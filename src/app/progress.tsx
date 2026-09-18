@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Badge, Card, Divider, Icon, ProgressBar, Screen, SkeletonLines, StateView, Text } from '@/components/ui';
+import { AchievementList } from '@/features/progress/components/AchievementList';
 import { LevelCard } from '@/features/progress/components/LevelCard';
+import { useAchievements } from '@/features/progress/hooks/useAchievements';
 import { useProgressSummary } from '@/features/progress/hooks/useProgress';
 import { percent } from '@/features/progress/logic/levels';
 import type { SkillProgress } from '@/services';
@@ -22,6 +24,7 @@ export default function ProgressScreen() {
   const theme = useTheme();
 
   const { data, isPending, isError, refetch } = useProgressSummary();
+  const achievements = useAchievements();
 
   if (isPending) {
     return (
@@ -65,6 +68,12 @@ export default function ProgressScreen() {
         showsVerticalScrollIndicator={false}
       >
         <LevelCard xpTotal={data.xp_total} streak={data.current_streak} />
+
+        {data.current_streak === 0 && (
+          <Text variant="caption" tone="secondary" style={styles.pending}>
+            {t('streakBroken')}
+          </Text>
+        )}
 
         {/* The four headline numbers, each with its own label — no icon-only tiles. */}
         <Card appearance="outlined">
@@ -149,6 +158,32 @@ export default function ProgressScreen() {
                   </View>
                 </View>
               </>
+            )}
+          </View>
+        </Card>
+
+        <Card appearance="outlined">
+          <View style={{ gap: theme.spacing.md }}>
+            <View style={[styles.moduleHeader, { gap: theme.spacing.sm }]}>
+              <Text variant="subheading" style={styles.flex}>
+                {t('achievements.title')}
+              </Text>
+              <Text variant="caption" tone="secondary">
+                {t('achievements.count', {
+                  unlocked: data.achievements.unlocked,
+                  total: data.achievements.total,
+                })}
+              </Text>
+            </View>
+
+            {achievements.isPending ? (
+              <SkeletonLines lines={3} />
+            ) : achievements.isError ? (
+              <Text variant="caption" tone="danger">
+                {t('achievements.error')}
+              </Text>
+            ) : (
+              <AchievementList achievements={achievements.data ?? []} />
             )}
           </View>
         </Card>

@@ -6,6 +6,8 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, ProgressBar, Screen, SkeletonLines, StateView, Text } from '@/components/ui';
 import { LessonBlockView } from '@/features/lesson/components/LessonBlocks';
 import { QuestionPage } from '@/features/lesson/components/QuestionPage';
+import { AchievementToast } from '@/features/progress/components/AchievementToast';
+import { useAchievements } from '@/features/progress/hooks/useAchievements';
 import { useLesson } from '@/features/lesson/hooks/useLesson';
 import { useCompleteLesson } from '@/features/progress/hooks/useProgress';
 import { buildLessonPages, countQuestions, pageProgress } from '@/features/lesson/logic/pages';
@@ -42,6 +44,18 @@ export default function LessonScreen() {
   const [finished, setFinished] = useState(false);
 
   const completeLesson = useCompleteLesson();
+
+  // The catalogue is only needed to put a NAME on an unlock: the RPC returns ids and icons,
+  // and the localized names live in one place rather than being duplicated into the response.
+  const { data: catalogue } = useAchievements();
+  const nameFor = (slug: string) =>
+    catalogue?.find((entry) => entry.slug === slug)?.name ?? slug;
+
+  // Everything unlocked during this lesson — by an answer or by finishing it.
+  const unlocked = [
+    ...results.flatMap((result) => result.unlocked),
+    ...(completeLesson.data?.unlocked ?? []),
+  ];
 
   const advance = () => {
     if (index + 1 >= pages.length) {
@@ -124,7 +138,10 @@ export default function LessonScreen() {
     return (
       <Screen>
         <Stack.Screen options={{ title: lesson.title }} />
-        <View style={[styles.centre, { gap: theme.spacing.md }]}>
+        <ScrollView
+          contentContainerStyle={[styles.completeContent, { gap: theme.spacing.md }]}
+          showsVerticalScrollIndicator={false}
+        >
           <StateView
             testID="lesson-complete"
             icon="checkmark-circle"
@@ -148,10 +165,23 @@ export default function LessonScreen() {
               {t('complete.perfect')}
             </Text>
           )}
+          {(completeLesson.data?.current_streak ?? 0) > 0 && (
+            <Text variant="bodyStrong" tone="accent" align="center">
+              {t('complete.streak', { count: completeLesson.data!.current_streak })}
+            </Text>
+          )}
+
+          {unlocked.map((achievement) => (
+            <AchievementToast
+              key={achievement.id}
+              achievement={achievement}
+              name={nameFor(achievement.slug)}
+            />
+          ))}
           <Text variant="caption" tone="secondary" style={styles.pendingNote}>
             {t('complete.xpPending')}
           </Text>
-        </View>
+        </ScrollView>
       </Screen>
     );
   }
@@ -223,5 +253,6 @@ export default function LessonScreen() {
 const styles = StyleSheet.create({
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { paddingVertical: 16, flexGrow: 1 },
+  completeContent: { flexGrow: 1, justifyContent: 'center', paddingVertical: 24 },
   pendingNote: { textAlign: 'center', paddingHorizontal: 24 },
 });

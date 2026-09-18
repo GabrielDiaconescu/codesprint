@@ -35,5 +35,28 @@
     "title": "Couldn't load your progress",
     "body": "Check your connection and try again."
   },
-  "pending": "Streaks begin counting in the next release."
+  "pending": "Practice and the daily challenge arrive in the next release.",
+  "lives": {
+    "count_one": "{{count}} life of {{max}}",
+    "count_other": "{{count}} lives of {{max}}",
+    "unlimited": "Unlimited lives",
+    "next": "Next life {{when}}.",
+    "inMinutes_one": "in {{count}} minute",
+    "inMinutes_other": "in {{count}} minutes",
+    "inHours_one": "in {{count}} hour",
+    "inHours_other": "in {{count}} hours",
+    "emptyTitle": "Out of lives",
+    "emptyBody": "Lives come back over time. You can keep reading completed lessons while you wait, or go Premium for unlimited lives."
+  },
+  "achievements": {
+    "title": "Achievements",
+    "count": "{{unlocked}} of {{total}} unlocked",
+    "unlocked": "Achievement unlocked",
+    "unlockedAnnouncement": "Achievement unlocked: {{name}}",
+    "reward": "+{{count}} XP",
+    "stateUnlocked": "Unlocked.",
+    "stateLocked": "Locked.",
+    "error": "Could not load your achievements."
+  },
+  "streakBroken": "Answer five questions or finish a lesson today to start a new streak."
 }

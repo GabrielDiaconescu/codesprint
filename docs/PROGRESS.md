@@ -2,7 +2,7 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 9 complete — awaiting approval for Phase 10 (Streak, lives, achievements).
+**Current phase:** Phase 10 complete — awaiting approval for Phase 11 (Home, Practice, Daily Challenge).
 **Last updated:** 2026-09-17
 
 ---
@@ -21,7 +21,8 @@
 | 7     | Course & lesson engine               | **Complete** — pending device check   |
 | 8     | Question engine & grading RPCs       | **Complete** — pending device check   |
 | 9     | XP, levels, progress                 | **Complete** — pending device check   |
-| 10–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 10    | Streak, lives, achievements          | **Complete** — pending device check   |
+| 11–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -801,6 +802,80 @@ A fresh guest answering all five questions of lesson 1.1 correctly, through the 
    moves, and the device check asks to see it. Today's goal, the daily challenge and the
    next-lesson card remain Phase 11, and the screen says so.
 
+## Phase 10 — what was implemented (Streak, lives, achievements)
+
+**Database** — `20260917121100_streak_lives_achievements.sql`
+
+- Streaks: `current_streak_for` (lazy read) and `evaluate_streak` (qualify and extend), both
+  on the user's local date.
+- Lives: `regenerate_lives`, `consume_life` and `lives_state`, all lazy from a timestamp.
+- Achievements: the thirteen-entry catalogue, `achievement_rule_met` for the eight V1 rule
+  types, `evaluate_achievements`, and `get_achievements` for the screen.
+- `submit_answer` and `complete_lesson` replaced to wire all three in; `get_user_stats` and
+  `get_progress_summary` now report the **live** streak and lives.
+- 55 new pgTAP tests (`09_streak_lives_achievements.test.sql`), 263 in total.
+
+**App**
+
+- `LivesIndicator` — hearts with one spoken label, and a countdown that ticks through
+  `useSyncExternalStore` rather than reading the clock during render.
+- `AchievementToast` — a short spring that respects reduce-motion and announces the unlock to
+  a screen reader.
+- `AchievementList` — locked achievements shown, dimmed, with their state in the label.
+- The level card on Home and Profile now carries the streak and lives; Progress gained the
+  achievement section; the lesson player shows lives once they are in play and celebrates
+  unlocks on the completion screen.
+
+### Phase 10 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+unit        jest ..................... 41 suites, 583 tests, all passing
+database    supabase test db ......... 9 files, 263 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+A fresh guest through the real HTTP API:
+
+| Step                                  | Result                                             |
+| ------------------------------------- | -------------------------------------------------- |
+| five correct answers                  | streak 1, lives 5/5, nothing unlocked yet          |
+| completing the lesson                 | perfect, unlocked `first-lesson`, `perfect-lesson` |
+| a wrong answer during the grace       | lives **5** — nothing taken                        |
+| the same, after three lessons         | lives **4**, with a regeneration time set          |
+| a wrong answer at zero                | lives **0** — never negative                       |
+| nine hours away                       | lives **2** — two 4-hour intervals credited        |
+| catalogue                             | 13 total, 2 unlocked, 11 shown as locked           |
+| achievement XP through the ledger     | 30                                                 |
+| a streak last extended three days ago | stored says 9, **live reads 0**                    |
+
+## Decisions and interpretations made during Phase 10
+
+1. **All three systems are lazy.** A streak breaks when it is read, not when a job runs; lives
+   return from arithmetic on a timestamp. No cron, no drift, and nothing to fail overnight.
+2. **The regeneration clock advances by what it spent, not to `now()`.** Otherwise a user who
+   opens the app every ten minutes would never regenerate anything, because each check would
+   throw away the partial interval.
+3. **Losing the first life starts the clock; losing a later one does not.** Restarting it on
+   every loss would push the next regeneration away each time someone answered.
+4. **Lives are shown only once they are in play.** Five full hearts in front of a beginner in
+   the grace period implies a threat that does not exist.
+5. **Achievements evaluate once per call.** Unlocking an XP achievement can cross the next XP
+   threshold; that one unlocks on the next event rather than recursing, which is what SPEC §25
+   asks for and what keeps the work bounded.
+6. **Streak rules read the live streak, not the stored number.** A pgTAP test pins it: a user
+   whose row says 9 but who stopped three days ago unlocks nothing.
+7. **The catalogue ships in the migration, not through the content pipeline.** The rule _types_
+   are code; adding an achievement that reuses one is a data change. Two entries name modules
+   whose content arrives in Phase 19 and simply cannot unlock until then — correct, not a gap.
+8. **Locked achievements are shown with their real names.** A grid of question marks tells a
+   learner less than the name does, and hiding them leaves nothing to aim at.
+9. **The countdown uses `useSyncExternalStore`.** The linter caught `Date.now()` during render
+   as impure — and a countdown frozen at the value it had when the screen opened is wrong
+   anyway, since someone waiting for a life is watching that number.
+
 ## Known limitations
 
 - Services other than Config are still no-ops: billing (14), ads (15), analytics and
@@ -818,14 +893,15 @@ A fresh guest answering all five questions of lesson 1.1 correctly, through the 
   file arrives with the content pipeline.
 - Home, Leaderboard and Profile still show honest "ships in Phase N" placeholders. Learn now
   shows real published modules.
-- Streaks are stored and displayed but never advance: `user_daily_activity.qualified` is
-  written by Phase 10, which decides what makes a day count. The Progress screen says so.
-- Lives are not consumed on a wrong answer yet (Phase 10). `submit_answer` takes the context
-  that Phase 10 will key lives on, so it slots in without a signature change.
-- Achievements are not evaluated (Phase 10), though `is_perfect` and the counters they will
-  read are now recorded.
-- Home shows XP and level only. The daily goal, the challenge card and the next-lesson CTA
-  are Phase 11.
+- Out of lives there is nowhere to go yet: the wait is explained, but the rewarded-ad
+  restore needs the ads integration (Phase 15) and the upgrade needs the paywall (Phase 14).
+  `rewarded_ad_grants` and the daily cap config are in place for it.
+- Practice mode — where a question answered wrong is retried for half XP — is Phase 11, so
+  a wrong answer in a lesson still has no in-app route to a retry.
+- Two achievements name modules whose content arrives in Phase 19 and cannot unlock before
+  then. The exam achievements wait on Phase 13.
+- Home shows XP, level, streak and lives. The daily goal, the challenge card and the
+  next-lesson CTA are Phase 11.
 - Practice mode, where a failed question is retried for half XP, is Phase 11. Until then a
   question answered wrong in a lesson has no in-app route to a retry.
 - Sounds (SPEC §29) are not wired; haptics are.
@@ -867,7 +943,7 @@ A fresh guest answering all five questions of lesson 1.1 correctly, through the 
 
 - None. Docker is running and the Supabase project is in the EU region.
 
-**Before Phase 10 (the next phase):**
+**Before Phase 11 (the next phase):**
 
 - None.
 
@@ -1319,3 +1395,57 @@ Use a **fresh guest**: the point is to watch numbers move from zero.
     legible and nothing clips.
 21. With a screen reader on, each stat tile announces "Accuracy: 80%" as one phrase rather than
     an icon and a number separately.
+
+---
+
+## Phase 10 device test checklist
+
+Use a **fresh guest**. Most of this is about watching numbers that only move once.
+
+### The streak
+
+1. Continue as guest. Home shows **no streak** — nothing has qualified yet.
+2. Answer four questions and stop. Still no streak: the bar is five questions **or** one
+   lesson.
+3. Answer a fifth. The streak becomes **1** and the flame appears on Home.
+4. Answer more in the same session. The streak stays at **1** — a day counts once.
+5. In Studio (`http://127.0.0.1:54323`), `user_daily_activity` shows today with
+   `qualified = true`.
+6. Set `user_stats.last_qualifying_date` back by **one** day and reopen the app: the streak is
+   still shown. Set it back by **three** days: it reads **0**, with nothing having run
+   overnight. `longest_streak` is unchanged — it is a record.
+
+### Lives
+
+7. As a new guest, answer a question **wrong**. You keep all five hearts: the first three
+   lessons are a grace period.
+8. In Studio set `user_stats.lessons_completed` to `3`, then answer wrong again. A heart is
+   lost and a countdown appears next to it.
+9. Keep answering wrong until you reach zero. Lives never go negative.
+10. Set `lives_updated_at` back by **9 hours**. Reopen the app: **two** hearts have returned
+    (one per four-hour interval), and the countdown reflects the remaining part of the third.
+11. Sign in as `premium@codesprint.test` (`sprint2026`) and answer wrong: the hearts are
+    replaced by an **infinity** symbol and nothing is ever taken.
+
+### Achievements — the unlock animation
+
+12. As a fresh guest, answer all five questions of **What is Python?** correctly, then finish.
+13. On the completion screen, **two achievement cards animate in**: _First Lesson_ and
+    _Perfect Lesson_, each with its XP.
+14. With the OS **reduce-motion** setting on, repeat: the cards appear in their final state
+    immediately rather than animating faster.
+15. With a **screen reader** on, the unlock is spoken — "Achievement unlocked: First Lesson".
+16. Open **Progress**. The achievements section reads "2 of 13 unlocked", the two earned ones
+    are highlighted, and the other eleven are listed, dimmed, with their real names and
+    descriptions.
+17. In Studio, `xp_events` has rows with `source_type = 'achievement'` — the reward went
+    through the ledger like everything else.
+18. Redo the same lesson. **Nothing unlocks again** and no further achievement XP appears.
+
+### Robustness and accessibility
+
+19. Stop Supabase and open Progress: an error state with **Try again**, not a blank screen.
+20. With a screen reader, the hearts announce as one phrase — "3 lives of 5. Next life in 2
+    hours." — rather than five separate icons.
+21. Large text and dark mode: the level card, the hearts row and the achievement list stay
+    legible and nothing clips.

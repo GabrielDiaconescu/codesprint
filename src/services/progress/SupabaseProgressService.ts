@@ -1,7 +1,9 @@
 import { getSupabaseClient } from '../supabase/client';
 import { LessonUnavailableError, type ProgressService } from '../types';
 
-import { lessonCompletion, progressSummary, userStats } from './schema';
+import { z } from 'zod';
+
+import { achievementEntry, lessonCompletion, progressSummary, userStats } from './schema';
 
 /**
  * XP, lesson completion and the progress summary (SPEC §19, §28).
@@ -33,6 +35,14 @@ export const SupabaseProgressService: ProgressService = {
     });
     if (error) throw error;
     return progressSummary.parse(data);
+  },
+
+  async getAchievements(locale) {
+    const { data, error } = await getSupabaseClient().rpc('get_achievements', {
+      p_locale: locale,
+    });
+    if (error) throw error;
+    return z.array(achievementEntry).parse(data);
   },
 
   async completeLesson(lessonId) {

@@ -1,4 +1,5 @@
 import type {
+  AchievementEntry,
   LessonCompletion,
   ProgressSummary,
   UserStats,
@@ -192,6 +193,8 @@ export type {
   LessonResponse,
   LessonBlock,
   RenderableQuestion,
+  LivesState,
+  UnlockedAchievement,
 } from './content/lessonSchema';
 
 export type AnswerContext = 'lesson' | 'practice' | 'challenge' | 'exam';
@@ -276,6 +279,7 @@ export type {
   ModuleProgress,
   SkillProgress,
   LessonCompletion,
+  AchievementEntry,
 } from './progress/schema';
 
 export interface ProgressService extends ServiceIdentity {
@@ -284,6 +288,9 @@ export interface ProgressService extends ServiceIdentity {
 
   /** The whole Progress screen in one round trip (SPEC §28). */
   getSummary(locale: string): Promise<ProgressSummary>;
+
+  /** The catalogue with this user's unlock dates. Locked ones are included (SPEC §29). */
+  getAchievements(locale: string): Promise<AchievementEntry[]>;
 
   /**
    * Records a lesson as complete and pays completion XP once (SPEC §19).

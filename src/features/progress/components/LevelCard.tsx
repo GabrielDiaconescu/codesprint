@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Card, Icon, ProgressBar, ProgressRing, Text } from '@/components/ui';
+
+import { LivesIndicator } from './LivesIndicator';
 import { useAppConfig } from '@/features/config/hooks/useAppConfig';
 import { getLevelProgress } from '@/features/progress/logic/levels';
 import { useTheme } from '@/theme';
@@ -9,6 +11,7 @@ import { useTheme } from '@/theme';
 interface LevelCardProps {
   xpTotal: number;
   streak?: number;
+  lives?: { lives: number; max: number; unlimited: boolean; nextLifeAt: string | null };
   compact?: boolean;
 }
 
@@ -21,7 +24,7 @@ interface LevelCardProps {
  * The ring shows progress through the current level rather than towards some final total: a
  * bar that creeps for a week is discouraging, one that fills every few lessons is not.
  */
-export const LevelCard = ({ xpTotal, streak, compact = false }: LevelCardProps) => {
+export const LevelCard = ({ xpTotal, streak, lives, compact = false }: LevelCardProps) => {
   const { t } = useTranslation('progress');
   const theme = useTheme();
   const { data: config } = useAppConfig();
@@ -74,14 +77,26 @@ export const LevelCard = ({ xpTotal, streak, compact = false }: LevelCardProps) 
             })}
           </Text>
 
-          {streak !== undefined && streak > 0 && (
-            <View style={[styles.xpRow, { gap: theme.spacing.xs }]}>
-              <Icon name="flame" size="sm" color={theme.colors.streak} />
-              <Text variant="caption" tone="secondary">
-                {t('stats.streakDays', { count: streak })}
-              </Text>
-            </View>
-          )}
+          <View style={[styles.footer, { gap: theme.spacing.lg }]}>
+            {streak !== undefined && streak > 0 && (
+              <View style={[styles.xpRow, { gap: theme.spacing.xs }]}>
+                <Icon name="flame" size="sm" color={theme.colors.streak} />
+                <Text variant="caption" tone="secondary">
+                  {t('stats.streakDays', { count: streak })}
+                </Text>
+              </View>
+            )}
+
+            {lives && (
+              <LivesIndicator
+                lives={lives.lives}
+                max={lives.max}
+                unlimited={lives.unlimited}
+                nextLifeAt={lives.nextLifeAt}
+                compact
+              />
+            )}
+          </View>
         </View>
       </View>
     </Card>
@@ -92,4 +107,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   detail: { flex: 1 },
   xpRow: { flexDirection: 'row', alignItems: 'center' },
+  footer: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
 });

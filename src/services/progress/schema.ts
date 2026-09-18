@@ -17,6 +17,10 @@ export const userStats = z
     current_streak: z.number().int().nonnegative(),
     longest_streak: z.number().int().nonnegative(),
     lives: z.number().int().nonnegative(),
+    lives_max: z.number().int().positive(),
+    lives_unlimited: z.boolean(),
+    /** ISO timestamp, or null when full or unlimited. */
+    next_life_at: z.string().nullable(),
     lessons_completed: z.number().int().nonnegative(),
     questions_answered: z.number().int().nonnegative(),
     questions_correct: z.number().int().nonnegative(),
@@ -68,6 +72,27 @@ export const progressSummary = z
     is_premium: z.boolean(),
     modules: z.array(moduleProgress),
     skills: z.array(skillProgress),
+    achievements: z
+      .object({
+        unlocked: z.number().int().nonnegative(),
+        total: z.number().int().nonnegative(),
+      })
+      .strict(),
+  })
+  .strict();
+
+/** One row of the achievement catalogue, with this user's unlock state (SPEC §29). */
+export const achievementEntry = z
+  .object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string(),
+    description: z.string(),
+    icon_key: z.string(),
+    xp_reward: z.number().int().nonnegative(),
+    sort_order: z.number().int(),
+    /** ISO timestamp, or null while still locked — locked ones are listed too. */
+    unlocked_at: z.string().nullable(),
   })
   .strict();
 
@@ -81,6 +106,17 @@ export const lessonCompletion = z
     xp_awarded: z.number().int().nonnegative(),
     already_completed: z.boolean(),
     xp_total: z.number().int().nonnegative(),
+    current_streak: z.number().int().nonnegative(),
+    unlocked: z.array(
+      z
+        .object({
+          id: z.string(),
+          slug: z.string(),
+          icon_key: z.string(),
+          xp_reward: z.number().int().nonnegative(),
+        })
+        .strict(),
+    ),
   })
   .strict();
 
@@ -89,3 +125,4 @@ export type ModuleProgress = z.infer<typeof moduleProgress>;
 export type SkillProgress = z.infer<typeof skillProgress>;
 export type ProgressSummary = z.infer<typeof progressSummary>;
 export type LessonCompletion = z.infer<typeof lessonCompletion>;
+export type AchievementEntry = z.infer<typeof achievementEntry>;

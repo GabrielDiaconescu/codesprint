@@ -5,6 +5,9 @@ const stats = {
   current_streak: 3,
   longest_streak: 7,
   lives: 5,
+  lives_max: 5,
+  lives_unlimited: false,
+  next_life_at: null,
   lessons_completed: 4,
   questions_answered: 30,
   questions_correct: 24,
@@ -42,6 +45,7 @@ const summary = {
       correct_attempts: null,
     },
   ],
+  achievements: { unlocked: 2, total: 13 },
 };
 
 describe('userStats', () => {
@@ -59,6 +63,16 @@ describe('userStats', () => {
 
   it('carries no level — SPEC §20 makes it a derived display value', () => {
     expect(Object.keys(userStats.parse(stats))).not.toContain('level');
+  });
+
+  it('accepts a premium user with unlimited lives and no countdown', () => {
+    const premium = userStats.parse({ ...stats, lives_unlimited: true, next_life_at: null });
+    expect(premium.lives_unlimited).toBe(true);
+  });
+
+  it('accepts a pending regeneration timestamp', () => {
+    expect(userStats.parse({ ...stats, lives: 2, next_life_at: '2026-09-18T14:00:00Z' }).next_life_at)
+      .toBe('2026-09-18T14:00:00Z');
   });
 });
 
@@ -104,6 +118,15 @@ describe('progressSummary', () => {
     const { is_unlocked: _omitted, ...broken } = summary.modules[0]!;
     expect(progressSummary.safeParse({ ...summary, modules: [broken] }).success).toBe(false);
   });
+
+  it('carries the achievement tally', () => {
+    expect(progressSummary.parse(summary).achievements).toEqual({ unlocked: 2, total: 13 });
+  });
+
+  it('accepts a broken streak reported as zero', () => {
+    // SPEC §21: a streak not extended yesterday reads as 0, with no job having run.
+    expect(progressSummary.parse({ ...summary, current_streak: 0 }).current_streak).toBe(0);
+  });
 });
 
 describe('lessonCompletion', () => {
@@ -116,6 +139,8 @@ describe('lessonCompletion', () => {
     xp_awarded: 20,
     already_completed: false,
     xp_total: 140,
+    current_streak: 1,
+    unlocked: [],
   };
 
   it('accepts a first completion', () => {
@@ -130,5 +155,17 @@ describe('lessonCompletion', () => {
 
   it('rejects negative XP', () => {
     expect(lessonCompletion.safeParse({ ...completion, xp_awarded: -20 }).success).toBe(false);
+  });
+
+  it('carries achievements unlocked by finishing', () => {
+    const parsed = lessonCompletion.parse({
+      ...completion,
+      unlocked: [{ id: 'a-1', slug: 'first-lesson', icon_key: 'footsteps', xp_reward: 10 }],
+    });
+    expect(parsed.unlocked).toHaveLength(1);
+  });
+
+  it('carries the streak the completion produced', () => {
+    expect(lessonCompletion.parse({ ...completion, current_streak: 7 }).current_streak).toBe(7);
   });
 });

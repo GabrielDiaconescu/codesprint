@@ -26,12 +26,14 @@
   "complete": {
     "title": "Lesson complete",
     "body": "You've read {{title}}.",
-    "xpPending": "Streaks and achievements begin counting in the next release.",
+    "xpPending": "Practice and the daily challenge arrive in the next release.",
     "next": "Next lesson",
     "backToModule": "Back to the module",
     "xpEarned": "+{{count}} XP earned in this lesson",
     "score": "{{correct}} of {{total}} correct on the first try",
-    "perfect": "Perfect lesson — every question right first time."
+    "perfect": "Perfect lesson — every question right first time.",
+    "streak_one": "{{count}} day streak",
+    "streak_other": "{{count}} day streak"
   },
   "error": {
     "premiumTitle": "This module is Premium",
@@ -96,7 +98,9 @@
     "unrenderable": "This question could not be displayed and has been skipped.",
     "expected": "Expected:",
     "outputLabel": "Output",
-    "blankLabel": "The blank"
+    "blankLabel": "The blank",
+    "livesLeft_one": "{{count}} life left",
+    "livesLeft_other": "{{count}} lives left"
   },
   "choice": {
     "correctChosen": "Correct answer, chosen",
