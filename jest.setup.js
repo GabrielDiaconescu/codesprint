@@ -15,3 +15,64 @@ jest.mock('expo-localization', () => ({
 // the real instance rather than stubbing it means the tests also assert the actual English
 // strings, which catches a missing key as a failing test instead of a key on screen.
 require('./src/i18n').initI18n();
+
+/**
+ * AdMob and App Tracking Transparency are native modules: `TurboModuleRegistry.getEnforcing`
+ * throws the moment they are imported under Jest, which would take out any test that reaches
+ * the service registry.
+ *
+ * Mocked rather than tested. The SDK is not ours to verify — what IS ours is the policy that
+ * decides whether an ad may be shown, whether it may be personalized and how often it may
+ * interrupt, and all of that lives in pure functions in `features/ads/logic` with real tests.
+ */
+jest.mock('react-native-google-mobile-ads', () => {
+  const noop = () => () => {};
+  const ad = {
+    addAdEventListener: noop,
+    load: jest.fn(),
+    show: jest.fn(),
+  };
+
+  return {
+    __esModule: true,
+    default: () => ({
+      initialize: jest.fn().mockResolvedValue([]),
+      setRequestConfiguration: jest.fn().mockResolvedValue(undefined),
+    }),
+    TestIds: {
+      BANNER: 'test/banner',
+      INTERSTITIAL: 'test/interstitial',
+      REWARDED: 'test/rewarded',
+    },
+    AdEventType: { LOADED: 'loaded', CLOSED: 'closed', ERROR: 'error' },
+    RewardedAdEventType: { LOADED: 'rewarded_loaded', EARNED_REWARD: 'earned_reward' },
+    MaxAdContentRating: { G: 'G', PG: 'PG' },
+    BannerAdSize: { ANCHORED_ADAPTIVE_BANNER: 'ANCHORED_ADAPTIVE_BANNER' },
+    BannerAd: () => null,
+    InterstitialAd: { createForAdRequest: () => ad },
+    RewardedAd: { createForAdRequest: () => ad },
+    AdsConsent: {
+      requestInfoUpdate: jest.fn(),
+      gatherConsent: jest.fn(),
+      getConsentInfo: jest.fn(),
+      showPrivacyOptionsForm: jest.fn(),
+    },
+    AdsConsentStatus: {
+      UNKNOWN: 0,
+      REQUIRED: 1,
+      NOT_REQUIRED: 2,
+      OBTAINED: 3,
+    },
+    AdsConsentDebugGeography: { DISABLED: 0, EEA: 1 },
+    AdsConsentPrivacyOptionsRequirementStatus: {
+      UNKNOWN: 'UNKNOWN',
+      REQUIRED: 'REQUIRED',
+      NOT_REQUIRED: 'NOT_REQUIRED',
+    },
+  };
+});
+
+jest.mock('expo-tracking-transparency', () => ({
+  getTrackingPermissionsAsync: jest.fn().mockResolvedValue({ status: 'undetermined' }),
+  requestTrackingPermissionsAsync: jest.fn().mockResolvedValue({ status: 'denied' }),
+}));

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { AnswerFeedback, Badge, Button, Icon, Text } from '@/components/ui';
+import { RewardedLifeCard } from '@/features/ads/components/RewardedLifeCard';
 import { LivesIndicator } from '@/features/progress/components/LivesIndicator';
 import { QuestionRenderer, instructionKey } from '@/features/questions/components/QuestionRenderer';
 import { useSubmitAnswer } from '@/features/questions/hooks/useSubmitAnswer';
@@ -94,6 +95,10 @@ export const QuestionPage = ({
           nextLifeAt={result.lives.next_life_at}
         />
       )}
+
+      {/* Out of lives: the countdown above says how long waiting takes, and this offers the
+          other two ways forward (SPEC §22). */}
+      {result && !result.lives.unlimited && result.lives.lives === 0 && <RewardedLifeCard />}
 
       <View style={{ gap: theme.spacing.xs }}>
         <Text variant="heading" accessibilityRole="header">

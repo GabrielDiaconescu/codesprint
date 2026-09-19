@@ -7,7 +7,7 @@ module.exports = {
   // `@revenuecat/*` ships modern ESM that Jest cannot parse untransformed. It arrives as a
   // transitive dependency of react-native-purchases, which the registry now imports.
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*|@revenuecat/.*)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*|@revenuecat/.*|react-native-google-mobile-ads)',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',

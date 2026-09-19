@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Screen, StateView, ToastHost } from '@/components/ui';
 import { useAuthBootstrap } from '@/features/auth/hooks/useAuthBootstrap';
+import { useAdsBootstrap } from '@/features/ads/hooks/useAds';
 import { useBillingBootstrap } from '@/features/paywall/hooks/useBillingBootstrap';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useSessionHeartbeat } from '@/features/profile/hooks/useSessionHeartbeat';
@@ -49,6 +50,9 @@ const ThemedApp = () => {
   // Inside the QueryClientProvider, because it clears the cached offerings when the customer
   // changes — and after `useAuthBootstrap`, so there is a session to identify with (SPEC §12).
   useBillingBootstrap();
+  // UMP first, then ATT, then the SDK — and only for somebody who may be shown an ad at
+  // all. The entitlement is checked BEFORE initialising, not before showing (SPEC §30).
+  useAdsBootstrap();
 
   const status = useSessionStore((state) => state.status);
   const pendingPasswordReset = useSessionStore((state) => state.pendingPasswordReset);

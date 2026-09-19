@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { FlatList, StyleSheet, View } from 'react-native';
 
 import { Button, Card, Screen, SkeletonLines, StateView, Text } from '@/components/ui';
+import { BannerSlot } from '@/features/ads/components/BannerSlot';
 import { ModuleCard } from '@/features/learn/components/ModuleCard';
 import { useCourseOverview } from '@/features/learn/hooks/useCourseOverview';
 import { useTheme } from '@/theme';
@@ -86,22 +87,26 @@ export default function LearnScreen() {
           </View>
         }
         ListFooterComponent={
-          <Card testID="learn-exam-entry" appearance="outlined">
-            <View style={{ gap: theme.spacing.md }}>
-              <Text variant="bodyStrong">{exam('entry.title')}</Text>
-              <Text variant="body" tone="secondary">
-                {exam('entry.body')}
-              </Text>
-              <Button
-                testID="learn-open-exams"
-                label={exam('entry.action')}
-                variant="secondary"
-                icon="school-outline"
-                onPress={() => router.push('/exam')}
-                fullWidth
-              />
-            </View>
-          </Card>
+          <>
+            {/* One of the only two screens allowed a banner (SPEC §30). */}
+            <BannerSlot placement="learn-list" />
+            <Card testID="learn-exam-entry" appearance="outlined">
+              <View style={{ gap: theme.spacing.md }}>
+                <Text variant="bodyStrong">{exam('entry.title')}</Text>
+                <Text variant="body" tone="secondary">
+                  {exam('entry.body')}
+                </Text>
+                <Button
+                  testID="learn-open-exams"
+                  label={exam('entry.action')}
+                  variant="secondary"
+                  icon="school-outline"
+                  onPress={() => router.push('/exam')}
+                  fullWidth
+                />
+              </View>
+            </Card>
+          </>
         }
         renderItem={({ item }) => (
           <ModuleCard

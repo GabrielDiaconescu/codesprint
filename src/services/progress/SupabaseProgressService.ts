@@ -1,3 +1,4 @@
+import { rewardedAllowance, rewardedGrant } from '../ads/rewardSchema';
 import { getSupabaseClient } from '../supabase/client';
 import { LessonUnavailableError, type ProgressService } from '../types';
 
@@ -51,5 +52,21 @@ export const SupabaseProgressService: ProgressService = {
     });
     if (error) throw new LessonUnavailableError(toReason(error));
     return lessonCompletion.parse(data);
+  },
+
+  async getRewardedAllowance() {
+    const { data, error } = await getSupabaseClient().rpc('rewarded_allowance');
+    if (error) throw error;
+    return rewardedAllowance.parse(data);
+  },
+
+  async claimRewardedAd(rewardType) {
+    const { data, error } = await getSupabaseClient().rpc('claim_rewarded_ad', {
+      p_reward_type: rewardType,
+    });
+    // The refusal codes are product rules the UI has copy for, so they travel as-is and the
+    // caller maps them with `toRewardRefusal`.
+    if (error) throw error;
+    return rewardedGrant.parse(data);
   },
 };

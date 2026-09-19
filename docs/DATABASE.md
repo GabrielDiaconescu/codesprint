@@ -61,6 +61,8 @@ Local Studio: http://127.0.0.1:54323 · API: http://127.0.0.1:54321
 | `20260917121300_leaderboard`               | Display names, the weekly ranking, reports, and the per-day ranking cap                                 |
 | `20260917121400_exams`                     | Exam attempts: the frozen paper, the server-side clock, grading, and score XP                           |
 | `20260917121500_billing`                   | Entitlement reconciliation, the webhook idempotency log, and the client's view of it                    |
+| `20260917121600_lifetime_entitlements`     | Reports the no_ads expiry, so a lifetime purchase can be told from a subscription                       |
+| `20260917121700_rewarded_ads`              | Server-granted rewarded-ad rewards under a per-day cap                                                  |
 
 ---
 
@@ -156,6 +158,8 @@ the search path and hijack an unqualified reference while the function runs as o
 | `submit_exam(uuid, jsonb, text)`                   | authenticated       | Grades the attempt, enforces the clock, pays score XP once. Idempotent                                                                                              |
 | `get_exam_results(uuid, text)`                     | authenticated       | Reopens a graded attempt's results without regrading or repaying                                                                                                    |
 | `get_entitlements()`                               | authenticated       | The caller's own paid access, for the UI to reflect. Never an input to a gate                                                                                       |
+| `rewarded_allowance()`                             | authenticated       | What the caller could still earn from ads today, read BEFORE an ad is offered                                                                                       |
+| `claim_rewarded_ad(text)`                          | authenticated       | Grants a watched ad's reward under a server-side daily cap                                                                                                          |
 
 ### Internal (no client grant)
 
@@ -206,6 +210,7 @@ the search path and hijack an unqualified reference while the function runs as o
 | `apply_entitlements(uuid, jsonb)`           | **service_role only.** Reconciles one user against the full RevenueCat subscriber     |
 | `entitlement_state(uuid)`                   | What a user currently holds, as the server sees it                                    |
 | `record_billing_event(text, uuid, …)`       | **service_role only.** Logs a delivery; says whether it still needs work              |
+| `rewarded_grants_today(uuid, text)`         | Grants of one reward type on the user's local day, for the cap                        |
 | `mark_billing_event_processed(text)`        | **service_role only.** Marks a delivery finished                                      |
 
 ### The XP ledger
@@ -635,6 +640,43 @@ Their logic — authorisation, subscriber mapping, which events matter — lives
 `supabase/functions/_shared/`, which is deliberately free of Deno globals so it is type-checked
 and unit-tested by the ordinary `npm test` run rather than by a toolchain nobody has installed.
 
+### Rewarded ads
+
+A learner who has run out of lives can wait, watch an ad, or upgrade (SPEC §22). The second of
+those is the only one that needs the database.
+
+**The client grants nothing.** It watches an ad, AdMob reports that the reward was earned, and
+it asks `claim_rewarded_ad` — which checks the daily cap, applies the reward and writes a row
+to `rewarded_ad_grants`. Every one of those steps is server-side.
+
+| Reward     | Cap                                  | Notes                                    |
+| ---------- | ------------------------------------ | ---------------------------------------- |
+| `life`     | `rewarded_life_restores_per_day` (3) | Refused when lives are full or unlimited |
+| `bonus_xp` | `rewarded_xp_max_per_day` (30)       | `counts_for_leaderboard = false`         |
+
+Two details worth spelling out:
+
+- **Rewarded XP never reaches the leaderboard.** `award_xp` is called with
+  `counts_for_leaderboard => false`, so minutes of advertising cannot outrank minutes of
+  learning (SPEC §19, §26). `14_rewarded_ads.test.sql` asserts the `leaderboard_weekly` row
+  simply does not appear.
+- **A refusal writes nothing.** Claiming with full lives, or past the cap, raises
+  `22023 rewarded unavailable: <reason>` and burns no grant — so the cap cannot be walked past
+  by retrying, and a learner does not lose one of their three daily goes to a mistake the UI
+  should have prevented.
+
+`rewarded_allowance()` exists so the UI can ask _before_ offering. Making somebody sit through
+thirty seconds of advertising and then telling them the cap was reached is the worst possible
+order of events, and it is entirely avoidable.
+
+#### What the server cannot check, in V1
+
+Nothing here proves the ad was actually watched. AdMob's server-side verification is V1.1
+(SPEC §42), so somebody calling the RPC in a loop gets three lives and thirty XP a day — the
+same as somebody who sat through three adverts. That is a nuisance rather than an exploit, and
+it is exactly why a rewarded ad must never grant Premium content or anything permanent
+(SPEC §30).
+
 ---
 
 ## Auth configuration
@@ -682,6 +724,7 @@ Supabase's built-in sender is not permitted there.
 | `11_leaderboard.test.sql`               | Display-name validation on every path into the column, including a direct owner write; that a guest, a hidden user, an unnamed user and last week's score are all absent from the ranking; that no email address appears anywhere in the payload; the ±5 neighbour slice; the daily ranking cap clamping the board while the learner keeps every point; and a report queue nobody can read back                                                              |
 | `12_exams.test.sql`                     | That the paper is frozen and resumed rather than redealt; that it carries no explanation, hint or key while the exam runs and does carry both afterwards; the difficulty mix; that a payload past the grace period is ignored in favour of what was saved in time; the free weekly limit, the premium cooldown and the Premium gate; that score XP is the improvement over the learner's best and a worse resit pays nothing; and that no life is ever spent |
 | `13_billing.test.sql`                   | That reconciliation revokes what the payload omits and keeps the history; that a lapsed expiry grants nothing however it is flagged; that an unknown entitlement id is skipped rather than fatal; that a client can neither insert, update, delete nor call its way to an entitlement; that a retry of a FAILED delivery is not mistaken for a duplicate; and that the webhook log is readable by nobody                                                     |
+| `14_rewarded_ads.test.sql`              | That the daily cap stops exactly at the cap and a refusal burns no grant; that a full or unlimited set of lives is refused rather than wasted; that rewarded XP never reaches the leaderboard; that the allowance resets at the LEARNER's midnight; and that a client can neither write a grant, award itself the lives, nor forge the ledger row                                                                                                            |
 
 CI runs these against a fresh database on every push, and fails if
 `src/types/database.types.ts` is out of date.
@@ -692,6 +735,5 @@ CI runs these against a fresh database on every push, and fails if
 
 These arrive with the features that need them:
 
-- `rewarded_ad_grants` and the RPC that pays a rewarded life — Phase 15
 - `export_my_data`, and the `delete-account` Edge Function — Phase 18
 - Sign in with Apple / Google — needs store credentials (SPEC §12, D6)

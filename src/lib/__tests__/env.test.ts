@@ -53,6 +53,12 @@ describe('parseEnv', () => {
     EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'pk_test',
     EXPO_PUBLIC_REVENUECAT_IOS_KEY: 'appl_ios',
     EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: 'goog_android',
+    EXPO_PUBLIC_ADMOB_BANNER_ID_IOS: 'ca-app-pub-x/1',
+    EXPO_PUBLIC_ADMOB_BANNER_ID_ANDROID: 'ca-app-pub-x/2',
+    EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_IOS: 'ca-app-pub-x/3',
+    EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_ANDROID: 'ca-app-pub-x/4',
+    EXPO_PUBLIC_ADMOB_REWARDED_ID_IOS: 'ca-app-pub-x/5',
+    EXPO_PUBLIC_ADMOB_REWARDED_ID_ANDROID: 'ca-app-pub-x/6',
     EXPO_PUBLIC_POSTHOG_HOST: 'https://eu.i.posthog.com',
   };
 
@@ -65,6 +71,20 @@ describe('parseEnv', () => {
       parseEnv({ EXPO_PUBLIC_APP_ENV: 'production' });
     } catch (error) {
       expect((error as EnvValidationError).issues.join()).toContain('EXPO_PUBLIC_SUPABASE_URL');
+    }
+  });
+
+  it('requires the AdMob unit ids in production, now that ads have shipped', () => {
+    try {
+      parseEnv({
+        ...productionEnv,
+        EXPO_PUBLIC_ADMOB_BANNER_ID_IOS: undefined,
+      });
+      throw new Error('expected validation to fail');
+    } catch (error) {
+      expect((error as EnvValidationError).issues.join()).toContain(
+        'EXPO_PUBLIC_ADMOB_BANNER_ID_IOS',
+      );
     }
   });
 

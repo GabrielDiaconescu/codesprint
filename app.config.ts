@@ -75,6 +75,31 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           dark: { backgroundColor: '#0B1020' },
         },
       ],
+      [
+        'react-native-google-mobile-ads',
+        {
+          // Build-time and NOT secret (SPEC §56) — an AdMob app id identifies the app to
+          // Google, it does not authorise anything. Google's published TEST app ids are the
+          // default so a build without credentials still runs; a production build overrides
+          // them, and `adUnitId` independently refuses to serve live units outside
+          // production (SPEC §59.31).
+          androidAppId:
+            process.env.ADMOB_APP_ID_ANDROID ?? 'ca-app-pub-3940256099942544~3347511713',
+          iosAppId: process.env.ADMOB_APP_ID_IOS ?? 'ca-app-pub-3940256099942544~1458002511',
+          // Delays measurement until `initialize()` runs, which happens only after consent
+          // has been resolved (SPEC §41).
+          delayAppMeasurementInit: true,
+        },
+      ],
+      [
+        'expo-tracking-transparency',
+        {
+          // Shown only when personalised ads are actually requested, and only after UMP.
+          userTrackingPermission:
+            'CodeSprint asks so that the ads you see can be more relevant. ' +
+            'Your lessons, streak and progress work exactly the same either way.',
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,

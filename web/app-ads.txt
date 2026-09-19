@@ -1,0 +1,16 @@
+# CodeSprint — app-ads.txt (SPEC §30, §41)
+#
+# Required by Google Play and recommended by Apple. It is served from the developer website
+# listed in both store listings, at https://<domain>/app-ads.txt, and tells ad buyers which
+# sellers are authorised to sell this app's inventory. Without it, a large share of
+# programmatic demand simply will not bid.
+#
+# REPLACE the publisher id below with the real one from AdMob (Settings → Account
+# information → Publisher ID, of the form pub-0000000000000000). The line is exactly what
+# AdMob's own "app-ads.txt" screen tells you to paste; it is not a secret, and it is meant to
+# be publicly readable.
+#
+# It only takes effect once the store listing points at the domain hosting this file, and
+# Google can take a few days to crawl it.
+
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

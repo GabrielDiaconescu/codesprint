@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { FlatList, StyleSheet, View } from 'react-native';
 
 import { Button, Card, Divider, SkeletonLines, StateView, Text } from '@/components/ui';
+import { BannerSlot } from '@/features/ads/components/BannerSlot';
 import type { LeaderboardRow } from '@/services';
 import { useTheme } from '@/theme';
 
@@ -92,6 +93,8 @@ export const LeaderboardBoard = ({ currentName }: LeaderboardBoardProps) => {
         contentContainerStyle={[styles.content, { gap: theme.spacing.xs }]}
         ListHeaderComponent={
           <View style={[styles.header, { gap: theme.spacing.md }]}>
+            {/* The other permitted placement (SPEC §30). */}
+            <BannerSlot placement="leaderboard" />
             <Text variant="caption" tone="secondary">
               {t('week', { count: data.total_ranked })}
             </Text>

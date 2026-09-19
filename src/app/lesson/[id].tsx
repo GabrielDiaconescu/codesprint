@@ -6,10 +6,11 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, ProgressBar, Screen, SkeletonLines, StateView, Text } from '@/components/ui';
 import { LessonBlockView } from '@/features/lesson/components/LessonBlocks';
 import { QuestionPage } from '@/features/lesson/components/QuestionPage';
+import { useInterstitial } from '@/features/ads/hooks/useAds';
 import { AchievementToast } from '@/features/progress/components/AchievementToast';
 import { useAchievements } from '@/features/progress/hooks/useAchievements';
 import { useLesson } from '@/features/lesson/hooks/useLesson';
-import { useCompleteLesson } from '@/features/progress/hooks/useProgress';
+import { useCompleteLesson, useUserStats } from '@/features/progress/hooks/useProgress';
 import { buildLessonPages, countQuestions, pageProgress } from '@/features/lesson/logic/pages';
 import { LessonUnavailableError, type AnswerResult, type LessonErrorReason } from '@/services';
 import { useTheme } from '@/theme';
@@ -44,6 +45,10 @@ export default function LessonScreen() {
   const [finished, setFinished] = useState(false);
 
   const completeLesson = useCompleteLesson();
+  const showInterstitial = useInterstitial();
+  // The beginner grace period is about how many lessons they have EVER finished, not this
+  // session's (SPEC §30).
+  const { data: stats } = useUserStats();
 
   // The catalogue is only needed to put a NAME on an unlock: the RPC returns ids and icons,
   // and the localized names live in one place rather than being duplicated into the response.
@@ -147,7 +152,12 @@ export default function LessonScreen() {
             title={t('complete.title')}
             body={t('complete.body', { title: lesson.title })}
             actionLabel={t('complete.backToModule')}
-            onAction={() => router.back()}
+            onAction={() => {
+              // SPEC §30: at a natural break, and only AFTER the completion screen is
+              // dismissed — never between a question and its explanation. Every pacing rule
+              // is checked inside; most of the time nothing happens at all.
+              void showInterstitial(stats?.lessons_completed ?? 0).finally(() => router.back());
+            }}
           />
           {questionTotal > 0 && (
             <Text variant="bodyStrong" align="center">

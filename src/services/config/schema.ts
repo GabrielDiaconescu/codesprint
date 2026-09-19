@@ -17,6 +17,10 @@ import { DEFAULT_APP_CONFIG } from './defaults';
 
 const KEY_SCHEMAS = {
   ads_enabled: z.boolean(),
+  // Interstitial pacing (SPEC §30). Read by `shouldShowInterstitial`, which is what decides.
+  interstitial_min_minutes_between: z.number().int().nonnegative(),
+  interstitial_max_per_day: z.number().int().nonnegative(),
+  interstitial_grace_lessons: z.number().int().nonnegative(),
   subscriptions_enabled: z.boolean(),
   paywall_enabled: z.boolean(),
   leaderboard_enabled: z.boolean(),

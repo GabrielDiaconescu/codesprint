@@ -58,6 +58,9 @@ const NOOP_CONSENT_STATE: ConsentState = {
   adsStatus: 'unknown',
   canRequestPersonalizedAds: false,
   analyticsGranted: false,
+  // Fails closed: with no consent service, no ad may be requested at all.
+  canRequestAds: false,
+  privacyOptionsRequired: false,
 };
 
 export const NoopConsentService: ConsentService = {

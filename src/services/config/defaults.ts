@@ -9,6 +9,9 @@ import type { AppConfigValues } from '../types';
  */
 export const DEFAULT_APP_CONFIG: AppConfigValues = {
   ads_enabled: true,
+  interstitial_min_minutes_between: 5,
+  interstitial_max_per_day: 4,
+  interstitial_grace_lessons: 3,
   subscriptions_enabled: true,
   paywall_enabled: true,
   leaderboard_enabled: true,

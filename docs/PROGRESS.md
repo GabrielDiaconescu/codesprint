@@ -2,8 +2,8 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 14 complete and **switched on** via the RevenueCat Test Store —
-awaiting approval for Phase 15 (Ads + consent).
+**Current phase:** Phase 15 complete — awaiting approval for Phase 16 (Analytics +
+monitoring).
 **Last updated:** 2026-09-18
 
 ---
@@ -27,7 +27,8 @@ awaiting approval for Phase 15 (Ads + consent).
 | 12    | Leaderboard, display names, reports  | **Complete** — pending device check   |
 | 13    | Exam mode                            | **Complete** — pending device check   |
 | 14    | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
-| 15–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 15    | Ads, consent, rewarded rewards       | **Complete** — pending device check   |
+| 16–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -1317,6 +1318,115 @@ entry:
 
 5 new pgTAP tests (483 total), 6 new unit tests (860 total).
 
+## Phase 15 — what was implemented (Ads, consent, rewarded rewards)
+
+**Database** — `20260917121700_rewarded_ads.sql`
+
+- `claim_rewarded_ad(type)`: grants a life or bonus XP for a watched ad, under a per-day cap
+  on the learner's **local** date. A refusal writes nothing, so the cap cannot be walked past
+  by retrying and a mistake does not cost one of the three daily goes.
+- `rewarded_allowance()`: what is still available, read **before** an ad is offered. Making
+  somebody sit through thirty seconds of advertising and then refusing the reward is the worst
+  possible order of events, and it is entirely avoidable.
+- Rewarded XP is awarded with `counts_for_leaderboard => false` — minutes of advertising must
+  never outrank minutes of learning (SPEC §19, §26).
+- 37 new pgTAP tests (`14_rewarded_ads.test.sql`), 520 in total.
+
+**The policy, as pure functions** — `src/features/ads/logic/`
+
+This is where Phase 15 actually lives. The SDK wrapper holds no opinion; these decide:
+
+- `shouldShowInterstitial` — the beginner grace period, the daily cap, the minimum gap, and a
+  30-second quiet period after launch (SPEC §30's "never right after launch", given a number).
+- `canRequestAds` — entitlement, kill switch and consent, checked **before loading** rather
+  than before showing.
+- `decidePersonalization` — minor, UMP consent and iOS ATT, with anything unknown counting as
+  "no".
+- `shouldRequestAtt` — iOS only, after UMP, once, and never to a minor.
+
+**Services**
+
+- `UmpConsentService` — Google UMP, then ATT, in that order. `debugGeography: EEA` in
+  development so the European form can be seen without flying there.
+- `GoogleAdService` — `TestIds` from the SDK rather than strings copied from documentation, so
+  there is no hardcoded ad unit anywhere in the codebase.
+- `AdBanner` in `src/services/ads/` — the only React component allowed to import the SDK, which
+  is what the architecture rule caught when the banner first lived in `features/`.
+
+**App**
+
+- Banners on the Learn list and the Leaderboard, **and nowhere else**. `BANNER_PLACEMENTS` is a
+  closed list and `BannerSlot` throws in development on anything else.
+- The slot takes **no space at all** until an ad has loaded — a reserved empty strip for a
+  paying learner, or for one whose ad failed to fill, is worse than the ad.
+- An interstitial after the lesson completion screen is dismissed, never before.
+- `RewardedLifeCard` when lives hit zero: wait (the countdown is already there), watch an ad,
+  or upgrade.
+- `web/app-ads.txt`, with the publisher id to replace.
+
+### Phase 15 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+format      prettier --check ......... clean
+unit        jest ..................... 59 suites, 898 tests, all passing
+database    supabase test db ......... 14 files, 520 pgTAP tests, all passing
+migrations  supabase db reset ........ applies cleanly, seed included
+bundle      expo export (android) .... succeeds
+```
+
+Through the database, as a free learner:
+
+| Step                                   | Result                                         |
+| -------------------------------------- | ---------------------------------------------- |
+| allowance with full lives              | life **not** offered; bonus XP offered         |
+| three rewarded lives                   | 2, 3, 4 — one each                             |
+| the fourth                             | `22023 cap_reached`, no grant written          |
+| claiming with full lives               | `22023 lives_full` — the daily go is not burnt |
+| a Premium learner claiming a life      | `22023 unlimited_lives`                        |
+| three rewarded XP grants               | 10 + 10 + 10, exactly the cap                  |
+| the fourth                             | refused rather than paying a partial amount    |
+| `leaderboard_weekly` after 30 bonus XP | **no row at all**                              |
+| yesterday's grants                     | do not count against today's allowance         |
+| `ads_enabled = false`                  | rewards refused, and the allowance says so     |
+
+## Decisions and interpretations made during Phase 15
+
+1. **The SDK wrapper holds no policy.** Whether an ad may be shown, whether it may be
+   personalized and how often it may interrupt are pure functions with tests. `GoogleAdService`
+   loads and shows what it is told to.
+2. **"Never right after launch" is 30 seconds.** SPEC §30 gives no number. Long enough that an
+   ad is attached to something the learner did rather than to opening the app; short enough not
+   to become a fourth de-facto cap.
+3. **Anything unknown means non-personalized.** A non-personalized ad earns less; a
+   personalized one served without a basis is a regulatory and store-policy problem. The
+   asymmetry is not close.
+4. **A minor is checked before consent.** A 14-year-old tapping "accept" does not make
+   personalised advertising to them lawful (SPEC §41, D11).
+5. **`tagForChildDirectedTreatment` is always false.** The product's floor is 13 (D10), so
+   there are no under-13 users to tag — claiming otherwise would misdescribe the audience to
+   Google. `tagForUnderAgeOfConsent` is what applies, and it follows the age.
+6. **The banner slot has zero height until an ad loads.** A reserved empty strip is a worse
+   experience than the ad it is reserving space for.
+7. **Interstitials are paced in Zustand, not on the server, and it is not persisted.** That
+   makes the daily cap a floor rather than a ceiling: force-quitting between lessons could
+   exceed four. The alternative costs a round trip on the happiest screen in the product to
+   pace an advert, and everything that genuinely must not be gamed — XP, lives, entitlements —
+   is already server-side (SPEC §42).
+8. **A rewarded refusal writes no grant.** Claiming with full lives does not cost one of the
+   three daily goes for a mistake the UI should have prevented.
+9. **The allowance is read before the ad, not after.** `rewarded_allowance()` exists for
+   exactly this.
+10. **Ad units come from the SDK's `TestIds`**, not from strings copied out of Google's docs,
+    so they cannot drift and there is no hardcoded unit in the codebase.
+11. **`AdBanner` lives in `src/services/ads/`.** A banner has to be rendered, so the SDK
+    component has to reach a screen somehow — the architecture rule caught it in `features/`
+    and the fix was to move the one SDK touch, not to add an exception.
+12. **The native modules are mocked in Jest.** `TurboModuleRegistry.getEnforcing` throws on
+    import, which would take out every test reaching the registry. The SDK is not ours to
+    verify; the policy around it is, and that is covered.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -1331,9 +1441,17 @@ Rewritten at the end of each phase, so this describes the product as it stands t
   Those need a real sandbox, which needs the store accounts.
 - **Expo Go no longer runs the app.** The RevenueCat SDK is native and is now in the bundle,
   so a development build is required from here on (SPEC §0.1.10).
-- Ads and UMP consent (15), analytics and monitoring (16), local notifications (17). Those
-  five services are still the no-op implementations listed in `PRODUCTION_NOOP_ALLOWLIST`,
-  which must be **empty** before the first production release. Billing has left that list.
+- Analytics and monitoring (16), local notifications (17). Those three services are still
+  the no-op implementations listed in `PRODUCTION_NOOP_ALLOWLIST`, which must be **empty**
+  before the first production release. Billing, ads and consent have left that list.
+- **Ads serve Google's TEST inventory**, and will until `EXPO_PUBLIC_APP_ENV=production`
+  with real unit ids. That is deliberate and enforced in `adUnitId`: tapping a live ad in
+  development is what gets an AdMob account suspended.
+- **AdMob server-side verification for rewarded ads is not implemented** (V1.1 per
+  SPEC §42). Nothing proves the ad was watched, so the daily caps are what bound the
+  damage — which is why a rewarded ad never grants Premium content or anything permanent.
+- `web/app-ads.txt` carries a placeholder publisher id. It must be replaced and the file
+  hosted on the domain named in both store listings before ads can fill properly.
 - **Sign in with Apple and Google (D6).** Both need credentials that do not exist yet: an
   Apple Developer account with the Sign in with Apple capability, and Google OAuth client ids.
   Email, password and guest are complete and fully exercised.
@@ -1343,13 +1461,11 @@ Rewritten at the end of each phase, so this describes the product as it stands t
 
 **Consequences of the above, visible in the app:**
 
-- Out of lives there is nowhere to go: the wait is explained, but the rewarded-ad restore
-  needs Phase 15 and the upgrade needs a working store account.
+- Out of lives now offers all three ways forward (SPEC §22): the countdown, a rewarded ad,
+  and the paywall.
 - The funnel triggers from SPEC §34 are implemented and unit-tested, but nothing calls
   `shouldPrompt` yet — the paywall is reached deliberately, not suggested. Wiring the
   triggers to the screens that fire them is part of Phase 15, where the ad trigger arrives.
-- Ads consent (Google UMP) is not asked during onboarding. It belongs with the ads
-  integration, which must show it before the first ad request.
 - The reminder time is stored, but nothing is scheduled and no notification permission is
   requested (Phase 17).
 
@@ -2145,3 +2261,60 @@ The Test Store proves the plumbing. These need a real sandbox:
     buys you, and the Test Store cannot exercise it.
 15. **Delete and reinstall** the app, sign in, tap **Restore purchases**.
 16. Let a subscription lapse (or cancel it in the sandbox) and confirm access closes.
+
+---
+
+## Phase 15 device test checklist
+
+Needs a development build (`npx expo run:android`). Sign in as **free@codesprint.test**
+(`sprint2026`) unless a step says otherwise.
+
+### Consent, first thing
+
+1. On a fresh install the **UMP consent form** appears before any ad. In a development build
+   it is forced on regardless of where you are, so you see what a European learner sees.
+2. Answer it. Note that the form appears **before** anything else ad-related — and on iOS, the
+   tracking prompt comes **after** it, never at the same time.
+3. **Profile → privacy options** reopens the form, so consent can be withdrawn as easily as it
+   was given.
+
+### Where banners may and may not appear
+
+4. **Learn** — a test banner at the foot of the module list, labelled "Test Ad" by Google.
+5. **Leaderboard** — a test banner at the top.
+6. **Home, Profile, a lesson, practice, the exam, the paywall** — **no banner anywhere**. This
+   is the check that matters most; a banner on a lesson is a SPEC §30 violation.
+7. While an ad is still loading, the slot takes **no vertical space** — nothing jumps.
+
+### Interstitials
+
+8. Finish your first lesson and dismiss the completion screen: **no ad**. Same after the
+   second and third — the grace period is three lessons.
+9. Finish a fourth. Dismissing the completion screen shows a test interstitial.
+10. Finish a fifth straight away: **no ad**, because the minimum gap is five minutes.
+11. An ad never appears mid-lesson, between a question and its explanation, or on the paywall.
+
+### Rewarded ads
+
+12. Get a question wrong until lives reach **0**. The out-of-lives card appears with the
+    countdown, **Watch an ad for 1 life**, and **Get unlimited lives**.
+13. Watch the ad through to the end: one life comes back, and a toast says so.
+14. Start another and **close it early**: nothing is granted. That is the contract of a
+    rewarded ad.
+15. Do it three times in total. The fourth time the button is **not shown at all** — the
+    allowance is read before the offer, not after.
+
+### Entitled learners see none of it
+
+16. Sign in as **noads@codesprint.test**. No banner on Learn or the Leaderboard, no
+    interstitial after a lesson.
+17. Same as **premium@codesprint.test**, plus the rewarded life button is absent — their lives
+    are unlimited, so there is nothing to restore.
+18. In Supabase Studio set `ads_enabled` to `false` and reopen the app: ads stop for everybody,
+    including the rewarded button.
+
+### Accessibility
+
+19. With the screen reader on, swipe through the Learn list. The banner is **skipped** — it is
+    not part of the reading order.
+20. The out-of-lives card and its buttons are announced properly.

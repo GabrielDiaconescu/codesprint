@@ -21,7 +21,7 @@ export type AppEnvironment = (typeof APP_ENVIRONMENTS)[number];
 const SHIPPED = {
   supabase: true, // Phase 3 — shipped
   revenueCat: true, // Phase 14 — shipped
-  admob: false, // Phase 15
+  admob: true, // Phase 15 — shipped
   postHog: false, // Phase 16
   sentry: false, // Phase 16 (optional earlier if a DSN exists)
   legalPages: false, // Phase 18

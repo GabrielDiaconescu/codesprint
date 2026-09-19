@@ -1,0 +1,21 @@
+{
+  "outOfLives": {
+    "title": "You are out of lives",
+    "body": "Lives come back on their own — one every few hours. You can also watch a short ad for one now, or never run out again with Premium.",
+    "premium": "Get unlimited lives"
+  },
+  "rewarded": {
+    "watchForLife": "Watch an ad for 1 life",
+    "granted": "You got a life back.",
+    "remaining": "{{used}} of {{cap}} used today",
+    "refused": {
+      "ads_disabled": "Ad rewards are unavailable right now. Please try again later.",
+      "cap_reached": "That is all the ad rewards for today. They reset tomorrow.",
+      "lives_full": "Your lives are already full.",
+      "unlimited_lives": "You have unlimited lives — there is nothing to restore.",
+      "unknown_reward": "That reward is not available.",
+      "unknown": "The reward could not be granted. Please try again."
+    }
+  },
+  "testBanner": "Test ads — this build never serves live inventory."
+}

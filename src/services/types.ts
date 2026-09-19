@@ -5,6 +5,7 @@ import type {
   PracticeMode,
   PracticeSet,
 } from './home/schema';
+import type { RewardKind, RewardedAllowance, RewardedGrant } from './ads/rewardSchema';
 import type { ServerEntitlements } from './billing/entitlementSchema';
 import type { ExamOverview, ExamPaper, ExamResults } from './exams/schema';
 import type { Leaderboard, ReportReason } from './leaderboard/schema';
@@ -306,6 +307,20 @@ export interface ProgressService extends ServiceIdentity {
    * timestamp only moves the first time.
    */
   completeLesson(lessonId: string): Promise<LessonCompletion>;
+
+  /**
+   * What the learner could still earn from rewarded ads today (SPEC §30).
+   *
+   * Read BEFORE an ad is offered, so a rewarded button is never shown for a reward the
+   * server would then refuse.
+   */
+  getRewardedAllowance(): Promise<RewardedAllowance>;
+
+  /**
+   * Asks the server to honour a watched ad. The CLIENT never grants anything: the cap, the
+   * lives and the XP are all applied server-side (SPEC §30, §42).
+   */
+  claimRewardedAd(rewardType: RewardKind): Promise<RewardedGrant>;
 }
 
 /* ------------------------------------------------------------------ Home (Supabase) */
@@ -484,8 +499,14 @@ export type ConsentStatus = 'unknown' | 'required' | 'obtained' | 'not-required'
 
 export interface ConsentState {
   adsStatus: ConsentStatus;
+  /** UMP obtained consent for personalisation. The FINAL say is `decidePersonalization`,
+   *  which also weighs the learner's age and iOS tracking permission (SPEC §41). */
   canRequestPersonalizedAds: boolean;
   analyticsGranted: boolean;
+  /** Whether any ad may be requested — UMP has been satisfied one way or the other. */
+  canRequestAds: boolean;
+  /** Whether Settings must show the privacy-options entry point UMP requires (SPEC §29). */
+  privacyOptionsRequired: boolean;
 }
 
 export interface ConsentService extends ServiceIdentity {
@@ -498,6 +519,14 @@ export interface ConsentService extends ServiceIdentity {
 }
 
 /* ------------------------------------------------------------------ Ads (AdMob) */
+export type {
+  RewardKind,
+  RewardedAllowance,
+  RewardedGrant,
+  RewardRefusal,
+} from './ads/rewardSchema';
+export { REWARD_TYPES, toRewardRefusal } from './ads/rewardSchema';
+
 export type AdPlacement = 'learn-list' | 'leaderboard';
 export type RewardType = 'life' | 'practice-set' | 'bonus-xp';
 
@@ -589,6 +618,10 @@ export interface NotificationService extends ServiceIdentity {
 /* ------------------------------------------------------------------ Remote config / feature flags */
 export interface AppConfigValues {
   ads_enabled: boolean;
+  /** Interstitial pacing (SPEC §30) — read by `shouldShowInterstitial`. */
+  interstitial_min_minutes_between: number;
+  interstitial_max_per_day: number;
+  interstitial_grace_lessons: number;
   subscriptions_enabled: boolean;
   paywall_enabled: boolean;
   leaderboard_enabled: boolean;

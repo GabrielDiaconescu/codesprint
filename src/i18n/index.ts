@@ -2,6 +2,7 @@ import { getLocales } from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import ads from './locales/en/ads.json';
 import auth from './locales/en/auth.json';
 import common from './locales/en/common.json';
 import exam from './locales/en/exam.json';
@@ -30,6 +31,7 @@ export const resources = {
     common,
     navigation,
     auth,
+    ads,
     onboarding,
     home,
     learn,

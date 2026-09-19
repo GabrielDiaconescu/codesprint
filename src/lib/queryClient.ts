@@ -51,6 +51,7 @@ export const queryKeys = {
     achievements: (userId: string, locale: string) =>
       ['user', userId, 'achievements', locale] as const,
     exams: (userId: string, locale: string) => ['user', userId, 'exams', locale] as const,
+    rewards: (userId: string) => ['user', userId, 'rewards'] as const,
     examResults: (userId: string, attemptId: string) =>
       ['user', userId, 'exam-results', attemptId] as const,
   },

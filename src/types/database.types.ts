@@ -996,6 +996,7 @@ export type Database = {
         Returns: boolean
       }
       claim_daily_challenge: { Args: never; Returns: Json }
+      claim_rewarded_ad: { Args: { p_reward_type: string }; Returns: Json }
       complete_lesson: { Args: { p_lesson_id: string }; Returns: Json }
       config_bool: {
         Args: { p_default: boolean; p_key: string }
@@ -1140,6 +1141,11 @@ export type Database = {
         Returns: undefined
       }
       require_auth_uid: { Args: never; Returns: string }
+      rewarded_allowance: { Args: never; Returns: Json }
+      rewarded_grants_today: {
+        Args: { p_reward_type: string; p_user_id: string }
+        Returns: number
+      }
       save_exam_progress: {
         Args: { p_answers: Json; p_attempt_id: string }
         Returns: undefined

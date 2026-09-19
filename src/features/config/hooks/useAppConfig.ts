@@ -20,6 +20,9 @@ export const useAppConfig = () =>
     initialData: () =>
       ({
         ads_enabled: services.config.get('ads_enabled'),
+        interstitial_min_minutes_between: services.config.get('interstitial_min_minutes_between'),
+        interstitial_max_per_day: services.config.get('interstitial_max_per_day'),
+        interstitial_grace_lessons: services.config.get('interstitial_grace_lessons'),
         subscriptions_enabled: services.config.get('subscriptions_enabled'),
         paywall_enabled: services.config.get('paywall_enabled'),
         leaderboard_enabled: services.config.get('leaderboard_enabled'),

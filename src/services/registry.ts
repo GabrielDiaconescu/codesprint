@@ -1,20 +1,16 @@
 import { SupabaseAuthService } from './auth/SupabaseAuthService';
 import { RevenueCatBillingService } from './billing/RevenueCatBillingService';
+import { GoogleAdService } from './ads/GoogleAdService';
 import { SupabaseEntitlementService } from './billing/SupabaseEntitlementService';
 import { SupabaseConfigService } from './config/SupabaseConfigService';
+import { UmpConsentService } from './consent/UmpConsentService';
 import { SupabaseContentService } from './content/SupabaseContentService';
 import { SupabaseExamService } from './exams/SupabaseExamService';
 import { SupabaseHomeService } from './home/SupabaseHomeService';
 import { SupabaseLeaderboardService } from './leaderboard/SupabaseLeaderboardService';
 import { SupabaseProfileService } from './profile/SupabaseProfileService';
 import { SupabaseProgressService } from './progress/SupabaseProgressService';
-import {
-  NoopAdService,
-  NoopAnalyticsService,
-  NoopConsentService,
-  NoopMonitoringService,
-  NoopNotificationService,
-} from './noop';
+import { NoopAnalyticsService, NoopMonitoringService, NoopNotificationService } from './noop';
 import type {
   AdService,
   AuthService,
@@ -70,8 +66,8 @@ export const services: Services = {
   exams: SupabaseExamService, // Phase 13 — real
   leaderboard: SupabaseLeaderboardService, // Phase 12 — real
   analytics: NoopAnalyticsService, // Phase 16
-  consent: NoopConsentService, // Phase 15
-  ads: NoopAdService, // Phase 15
+  consent: UmpConsentService, // Phase 15 — real
+  ads: GoogleAdService, // Phase 15 — real
   billing: RevenueCatBillingService, // Phase 14 — real
   entitlements: SupabaseEntitlementService, // Phase 14 — real; the server is the authority
   notifications: NoopNotificationService, // Phase 17
@@ -88,8 +84,6 @@ export const services: Services = {
 export const PRODUCTION_NOOP_ALLOWLIST: (keyof Services)[] = [
   'monitoring',
   'analytics',
-  'consent',
-  'ads',
   'notifications',
 ];
 
