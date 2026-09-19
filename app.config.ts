@@ -104,11 +104,23 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     experiments: {
       typedRoutes: true,
     },
+    // Which EAS account owns the builds. Pinned because this login has access to two, and
+    // "which account did that build go to" is not a question worth answering twice.
+    owner: 'gabrieldiaconescu',
     extra: {
       appVariant: APP_VARIANT,
       eas: {
-        // Filled in by `eas init` (human action H-EAS, see docs/PROGRESS.md).
-        projectId: process.env.EAS_PROJECT_ID,
+        /**
+         * The EAS project id.
+         *
+         * Hardcoded with an env override rather than read only from `.env`, because `.env` is
+         * gitignored: a fresh clone — another machine, or CI in Phase 22 — would otherwise
+         * fail to build with a confusing "no project id" rather than just working.
+         *
+         * It is not a secret. It appears in the public project URL:
+         * https://expo.dev/accounts/gabrieldiaconescu/projects/codesprint
+         */
+        projectId: process.env.EAS_PROJECT_ID ?? '7ab009a0-219f-4861-906f-64431e42ebae',
       },
     },
   };
