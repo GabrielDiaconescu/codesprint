@@ -24,6 +24,13 @@ export const useCompleteOnboarding = () => {
     onSuccess: (profile) => {
       queryClient.setQueryData(queryKeys.user.profile(userId ?? 'none'), profile);
       resetDraft();
+
+      // The onboarding-completion KPI (SPEC §43). Enums only: the daily goal in minutes and
+      // the experience level, never the birth year.
+      services.analytics.capture('onboarding_completed', {
+        daily_goal_minutes: profile.dailyGoalMinutes,
+        experience_level: profile.experienceLevel,
+      });
     },
   });
 };

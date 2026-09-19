@@ -1,16 +1,18 @@
 import { SupabaseAuthService } from './auth/SupabaseAuthService';
 import { RevenueCatBillingService } from './billing/RevenueCatBillingService';
 import { GoogleAdService } from './ads/GoogleAdService';
+import { PostHogAnalyticsService } from './analytics/PostHogAnalyticsService';
 import { SupabaseEntitlementService } from './billing/SupabaseEntitlementService';
 import { SupabaseConfigService } from './config/SupabaseConfigService';
 import { UmpConsentService } from './consent/UmpConsentService';
+import { SentryMonitoringService } from './monitoring/SentryMonitoringService';
 import { SupabaseContentService } from './content/SupabaseContentService';
 import { SupabaseExamService } from './exams/SupabaseExamService';
 import { SupabaseHomeService } from './home/SupabaseHomeService';
 import { SupabaseLeaderboardService } from './leaderboard/SupabaseLeaderboardService';
 import { SupabaseProfileService } from './profile/SupabaseProfileService';
 import { SupabaseProgressService } from './progress/SupabaseProgressService';
-import { NoopAnalyticsService, NoopMonitoringService, NoopNotificationService } from './noop';
+import { NoopNotificationService } from './noop';
 import type {
   AdService,
   AuthService,
@@ -57,7 +59,7 @@ export type Services = {
 };
 
 export const services: Services = {
-  monitoring: NoopMonitoringService, // Phase 16 (earlier if a Sentry DSN is provided)
+  monitoring: SentryMonitoringService, // Phase 16 — real (inert without a DSN)
   auth: SupabaseAuthService, // Phase 4 — real
   profile: SupabaseProfileService, // Phase 5 — real
   content: SupabaseContentService, // Phase 6 — real
@@ -65,7 +67,7 @@ export const services: Services = {
   home: SupabaseHomeService, // Phase 11 — real
   exams: SupabaseExamService, // Phase 13 — real
   leaderboard: SupabaseLeaderboardService, // Phase 12 — real
-  analytics: NoopAnalyticsService, // Phase 16
+  analytics: PostHogAnalyticsService, // Phase 16 — real (inert without a key or consent)
   consent: UmpConsentService, // Phase 15 — real
   ads: GoogleAdService, // Phase 15 — real
   billing: RevenueCatBillingService, // Phase 14 — real
@@ -81,11 +83,7 @@ export const services: Services = {
  * builds during early phases do not trip the guard, while making the remaining gap explicit
  * and reviewable rather than invisible.
  */
-export const PRODUCTION_NOOP_ALLOWLIST: (keyof Services)[] = [
-  'monitoring',
-  'analytics',
-  'notifications',
-];
+export const PRODUCTION_NOOP_ALLOWLIST: (keyof Services)[] = ['notifications'];
 
 export class NoopServiceInProductionError extends Error {
   constructor(public readonly offenders: string[]) {

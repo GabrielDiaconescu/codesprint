@@ -1,0 +1,13 @@
+{
+  "title": "Privacy",
+  "failed": "That setting could not be saved. Please try again.",
+  "analytics": {
+    "label": "Help improve CodeSprint",
+    "description": "Shares anonymous usage data — which lessons are finished, where people get stuck. Never your answers, your name or your email.",
+    "minor": "Analytics stays off for learners under {{age}}. Nothing about how you use the app is shared."
+  },
+  "ads": {
+    "description": "Ad preferences are managed by Google's consent form, which is also where you can withdraw what you agreed to.",
+    "action": "Ad privacy options"
+  }
+}

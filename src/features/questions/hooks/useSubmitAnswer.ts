@@ -24,7 +24,16 @@ export const useSubmitAnswer = (context: AnswerContext = 'lesson') => {
     mutationFn: ({ questionId, value }) =>
       services.content.submitAnswer(questionId, toSubmission(value), context, i18n.language),
     retry: false,
-    onSuccess: (result) => {
+    onSuccess: (result, variables) => {
+      // Type, difficulty, correctness and attempt number — no question id, no answer
+      // text. The sanitiser would drop both anyway (SPEC §43).
+      services.analytics.capture('question_answered', {
+        type: variables.value.type,
+        correct: result.correct,
+        attempt_no: result.attempt_no,
+        context,
+      });
+
       if (result.correct) {
         haptics.correct();
       } else {

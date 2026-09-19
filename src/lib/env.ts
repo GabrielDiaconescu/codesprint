@@ -22,8 +22,10 @@ const SHIPPED = {
   supabase: true, // Phase 3 — shipped
   revenueCat: true, // Phase 14 — shipped
   admob: true, // Phase 15 — shipped
-  postHog: false, // Phase 16
-  sentry: false, // Phase 16 (optional earlier if a DSN exists)
+  postHog: true, // Phase 16 — shipped
+  // Optional even in production: a build without a DSN simply reports nothing, which is
+  // worse than having it but is not a reason to refuse to start (SPEC §44).
+  sentry: false, // Phase 16 — written, DSN still a pending human action
   legalPages: false, // Phase 18
 } as const;
 

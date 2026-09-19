@@ -11,6 +11,7 @@ import {
   useOfferings,
   useRefreshEntitlements,
 } from '@/features/paywall/hooks/useEntitlements';
+import { useCapture, useCaptureOnce } from '@/features/analytics/hooks/useAnalytics';
 import { annualSavingPercent, buildPlans, type Plan } from '@/features/paywall/logic/plans';
 import { PAYWALL_TRIGGERS, type PaywallTrigger } from '@/features/paywall/logic/prompts';
 import { getEnv } from '@/lib/env';
@@ -49,10 +50,16 @@ export default function PaywallScreen() {
     ? (params.trigger as PaywallTrigger)
     : 'manual';
 
+  const capture = useCapture();
+
   const offerings = useOfferings();
   const { data: entitlements } = useEntitlements();
   const refresh = useRefreshEntitlements();
   const [busyRole, setBusyRole] = useState<string | null>(null);
+
+  // Once per open, whatever re-renders happen while offerings load — otherwise the
+  // conversion denominator quietly doubles (SPEC §43).
+  useCaptureOnce('paywall_viewed', { trigger });
 
   const plans = buildPlans(offerings.data ?? [], {
     active: entitlements.active,
@@ -62,6 +69,8 @@ export default function PaywallScreen() {
 
   const purchase = (plan: Plan) => {
     setBusyRole(plan.role);
+    // `product` is a role, not a price or an id — enums and counts only (SPEC §43).
+    capture('purchase_started', { product: plan.role });
 
     void services.billing
       .purchase(plan.product.packageId)
@@ -69,13 +78,18 @@ export default function PaywallScreen() {
         // RevenueCat says it worked; the SERVER decides whether it did (SPEC §31). Nothing
         // unlocks until `user_entitlements` has been reconciled.
         await refresh.mutateAsync();
+        capture('purchase_completed', { product: plan.role });
         showToast({ message: t('purchase.done'), tone: 'success' });
         router.back();
       })
       .catch((error: unknown) => {
         // A cancelled purchase is not a failure and gets no message at all — the customer
         // knows what they just did (SPEC §31).
-        if (isCancellation(error)) return;
+        if (isCancellation(error)) {
+          capture('purchase_cancelled', { product: plan.role });
+          return;
+        }
+        capture('purchase_failed', { product: plan.role });
         showToast({ message: t('purchase.failed'), tone: 'error' });
       })
       .finally(() => setBusyRole(null));
@@ -83,11 +97,13 @@ export default function PaywallScreen() {
 
   const restore = () => {
     setBusyRole('restore');
+    capture('restore_started');
 
     void services.billing
       .restorePurchases()
       .then(async () => {
         const restored = await refresh.mutateAsync();
+        capture('restore_completed', { restored: restored.active.length });
         showToast({
           message: restored.active.length > 0 ? t('restore.done') : t('restore.nothing'),
           tone: restored.active.length > 0 ? 'success' : 'info',

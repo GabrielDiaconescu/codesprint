@@ -59,6 +59,7 @@ describe('parseEnv', () => {
     EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_ANDROID: 'ca-app-pub-x/4',
     EXPO_PUBLIC_ADMOB_REWARDED_ID_IOS: 'ca-app-pub-x/5',
     EXPO_PUBLIC_ADMOB_REWARDED_ID_ANDROID: 'ca-app-pub-x/6',
+    EXPO_PUBLIC_POSTHOG_KEY: 'phc_test',
     EXPO_PUBLIC_POSTHOG_HOST: 'https://eu.i.posthog.com',
   };
 
@@ -86,6 +87,21 @@ describe('parseEnv', () => {
         'EXPO_PUBLIC_ADMOB_BANNER_ID_IOS',
       );
     }
+  });
+
+  it('requires the PostHog key in production, now that analytics has shipped', () => {
+    try {
+      parseEnv({ ...productionEnv, EXPO_PUBLIC_POSTHOG_KEY: undefined });
+      throw new Error('expected validation to fail');
+    } catch (error) {
+      expect((error as EnvValidationError).issues.join()).toContain('EXPO_PUBLIC_POSTHOG_KEY');
+    }
+  });
+
+  it('does NOT require a Sentry DSN, which is optional even in production', () => {
+    // A build without it reports nothing, which is worse than having it but is not a reason
+    // to refuse to start (SPEC §44).
+    expect(() => parseEnv({ ...productionEnv, EXPO_PUBLIC_SENTRY_DSN: undefined })).not.toThrow();
   });
 
   it('requires the RevenueCat SDK keys in production, now that billing has shipped', () => {

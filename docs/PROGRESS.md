@@ -2,8 +2,8 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 15 complete — awaiting approval for Phase 16 (Analytics +
-monitoring).
+**Current phase:** Phase 16 complete — awaiting approval for Phase 17 (Local
+notifications).
 **Last updated:** 2026-09-18
 
 ---
@@ -28,7 +28,8 @@ monitoring).
 | 13    | Exam mode                            | **Complete** — pending device check   |
 | 14    | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
 | 15    | Ads, consent, rewarded rewards       | **Complete** — pending device check   |
-| 16–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 16    | Analytics + monitoring               | **Complete** — pending device check   |
+| 17–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -1427,6 +1428,92 @@ Through the database, as a free learner:
     import, which would take out every test reaching the registry. The SDK is not ours to
     verify; the policy around it is, and that is covered.
 
+## Phase 16 — what was implemented (Analytics + monitoring)
+
+No database changes. The whole phase is about what leaves the device, and the most important
+part of it is a pure function.
+
+**Keeping personal data out** — `src/features/analytics/logic/sanitize.ts`
+
+SPEC §43 says "no email, names or free-text answers in event properties". That is a rule, and a
+rule enforced only by everybody remembering it is one that gets broken once and then sits in a
+third party's database for years. So every event passes through `sanitizeProperties`, which
+drops:
+
+- any property whose **name** suggests personal data (`email`, `name`, `answer`, `token`, …),
+  whatever the value;
+- any **value** containing an email address, under any key;
+- any string longer than 64 characters — every legitimate property in SPEC §43 is an enum-ish
+  token, and prose is where personal data hides;
+- any **UUID** used as a property, because the pseudonymous distinct id already links events to
+  one learner and a lesson id would tie them more tightly than any KPI needs.
+
+It is **deny by shape, not allow by name**: a per-event allow-list would be stricter but would
+block every new property behind a code change, and the pressure to skip the check would
+eventually win. `isSafeDistinctId` refuses anything that is not a Supabase user id, because an
+email as the distinct id is the one mistake here that deleting a property afterwards cannot
+undo.
+
+**Services**
+
+- `PostHogAnalyticsService` — EU host (the SDK default is US, so this is not optional).
+  Consent is checked on **every call**, not at startup, so withdrawal takes effect at once.
+  Events raised before consent are **dropped, not queued**: a queue that flushed on consent
+  would send behaviour from before the learner agreed to it, which is what opt-in exists to
+  prevent.
+- `SentryMonitoringService` — `sendDefaultPii: false`, request bodies, cookies and headers
+  stripped in `beforeSend`, and a last regex pass over messages and exception values. It does
+  **not** wait for consent: a crash report is a stack trace, not a behavioural profile, and
+  SPEC §41 lists its basis separately for that reason.
+- Both are real and wired in. `PRODUCTION_NOOP_ALLOWLIST` is now down to `['notifications']`.
+
+**Instrumentation**
+
+`app_opened`, `onboarding_completed`, `lesson_started`, `lesson_completed`,
+`question_answered`, `paywall_viewed` (with its trigger), `purchase_started` /
+`_completed` / `_failed` / `_cancelled`, `restore_started` / `_completed`, `exam_started` /
+`_completed`, `rewarded_ad_started` / `_completed`, `interstitial_shown`, `consent_updated`.
+
+`useCaptureOnce` exists because a re-render must not produce a second `..._viewed` event and
+quietly double a funnel denominator.
+
+**Privacy settings** — a card on Profile with the analytics opt-in and the UMP privacy-options
+entry point. Disabled with its reason for a learner under `minor_protection_age`, since the
+server forces their consent to false whatever the client sends.
+
+### Phase 16 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+format      prettier --check ......... clean
+unit        jest ..................... 60 suites, 930 tests, all passing
+database    supabase test db ......... 14 files, 520 pgTAP tests, all passing (unchanged)
+bundle      expo export (android) .... succeeds
+```
+
+## Decisions and interpretations made during Phase 16
+
+1. **PII protection is a pure function, not a convention.** It is the one thing in this phase
+   that cannot be fixed after the fact: an event already sent cannot be un-sent.
+2. **Deny by shape, not allow by name.** An allow-list per event would be stricter and would
+   rot — every new property would need a code change, and eventually somebody would bypass it.
+3. **Events before consent are dropped, not queued.** Flushing a queue the moment consent is
+   granted would send behaviour from before the learner agreed to it.
+4. **Consent is re-checked on every call**, so withdrawal is immediate rather than effective
+   at the next launch.
+5. **Monitoring does not wait for consent, analytics does.** A stack trace is not a
+   behavioural profile; SPEC §41 treats them separately and so does this.
+6. **`profiles.analytics_consent` is the authority, not the SDK's own flag.** The server forces
+   it false for a minor, so the client mirrors the profile rather than the other way round.
+7. **UUIDs are dropped from properties.** The distinct id already identifies the learner; a
+   lesson or question id in a property adds linkage no KPI in SPEC §43 needs.
+8. **The Sentry DSN stays optional even in production.** A build without it reports nothing,
+   which is worse than having it — but is not a reason to refuse to start. The PostHog key, by
+   contrast, is required, because analytics is a shipped feature.
+9. **Traces are sampled at 10% in production and 0% elsewhere.** Performance monitoring is the
+   part of Sentry that costs money at volume (SPEC §60).
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -1441,9 +1528,14 @@ Rewritten at the end of each phase, so this describes the product as it stands t
   Those need a real sandbox, which needs the store accounts.
 - **Expo Go no longer runs the app.** The RevenueCat SDK is native and is now in the bundle,
   so a development build is required from here on (SPEC §0.1.10).
-- Analytics and monitoring (16), local notifications (17). Those three services are still
-  the no-op implementations listed in `PRODUCTION_NOOP_ALLOWLIST`, which must be **empty**
-  before the first production release. Billing, ads and consent have left that list.
+- **Local notifications (17) are the last no-op.** `PRODUCTION_NOOP_ALLOWLIST` is down to
+  `['notifications']` and must be **empty** before the first production release.
+- **Analytics captures nothing without a PostHog key**, and nothing without consent even
+  with one. Both are correct; neither has been exercised against a real project yet.
+- **No Sentry DSN**, so crashes are reported nowhere. Creating the project is free and can
+  be done now; source maps additionally need `SENTRY_AUTH_TOKEN` in the EAS environment.
+- Session length and `notification_*` events are not instrumented — the first needs an
+  app-state listener and the second arrives with Phase 17.
 - **Ads serve Google's TEST inventory**, and will until `EXPO_PUBLIC_APP_ENV=production`
   with real unit ids. That is deliberate and enforced in `adUnitId`: tapping a live ad in
   development is what gets an AdMob account suspended.
@@ -2318,3 +2410,29 @@ Needs a development build (`npx expo run:android`). Sign in as **free@codesprint
 19. With the screen reader on, swipe through the Learn list. The banner is **skipped** — it is
     not part of the reading order.
 20. The out-of-lives card and its buttons are announced properly.
+
+---
+
+## Phase 17 prerequisites — not a device checklist
+
+Phase 16 has little to see on a device, and what there is cannot be verified without a PostHog
+project. The honest checklist is short:
+
+1. **Profile → Privacy.** The analytics toggle is **off** by default. That is opt-in working
+   (SPEC §41), not a bug.
+2. Turn it on, then off. Neither produces an error, and the setting survives a restart.
+3. Sign in as a learner under 16 (set `birth_year` in Studio). The toggle is **disabled** with
+   the reason shown, and the server refuses to record consent for them anyway.
+4. **Ad privacy options** reopens Google's UMP form.
+5. Everything else in the app behaves exactly as before — which is the point: with no PostHog
+   key, analytics does nothing at all.
+
+### Once a PostHog project exists
+
+6. Create a project in the **EU** region, put the key in `EXPO_PUBLIC_POSTHOG_KEY`.
+7. Open the app with analytics **off** and finish a lesson. PostHog shows **nothing**.
+8. Turn analytics on and finish another. `app_opened`, `lesson_started`, `question_answered`
+   and `lesson_completed` appear.
+9. Open one of those events and read its properties. There must be **no email, no display
+   name, no answer text and no lesson id** — only enums and counts.
+10. Check the distinct id: a Supabase UUID, never an email address.

@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button, PlaceholderState, Screen, SkeletonLines } from '@/components/ui';
 import { SessionCard } from '@/features/auth/components/SessionCard';
+import { PrivacySettingsCard } from '@/features/analytics/components/PrivacySettingsCard';
 import { LeaderboardSettingsCard } from '@/features/leaderboard/components/LeaderboardSettingsCard';
 import { LevelCard } from '@/features/progress/components/LevelCard';
 import { useProfile } from '@/features/profile/hooks/useProfile';
@@ -47,6 +48,8 @@ export default function ProfileScreen() {
         )}
 
         {profile && <LeaderboardSettingsCard profile={profile} />}
+
+        {profile && <PrivacySettingsCard profile={profile} />}
 
         <Button
           testID="profile-progress"

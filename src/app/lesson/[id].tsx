@@ -7,6 +7,7 @@ import { Button, ProgressBar, Screen, SkeletonLines, StateView, Text } from '@/c
 import { LessonBlockView } from '@/features/lesson/components/LessonBlocks';
 import { QuestionPage } from '@/features/lesson/components/QuestionPage';
 import { useInterstitial } from '@/features/ads/hooks/useAds';
+import { useCapture, useCaptureOnce } from '@/features/analytics/hooks/useAnalytics';
 import { AchievementToast } from '@/features/progress/components/AchievementToast';
 import { useAchievements } from '@/features/progress/hooks/useAchievements';
 import { useLesson } from '@/features/lesson/hooks/useLesson';
@@ -46,6 +47,20 @@ export default function LessonScreen() {
 
   const completeLesson = useCompleteLesson();
   const showInterstitial = useInterstitial();
+  const capture = useCapture();
+
+  // Gated rather than placed after the early returns: hooks must run in the same order every
+  // render, and `useCaptureOnce` already guarantees a single event.
+  useCaptureOnce('lesson_started', undefined, lesson !== undefined);
+  useCaptureOnce(
+    'lesson_completed',
+    {
+      questions: completeLesson.data?.questions_total ?? 0,
+      first_try_correct: completeLesson.data?.first_try_correct ?? 0,
+      perfect: completeLesson.data?.is_perfect ?? false,
+    },
+    completeLesson.isSuccess,
+  );
   // The beginner grace period is about how many lessons they have EVER finished, not this
   // session's (SPEC §30).
   const { data: stats } = useUserStats();
@@ -156,6 +171,7 @@ export default function LessonScreen() {
               // SPEC §30: at a natural break, and only AFTER the completion screen is
               // dismissed — never between a question and its explanation. Every pacing rule
               // is checked inside; most of the time nothing happens at all.
+              capture('interstitial_shown');
               void showInterstitial(stats?.lessons_completed ?? 0).finally(() => router.back());
             }}
           />

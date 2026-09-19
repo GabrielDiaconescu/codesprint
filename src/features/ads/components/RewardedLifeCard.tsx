@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { Button, Card, Text } from '@/components/ui';
+import { useCapture } from '@/features/analytics/hooks/useAnalytics';
 import { queryKeys } from '@/lib/queryClient';
 import { services, toRewardRefusal, type RewardedAllowance, type RewardedGrant } from '@/services';
 import { useSessionStore } from '@/store/sessionStore';
@@ -30,6 +31,7 @@ export const RewardedLifeCard = () => {
   const showToast = useToastStore((state) => state.show);
   const userId = useSessionStore((state) => state.userId);
   const [watching, setWatching] = useState(false);
+  const capture = useCapture();
 
   const allowance = useQuery<RewardedAllowance>({
     queryKey: queryKeys.user.rewards(userId ?? 'none'),
@@ -48,6 +50,7 @@ export const RewardedLifeCard = () => {
 
   const watch = async () => {
     setWatching(true);
+    capture('rewarded_ad_started', { reward: 'life' });
     try {
       // AdMob reports whether the reward was earned. Closing the ad early earns nothing,
       // and nothing is claimed.
@@ -55,6 +58,7 @@ export const RewardedLifeCard = () => {
       if (!earned) return;
 
       await claim.mutateAsync();
+      capture('rewarded_ad_completed', { reward: 'life' });
       showToast({ message: t('rewarded.granted'), tone: 'success' });
     } catch (error) {
       showToast({ message: t(`rewarded.refused.${toRewardRefusal(error)}`), tone: 'error' });

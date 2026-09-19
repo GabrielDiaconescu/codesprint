@@ -7,6 +7,7 @@ import { Screen, SkeletonLines, StateView } from '@/components/ui';
 import { ExamResultsView } from '@/features/exams/components/ExamResultsView';
 import { ExamReview } from '@/features/exams/components/ExamReview';
 import { ExamRunner } from '@/features/exams/components/ExamRunner';
+import { useCapture } from '@/features/analytics/hooks/useAnalytics';
 import { useStartExam, useSubmitExam } from '@/features/exams/hooks/useExams';
 import { ExamUnavailable, type ExamPaper, type ExamResults } from '@/services';
 import { useTheme } from '@/theme';
@@ -31,6 +32,8 @@ export default function ExamScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id: string; title?: string }>();
 
+  const capture = useCapture();
+
   const start = useStartExam();
   const submit = useSubmitExam();
 
@@ -42,7 +45,12 @@ export default function ExamScreen() {
 
   useEffect(() => {
     if (!params.id) return;
-    startExam(params.id, { onSuccess: setPaper });
+    startExam(params.id, {
+      onSuccess: (paper) => {
+        setPaper(paper);
+        capture('exam_started', { resumed: paper.resumed, questions: paper.question_count });
+      },
+    });
     // Once per exam. A second call would be harmless — an open attempt is resumed — but it
     // would also restart the clock display for no reason.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -121,6 +129,10 @@ export default function ExamScreen() {
                 onSuccess: (graded) => {
                   setResults(graded);
                   setStage('results');
+                  capture('exam_completed', {
+                    passed: graded.passed,
+                    score_pct: Math.round(graded.score_pct),
+                  });
                 },
               },
             )
