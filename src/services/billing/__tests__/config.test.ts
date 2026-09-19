@@ -1,4 +1,4 @@
-import { PACKAGES, PACKAGE_ROLES, isUpgradeFrom, roleForPackage, selectSdkKey } from '../config';
+import { PACKAGES, PACKAGE_ROLES, roleForPackage, selectSdkKey } from '../config';
 
 /**
  * Billing configuration (SPEC §31, §32, §56).
@@ -60,8 +60,17 @@ describe('selectSdkKey', () => {
 });
 
 describe('the product model (SPEC §32)', () => {
-  it('sells exactly three things', () => {
-    expect(PACKAGE_ROLES).toEqual(['no_ads_monthly', 'premium_monthly', 'premium_annual']);
+  it('sells four things: two ways to buy No Ads, two to buy Premium', () => {
+    expect(PACKAGE_ROLES).toEqual([
+      'no_ads_monthly',
+      'no_ads_lifetime',
+      'premium_monthly',
+      'premium_annual',
+    ]);
+  });
+
+  it('offers No Ads as a one-off as well as a subscription (D2)', () => {
+    expect(PACKAGES.no_ads_lifetime.billingPeriod).toBe('lifetime');
   });
 
   it('gives Premium products BOTH entitlements', () => {
@@ -70,8 +79,9 @@ describe('the product model (SPEC §32)', () => {
     expect(PACKAGES.premium_annual.entitlements).toEqual(['no_ads', 'premium']);
   });
 
-  it('gives No Ads only ad removal', () => {
+  it('gives No Ads only ad removal, however it was bought', () => {
     expect(PACKAGES.no_ads_monthly.entitlements).toEqual(['no_ads']);
+    expect(PACKAGES.no_ads_lifetime.entitlements).toEqual(['no_ads']);
   });
 
   it('uses a distinct product id per role, since store ids are permanent', () => {
@@ -96,24 +106,5 @@ describe('roleForPackage', () => {
 
   it('is null for a package this build does not sell', () => {
     expect(roleForPackage('$rc_weekly_mystery')).toBeNull();
-  });
-});
-
-describe('isUpgradeFrom', () => {
-  it('is true for a No Ads subscriber buying Premium', () => {
-    expect(isUpgradeFrom(['no_ads'], 'premium_monthly')).toBe(true);
-    expect(isUpgradeFrom(['no_ads'], 'premium_annual')).toBe(true);
-  });
-
-  it('is false for somebody with nothing — that is a plain subscribe', () => {
-    expect(isUpgradeFrom([], 'premium_monthly')).toBe(false);
-  });
-
-  it('is false for somebody who already has Premium', () => {
-    expect(isUpgradeFrom(['no_ads', 'premium'], 'premium_monthly')).toBe(false);
-  });
-
-  it('is false for No Ads itself — there is nothing to replace', () => {
-    expect(isUpgradeFrom(['no_ads'], 'no_ads_monthly')).toBe(false);
   });
 });

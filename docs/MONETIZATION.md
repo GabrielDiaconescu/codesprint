@@ -57,8 +57,13 @@ once and live in exactly one file: `src/services/billing/config.ts`.
 | Role            | Product id        | RevenueCat package   | Grants               |
 | --------------- | ----------------- | -------------------- | -------------------- |
 | No Ads monthly  | `no_ads_monthly`  | `$rc_monthly_no_ads` | `no_ads`             |
+| No Ads lifetime | `no_ads_lifetime` | `$rc_lifetime`       | `no_ads`             |
 | Premium monthly | `premium_monthly` | `$rc_monthly`        | `no_ads` + `premium` |
 | Premium annual  | `premium_annual`  | `$rc_annual`         | `no_ads` + `premium` |
+
+**No Ads lifetime is D2's alternative**: a one-time non-consumable rather than a subscription.
+Both forms may be offered at once — the `default` offering decides what actually appears, and a
+package missing from it simply does not render.
 
 **Premium grants both entitlements.** That is why `isAdFree` is `no_ads OR premium` everywhere,
 and why a Premium subscriber sees No Ads marked "included" rather than being sold it again.
@@ -76,6 +81,14 @@ when the monthly plan is on screen to compare against and the saving is genuinel
 
 The paywall labels this "Upgrade to Premium" and states that it replaces the current
 subscription rather than adding to it (SPEC §5, §33).
+
+**A lifetime No Ads purchase is different, and the paywall says so.** A non-consumable cannot
+be replaced by a subscription: somebody who bought it keeps it _and_ pays for Premium on top.
+Telling them "you are not charged for both" would be false, so `planState` returns `add-on`
+instead of `upgrade` and the card reads "Your ad-free purchase is permanent and stays yours."
+
+The server is what makes the two distinguishable: `entitlement_state` reports
+`no_ads_expires_at`, which is null for a lifetime purchase and a date for a subscription.
 
 ---
 

@@ -9,7 +9,7 @@ import { getEnv, isProduction } from '@/lib/env';
 
 import type { BillingService, CustomerEntitlements, EntitlementId, StoreProduct } from '../types';
 
-import { ENTITLEMENTS, OFFERING_ID, roleForPackage, selectSdkKey } from './config';
+import { ENTITLEMENTS, OFFERING_ID, PACKAGES, roleForPackage, selectSdkKey } from './config';
 
 /**
  * RevenueCat (SPEC §31).
@@ -75,12 +75,24 @@ const asStoreProducts = (offerings: PurchasesOfferings): StoreProduct[] => {
       localizedPrice: item.product.priceString,
       priceAmountMicros: Math.round(item.product.price * 1_000_000),
       currencyCode: item.product.currencyCode,
-      billingPeriod: item.packageType === 'ANNUAL' ? 'annual' : 'monthly',
-      entitlements: role === 'no_ads_monthly' ? ['no_ads'] : ['no_ads', 'premium'],
+      billingPeriod: BILLING_PERIODS[item.packageType] ?? 'monthly',
+      entitlements: PACKAGES[role].entitlements,
     });
   }
 
   return products;
+};
+
+/**
+ * RevenueCat's package types, narrowed to the three this product sells.
+ *
+ * A LIFETIME package mapped to 'monthly' would print "per month" under a one-off price —
+ * which is not a cosmetic slip but a false statement about what the customer is agreeing to.
+ */
+const BILLING_PERIODS: Record<string, StoreProduct['billingPeriod']> = {
+  ANNUAL: 'annual',
+  MONTHLY: 'monthly',
+  LIFETIME: 'lifetime',
 };
 
 let cachedPackages: PurchasesPackage[] = [];

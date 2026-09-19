@@ -1291,6 +1291,32 @@ Reconciliation, through the database:
 14. **`MONETIZATION.md` was written now**, not at launch: it is the setup checklist for the
     store paperwork that has to happen before this phase can be device-tested at all.
 
+## Phase 14 follow-up — lifetime No Ads (D2)
+
+A one-time non-consumable No Ads product was added in RevenueCat, which D2 allows as an
+alternative to the monthly subscription. Supporting it turned out to be more than a config
+entry:
+
+- `roleForPackage` returned null for the unknown package, so `buildPlans` **silently dropped
+  it** — the product would simply not have appeared, with no error anywhere.
+- `asStoreProducts` mapped every non-annual package to `'monthly'`, so a lifetime product would
+  have printed "per month" under a one-off price. Not a cosmetic slip: a false statement about
+  what the customer is agreeing to.
+- **The important one.** `planState` treated any held `no_ads` as a replaceable subscription,
+  so a lifetime owner opening the paywall would have read _"Upgrade to Premium — this replaces
+  your current subscription, you are not charged for both."_ That is untrue for a
+  non-consumable: they keep it and pay for Premium as well. A new `add-on` state says the
+  honest thing instead (SPEC §33).
+- `entitlement_state` gained `no_ads_expires_at` and `no_ads_product_id`
+  (`20260917121600_lifetime_entitlements.sql`). Null expiry while active means lifetime; that
+  one fact is what the paywall branches on. Additive, so nothing existing changed shape.
+- `isUpgradeFrom` was deleted. It duplicated what `planState` decides and would have become
+  the stale copy of a rule that now has a subtlety in it.
+- The "owned" badge reads **"You already have this"** rather than "Your current plan", which
+  would be untrue on whichever of the two No Ads products the customer did not buy.
+
+5 new pgTAP tests (483 total), 6 new unit tests (860 total).
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.

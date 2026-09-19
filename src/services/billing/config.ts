@@ -22,14 +22,15 @@ export const ENTITLEMENTS: Record<'noAds' | 'premium', EntitlementId> = {
 /** The offering the paywall renders. Changing which products are sold is a dashboard change. */
 export const OFFERING_ID = 'default';
 
-export type PackageRole = 'no_ads_monthly' | 'premium_monthly' | 'premium_annual';
+export type PackageRole =
+  'no_ads_monthly' | 'no_ads_lifetime' | 'premium_monthly' | 'premium_annual';
 
 export interface PackageConfig {
   /** The RevenueCat package identifier within the offering. */
   packageId: string;
   /** The store product identifier. Permanent once created (SPEC §5). */
   productId: string;
-  billingPeriod: 'monthly' | 'annual';
+  billingPeriod: 'monthly' | 'annual' | 'lifetime';
   /**
    * What the purchase grants. Premium grants BOTH, which is why `isAdFree` is
    * `no_ads || premium` everywhere (SPEC §32).
@@ -44,6 +45,21 @@ export const PACKAGES: Record<PackageRole, PackageConfig> = {
     packageId: '$rc_monthly_no_ads',
     productId: 'no_ads_monthly',
     billingPeriod: 'monthly',
+    entitlements: ['no_ads'],
+    recommended: false,
+  },
+  /**
+   * D2's alternative: No Ads as a one-time non-consumable rather than a subscription.
+   *
+   * Both may be offered at once — RevenueCat's `default` offering decides which actually
+   * appear, and a package missing from it simply does not render. What matters in code is
+   * that a lifetime purchase can never be "replaced" by an upgrade, which is why
+   * `planState` asks whether the held entitlement expires.
+   */
+  no_ads_lifetime: {
+    packageId: '$rc_lifetime',
+    productId: 'no_ads_lifetime',
+    billingPeriod: 'lifetime',
     entitlements: ['no_ads'],
     recommended: false,
   },
@@ -72,21 +88,6 @@ export const roleForProduct = (productId: string): PackageRole | null =>
 /** The role a RevenueCat package identifier belongs to. */
 export const roleForPackage = (packageId: string): PackageRole | null =>
   PACKAGE_ROLES.find((role) => PACKAGES[role].packageId === packageId) ?? null;
-
-/**
- * Upgrading from No Ads to Premium must not bill twice (SPEC §5).
- *
- * On iOS that is handled by putting every subscription in ONE subscription group with Premium
- * ranked above No Ads — a store configuration, not code. On Android it needs a product change
- * with a replacement mode, which RevenueCat applies when it knows the purchase is an upgrade.
- *
- * This is the flag the paywall uses to say "upgrade" rather than "subscribe", so the customer
- * is told what is about to happen before they tap.
- */
-export const isUpgradeFrom = (current: EntitlementId[], role: PackageRole): boolean =>
-  current.includes('no_ads') &&
-  !current.includes('premium') &&
-  PACKAGES[role].entitlements.includes('premium');
 
 /**
  * Which RevenueCat SDK key to configure with.

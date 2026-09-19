@@ -18,6 +18,13 @@ export const serverEntitlements = z
     /** `no_ads OR premium` — computed server-side so no caller has to remember (SPEC §32). */
     is_ad_free: z.boolean(),
     premium_expires_at: z.string().nullable(),
+    /**
+     * Null WHILE `no_ads` is active means it never lapses: a lifetime purchase (D2).
+     * The paywall reads this to decide whether Premium replaces what they hold or sits
+     * alongside a non-consumable they keep either way.
+     */
+    no_ads_expires_at: z.string().nullable(),
+    no_ads_product_id: z.string().nullable(),
     /** Null for somebody who has never had an entitlement row of any kind. */
     updated_at: z.string().nullable(),
   })
@@ -31,5 +38,7 @@ export const NO_SERVER_ENTITLEMENTS: ServerEntitlements = {
   is_premium: false,
   is_ad_free: false,
   premium_expires_at: null,
+  no_ads_expires_at: null,
+  no_ads_product_id: null,
   updated_at: null,
 };

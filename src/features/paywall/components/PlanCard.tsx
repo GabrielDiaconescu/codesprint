@@ -85,7 +85,7 @@ export const PlanCard = ({ plan, savingPercent, onSelect, busy }: PlanCardProps)
 
         {owned ? (
           <Badge
-            label={t(state === 'superseded' ? 'included' : 'current')}
+            label={t(state === 'superseded' ? 'included' : 'owned')}
             tone="success"
             icon="checkmark-circle"
           />
@@ -101,8 +101,16 @@ export const PlanCard = ({ plan, savingPercent, onSelect, busy }: PlanCardProps)
         )}
 
         {state === 'upgrade' && (
-          <Text variant="caption" tone="secondary">
+          <Text testID="upgrade-note" variant="caption" tone="secondary">
             {t('upgradeNote')}
+          </Text>
+        )}
+
+        {/* A lifetime purchase cannot be replaced, so the customer is told plainly that this
+            is a second charge and that what they already bought is not lost (SPEC §33). */}
+        {state === 'add-on' && (
+          <Text testID="add-on-note" variant="caption" tone="secondary">
+            {t('addOnNote')}
           </Text>
         )}
       </View>

@@ -54,7 +54,10 @@ export default function PaywallScreen() {
   const refresh = useRefreshEntitlements();
   const [busyRole, setBusyRole] = useState<string | null>(null);
 
-  const plans = buildPlans(offerings.data ?? [], entitlements.active);
+  const plans = buildPlans(offerings.data ?? [], {
+    active: entitlements.active,
+    noAdsExpiresAt: entitlements.no_ads_expires_at,
+  });
   const saving = annualSavingPercent(plans);
 
   const purchase = (plan: Plan) => {

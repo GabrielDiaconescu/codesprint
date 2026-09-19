@@ -5,7 +5,6 @@
   "saving": "Save {{percent}}%",
   "perMonth": "{{price}} per month, billed yearly",
   "included": "Included in your plan",
-  "current": "Your current plan",
   "upgradeNote": "This replaces your current subscription — you are not charged for both.",
   "trigger": {
     "manual": "Here is exactly what each plan includes, and what it does not.",
@@ -32,6 +31,11 @@
     "premium_annual": {
       "name": "Premium, yearly",
       "body": "Everything in Premium, paid once a year."
+    },
+    "no_ads_lifetime": {
+      "name": "No Ads, forever",
+      "body": "Everything in Free, without advertising. Paid once.",
+      "limits": "It does not unlock Premium lessons or unlimited lives. Those are Premium."
     }
   },
   "free": {
@@ -62,5 +66,7 @@
   "legal": {
     "terms": "Terms",
     "privacy": "Privacy Policy"
-  }
+  },
+  "addOnNote": "Your ad-free purchase is permanent and stays yours. Premium is a separate subscription on top of it.",
+  "owned": "You already have this"
 }

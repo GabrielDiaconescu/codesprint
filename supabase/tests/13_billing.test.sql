@@ -10,7 +10,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select plan(45);
+select plan(50);
 
 create or replace function pg_temp.act_as(p_uid uuid)
 returns void language plpgsql as $$
@@ -157,6 +157,58 @@ select throws_ok(
 );
 
 -- ---------------------------------------------------------------------------------------
+-- A lifetime purchase versus a subscription (SPEC §33, D2)
+-- ---------------------------------------------------------------------------------------
+--
+-- D2 allows No Ads to be sold as a one-time non-consumable. The difference is not cosmetic:
+-- the paywall tells a No Ads SUBSCRIBER that Premium "replaces your current subscription --
+-- you are not charged for both", and that sentence is false for somebody holding a permanent
+-- purchase. `entitlement_state` has to make the two distinguishable.
+
+select public.apply_entitlements(
+  'cccc1414-0000-0000-0000-0000000000b1',
+  '{"no_ads": {"is_active": true, "product_id": "no_ads_lifetime", "store": "app_store"}}'::jsonb
+);
+
+select is(
+  public.entitlement_state('cccc1414-0000-0000-0000-0000000000b1') ->> 'no_ads_expires_at',
+  null,
+  'a lifetime No Ads purchase reports no expiry — the client reads that as "never lapses"'
+);
+
+select is(
+  public.entitlement_state('cccc1414-0000-0000-0000-0000000000b1') ->> 'no_ads_product_id',
+  'no_ads_lifetime',
+  'and names the product that granted it, so support need not open the RevenueCat dashboard'
+);
+
+select ok(
+  public.has_entitlement('cccc1414-0000-0000-0000-0000000000b1', 'no_ads'),
+  'and it is active, with nothing to renew'
+);
+
+select public.apply_entitlements(
+  'cccc1414-0000-0000-0000-0000000000b1',
+  '{"no_ads": {"is_active": true, "expires_at": "2099-01-01T00:00:00Z",
+               "product_id": "no_ads_monthly", "store": "play_store"}}'::jsonb
+);
+
+select isnt(
+  public.entitlement_state('cccc1414-0000-0000-0000-0000000000b1') ->> 'no_ads_expires_at',
+  null,
+  'a No Ads SUBSCRIPTION reports its expiry, which is what marks it replaceable'
+);
+
+-- Back to nothing, so the fixtures below start clean.
+select public.apply_entitlements('cccc1414-0000-0000-0000-0000000000b1', '{}'::jsonb);
+
+select is(
+  public.entitlement_state('cccc1414-0000-0000-0000-0000000000b1') ->> 'no_ads_expires_at',
+  null,
+  'a revoked entitlement reports no expiry either — absence of access, not a lifetime grant'
+);
+
+-- ---------------------------------------------------------------------------------------
 -- The client's view (SPEC §31)
 -- ---------------------------------------------------------------------------------------
 
@@ -187,9 +239,10 @@ select ok(
 );
 
 select is(
-  (select count(*)::integer from public.user_entitlements),
+  (select count(*)::integer from public.user_entitlements
+   where user_id <> 'cccc1414-0000-0000-0000-0000000000b1'),
   0,
-  'RLS shows each learner only their own rows'
+  'RLS shows each learner only their own rows, and never another''s'
 );
 
 -- ---------------------------------------------------------------------------------------

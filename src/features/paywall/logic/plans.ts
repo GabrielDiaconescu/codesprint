@@ -21,8 +21,27 @@ export type PlanState =
   | 'owned'
   /** Held at a higher tier: Premium makes No Ads pointless. */
   | 'superseded'
-  /** Buyable, and replaces a cheaper subscription rather than adding to it (SPEC §5). */
-  | 'upgrade';
+  /** Buyable, and REPLACES a cheaper subscription rather than adding to it (SPEC §5). */
+  | 'upgrade'
+  /**
+   * Buyable, and sits ALONGSIDE something permanent they keep.
+   *
+   * Only reachable via D2's lifetime No Ads: a non-consumable cannot be replaced by a
+   * subscription, so calling this an upgrade would promise they will not be charged twice
+   * when they will be (SPEC §33).
+   */
+  | 'add-on';
+
+/**
+ * What the learner currently holds, as the SERVER reports it.
+ *
+ * `noAdsExpiresAt` is null for a lifetime purchase and a date for a subscription — the one
+ * fact that decides between `upgrade` and `add-on`.
+ */
+export interface HeldEntitlements {
+  active: EntitlementId[];
+  noAdsExpiresAt: string | null;
+}
 
 export interface Plan {
   role: PackageRole;
@@ -44,7 +63,8 @@ const grants = (role: PackageRole): EntitlementId[] => PACKAGES[role].entitlemen
  * offered Premium again; and No Ads is "superseded" rather than "owned" for a Premium
  * subscriber, because the honest message is "you already have this" and not "buy it".
  */
-export const planState = (role: PackageRole, active: EntitlementId[]): PlanState => {
+export const planState = (role: PackageRole, held: HeldEntitlements): PlanState => {
+  const { active, noAdsExpiresAt } = held;
   const needed = grants(role);
   const hasAll = needed.every((entitlement) => active.includes(entitlement));
 
@@ -53,7 +73,11 @@ export const planState = (role: PackageRole, active: EntitlementId[]): PlanState
     return needed.includes('premium') || !active.includes('premium') ? 'owned' : 'superseded';
   }
 
-  if (active.includes('no_ads') && needed.includes('premium')) return 'upgrade';
+  if (active.includes('no_ads') && needed.includes('premium')) {
+    // A subscription is replaced; a lifetime purchase is kept and paid alongside. Saying
+    // "you are not charged for both" to the second kind would simply be untrue.
+    return noAdsExpiresAt === null ? 'add-on' : 'upgrade';
+  }
 
   return 'available';
 };
@@ -65,7 +89,7 @@ export const planState = (role: PackageRole, active: EntitlementId[]): PlanState
  * that has been reconfigured ahead of a release must not put an unrecognised package in front
  * of a customer with no copy to describe it.
  */
-export const buildPlans = (products: StoreProduct[], active: EntitlementId[]): Plan[] => {
+export const buildPlans = (products: StoreProduct[], held: HeldEntitlements): Plan[] => {
   const plans: Plan[] = [];
 
   for (const product of products) {
@@ -75,7 +99,7 @@ export const buildPlans = (products: StoreProduct[], active: EntitlementId[]): P
     plans.push({
       role,
       product,
-      state: planState(role, active),
+      state: planState(role, held),
       recommended: PACKAGES[role].recommended,
       monthlyEquivalentMicros:
         product.billingPeriod === 'annual'
@@ -86,7 +110,12 @@ export const buildPlans = (products: StoreProduct[], active: EntitlementId[]): P
 
   // Cheapest first within a tier, No Ads before Premium: the customer sees the smallest
   // commitment first rather than being led with the most expensive (SPEC §33).
-  const order: PackageRole[] = ['no_ads_monthly', 'premium_monthly', 'premium_annual'];
+  const order: PackageRole[] = [
+    'no_ads_monthly',
+    'no_ads_lifetime',
+    'premium_monthly',
+    'premium_annual',
+  ];
   return plans.sort((a, b) => order.indexOf(a.role) - order.indexOf(b.role));
 };
 
@@ -126,4 +155,6 @@ export const formatMicros = (micros: number, currencyCode: string, locale: strin
  * never a screen with prices invented (SPEC §31: no fallback hardcoded prices).
  */
 export const hasBuyablePlan = (plans: Plan[]): boolean =>
-  plans.some((plan) => plan.state === 'available' || plan.state === 'upgrade');
+  plans.some(
+    (plan) => plan.state === 'available' || plan.state === 'upgrade' || plan.state === 'add-on',
+  );
