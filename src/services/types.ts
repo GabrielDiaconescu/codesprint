@@ -600,19 +600,85 @@ export interface BillingService extends ServiceIdentity {
 }
 
 /* ------------------------------------------------------------------ Notifications (local only in V1) */
+
+/**
+ * The two reminders V1 sends (SPEC §48).
+ *
+ * The vocabulary lives here rather than in the feature because both sides speak it, and the
+ * dependency runs features -> services. **When** each one fires is decided by
+ * `plannedReminders`, which is pure and tested.
+ */
+export type ReminderKind =
+  /** At the time the learner chose. "Your 5-minute coding session is waiting." */
+  | 'daily'
+  /** Evening, and only while today's goal is unmet. "Protect your streak today." */
+  | 'streak';
+
+/**
+ * One reminder to schedule.
+ *
+ * The copy travels with the request rather than being set on the service beforehand: text is
+ * baked into the notification by the OS at schedule time, and a service holding it in a
+ * variable could be asked to schedule before it was filled — an empty title on a real phone
+ * (SPEC §59.30 keeps user-facing strings in i18n, which is where the caller reads them).
+ */
+export interface ReminderRequest {
+  kind: ReminderKind;
+  hour: number;
+  minute: number;
+  title: string;
+  body: string;
+}
+
 export interface ScheduledReminder {
   id: string;
+  kind: ReminderKind;
   hour: number;
   minute: number;
 }
 
+/**
+ * A reminder the learner tapped.
+ *
+ * Only the kind travels. The destination is decided when the tap arrives, not when the
+ * reminder was scheduled, so a reminder queued a week ago still opens the right screen after
+ * an update that moved a route — and there is no route string from outside to validate.
+ */
+export interface OpenedReminder {
+  kind: ReminderKind;
+}
+
+/**
+ * What the OS allows right now.
+ *
+ * `canAskAgain` is the bit that decides what Settings can offer. Without it, "never asked"
+ * and "refused for good" look identical — and a learner who simply skipped the onboarding
+ * step would be told to go to system settings when one tap would have done.
+ */
+export interface NotificationPermission {
+  granted: boolean;
+  /** False once the OS will no longer show a prompt; the only way back is system settings. */
+  canAskAgain: boolean;
+}
+
 export interface NotificationService extends ServiceIdentity {
-  requestPermissions(): Promise<boolean>;
-  hasPermissions(): Promise<boolean>;
-  scheduleDailyReminder(hour: number, minute: number): Promise<string>;
-  scheduleStreakReminder(hour: number, minute: number): Promise<string>;
+  /**
+   * Asks the OS for permission.
+   *
+   * Called only after the learner has chosen a reminder time and read the explanation
+   * (SPEC §11). A prompt on first launch is the one that gets denied, and a denial on iOS is
+   * permanent until the learner goes to Settings themselves.
+   */
+  requestPermissions(): Promise<NotificationPermission>;
+  hasPermissions(): Promise<NotificationPermission>;
+  scheduleReminder(reminder: ReminderRequest): Promise<string>;
   cancelAll(): Promise<void>;
+  /** What the OS actually holds — the authority, and it survives app restarts. */
   getScheduled(): Promise<ScheduledReminder[]>;
+  /** Taps while the app is running. Returns an unsubscribe. */
+  onOpened(listener: (opened: OpenedReminder) => void): () => void;
+  /** The tap that started the app, if any. Consumed once, so a later launch is not a tap. */
+  consumeInitialOpen(): Promise<OpenedReminder | null>;
 }
 
 /* ------------------------------------------------------------------ Remote config / feature flags */

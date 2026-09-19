@@ -103,3 +103,26 @@ jest.mock('posthog-react-native', () => ({
     optOut: jest.fn(),
   })),
 }));
+
+/**
+ * expo-notifications is a native module too, and importing it under Jest throws before a
+ * single assertion runs.
+ *
+ * The scheduling POLICY — what to send, when, and the two-a-day budget — is pure and tested
+ * for real in `features/notifications/logic`. This mock covers only the OS calls around it,
+ * and returns "granted" so the reconciler under test takes its interesting path.
+ */
+jest.mock('expo-notifications', () => ({
+  AndroidImportance: { DEFAULT: 3 },
+  SchedulableTriggerInputTypes: { DAILY: 'daily' },
+  setNotificationHandler: jest.fn(),
+  setNotificationChannelAsync: jest.fn().mockResolvedValue(undefined),
+  getPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
+  scheduleNotificationAsync: jest.fn().mockResolvedValue('scheduled-id'),
+  cancelAllScheduledNotificationsAsync: jest.fn().mockResolvedValue(undefined),
+  getAllScheduledNotificationsAsync: jest.fn().mockResolvedValue([]),
+  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  getLastNotificationResponse: jest.fn(() => null),
+  clearLastNotificationResponse: jest.fn(),
+}));

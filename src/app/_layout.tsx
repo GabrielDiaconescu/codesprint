@@ -12,6 +12,7 @@ import { Screen, StateView, ToastHost } from '@/components/ui';
 import { useAuthBootstrap } from '@/features/auth/hooks/useAuthBootstrap';
 import { useAdsBootstrap } from '@/features/ads/hooks/useAds';
 import { useAnalyticsBootstrap } from '@/features/analytics/hooks/useAnalytics';
+import { useReminders } from '@/features/notifications/hooks/useReminders';
 import { useBillingBootstrap } from '@/features/paywall/hooks/useBillingBootstrap';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useSessionHeartbeat } from '@/features/profile/hooks/useSessionHeartbeat';
@@ -70,6 +71,10 @@ const ThemedApp = () => {
 
   const profileQuery = useProfile();
   useSessionHeartbeat();
+  // Keeps the device's scheduled reminders equal to what the learner should be getting. Here
+  // rather than on Home, because it also has to cancel them — for somebody who has met
+  // today's goal and never opens Home again today (SPEC §48).
+  useReminders();
 
   const onboardingCompleted = profileQuery.data?.onboardingCompleted ?? false;
   const profileReady = profileQuery.isSuccess;

@@ -5,6 +5,8 @@ import { StyleSheet, View } from 'react-native';
 import { Icon, Text } from '@/components/ui';
 import { OnboardingStepScreen } from '@/features/onboarding/components/OnboardingStepScreen';
 import { OptionList, type Option } from '@/features/onboarding/components/OptionList';
+import { useRequestNotificationPermission } from '@/features/notifications/hooks/useNotificationPermission';
+import { REMINDER_TIMES } from '@/features/notifications/logic/schedule';
 import { useOnboardingStore } from '@/features/onboarding/store';
 import { useTheme } from '@/theme';
 
@@ -15,13 +17,14 @@ import { useTheme } from '@/theme';
  * dependency for a question whose useful answers are "morning", "after work" and "before bed"
  * — and five taps beats scrolling two wheels on a phone.
  *
- * Nothing is scheduled here and no permission is requested yet. SPEC §11 requires the
- * explanation to come before the OS prompt; the prompt itself belongs to Phase 17, where the
- * notification service becomes real. Promising a reminder we cannot yet deliver would be
- * exactly the kind of fake integration SPEC §59.11 forbids, so the copy commits to asking,
- * not to notifying.
+ * The OS permission is requested on Continue, and only when a time was actually chosen —
+ * SPEC §11 requires the explanation before the prompt, and this screen IS that explanation.
+ * Skipping asks for nothing: there is no reminder to deliver, so there is no reason to spend
+ * the one prompt the platform allows.
+ *
+ * Nothing is scheduled here either. The reconciler does that once the answers are saved, so
+ * scheduling happens in exactly one place in the app.
  */
-const REMINDER_TIMES = ['08:00', '12:00', '18:00', '20:00', '21:30'] as const;
 
 export default function ReminderStep() {
   const { t } = useTranslation('onboarding');
@@ -38,7 +41,16 @@ export default function ReminderStep() {
     icon: 'alarm-outline',
   }));
 
+  const requestPermission = useRequestNotificationPermission();
+
   const goOn = () => router.push('/consent');
+
+  const continueWithReminder = async () => {
+    // A refusal is not a failure: the answers are still saved, reminders simply stay off
+    // until the learner switches them on in Settings.
+    await requestPermission('onboarding').catch(() => false);
+    goOn();
+  };
 
   return (
     <OnboardingStepScreen
@@ -46,7 +58,7 @@ export default function ReminderStep() {
       title={t('reminder.title')}
       subtitle={t('reminder.subtitle')}
       canContinue={selected !== undefined && selected !== null}
-      onContinue={goOn}
+      onContinue={() => void continueWithReminder()}
       skipLabel={t('reminder.skip')}
       onSkip={() => {
         // null is a real answer — "no reminder" — not an unanswered step.

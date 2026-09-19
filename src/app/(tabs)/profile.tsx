@@ -6,6 +6,7 @@ import { Button, PlaceholderState, Screen, SkeletonLines } from '@/components/ui
 import { SessionCard } from '@/features/auth/components/SessionCard';
 import { PrivacySettingsCard } from '@/features/analytics/components/PrivacySettingsCard';
 import { LeaderboardSettingsCard } from '@/features/leaderboard/components/LeaderboardSettingsCard';
+import { ReminderSettingsCard } from '@/features/notifications/components/ReminderSettingsCard';
 import { LevelCard } from '@/features/progress/components/LevelCard';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useUserStats } from '@/features/progress/hooks/useProgress';
@@ -46,6 +47,8 @@ export default function ProfileScreen() {
             compact
           />
         )}
+
+        {profile && <ReminderSettingsCard profile={profile} />}
 
         {profile && <LeaderboardSettingsCard profile={profile} />}
 

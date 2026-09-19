@@ -92,6 +92,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         },
       ],
       [
+        'expo-notifications',
+        {
+          // Android draws a notification icon from its ALPHA channel only: a full-colour app
+          // icon arrives as a white square. The monochrome adaptive layer is already the
+          // right shape, so it is reused rather than adding another asset.
+          icon: './assets/android-icon-monochrome.png',
+          color: '#3B5BFF',
+        },
+      ],
+      [
         'expo-tracking-transparency',
         {
           // Shown only when personalised ads are actually requested, and only after UMP.

@@ -12,6 +12,7 @@ import learn from './locales/en/learn.json';
 import lesson from './locales/en/lesson.json';
 import challenge from './locales/en/challenge.json';
 import navigation from './locales/en/navigation.json';
+import notifications from './locales/en/notifications.json';
 import practice from './locales/en/practice.json';
 import onboarding from './locales/en/onboarding.json';
 import paywall from './locales/en/paywall.json';
@@ -42,6 +43,7 @@ export const resources = {
     leaderboard,
     exam,
     paywall,
+    notifications,
     privacy,
     profile,
     progress,

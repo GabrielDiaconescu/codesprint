@@ -76,7 +76,8 @@ silently continue, never implement a future phase's features while working on th
 - Path aliases: `@/features/...`, `@/services/...`, `@/components/...`, `@/theme`, `@/lib/...`.
 - Brand strings live only in `src/constants/brand.ts` + i18n files (SPEC §9).
 - User-facing text always comes from i18next — never a literal in a component.
-- `@testing-library/react-native` v14: **`render` AND `fireEvent` are async — always
-  `await` both.** A missing await on `render` gives "`render` function has not been called";
-  a missing await on `fireEvent` silently asserts against the pre-event state.
+- `@testing-library/react-native` v14: **`render`, `rerender` and `fireEvent` are async —
+  always `await` them.** A missing await on `render` gives "`render` function has not been
+  called"; on `fireEvent` it silently asserts against the pre-event state; on `rerender` it
+  logs "overlapping act() calls" from whichever test happens to run next.
 - Commit messages end with the project's attribution line.

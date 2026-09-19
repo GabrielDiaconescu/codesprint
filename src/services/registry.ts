@@ -12,7 +12,7 @@ import { SupabaseHomeService } from './home/SupabaseHomeService';
 import { SupabaseLeaderboardService } from './leaderboard/SupabaseLeaderboardService';
 import { SupabaseProfileService } from './profile/SupabaseProfileService';
 import { SupabaseProgressService } from './progress/SupabaseProgressService';
-import { NoopNotificationService } from './noop';
+import { ExpoNotificationService } from './notifications/ExpoNotificationService';
 import type {
   AdService,
   AuthService,
@@ -72,18 +72,19 @@ export const services: Services = {
   ads: GoogleAdService, // Phase 15 — real
   billing: RevenueCatBillingService, // Phase 14 — real
   entitlements: SupabaseEntitlementService, // Phase 14 — real; the server is the authority
-  notifications: NoopNotificationService, // Phase 17
+  notifications: ExpoNotificationService, // Phase 17 — real
   config: SupabaseConfigService, // Phase 3 — real
 };
 
 /**
  * Services that are allowed to still be no-ops in a production build.
  *
- * This list must be EMPTY before the first production release. It exists so that preview
- * builds during early phases do not trip the guard, while making the remaining gap explicit
- * and reviewable rather than invisible.
+ * **Empty since Phase 17**, and it must stay that way: every service now has a real
+ * implementation. The list is kept rather than deleted because the guard reads it, and
+ * because a future phase that introduces a service will need somewhere to declare the gap
+ * explicitly instead of leaving it invisible.
  */
-export const PRODUCTION_NOOP_ALLOWLIST: (keyof Services)[] = ['notifications'];
+export const PRODUCTION_NOOP_ALLOWLIST: (keyof Services)[] = [];
 
 export class NoopServiceInProductionError extends Error {
   constructor(public readonly offenders: string[]) {

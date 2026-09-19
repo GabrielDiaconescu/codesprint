@@ -2,9 +2,11 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 16 complete — awaiting approval for Phase 17 (Local
-notifications).
-**Last updated:** 2026-09-18
+**Current phase:** Phase 17 complete — awaiting approval for Phase 20 (Polish,
+accessibility, performance). Agreed order from here: **17 → 20 → 21**, with Phase 19
+(content to launch volume) running in parallel because it is long, and Phase 18 once a
+domain exists.
+**Last updated:** 2026-09-19
 
 ---
 
@@ -29,7 +31,8 @@ notifications).
 | 14    | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
 | 15    | Ads, consent, rewarded rewards       | **Complete** — pending device check   |
 | 16    | Analytics + monitoring               | **Complete** — pending device check   |
-| 17–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 17    | Local notifications                  | **Complete** — pending device check   |
+| 18–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -1514,6 +1517,87 @@ bundle      expo export (android) .... succeeds
 9. **Traces are sampled at 10% in production and 0% elsewhere.** Performance monitoring is the
    part of Sentry that costs money at volume (SPEC §60).
 
+## Phase 17 — what was implemented (Local notifications)
+
+No database changes and no server involvement at all. Every reminder is scheduled on the
+device by the device, which is why the feature costs nothing to run (SPEC §60) and keeps
+working with no network.
+
+**The policy is pure** — `src/features/notifications/logic/`
+
+`plannedReminders(context)` returns everything that should currently be scheduled, and most
+of its tests are the app deciding to say **nothing**. That is the feature: SPEC §48 caps the
+day at two notifications, and an app that nags is one that gets its notifications turned off.
+
+- The **daily** reminder fires at the time the learner chose.
+- The **streak** reminder fires in the evening, and only when there is something to protect:
+  dropped at streak zero, dropped once today's goal is met.
+- A daily reminder already late in the day would put the two within two hours of each other —
+  one interruption, not two reminders. The streak one is **pushed back** rather than dropped,
+  because evening is a common choice for a learning app and dropping it would quietly remove
+  the feature for half the users. Past 22:00 it is dropped, which is the one case where
+  silence really is better.
+
+`reconcileReminders` then makes the device agree with the plan: cancel everything, schedule
+the plan. Idempotent, and it cannot drift — whatever state a crash or an old version left
+behind, one pass puts it right.
+
+**The reconciler runs at the root**, not on a screen. It reads the profile (the chosen time)
+and Home (today's goal and the streak), both already in the cache, so finishing a lesson
+invalidates Home, the plan loses its streak reminder and the device is updated. That is the
+whole "cancelled after activity" behaviour from the SPEC §57 device check: no cancel call at
+any call site, and none to forget.
+
+**Permission is asked once the learner has chosen a time** (SPEC §11), on Continue in
+onboarding, never on launch. Skipping the step asks for nothing — there is no reminder to
+deliver, so there is no reason to spend the one prompt the platform allows.
+
+**Settings** (SPEC §29) is a card on Profile: a switch, the five times, and — only for
+somebody the OS will no longer prompt — an explanation and a button to system settings.
+
+**Analytics**: `notification_permission_result` (with its source) and `notification_opened`
+(with the kind), each raised from exactly one place.
+
+**`PRODUCTION_NOOP_ALLOWLIST` is now empty.** Every service in the registry is real.
+
+### Phase 17 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+format      prettier --check ......... clean
+unit        jest ..................... 63 suites, 995 tests, all passing
+database    supabase test db ......... unchanged (no migration in this phase)
+```
+
+## Decisions and interpretations made during Phase 17
+
+1. **`reminder_time = null` IS the off switch.** No second "notifications enabled" flag, so
+   the two can never disagree, and the setting follows the learner to a new phone. It is also
+   already how skipping the onboarding step is stored. The cost: switching off and on again in
+   a later session picks the default time rather than their old one.
+2. **The streak reminder is pushed back, not dropped, when the daily one is close.** Found by
+   a test: the first version silently removed the evening reminder for everybody who chose
+   18:00-22:00.
+3. **Permission carries `canAskAgain`, not just `granted`.** Without it, "never asked" and
+   "refused for good" look identical, and somebody who merely skipped the onboarding step
+   would be sent to system settings when one tap would have done.
+4. **Refusing the OS prompt writes nothing.** A switch left on while the OS delivers nothing
+   is the worst outcome here: the learner believes they are being reminded and quietly loses
+   their streak.
+5. **The destination is resolved when the notification is tapped**, from its kind — not stored
+   as a route when it was scheduled. A reminder queued a week ago then still opens the right
+   screen after an update that moved a route, and there is no route string from outside to
+   validate (SPEC §40).
+6. **A reminder that arrives while the app is open is not shown.** "Your 5-minute coding
+   session is waiting", on top of the session they are already in, reads as a bug.
+7. **The Android channel is `DEFAULT` importance and silent.** A heads-up banner that
+   interrupts what somebody is doing is how an app earns a long-press and "turn these off".
+8. **The reminder copy travels with each schedule call** rather than being set on the service
+   beforehand, so no ordering mistake can bake an empty title into a real notification.
+9. **The notification icon reuses the monochrome adaptive layer.** Android draws the icon from
+   its alpha channel only; a full-colour app icon arrives as a white square.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -1528,14 +1612,14 @@ Rewritten at the end of each phase, so this describes the product as it stands t
   Those need a real sandbox, which needs the store accounts.
 - **Expo Go no longer runs the app.** The RevenueCat SDK is native and is now in the bundle,
   so a development build is required from here on (SPEC §0.1.10).
-- **Local notifications (17) are the last no-op.** `PRODUCTION_NOOP_ALLOWLIST` is down to
-  `['notifications']` and must be **empty** before the first production release.
+- **`PRODUCTION_NOOP_ALLOWLIST` is empty.** Every service in the registry is now a real
+  implementation; the guard stays, so a future phase cannot quietly ship a placeholder.
 - **Analytics captures nothing without a PostHog key**, and nothing without consent even
   with one. Both are correct; neither has been exercised against a real project yet.
 - **No Sentry DSN**, so crashes are reported nowhere. Creating the project is free and can
   be done now; source maps additionally need `SENTRY_AUTH_TOKEN` in the EAS environment.
-- Session length and `notification_*` events are not instrumented — the first needs an
-  app-state listener and the second arrives with Phase 17.
+- Session length is still not instrumented; it needs an app-state listener and a decision
+  about what counts as a session. The `notification_*` events landed with Phase 17.
 - **Ads serve Google's TEST inventory**, and will until `EXPO_PUBLIC_APP_ENV=production`
   with real unit ids. That is deliberate and enforced in `adUnitId`: tapping a live ad in
   development is what gets an AdMob account suspended.
@@ -1558,8 +1642,16 @@ Rewritten at the end of each phase, so this describes the product as it stands t
 - The funnel triggers from SPEC §34 are implemented and unit-tested, but nothing calls
   `shouldPrompt` yet — the paywall is reached deliberately, not suggested. Wiring the
   triggers to the screens that fire them is part of Phase 15, where the ad trigger arrives.
-- The reminder time is stored, but nothing is scheduled and no notification permission is
-  requested (Phase 17).
+- **Notifications have never been delivered on real hardware.** The scheduling policy and
+  the reconciler are unit-tested, but an evening reminder actually arriving is something
+  only a device and a clock can prove — and `expo-notifications` is a native module added
+  after the last development build, so a **new build is required** before any of it runs.
+- Reminder times are five presets, not a picker. A learner who wants 07:15 cannot have it;
+  a native date-time picker is a whole extra dependency for a question whose useful
+  answers are morning, after work and before bed.
+- The daily reminder does not mention the Daily Challenge (SPEC §48 lists it as optional
+  and part of the same two-a-day budget). Adding a third message would mean one of the two
+  existing ones giving up its place.
 
 **Content and features still to come:**
 
@@ -1574,7 +1666,8 @@ Rewritten at the end of each phase, so this describes the product as it stands t
 - Onboarding does not let an intermediate learner choose a starting module (SPEC §11). Their
   answer is stored and unused; every module up to the free boundary is reachable anyway.
 - Profile still shows a placeholder for the rest of Settings (SPEC §29) — theme, sound,
-  notifications, account management and the legal links arrive with Phases 17, 18 and 20.
+  account management and the legal links arrive with Phases 18 and 20. Reminders, privacy
+  and leaderboard visibility are done.
 - Avatars are an initial on a colour derived from `avatar_key`, not preset artwork. No photo
   uploads in V1 by design (SPEC §29); the preset set is a content decision, not a code one.
 - Sounds (SPEC §29) are not wired; haptics are.
@@ -2436,3 +2529,35 @@ project. The honest checklist is short:
 9. Open one of those events and read its properties. There must be **no email, no display
    name, no answer text and no lesson id** — only enums and counts.
 10. Check the distinct id: a Supabase UUID, never an email address.
+
+---
+
+## Phase 17 device checklist (SPEC §57)
+
+**This needs a NEW development build.** `expo-notifications` is a native module and was added
+after the last one, together with a config plugin for the notification icon. The build already
+on the emulator cannot run any of this.
+
+```
+eas build --profile development --platform android
+```
+
+1. Install the new build. Complete onboarding as a new account and pick a reminder time. The
+   OS permission dialogue appears **after** the time is chosen, not on launch.
+2. Do it again on a second account and **skip** the step instead. No dialogue appears at all.
+3. **Profile -> Reminders.** The switch is on and the time you chose is selected.
+4. Set the time to two minutes from now (in Supabase Studio, `profiles.reminder_time` — the
+   presets are whole hours), reopen the app so it reschedules, then background it. The
+   notification arrives, silently, with a plain icon rather than a white square.
+5. Tap it. The app opens on Home.
+6. Leave the app in the **foreground** over another test time. Nothing appears on screen — a
+   reminder about the session you are already in is suppressed deliberately.
+7. **The streak reminder.** With a streak of at least 1 and today's goal unmet, two reminders
+   are scheduled (`adb shell dumpsys alarm | grep codesprint`).
+8. Finish a lesson so today's goal is met, then reopen the app. Only **one** remains — this is
+   the check SPEC §57 asks for.
+9. **Switch reminders off** in Profile. Nothing remains scheduled and nothing arrives.
+10. Switch them back on in the same session: the time you had is restored.
+11. Turn notifications off for CodeSprint in the phone's own settings, then return to the app.
+    The switch is disabled and the card offers **Open phone settings**.
+12. Reinstall or clear the app's data and confirm nothing is left scheduled afterwards.

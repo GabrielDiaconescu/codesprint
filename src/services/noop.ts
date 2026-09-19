@@ -129,20 +129,23 @@ export const NoopNotificationService: NotificationService = {
   serviceName: 'NotificationService',
   isNoop: true,
   async requestPermissions() {
-    return false;
+    return { granted: false, canAskAgain: false };
   },
   async hasPermissions() {
-    return false;
+    return { granted: false, canAskAgain: false };
   },
-  async scheduleDailyReminder() {
-    throw noopUnavailable('NotificationService', 'scheduleDailyReminder');
-  },
-  async scheduleStreakReminder() {
-    throw noopUnavailable('NotificationService', 'scheduleStreakReminder');
+  async scheduleReminder() {
+    throw noopUnavailable('NotificationService', 'scheduleReminder');
   },
   async cancelAll() {},
   async getScheduled() {
     return [];
+  },
+  onOpened() {
+    return () => {};
+  },
+  async consumeInitialOpen() {
+    return null;
   },
 };
 

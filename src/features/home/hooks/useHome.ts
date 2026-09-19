@@ -18,14 +18,17 @@ import { useSessionStore } from '@/store/sessionStore';
  * `staleTime` is short because everything on this screen moves: XP, the streak, lives, the
  * next lesson. Coming back from a lesson to a stale Home reads as a bug.
  */
-export const useHome = () => {
+export const useHome = (enabled = true) => {
   const { i18n } = useTranslation();
   const userId = useSessionStore((state) => state.userId);
 
   return useQuery<HomeSummary>({
     queryKey: queryKeys.user.home(userId ?? 'none'),
     queryFn: () => services.home.getHome(i18n.language),
-    enabled: userId !== null,
+    // `enabled` exists for the reminder reconciler, which needs today's goal and streak but
+    // must not pull Home for somebody still in onboarding. Same key, so the two callers share
+    // one request and one cache entry.
+    enabled: enabled && userId !== null,
     staleTime: 15_000,
   });
 };

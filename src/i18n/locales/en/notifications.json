@@ -1,0 +1,25 @@
+{
+  "title": "Reminders",
+  "failed": "That setting could not be saved. Please try again.",
+  "toggle": {
+    "label": "Daily reminder",
+    "description": "One nudge at the time you pick, plus a last call in the evening if your goal is still open. Never more than two a day."
+  },
+  "time": {
+    "label": "Remind me at"
+  },
+  "permission": {
+    "denied": "Notifications are switched off for CodeSprint in your phone's settings, so nothing can be delivered.",
+    "action": "Open phone settings"
+  },
+  "reminders": {
+    "daily": {
+      "title": "Time to code",
+      "body": "Your 5-minute coding session is waiting."
+    },
+    "streak": {
+      "title": "Keep your streak",
+      "body": "Protect your streak today."
+    }
+  }
+}
