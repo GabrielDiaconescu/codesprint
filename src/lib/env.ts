@@ -104,6 +104,25 @@ const buildSchema = (isProduction: boolean) =>
       EXPO_PUBLIC_LEGAL_BASE_URL: whenShipped(SHIPPED.legalPages, z.string().url(), isProduction),
     })
     .superRefine((env, ctx) => {
+      // D7 and SPEC §41 put analytics in the EU. The SDK's own default is the US host, and
+      // PostHog's onboarding hands out whichever region you happened to sign up in — so this
+      // is a mistake that arrives already made, in a snippet, looking correct.
+      //
+      // A `phc_` key belongs to ONE cloud, so a US project cannot simply be pointed at the EU
+      // host: getting this wrong means either no analytics at all, or EU learners' data in
+      // the United States. Neither should be discovered after release.
+      const host = env.EXPO_PUBLIC_POSTHOG_HOST;
+      if (isProduction && host && !/^https:\/\/[a-z-]*\.?eu\.(i\.)?posthog\.com/.test(host)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['EXPO_PUBLIC_POSTHOG_HOST'],
+          message:
+            'Analytics must use a PostHog EU host (SPEC §41, D7). Got: ' +
+            host +
+            '. A US project key cannot be pointed at the EU host — create an EU project.',
+        });
+      }
+
       if (isProduction && env.EXPO_PUBLIC_REVENUECAT_TEST_KEY) {
         ctx.addIssue({
           code: 'custom',

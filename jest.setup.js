@@ -76,3 +76,30 @@ jest.mock('expo-tracking-transparency', () => ({
   getTrackingPermissionsAsync: jest.fn().mockResolvedValue({ status: 'undetermined' }),
   requestTrackingPermissionsAsync: jest.fn().mockResolvedValue({ status: 'denied' }),
 }));
+
+/**
+ * Sentry starts a cleanup interval the moment it is imported, which leaks a timer into every
+ * test that reaches the service registry and makes Jest warn about a worker that would not
+ * exit. Left alone it is the kind of thing that turns into a flaky CI run later.
+ *
+ * Mocked for the same reason as AdMob: the SDK is not ours to verify. What IS ours is the PII
+ * scrubbing around it, and `beforeSend` is exercised through `SentryMonitoringService`.
+ */
+jest.mock('@sentry/react-native', () => ({
+  init: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  setUser: jest.fn(),
+}));
+
+/** PostHog opens a queue timer on construction; same reasoning. */
+jest.mock('posthog-react-native', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    capture: jest.fn(),
+    identify: jest.fn(),
+    reset: jest.fn(),
+    optIn: jest.fn(),
+    optOut: jest.fn(),
+  })),
+}));

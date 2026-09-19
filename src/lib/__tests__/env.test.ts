@@ -98,6 +98,41 @@ describe('parseEnv', () => {
     }
   });
 
+  describe('the PostHog region (SPEC §41, D7)', () => {
+    it.each(['https://eu.i.posthog.com', 'https://eu.posthog.com'])(
+      'accepts the EU host %s',
+      (host) => {
+        expect(() => parseEnv({ ...productionEnv, EXPO_PUBLIC_POSTHOG_HOST: host })).not.toThrow();
+      },
+    );
+
+    /**
+     * The mistake this exists to stop arrives already made, in a snippet: PostHog's onboarding
+     * hands out whichever region you signed up in, and `us.i.posthog.com` looks exactly as
+     * correct as the EU one. Shipping it means EU learners' analytics in the United States.
+     */
+    it.each(['https://us.i.posthog.com', 'https://app.posthog.com', 'https://us.posthog.com'])(
+      'REFUSES %s in production',
+      (host) => {
+        try {
+          parseEnv({ ...productionEnv, EXPO_PUBLIC_POSTHOG_HOST: host });
+          throw new Error('expected validation to fail');
+        } catch (error) {
+          expect((error as EnvValidationError).issues.join()).toContain('EXPO_PUBLIC_POSTHOG_HOST');
+        }
+      },
+    );
+
+    it('allows any host in development, where a scratch project is fine', () => {
+      expect(() =>
+        parseEnv({
+          EXPO_PUBLIC_APP_ENV: 'development',
+          EXPO_PUBLIC_POSTHOG_HOST: 'https://us.i.posthog.com',
+        }),
+      ).not.toThrow();
+    });
+  });
+
   it('does NOT require a Sentry DSN, which is optional even in production', () => {
     // A build without it reports nothing, which is worse than having it but is not a reason
     // to refuse to start (SPEC §44).
