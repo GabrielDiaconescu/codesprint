@@ -1793,8 +1793,8 @@ Rewritten at the end of each phase, so this describes the product as it stands t
   (`@expo/cli` and its `query-string` / `decode-uri-component` / `uuid` / `xcode` chain).
   They are build-time code, not shipped app code, and cannot be resolved without an Expo
   release — `npm audit fix --force` would downgrade Expo itself. Recheck each SDK upgrade.
-- **The app has not been run on a physical device yet.** Every device checklist from Phase 1
-  onward is outstanding, deferred by agreement. Fonts, contrast, dynamic type and
+- **The app has not been run on a physical device yet.** It runs on the Android emulator;
+  every device checklist from Phase 1 onward is outstanding, deferred by agreement. Fonts, contrast, dynamic type and
   reduce-motion in particular can only be verified on hardware.
 
 ---
@@ -2655,8 +2655,9 @@ on the emulator cannot run any of this.
 eas build --profile development --platform android
 ```
 
-1. Install the new build. Complete onboarding as a new account and pick a reminder time. The
-   OS permission dialogue appears **after** the time is chosen, not on launch.
+1. Install the new build (done — `b58c049e`, installed 2026-09-20). Complete onboarding as a
+   new account and pick a reminder time. The OS permission dialogue appears **after** the time
+   is chosen, not on launch.
 2. Do it again on a second account and **skip** the step instead. No dialogue appears at all.
 3. **Profile -> Reminders.** The switch is on and the time you chose is selected.
 4. Set the time to two minutes from now (in Supabase Studio, `profiles.reminder_time` — the
@@ -2679,7 +2680,10 @@ eas build --profile development --platform android
 
 ## Phase 20 device checklist (SPEC §57)
 
-The build from Phase 17 covers this — no native module was added.
+A development build containing `expo-notifications` was made and installed on the emulator on
+2026-09-20 (`b58c049e`); Phase 20 added no native module, so that same build covers both
+phases. Home, Profile, the Reminders card and the Appearance card were confirmed to render on
+it, and the theme was confirmed to survive a force-stop.
 
 **Screen reader** (TalkBack on Android, VoiceOver on iOS)
 
