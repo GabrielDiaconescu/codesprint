@@ -41,7 +41,7 @@ export default function ExamListScreen() {
         <Stack.Screen options={{ title: t('title') }} />
         <StateView
           testID="exam-list-error"
-          icon="cloud-offline-outline"
+          icon="cloud-offline"
           tone="danger"
           title={t('error.title')}
           body={t('error.body')}
@@ -60,7 +60,7 @@ export default function ExamListScreen() {
         <Stack.Screen options={{ title: t('title') }} />
         <StateView
           testID="exam-disabled"
-          icon="construct-outline"
+          icon="construct"
           title={t('disabled.title')}
           body={t('disabled.body')}
           actionLabel={common('actions.close')}

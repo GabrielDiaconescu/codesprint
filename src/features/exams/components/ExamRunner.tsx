@@ -151,7 +151,7 @@ export const ExamRunner = ({ paper, onSubmit, submitting }: ExamRunnerProps) => 
           // A question this build cannot render is skipped rather than crashing the exam. It
           // is marked wrong, which is the honest outcome — but the other 29 still count.
           <View style={[styles.unrenderable, { gap: theme.spacing.sm }]}>
-            <Icon name="alert-circle-outline" size="lg" color={theme.colors.textSecondary} />
+            <Icon name="alert-circle" size="lg" color={theme.colors.textSecondary} />
             <Text variant="body" tone="secondary">
               {t('unrenderable')}
             </Text>
@@ -177,7 +177,7 @@ export const ExamRunner = ({ paper, onSubmit, submitting }: ExamRunnerProps) => 
           testID="exam-previous"
           label={t('previous')}
           variant="secondary"
-          icon="chevron-back-outline"
+          icon="chevron-back"
           disabled={index === 0 || submitting}
           onPress={() => go(index - 1)}
         />
@@ -185,7 +185,7 @@ export const ExamRunner = ({ paper, onSubmit, submitting }: ExamRunnerProps) => 
           <Button
             testID="exam-hand-in"
             label={t('handIn')}
-            icon="checkmark-done-outline"
+            icon="checkmark-done"
             loading={submitting}
             onPress={handIn}
             fullWidth
@@ -194,7 +194,7 @@ export const ExamRunner = ({ paper, onSubmit, submitting }: ExamRunnerProps) => 
           <Button
             testID="exam-next"
             label={t('next')}
-            icon="chevron-forward-outline"
+            icon="chevron-forward"
             disabled={submitting}
             onPress={() => go(index + 1)}
             fullWidth

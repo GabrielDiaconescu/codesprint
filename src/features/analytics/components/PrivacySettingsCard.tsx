@@ -89,7 +89,7 @@ export const PrivacySettingsCard = ({ profile }: PrivacySettingsCardProps) => {
             testID="privacy-options"
             label={t('ads.action')}
             variant="secondary"
-            icon="options-outline"
+            icon="options"
             onPress={() => void services.consent.openPrivacyOptions()}
             fullWidth
           />

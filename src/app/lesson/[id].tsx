@@ -115,14 +115,14 @@ export default function LessonScreen() {
         onAction: () => router.back(),
       },
       'not-found': {
-        icon: 'help-circle-outline' as const,
+        icon: 'help-circle' as const,
         title: t('error.notFoundTitle'),
         body: t('error.notFoundBody'),
         action: t('error.back'),
         onAction: () => router.back(),
       },
       unknown: {
-        icon: 'cloud-offline-outline' as const,
+        icon: 'cloud-offline' as const,
         title: t('error.unknownTitle'),
         body: t('error.unknownBody'),
         action: common('actions.retry'),

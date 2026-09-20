@@ -58,7 +58,7 @@ export const SubscriptionCard = () => {
             <Button
               testID="subscription-upgrade"
               label={t('subscription.upgrade')}
-              icon="sparkles-outline"
+              icon="sparkles"
               onPress={() => router.push('/paywall?trigger=manual')}
               fullWidth
             />
@@ -68,7 +68,7 @@ export const SubscriptionCard = () => {
             testID="subscription-restore"
             label={t('subscription.restore')}
             variant="secondary"
-            icon="refresh-outline"
+            icon="refresh"
             loading={isRestoring}
             onPress={restore}
             fullWidth
@@ -79,7 +79,7 @@ export const SubscriptionCard = () => {
               testID="subscription-manage"
               label={t('subscription.manage')}
               variant="ghost"
-              icon="open-outline"
+              icon="open"
               onPress={() => void Linking.openURL(manageUrl)}
               fullWidth
             />

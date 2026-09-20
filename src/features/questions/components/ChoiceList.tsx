@@ -59,6 +59,8 @@ export const ChoiceList = ({
   const visuals: Record<Marking, { border: string; icon: IconName; iconColor: string }> = {
     none: {
       border: theme.colors.border,
+      // Outline on purpose: these two are the UNANSWERED state. A filled box or ring here
+      // would tell the learner they have already picked something.
       icon: multi ? 'square-outline' : 'ellipse-outline',
       iconColor: theme.colors.border,
     },
@@ -74,7 +76,7 @@ export const ChoiceList = ({
     },
     missed: {
       border: theme.colors.success,
-      icon: 'checkmark-circle-outline',
+      icon: 'checkmark-circle',
       iconColor: theme.colors.success,
     },
     wrong: { border: theme.colors.danger, icon: 'close-circle', iconColor: theme.colors.danger },

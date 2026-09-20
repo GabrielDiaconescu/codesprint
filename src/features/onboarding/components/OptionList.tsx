@@ -77,6 +77,7 @@ export const OptionList = <T extends string | number>({
               </View>
 
               <Icon
+                // Outline on purpose: an empty ring is how an unchosen option reads.
                 name={isSelected ? 'checkmark-circle' : 'ellipse-outline'}
                 size="lg"
                 color={isSelected ? theme.colors.primary : theme.colors.border}

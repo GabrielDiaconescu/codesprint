@@ -7,6 +7,8 @@ import {
   BottomSheet,
   Button,
   Card,
+  GameIcon,
+  IconButton,
   Chip,
   CodeBlock,
   Divider,
@@ -117,6 +119,8 @@ export default function GalleryScreen() {
 
       <Section title="Buttons">
         <Button label="Primary" onPress={() => showToast({ message: 'Primary pressed' })} />
+        <Button label="Challenge" variant="challenge" icon="flash" onPress={() => {}} />
+        <Button label="Success" variant="success" icon="checkmark" onPress={() => {}} />
         <Button label="Secondary" variant="secondary" onPress={() => {}} />
         <Button label="Ghost" variant="ghost" onPress={() => {}} />
         <Button label="Danger" variant="danger" onPress={() => {}} />
@@ -133,6 +137,51 @@ export default function GalleryScreen() {
         />
       </Section>
 
+      <Section title="3D depth and round toggles">
+        {/* Hold each of these down: the face should travel onto its rim and the rim should
+            disappear. If anything here floats or blurs instead, the restyle regressed. */}
+        <View style={styles.row}>
+          <IconButton icon="moon" accessibilityLabel="Theme" onPress={() => {}} />
+          <IconButton icon="settings" accessibilityLabel="Settings" onPress={() => {}} />
+          <IconButton icon="language" badge="EN" accessibilityLabel="Language" onPress={() => {}} />
+          <IconButton icon="play" tone="primary" accessibilityLabel="Play" onPress={() => {}} />
+          <IconButton
+            icon="flash"
+            tone="challenge"
+            accessibilityLabel="Challenge"
+            onPress={() => {}}
+          />
+        </View>
+
+        <Card tone="challenge">
+          <Text variant="bodyStrong">Challenge card</Text>
+        </Card>
+        <Card tone="gold">
+          <Text variant="bodyStrong">Goal met card</Text>
+        </Card>
+      </Section>
+
+      <Section title="Game icons">
+        {/* Full, then muted. The muted row is what a spent life and an unearned reward
+            look like — the shape has to survive losing its colour. */}
+        <View style={styles.row}>
+          <GameIcon name="flame" size={40} />
+          <GameIcon name="heart" size={40} />
+          <GameIcon name="coin" size={40} />
+          <GameIcon name="bolt" size={40} />
+          <GameIcon name="star" size={40} />
+          <GameIcon name="trophy" size={40} />
+        </View>
+        <View style={styles.row}>
+          <GameIcon name="flame" size={40} muted />
+          <GameIcon name="heart" size={40} muted />
+          <GameIcon name="coin" size={40} muted />
+          <GameIcon name="bolt" size={40} muted />
+          <GameIcon name="star" size={40} muted />
+          <GameIcon name="trophy" size={40} muted />
+        </View>
+      </Section>
+
       <Section title="Badges and chips">
         <Row>
           <Badge label="Neutral" />
@@ -143,6 +192,7 @@ export default function GalleryScreen() {
         <Row>
           <Badge label="12 day streak" tone="streak" icon="flame" />
           <Badge label="2,840 XP" tone="xp" icon="sparkles" />
+          <Badge label="Daily" tone="challenge" icon="flash" />
         </Row>
         <Row>
           {['Complete beginner', 'Beginner', 'Intermediate'].map((level) => (
@@ -255,7 +305,7 @@ export default function GalleryScreen() {
       <Section title="States">
         <View style={styles.stateBox}>
           <StateView
-            icon="cloud-offline-outline"
+            icon="cloud-offline"
             title="No internet connection"
             body="Check your connection and try again."
             actionLabel="Try again"
@@ -264,7 +314,7 @@ export default function GalleryScreen() {
         </View>
         <View style={styles.stateBox}>
           <StateView
-            icon="alert-circle-outline"
+            icon="alert-circle"
             tone="danger"
             title="Something went wrong"
             body="We couldn't load this. Please try again."

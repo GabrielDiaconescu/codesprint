@@ -49,7 +49,7 @@ export const AchievementList = ({ achievements }: { achievements: AchievementEnt
                 ]}
               >
                 <Icon
-                  name={(unlocked ? achievement.icon_key : 'lock-closed-outline') as IconName}
+                  name={(unlocked ? achievement.icon_key : 'lock-closed') as IconName}
                   size="md"
                   color={unlocked ? theme.colors.success : theme.colors.textSecondary}
                 />

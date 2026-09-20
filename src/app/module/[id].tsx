@@ -41,7 +41,7 @@ export default function ModuleScreen() {
       ) : isError ? (
         <View style={styles.centre}>
           <StateView
-            icon="cloud-offline-outline"
+            icon="cloud-offline"
             tone="danger"
             title={t('error.unknownTitle')}
             body={t('error.unknownBody')}
@@ -51,7 +51,7 @@ export default function ModuleScreen() {
         </View>
       ) : (lessons ?? []).length === 0 ? (
         <View style={styles.centre}>
-          <StateView icon="book-outline" title={t('module.empty')} />
+          <StateView icon="book" title={t('module.empty')} />
         </View>
       ) : (
         <FlatList
@@ -98,7 +98,7 @@ export default function ModuleScreen() {
                 </View>
 
                 <View style={[styles.duration, { gap: theme.spacing.xs }]}>
-                  <Icon name="time-outline" size="sm" color={theme.colors.textSecondary} />
+                  <Icon name="time" size="sm" color={theme.colors.textSecondary} />
                   <Text variant="caption" tone="secondary">
                     {t('estimated', { count: item.estimatedMinutes })}
                   </Text>

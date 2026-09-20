@@ -41,7 +41,7 @@ export default function LearnScreen() {
       <Screen>
         <View style={styles.centre}>
           <StateView
-            icon="cloud-offline-outline"
+            icon="cloud-offline"
             tone="danger"
             title={t('error.title')}
             body={t('error.body')}
@@ -59,7 +59,7 @@ export default function LearnScreen() {
     return (
       <Screen>
         <View style={styles.centre}>
-          <StateView icon="book-outline" title={t('empty.title')} body={t('empty.body')} />
+          <StateView icon="book" title={t('empty.title')} body={t('empty.body')} />
         </View>
       </Screen>
     );
@@ -100,7 +100,7 @@ export default function LearnScreen() {
                   testID="learn-open-exams"
                   label={exam('entry.action')}
                   variant="secondary"
-                  icon="school-outline"
+                  icon="school"
                   onPress={() => router.push('/exam')}
                   fullWidth
                 />

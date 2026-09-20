@@ -38,7 +38,7 @@ export default function ReminderStep() {
     value: time,
     label: t(`reminder.options.${time}.label`),
     description: t(`reminder.options.${time}.description`),
-    icon: 'alarm-outline',
+    icon: 'alarm',
   }));
 
   const requestPermission = useRequestNotificationPermission();
@@ -74,7 +74,7 @@ export default function ReminderStep() {
       />
 
       <View style={[styles.note, { gap: theme.spacing.sm }]}>
-        <Icon name="information-circle-outline" size="md" color={theme.colors.textSecondary} />
+        <Icon name="information-circle" size="md" color={theme.colors.textSecondary} />
         <Text variant="caption" tone="secondary" style={styles.flex}>
           {t('reminder.explanation')}
         </Text>

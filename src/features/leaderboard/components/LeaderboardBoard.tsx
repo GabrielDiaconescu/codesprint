@@ -46,7 +46,7 @@ export const LeaderboardBoard = ({ currentName }: LeaderboardBoardProps) => {
     return (
       <StateView
         testID="leaderboard-error"
-        icon="cloud-offline-outline"
+        icon="cloud-offline"
         title={t('error.title')}
         body={t('error.body')}
         actionLabel={t('error.retry')}
@@ -123,7 +123,7 @@ export const LeaderboardBoard = ({ currentName }: LeaderboardBoardProps) => {
         ListEmptyComponent={
           <StateView
             testID="leaderboard-empty"
-            icon="trophy-outline"
+            icon="trophy"
             title={t('empty.title')}
             body={t('empty.body')}
           />

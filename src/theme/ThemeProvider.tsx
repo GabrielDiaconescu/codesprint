@@ -5,7 +5,7 @@ import { useSettingsStore } from '@/store/settingsStore';
 
 import { palettes, type ColorScheme, type Palette } from './colors';
 import { fontFamily } from './fonts';
-import { a11y, elevation, motion, pressed, radius, spacing, typography } from './tokens';
+import { a11y, depth, elevation, motion, pressed, radius, spacing, typography } from './tokens';
 
 export interface Theme {
   scheme: ColorScheme;
@@ -14,6 +14,7 @@ export interface Theme {
   radius: typeof radius;
   typography: typeof typography;
   motion: typeof motion;
+  depth: typeof depth;
   elevation: typeof elevation;
   a11y: typeof a11y;
   fontFamily: typeof fontFamily;
@@ -41,6 +42,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       radius,
       typography,
       motion,
+      depth,
       elevation,
       a11y,
       fontFamily,

@@ -45,16 +45,16 @@ export const ExamCard = ({ exam, onStart, busy = false }: ExamCardProps) => {
         </Text>
 
         <View style={[styles.facts, { gap: theme.spacing.sm }]}>
-          <Badge label={t('facts.questions', { count: exam.question_count })} icon="list-outline" />
+          <Badge label={t('facts.questions', { count: exam.question_count })} icon="list" />
           <Badge
             label={
               exam.time_limit_minutes === null
                 ? t('facts.untimed')
                 : t('facts.minutes', { count: exam.time_limit_minutes })
             }
-            icon="time-outline"
+            icon="time"
           />
-          <Badge label={t('facts.pass', { pct: exam.pass_threshold_pct })} icon="flag-outline" />
+          <Badge label={t('facts.pass', { pct: exam.pass_threshold_pct })} icon="flag" />
         </View>
 
         {exam.attempts_taken > 0 && exam.best_score_pct !== null && (
@@ -79,7 +79,7 @@ export const ExamCard = ({ exam, onStart, busy = false }: ExamCardProps) => {
           testID={`exam-action-${exam.slug}`}
           label={t(`action.${action}`)}
           variant={action === 'resume' ? 'primary' : locked ? 'secondary' : 'primary'}
-          icon={locked ? 'lock-closed-outline' : 'play-outline'}
+          icon={locked ? 'lock-closed' : 'play'}
           disabled={locked}
           loading={busy}
           onPress={() => onStart(exam)}

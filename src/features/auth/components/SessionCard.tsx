@@ -39,9 +39,9 @@ export const SessionCard = () => {
             {isGuest ? t('session.guestBadge') : (email ?? '')}
           </Text>
           {isGuest ? (
-            <Badge label={t('session.guestBadge')} tone="neutral" icon="person-outline" />
+            <Badge label={t('session.guestBadge')} tone="neutral" icon="person" />
           ) : emailConfirmed ? null : (
-            <Badge label={t('session.unconfirmed')} tone="warning" icon="mail-unread-outline" />
+            <Badge label={t('session.unconfirmed')} tone="warning" icon="mail-unread" />
           )}
         </View>
 
@@ -54,7 +54,7 @@ export const SessionCard = () => {
               <Button
                 testID="profile-link-account"
                 label={t('linkAccount.submit')}
-                icon="shield-checkmark-outline"
+                icon="shield-checkmark"
                 onPress={() => router.push('/link-account')}
                 fullWidth
               />
@@ -68,7 +68,7 @@ export const SessionCard = () => {
           testID="profile-sign-out"
           variant="ghost"
           label={t('session.signOut')}
-          icon="log-out-outline"
+          icon="log-out"
           onPress={() => setConfirming(true)}
         />
       </Card>

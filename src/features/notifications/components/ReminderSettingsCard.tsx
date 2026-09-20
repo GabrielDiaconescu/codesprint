@@ -104,7 +104,7 @@ export const ReminderSettingsCard = ({ profile }: ReminderSettingsCardProps) => 
               testID="reminders-open-settings"
               label={t('permission.action')}
               variant="secondary"
-              icon="options-outline"
+              icon="options"
               onPress={() => void Linking.openSettings()}
               fullWidth
             />

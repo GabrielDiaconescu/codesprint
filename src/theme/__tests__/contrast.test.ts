@@ -1,3 +1,5 @@
+import { GAME_ICON_COLOURS } from '@/components/ui/GameIcon';
+
 import { palettes, syntaxPalette, type Palette } from '../colors';
 import { AA_NON_TEXT, AA_TEXT, contrastRatio, meetsContrast, relativeLuminance } from '../contrast';
 
@@ -11,6 +13,13 @@ import { AA_NON_TEXT, AA_TEXT, contrastRatio, meetsContrast, relativeLuminance }
  *
  * Text needs 4.5:1 (1.4.3). Icons and the outlines that identify a control need 3:1 (1.4.11).
  * Decorative outlines — a card edge, a divider — are exempt, and are deliberately absent.
+ *
+ * **Progress FILLS are deliberately not asserted here.** A fill bright enough to look like the
+ * style demands cannot reach 3:1 against any track light enough to sit on a white card; that
+ * is arithmetic, not an oversight. What 1.4.11 actually requires is that the *component* be
+ * identifiable, which `borderStrong` does as the track's outline, and the *value* is never
+ * carried by colour alone — every bar renders a text label beside it and exposes
+ * `accessibilityValue`. Those are the assertions that matter, and they are below.
  */
 
 const themes = Object.entries(palettes) as [keyof typeof palettes, Palette][];
@@ -25,7 +34,17 @@ const TEXT_ON_SURFACES: [keyof Palette, keyof Palette][] = [
   ['textSecondary', 'surfaceElevated'],
 ];
 
-/** Semantic text: the feedback panel and the badge labels. */
+/** The tinted cards — the Daily Challenge, a met goal, a success panel — carry body text too. */
+const TEXT_ON_TINTED_CARDS: [keyof Palette, keyof Palette][] = [
+  ['textPrimary', 'challengeSurface'],
+  ['textSecondary', 'challengeSurface'],
+  ['textPrimary', 'successSurface'],
+  ['textSecondary', 'successSurface'],
+  ['textPrimary', 'warningSurface'],
+  ['textSecondary', 'warningSurface'],
+];
+
+/** Semantic text: the feedback panel, the badge labels and every button face. */
 const SEMANTIC_TEXT: [keyof Palette, keyof Palette][] = [
   ['success', 'successSurface'],
   ['success', 'background'],
@@ -38,15 +57,24 @@ const SEMANTIC_TEXT: [keyof Palette, keyof Palette][] = [
   ['warning', 'surface'],
   // The neutral badge is a textSecondary label on the border colour.
   ['textSecondary', 'border'],
-  // Buttons.
+  // Button faces. Every variant must hold its own label, pressed as well as resting.
   ['onPrimary', 'primary'],
   ['onPrimary', 'primaryPressed'],
+  ['onChallenge', 'challenge'],
+  ['onChallenge', 'challengePressed'],
+  ['textInverse', 'success'],
+  ['textInverse', 'successPressed'],
+  ['textInverse', 'danger'],
+  ['textInverse', 'dangerPressed'],
+  // The number on a coin. This pair is why `onGold` exists and why it does not flip with the
+  // theme — the coin's face is bright in both.
+  ['onGold', 'xpGlow'],
   // Links and the primary-tinted labels.
   ['primary', 'background'],
   ['primary', 'surface'],
 ];
 
-/** Icons and progress fills — graphics, not words. */
+/** Icons — graphics, not words. */
 const GRAPHICS: [keyof Palette, keyof Palette][] = [
   ['streak', 'background'],
   ['streak', 'surface'],
@@ -64,8 +92,19 @@ const CONTROL_OUTLINES: [keyof Palette, keyof Palette][] = [
   ['borderStrong', 'surface'],
   ['borderStrong', 'background'],
   ['borderStrong', 'surfaceElevated'],
+  // The progress track's own outline, including inside the two tinted cards that hold a bar.
+  ['borderStrong', 'warningSurface'],
+  ['borderStrong', 'challengeSurface'],
   ['primary', 'surface'],
   ['danger', 'surface'],
+];
+
+/** Everything a `GameIcon` is ever drawn on. */
+const ICON_BACKGROUNDS: (keyof Palette)[] = [
+  'background',
+  'surface',
+  'challengeSurface',
+  'warningSurface',
 ];
 
 describe('contrastRatio', () => {
@@ -96,6 +135,10 @@ describe.each(themes)('%s theme', (_name, palette) => {
     expect(contrastRatio(palette[foreground], palette[background])).toBeGreaterThanOrEqual(AA_TEXT);
   });
 
+  it.each(TEXT_ON_TINTED_CARDS)('%s on %s is readable text', (foreground, background) => {
+    expect(contrastRatio(palette[foreground], palette[background])).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
   it.each(SEMANTIC_TEXT)('%s on %s is readable text', (foreground, background) => {
     expect(contrastRatio(palette[foreground], palette[background])).toBeGreaterThanOrEqual(AA_TEXT);
   });
@@ -111,6 +154,26 @@ describe.each(themes)('%s theme', (_name, palette) => {
       AA_NON_TEXT,
     );
   });
+
+  /**
+   * A `GameIcon` is a bright face inside a dark rim. Requiring BOTH to clear 3:1 would ban the
+   * bright faces the style is made of; requiring NEITHER would let an icon vanish into its
+   * card. So the rule is that one of them always does the work — the rim in the light theme,
+   * the face in the dark one — and this proves it for every icon on every surface it lands on.
+   */
+  it.each(Object.entries(GAME_ICON_COLOURS))(
+    'the %s icon stays visible on every surface it is drawn on',
+    (name, tokens) => {
+      for (const background of ICON_BACKGROUNDS) {
+        const best = Math.max(
+          contrastRatio(palette[tokens.face], palette[background]),
+          contrastRatio(palette[tokens.rim], palette[background]),
+        );
+
+        expect(best >= AA_NON_TEXT ? name : `${name} disappears on ${background}`).toBe(name);
+      }
+    },
+  );
 
   it('keeps every syntax colour readable on the code surface', () => {
     // The code block stays dark in both themes, so this runs twice against the same target —

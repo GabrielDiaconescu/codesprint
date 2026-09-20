@@ -27,7 +27,13 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.border,
+          // A hairline under a chunky UI looks like a rendering mistake.
+          borderTopWidth: 2,
+          height: 64,
+          paddingTop: 6,
         },
+        tabBarLabelStyle: { fontFamily: theme.fontFamily.semibold, fontSize: 12 },
+        tabBarIconStyle: { marginTop: 2 },
         sceneStyle: { backgroundColor: theme.colors.background },
       }}
     >
@@ -35,18 +41,17 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: t('tabs.home'),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" color={color} size={size} />
-          ),
+          // Home draws its own header with the greeting and the quick toggles (SPEC §13),
+          // so the navigator's would be the word "Home" twice.
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="learn"
         options={{
           title: t('tabs.learn'),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book-outline" color={color} size={size} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="book" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
@@ -54,18 +59,14 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.leaderboard'),
           href: leaderboardEnabled ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="trophy-outline" color={color} size={size} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t('tabs.profile'),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" color={color} size={size} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="person" color={color} size={size} />,
         }}
       />
     </Tabs>

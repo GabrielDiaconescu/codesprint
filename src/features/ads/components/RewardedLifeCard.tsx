@@ -83,7 +83,7 @@ export const RewardedLifeCard = () => {
             <Button
               testID="watch-for-life"
               label={t('rewarded.watchForLife')}
-              icon="play-circle-outline"
+              icon="play-circle"
               variant="secondary"
               loading={watching || claim.isPending}
               onPress={() => void watch()}
@@ -98,7 +98,7 @@ export const RewardedLifeCard = () => {
         <Button
           testID="out-of-lives-premium"
           label={t('outOfLives.premium')}
-          icon="infinite-outline"
+          icon="infinite"
           onPress={() => router.push({ pathname: '/paywall', params: { trigger: 'out_of_lives' } })}
           fullWidth
         />

@@ -66,7 +66,7 @@ export default function ExamScreen() {
         <Stack.Screen options={{ title }} />
         <StateView
           testID={`exam-unavailable-${reason}`}
-          icon={reason === 'requires_premium' ? 'lock-closed' : 'information-circle-outline'}
+          icon={reason === 'requires_premium' ? 'lock-closed' : 'information-circle'}
           title={t(`locked.${reason}Title`)}
           body={t(`locked.${reason}`)}
           actionLabel={common('actions.close')}

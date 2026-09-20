@@ -4,10 +4,12 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 
 import { useReducedMotion, useTheme } from '@/theme';
 
+export type ProgressTone = 'accent' | 'success' | 'streak' | 'gold' | 'challenge';
+
 export interface ProgressBarProps {
   /** 0–1. Values outside the range are clamped. */
   value: number;
-  tone?: 'accent' | 'success' | 'streak';
+  tone?: ProgressTone;
   height?: number;
   /** Announced to screen readers, e.g. "Today's goal". */
   label?: string;
@@ -21,11 +23,26 @@ export const clampProgress = (value: number): number => {
   return Math.min(1, Math.max(0, value));
 };
 
-/** Linear progress indicator (SPEC §8). Respects reduce-motion (SPEC §47). */
+/**
+ * A progress bar that looks like a filled tube (SPEC §8).
+ *
+ * Thick, fully rounded, with a soft highlight running along the top of the fill. The highlight
+ * is the whole trick: a flat rectangle reads as a chart, the same rectangle with a lighter
+ * strip near its top edge reads as a cylinder catching light.
+ *
+ * **On contrast.** The fills are bright by design, and a mid-bright fill cannot reach 3:1
+ * against any track light enough to sit on a white card — that is arithmetic, not a choice.
+ * WCAG 1.4.11 asks that the *component* be identifiable, which the track's outline does at
+ * 3.7:1, and the *value* is never carried by colour alone: every bar in the app is rendered
+ * next to a text label and exposes `accessibilityValue`, so a screen reader and a person who
+ * cannot separate the two greens both get the number (SPEC §47).
+ *
+ * Respects reduce-motion.
+ */
 export const ProgressBar = ({
   value,
   tone = 'accent',
-  height = 10,
+  height = 16,
   label,
   testID,
 }: ProgressBarProps) => {
@@ -40,11 +57,17 @@ export const ProgressBar = ({
 
   const fillStyle = useAnimatedStyle(() => ({ width: `${width.value * 100}%` }));
 
-  const tones = {
+  const tones: Record<ProgressTone, string> = {
     accent: theme.colors.primary,
-    success: theme.colors.success,
+    success: theme.colors.successFill,
     streak: theme.colors.streak,
-  } as const;
+    gold: theme.colors.xpGlow,
+    challenge: theme.colors.challenge,
+  };
+
+  const radius = height / 2;
+  // Enough of the tube to catch light, never so much that it washes the fill out.
+  const highlightHeight = Math.max(3, Math.round(height * 0.26));
 
   return (
     <View
@@ -55,17 +78,41 @@ export const ProgressBar = ({
       accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}
       style={[
         styles.track,
-        { height, borderRadius: height / 2, backgroundColor: theme.colors.border },
+        {
+          height,
+          borderRadius: radius,
+          backgroundColor: theme.colors.border,
+          borderColor: theme.colors.borderStrong,
+        },
       ]}
     >
       <Animated.View
-        style={[styles.fill, { borderRadius: height / 2, backgroundColor: tones[tone] }, fillStyle]}
-      />
+        style={[styles.fill, { borderRadius: radius, backgroundColor: tones[tone] }, fillStyle]}
+      >
+        <View
+          style={[
+            styles.highlight,
+            {
+              height: highlightHeight,
+              top: Math.max(2, Math.round(height * 0.13)),
+              borderRadius: highlightHeight / 2,
+            },
+          ]}
+        />
+      </Animated.View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  track: { width: '100%', overflow: 'hidden' },
-  fill: { height: '100%' },
+  track: { width: '100%', overflow: 'hidden', borderWidth: 2 },
+  fill: { height: '100%', overflow: 'hidden' },
+  // White at low alpha rather than a named colour, so one highlight works over every tone and
+  // in both themes.
+  highlight: {
+    position: 'absolute',
+    left: 6,
+    right: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+  },
 });

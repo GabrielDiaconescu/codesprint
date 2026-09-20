@@ -53,7 +53,7 @@ export default function PracticeScreen() {
         <View style={styles.centre}>
           <StateView
             testID={premium ? 'practice-premium' : 'practice-error'}
-            icon={premium ? 'lock-closed' : 'cloud-offline-outline'}
+            icon={premium ? 'lock-closed' : 'cloud-offline'}
             tone={premium ? 'neutral' : 'danger'}
             title={premium ? t('premium.title') : t('error.title')}
             body={premium ? t('premium.body') : t('error.body')}
@@ -72,7 +72,7 @@ export default function PracticeScreen() {
         <View style={styles.centre}>
           <StateView
             testID="practice-empty"
-            icon="checkmark-circle-outline"
+            icon="checkmark-circle"
             title={t(`empty.${mode}Title`)}
             body={t(`empty.${mode}Body`)}
             actionLabel={common('actions.close')}

@@ -89,7 +89,7 @@ export const LeaderboardSettingsCard = ({ profile }: LeaderboardSettingsCardProp
             testID="leaderboard-edit-name"
             variant="secondary"
             label={profile.displayName ? t('settings.changeName') : t('settings.chooseName')}
-            icon="person-outline"
+            icon="person"
             onPress={() => setNaming(true)}
             fullWidth
           />

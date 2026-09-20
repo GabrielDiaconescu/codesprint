@@ -90,7 +90,7 @@ const ThemedApp = () => {
       <Screen>
         <View style={styles.centre}>
           <StateView
-            icon="cloud-offline-outline"
+            icon="cloud-offline"
             tone="danger"
             title={t('states.errorTitle')}
             body={t('states.errorBody')}

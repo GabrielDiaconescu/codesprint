@@ -134,7 +134,7 @@ export default function PaywallScreen() {
           // No prices, so no paywall. An error with a retry — never invented numbers.
           <StateView
             testID="paywall-unavailable"
-            icon="cloud-offline-outline"
+            icon="cloud-offline"
             tone="danger"
             title={t('unavailable.title')}
             body={t('unavailable.body')}
@@ -174,7 +174,7 @@ export default function PaywallScreen() {
             testID="paywall-restore"
             label={t('restore.action')}
             variant="secondary"
-            icon="refresh-outline"
+            icon="refresh"
             loading={isRestoring}
             onPress={restore}
             fullWidth
@@ -183,7 +183,7 @@ export default function PaywallScreen() {
             testID="paywall-manage"
             label={t('manage')}
             variant="ghost"
-            icon="open-outline"
+            icon="open"
             // Hidden rather than pointed at a guess when there is no store to open.
             disabled={manageUrl === null}
             onPress={() => manageUrl && void Linking.openURL(manageUrl)}

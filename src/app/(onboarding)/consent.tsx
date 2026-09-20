@@ -84,7 +84,7 @@ export default function ConsentStep() {
       </Card>
 
       <View style={[styles.note, { gap: theme.spacing.sm }]}>
-        <Icon name="information-circle-outline" size="md" color={theme.colors.textSecondary} />
+        <Icon name="information-circle" size="md" color={theme.colors.textSecondary} />
         <Text variant="caption" tone="secondary" style={styles.flex}>
           {t('consent.adsNote')}
         </Text>

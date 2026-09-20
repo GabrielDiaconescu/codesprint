@@ -92,7 +92,7 @@ export default function SignInScreen() {
           testID="sign-in-guest"
           variant="secondary"
           label={t('signIn.guest')}
-          icon="flash-outline"
+          icon="flash"
           onPress={() => guest.mutate()}
           loading={guest.isPending}
           disabled={busy}

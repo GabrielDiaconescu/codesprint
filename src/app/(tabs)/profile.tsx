@@ -64,7 +64,7 @@ export default function ProfileScreen() {
           testID="profile-progress"
           variant="secondary"
           label={progress('open')}
-          icon="stats-chart-outline"
+          icon="stats-chart"
           onPress={() => router.push('/progress')}
           fullWidth
         />
@@ -77,7 +77,7 @@ export default function ProfileScreen() {
       {__DEV__ && (
         <View style={styles.devTools}>
           <Link href="/gallery" asChild>
-            <Button label="Component gallery (dev)" variant="ghost" icon="color-palette-outline" />
+            <Button label="Component gallery (dev)" variant="ghost" icon="color-palette" />
           </Link>
         </View>
       )}

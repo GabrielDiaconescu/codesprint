@@ -39,7 +39,7 @@ export default function LinkAccountScreen() {
       <AuthErrorBanner message={errorText(linkEmail.error)} />
 
       <View style={[styles.reassurance, { gap: theme.spacing.sm }]}>
-        <Icon name="shield-checkmark-outline" size="md" color={theme.colors.success} />
+        <Icon name="shield-checkmark" size="md" color={theme.colors.success} />
         <Text variant="bodySmall" tone="secondary" style={styles.flex}>
           {t('linkAccount.keepsProgress')}
         </Text>

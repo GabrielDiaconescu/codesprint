@@ -56,7 +56,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       package: variant.bundleId,
       adaptiveIcon: {
-        backgroundColor: '#0B1020',
+        // Native colour has to be repeated here by hand: app.config.ts is evaluated by the
+        // Expo CLI at build time, long before the React theme exists. Keep these four in
+        // step with `src/theme/colors.ts` — a splash in the old white is the first thing a
+        // user sees flash into the new cream.
+        backgroundColor: '#151226',
         foregroundImage: './assets/android-icon-foreground.png',
         monochromeImage: './assets/android-icon-monochrome.png',
       },
@@ -71,8 +75,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           image: './assets/splash-icon.png',
           imageWidth: 180,
           resizeMode: 'contain',
-          backgroundColor: '#FFFFFF',
-          dark: { backgroundColor: '#0B1020' },
+          backgroundColor: '#FBF6EC',
+          dark: { backgroundColor: '#151226' },
         },
       ],
       [
@@ -98,7 +102,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           // icon arrives as a white square. The monochrome adaptive layer is already the
           // right shape, so it is reused rather than adding another asset.
           icon: './assets/android-icon-monochrome.png',
-          color: '#3B5BFF',
+          color: '#1C5FF5',
         },
       ],
       [

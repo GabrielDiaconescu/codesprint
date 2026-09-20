@@ -62,7 +62,7 @@ export const LeaderboardRowItem = ({ row, isMe, onReport }: LeaderboardRowItemPr
         <Text variant="bodyStrong" tone={isMe ? 'primary' : 'secondary'}>
           {row.rank}
         </Text>
-        {medal && <Icon name="medal-outline" size="sm" color={medal} />}
+        {medal && <Icon name="medal" size="sm" color={medal} />}
       </View>
 
       <Avatar displayName={row.display_name} avatarKey={row.avatar_key} />

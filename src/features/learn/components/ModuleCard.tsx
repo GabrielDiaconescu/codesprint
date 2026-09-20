@@ -59,7 +59,7 @@ export const ModuleCard = ({ module, onPress }: ModuleCardProps) => {
 
         <View style={[styles.meta, { gap: theme.spacing.lg }]}>
           <View style={[styles.metaItem, { gap: theme.spacing.xs }]}>
-            <Icon name="book-outline" size="sm" color={theme.colors.textSecondary} />
+            <Icon name="book" size="sm" color={theme.colors.textSecondary} />
             <Text variant="caption" tone="secondary">
               {t('module.lessons', { count: module.lessonCount })}
             </Text>
@@ -67,7 +67,7 @@ export const ModuleCard = ({ module, onPress }: ModuleCardProps) => {
 
           {module.estimatedMinutes > 0 && (
             <View style={[styles.metaItem, { gap: theme.spacing.xs }]}>
-              <Icon name="time-outline" size="sm" color={theme.colors.textSecondary} />
+              <Icon name="time" size="sm" color={theme.colors.textSecondary} />
               <Text variant="caption" tone="secondary">
                 {t('module.minutes', { count: module.estimatedMinutes })}
               </Text>

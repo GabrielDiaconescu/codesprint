@@ -95,6 +95,8 @@ export const LivesIndicator = ({
       <View style={[styles.row, { gap: theme.spacing.xs }]}>
         {Array.from({ length: max }, (_, index) => (
           <Icon
+            // Stays an OUTLINE on purpose: the empty ring is what says "not yet".
+            // Filling it would make a spent life look like a held one.
             key={index}
             name={index < lives ? 'heart' : 'heart-outline'}
             size={compact ? 'sm' : 'md'}

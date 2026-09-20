@@ -138,7 +138,7 @@ export const TextField = ({
             style={({ pressed }) => pressed && { opacity: theme.pressed.opacity }}
           >
             <Icon
-              name={revealed ? 'eye-off-outline' : 'eye-outline'}
+              name={revealed ? 'eye-off' : 'eye'}
               size="md"
               color={theme.colors.textSecondary}
             />

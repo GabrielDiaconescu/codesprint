@@ -2,9 +2,9 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 20 complete — awaiting approval for Phase 21 (E2E & regression
-hardening). Agreed order from here: **20 → 21**, with Phase 19 (content to launch volume)
-running in parallel because it is long, and Phase 18 once a domain exists.
+**Current phase:** Restyle complete (not a numbered phase — see below) — awaiting approval
+for Phase 19 (content to launch volume). Agreed order from here: **19 → 21 → 18 → 22 → 23**,
+with the PFA → D-U-N-S chain running in parallel.
 **Last updated:** 2026-09-20
 
 ---
@@ -32,6 +32,7 @@ running in parallel because it is long, and Phase 18 once a domain exists.
 | 16            | Analytics + monitoring               | **Complete** — pending device check   |
 | 17            | Local notifications                  | **Complete** — pending device check   |
 | 20            | Polish, accessibility, performance   | **Complete** — pending device check   |
+| —             | Playful 3D restyle (SPEC §8, §13)    | **Complete** — pending device check   |
 | 18, 19, 21–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
@@ -66,19 +67,19 @@ and is green: typecheck, lint, 102 tests, and a gitleaks scan of the full histor
 
 ## Decisions taken
 
-| #   | Decision                 | Value                                 | Notes                                                                                         |
-| --- | ------------------------ | ------------------------------------- | --------------------------------------------------------------------------------------------- |
-| D1  | Guest mode               | ON (default)                          | Approved with the plan                                                                        |
-| D2  | No Ads product           | Monthly subscription €2.99            | Approved with the plan                                                                        |
-| D3  | Annual Premium           | YES                                   | Approved with the plan                                                                        |
-| D4  | Free trial               | None at launch                        | Paywall still renders trial terms dynamically                                                 |
-| D5  | Free boundary            | Modules 1–6 (`free_module_count = 6`) | Config-driven, computed not stored                                                            |
-| D6  | Social login             | Apple + Google (default stands)       | Not re-raised; revisit before Phase 4 if scope needs trimming                                 |
-| D7  | Analytics                | PostHog Cloud EU                      |                                                                                               |
-| D8  | Monitoring               | Sentry                                |                                                                                               |
-| D9  | Python semantics         | 3.12 + latest stable 3.x              | **Resolved** — 3.12.10 and 3.14.4 both present; `py -3.12` / `py -3.14` on Windows            |
-| D10 | Minimum age              | 13                                    |                                                                                               |
-| D11 | Personalized ads         | Consent + 16+ only                    |                                                                                               |
+| #   | Decision                 | Value                                 | Notes                                                                                                                |
+| --- | ------------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| D1  | Guest mode               | ON (default)                          | Approved with the plan                                                                                               |
+| D2  | No Ads product           | Monthly subscription €2.99            | Approved with the plan                                                                                               |
+| D3  | Annual Premium           | YES                                   | Approved with the plan                                                                                               |
+| D4  | Free trial               | None at launch                        | Paywall still renders trial terms dynamically                                                                        |
+| D5  | Free boundary            | Modules 1–6 (`free_module_count = 6`) | Config-driven, computed not stored                                                                                   |
+| D6  | Social login             | Apple + Google (default stands)       | Not re-raised; revisit before Phase 4 if scope needs trimming                                                        |
+| D7  | Analytics                | PostHog Cloud EU                      |                                                                                                                      |
+| D8  | Monitoring               | Sentry                                |                                                                                                                      |
+| D9  | Python semantics         | 3.12 + latest stable 3.x              | **Resolved** — 3.12.10 and 3.14.4 both present; `py -3.12` / `py -3.14` on Windows                                   |
+| D10 | Minimum age              | 13                                    |                                                                                                                      |
+| D11 | Personalized ads         | Consent + 16+ only                    |                                                                                                                      |
 | D12 | Google Play account type | **Organization**                      | Decided 2026-09-17, reaffirmed 2026-09-20. Exempt from the 12-tester / 14-day closed test. Requires a D-U-N-S number |
 
 Plan approved 2026-09-16. Defaults apply for everything not marked OPEN.
@@ -1701,6 +1702,132 @@ bundle      expo export (android) .... succeeds
    already paid; making them look at an offer first to get their own purchase back is the kind
    of thing that ends in a support email.
 
+## Restyle — playful 3D gamified UI (SPEC §8, §13)
+
+Not a numbered phase. SPEC §8 and §13 were rewritten on 2026-09-20 from "modern, polished,
+minimal" to a vibrant, physical, gamified direction, which made the Phase 2 design system and
+the Phase 11 Home screen non-conformant. This is the work that closed that gap, taken before
+Phase 19 deliberately: authoring 300 questions against a design that is about to change means
+re-checking every lesson layout twice.
+
+No database changes. No behaviour changes — every route, query and RPC is untouched.
+
+**The one idea: two boxes, not a blur** — `src/theme/tokens.ts`
+
+Everything raised in the app is now drawn as a `Deep`-coloured **rim** with the real **face**
+on top of it, offset by `depth.press`. Pressing translates the face down by exactly that
+number, so the rim is swallowed and the object looks pushed into the page. The container
+reserves the rim as padding, so pressing a button never moves anything around it.
+
+The travel is **instant, not animated**. A key does not ease into its own keycap, and 150 ms
+of spring on the way down is the difference between mechanical and laggy. It also means there
+is no animation to suppress under reduce-motion: a press is a state change, which SPEC §47
+exempts, not a decorative transition.
+
+`Button`, `Card`, `IconButton` and `RewardCoin` all share it.
+
+**A palette that separates paint from ink** — `src/theme/colors.ts`
+
+The whole risk of a saturated style is that saturated colour cannot carry small text: a
+golden-yellow dark enough to read as a word has stopped being golden. So every colour now
+declares which job it has. Tokens ending in `Fill`, `Glow` or `Deep`, and the gamification
+accents, are **paint** — held to 3:1 (WCAG 1.4.11). Everything else may end up under a word
+and is held to 4.5:1 (1.4.3).
+
+That let the primary be a genuine cobalt (`#1C5FF5`) rather than a compromise: 5.2:1 against
+white in **both** directions, so the same blue works as a button fill under white text and as
+a link on a white card. A brighter sky blue can do neither.
+
+New tokens: `challenge` (the Daily Challenge needs its own heat — two blue buttons of equal
+weight on one screen read as the same action twice), `successFill`, `surfaceDeep`, `xpGlow`,
+`onGold`, and per-theme `*Pressed` shades.
+
+**The contrast test caught a real defect, again**
+
+Reusing the light theme's pressed shades in dark mode put **dark ink on a dark held button**:
+`textInverse` on `dangerDeep` measured **1.92:1**. The failure only exists while a finger is
+down, which is exactly the state nobody screenshots. Dark mode now presses _lighter_, the same
+direction `primaryPressed` always went there, and the pressed state of every variant is
+asserted.
+
+**Icons are drawn, and prove they are visible** — `src/components/ui/GameIcon.tsx`
+
+Six cartoony icons (flame, heart, coin, bolt, star, trophy) built as SVG: a saturated face, a
+darker rim, and a white glint always in the upper left, because a shape lit from two
+directions looks flat. Deliberately **not emoji** — emoji render as a different picture on
+every OS version, are announced literally by screen readers, and cannot be recoloured for dark
+mode.
+
+Their colour policy is exported as token _names_, so the contrast test can assert the rule
+they actually rely on: in every theme, at least one of face or rim clears 3:1 against every
+surface the icon lands on. Which one does the work flips with the theme — the rim in light,
+the face in dark — and requiring both would have banned the bright faces the style is made of.
+
+**Nunito replaces Inter**, and `typography.score` (Nunito Black, 34pt) exists for numbers that
+are meant to feel earned. Inter was uninstalled rather than left in the bundle. Nunito covers
+Latin Extended-A, so SPEC §38's Romanian comma-below diacritics exist — still to be confirmed
+visually when the locale ships.
+
+**Home, rebuilt** — `src/features/home/components/`
+
+Header with the greeting and three round toggles; `PlayerCard` (level in a solid puck, XP as a
+score, streak, lives as draining hearts); `GoalCard` that turns gold when the goal is met;
+`NextLessonCard` with the largest button in the app; `ChallengeCard` in orange with the reward
+as a physical coin. Then course progress and practice.
+
+The order is the argument: who you are, how today is going, the one thing to do now, the extra
+thing, then the slower context. Nothing below the challenge has to be read to start.
+
+**Wireframe icons are gone.** 37 files swept from `-outline` to filled. Three names were
+protected and commented in place — `ellipse-outline`, `square-outline` and `heart-outline` are
+the _empty_ states of a radio, a checkbox and a spent life, and filling them would tell the
+learner they had already chosen something.
+
+**Native colour updated too.** `app.config.ts` carried the old palette in the splash, the
+adaptive icon and the notification tint. Those are evaluated by the Expo CLI at build time and
+cannot read the theme, so they are duplicated by hand with a comment saying so — otherwise the
+first thing a user sees is the old white flashing into the new cream.
+
+### Restyle verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+format      prettier --write ......... clean
+unit        jest ..................... 70 suites, 1170 tests, all passing
+contrast    118 assertions ........... both themes, including every pressed state
+bundle      expo export (android) .... succeeds, fonts bundled
+database    supabase test db ......... unchanged (no migration)
+```
+
+## Decisions and interpretations made during the restyle
+
+1. **The rim is a hard offset, never a blur.** A blurred shadow says "floating above"; an
+   offset says "solid, with a side". Mixing the two in one app reads as two design systems.
+2. **The press does not animate.** See above — and it removes the only place this style would
+   have had to negotiate with reduce-motion.
+3. **Progress fills are exempt from 3:1, and the test says why.** A fill bright enough for this
+   style cannot reach 3:1 against any track light enough to sit on a white card; that is
+   arithmetic. What 1.4.11 requires is that the _component_ be identifiable, which the track's
+   `borderStrong` outline does at 3.7:1, and the value is never colour-only — every bar in the
+   app renders a text label and exposes `accessibilityValue`.
+4. **`onGold` does not flip with the theme.** It is ink for text drawn on a coin, and the coin
+   is bright in both themes. It is deliberately not reused on `warningSurface`, which does
+   flip.
+5. **Button labels are uppercased visually, never in the accessibility label.** The face uses
+   `textTransform`; the label keeps its own casing, so a screen reader does not spell it out.
+6. **The language toggle ships hidden.** SPEC §29 and §38 keep language hidden until a second
+   locale exists, and `showLanguageToggle` derives that from the shipped i18n resources rather
+   than a flag — so it appears the day Romanian lands, already sized into the layout, instead
+   of a release later.
+7. **The greeting has a name-free form.** Guest mode is on by default (D1), so "Hello !" would
+   have been the first thing most new users read. Two i18n keys, not one key with an empty
+   interpolation.
+8. **Lives drain rather than disappear.** A row that shrinks tells you how many you have; a row
+   that drains tells you how many you have _lost_, which is what the system is for.
+9. **Home hides the navigator's header.** It draws its own with the greeting and the toggles,
+   so the built-in one was the word "Home" twice.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -1782,6 +1909,18 @@ Rewritten at the end of each phase, so this describes the product as it stands t
   2.5 s and 60 fps navigation need a release build on a mid-range Android phone; what is
   enforced today is the lesson payload budget and the one screen that rendered thirty
   syntax-highlighted snippets at once.
+- **The restyle is unseen on hardware.** Every claim above is from tests, a typecheck and a
+  successful bundle. The 3D press, the rounded font, the drawn icons and the warm
+  background have not been looked at on a phone in either theme — that is the whole of the
+  device checklist below.
+- **Only Home was rebuilt.** Learn, Leaderboard, Profile, the lesson player, practice, the
+  exam and the paywall inherit the new tokens — chunky cards, 3D buttons, the new palette,
+  filled icons — but their layouts were not redesigned for the style. SPEC §13 specified
+  Home and only Home; the others will look restyled rather than designed until they get the
+  same treatment.
+- **Nunito's Romanian diacritics are unverified.** The font covers Latin Extended-A, so
+  ș and ț exist, but whether they render as comma-below rather than cedilla (SPEC §38)
+  needs a look on device once a Romanian string exists.
 - **Large text and screen reader have been reasoned about, not used.** Every animation
   respects reduce-motion, every control carries a role and a label, and the one clipping
   layout found is fixed — but a real VoiceOver and TalkBack pass is on the device
@@ -2742,3 +2881,64 @@ it, and the theme was confirmed to survive a force-stop.
     a white screen while the code snippets are highlighted.
 17. Cold start from a killed app to a usable Home: under 2.5 seconds on a mid-range phone
     (SPEC §45). Note the number rather than guessing — a release build, not the dev client.
+
+---
+
+## Restyle device checklist (SPEC §57)
+
+**Needs a new build** — Nunito is a native asset and the splash colours changed, so the
+JavaScript bundle alone will not show this.
+
+**The press is the whole style**
+
+1. Open the dev gallery (`/gallery`). Press and HOLD each button in turn. The face must travel
+   down onto its rim and the rim must disappear — not fade, not scale, not blur. Release: it
+   pops straight back.
+2. Hold a button and drag your finger off it. It returns to the raised state without firing.
+3. Press the round toggles at the top of Home. Same travel, same distance.
+4. Nothing around a pressed button moves. If the layout shifts by a few pixels, the rim is not
+   being reserved as padding.
+
+**Colour and font**
+
+5. The background is warm cream, not white, and the white cards visibly sit on top of it.
+6. Headings and numbers are rounded and heavy. If anything looks like the old Inter, the font
+   failed to load — check for a reflow right after the splash.
+7. The XP total on Home is set in the heaviest weight in the app and reads as a score.
+8. Switch to dark mode with the moon button. The raised things are still raised: a lighter face
+   over a darker rim. Nothing should look flat or inverted.
+9. In dark mode, press and hold a red (danger) and a green (success) button. **The label stays
+   readable while held.** This is the defect the contrast test caught; confirm it with eyes.
+
+**Home**
+
+10. The greeting reads "Hello <your name>! Ready to play?". Continue as a guest instead: it
+    reads "Ready to play?" with no stray punctuation.
+11. There is **no** language toggle. Only theme and settings.
+12. The level sits in a solid coloured puck. The hearts are drawn hearts, not emoji — compare
+    against the emoji in your keyboard; they must not match.
+13. Spend a life. The heart drains to grey **in place**; the row does not get shorter.
+14. Reach the daily goal. The goal card turns gold and grows a trophy.
+15. The Daily Challenge card is warm, its button is orange, and the reward looks like a coin
+    with a raised edge.
+16. Claim the challenge. The coin becomes a tick and the button goes quiet.
+
+**Accessibility**
+
+17. Turn on the largest accessibility font size. Home header: the title and greeting take the
+    width and the three toggles wrap rather than squashing. Nothing is clipped.
+18. TalkBack/VoiceOver over the lives row: it announces once, as "4 lives left of 5" — not five
+    separate "heart" nodes.
+19. TalkBack over the CONTINUE button: it says "Continue", spoken as a word.
+20. Turn on Reduce Motion. Buttons still press down — that is deliberate. Progress bars jump to
+    their value instead of filling.
+21. In a question, an unanswered option still shows an **empty** ring or box. If those got
+    filled in the icon sweep, every option looks chosen.
+
+**The rest of the app**
+
+22. Walk through Learn, a lesson, the leaderboard, Profile and the paywall. These were not
+    redesigned, only re-tokened: look for text that has gone too big for its box, a card whose
+    new corner radius clips content, or an icon that changed meaning when it was filled.
+23. Open a code block. It is still monospace and still dark in both themes — the rounded font
+    must **not** have reached the code.

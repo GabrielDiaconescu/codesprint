@@ -8,7 +8,17 @@ export {
   type Palette,
   type SyntaxPalette,
 } from './colors';
-export { spacing, radius, typography, motion, elevation, a11y, pressed } from './tokens';
+export {
+  spacing,
+  radius,
+  typography,
+  motion,
+  depth,
+  elevation,
+  a11y,
+  pressed,
+  type Depth,
+} from './tokens';
 export { fontFamily, type FontFamily } from './fonts';
 export { useReducedMotion, useMotionDuration } from './useReducedMotion';
 export { useAppFonts } from './useAppFonts';

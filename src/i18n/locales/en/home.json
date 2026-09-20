@@ -1,5 +1,24 @@
 {
   "title": "Home",
+  "greeting": {
+    "named": "Hello {{name}}! Ready to play?",
+    "anonymous": "Ready to play?"
+  },
+  "toggles": {
+    "language": "Change language",
+    "themeLight": "Switch to light theme",
+    "themeDark": "Switch to dark theme",
+    "settings": "Open settings"
+  },
+  "xp": "XP",
+  "level": {
+    "short": "LVL"
+  },
+  "lives": {
+    "count_one": "{{count}} life left of {{max}}",
+    "count_other": "{{count}} lives left of {{max}}",
+    "unlimited": "Unlimited lives"
+  },
   "greetingNew": "Ready to start?",
   "greetingBack": "Welcome back",
   "startFirst": "Start your first lesson",
@@ -7,10 +26,12 @@
   "continueTitle": "Today's learning",
   "continueCta": "Continue",
   "startCta": "Start",
+  "lessonMeta": "{{module}} · {{minutes}} min",
   "allDoneTitle": "You have finished everything available",
   "allDoneBody": "More modules are on the way. Practice what you know in the meantime.",
   "goal": {
     "title": "Today's goal",
+    "metTitle": "Goal complete!",
     "progress": "{{earned}} / {{target}} XP today",
     "met": "Goal met. Anything more is a bonus."
   },

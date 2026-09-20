@@ -59,7 +59,7 @@ export const ExamTimer = ({ expiresAt, onExpired }: ExamTimerProps) => {
   if (expiresAt === null || remaining === null) {
     return (
       <View style={[styles.root, { gap: theme.spacing.xs }]}>
-        <Icon name="infinite-outline" size="sm" color={theme.colors.textSecondary} />
+        <Icon name="infinite" size="sm" color={theme.colors.textSecondary} />
         <Text variant="caption" tone="secondary">
           {t('timer.untimed')}
         </Text>
@@ -85,7 +85,7 @@ export const ExamTimer = ({ expiresAt, onExpired }: ExamTimerProps) => {
       accessibilityLiveRegion={tone === 'urgent' ? 'polite' : 'none'}
       style={[styles.root, { gap: theme.spacing.xs }]}
     >
-      <Icon name="time-outline" size="sm" color={colour} />
+      <Icon name="time" size="sm" color={colour} />
       <Text variant="bodyStrong" style={{ color: colour }}>
         {formatRemaining(remaining)}
       </Text>

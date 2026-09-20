@@ -41,4 +41,27 @@ describe('Button', () => {
     await renderWithTheme(<Button label="Delete account" variant="danger" onPress={() => {}} />);
     expect(screen.getByRole('button', { name: 'Delete account' })).toBeOnTheScreen();
   });
+
+  it('announces the label in its own casing, although the face is uppercased', async () => {
+    // The face uses textTransform for the look. If the accessibility label picked that up
+    // too, VoiceOver would spell "C-O-N-T-I-N-U-E" — the usual way this trick goes wrong.
+    await renderWithTheme(<Button label="Continue" onPress={() => {}} />);
+
+    expect(screen.getByLabelText('Continue')).toBeOnTheScreen();
+    expect(screen.queryByLabelText('CONTINUE')).toBeNull();
+  });
+
+  // One test per variant rather than a loop, so a broken tone names itself in the report
+  // instead of failing as "the button test". Cheap, but it is what would have caught a
+  // palette token renamed during the restyle and never re-rendered.
+  it.each(['primary', 'challenge', 'success', 'secondary', 'ghost', 'danger'] as const)(
+    'renders the %s variant and keeps it pressable',
+    async (variant) => {
+      const onPress = jest.fn();
+      await renderWithTheme(<Button label="Go" variant={variant} onPress={onPress} />);
+
+      fireEvent.press(screen.getByRole('button', { name: 'Go' }));
+      expect(onPress).toHaveBeenCalledTimes(1);
+    },
+  );
 });

@@ -60,7 +60,7 @@ export const QuestionPage = ({
     // empty card the learner cannot get past (SPEC §46).
     return (
       <View style={[styles.unrenderable, { gap: theme.spacing.md }]}>
-        <Icon name="alert-circle-outline" size="lg" color={theme.colors.warning} />
+        <Icon name="alert-circle" size="lg" color={theme.colors.warning} />
         <Text variant="body" tone="secondary" align="center">
           {t('question.unrenderable')}
         </Text>
@@ -121,7 +121,7 @@ export const QuestionPage = ({
 
       {submit.isError && !graded && (
         <View style={[styles.error, { gap: theme.spacing.sm }]} accessibilityRole="alert">
-          <Icon name="cloud-offline-outline" size="md" color={theme.colors.danger} />
+          <Icon name="cloud-offline" size="md" color={theme.colors.danger} />
           <Text variant="bodySmall" tone="danger" style={styles.flex}>
             {t('question.submitError')}
           </Text>

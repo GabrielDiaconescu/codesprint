@@ -28,7 +28,7 @@ export default function ForgotPasswordScreen() {
     return (
       <AuthScreen title={t('forgotPassword.sentTitle')}>
         <StateView
-          icon="mail-outline"
+          icon="mail"
           title={t('forgotPassword.sentTitle')}
           body={t('forgotPassword.sentBody', { email: sentTo })}
           actionLabel={t('forgotPassword.back')}

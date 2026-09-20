@@ -115,7 +115,7 @@ export const ExamResultsView = ({ results, onClose, onReview }: ExamResultsViewP
           testID="exam-review"
           label={t('results.review')}
           variant="secondary"
-          icon="reader-outline"
+          icon="reader"
           onPress={onReview}
           fullWidth
         />

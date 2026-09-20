@@ -78,7 +78,7 @@ export default function AuthCallbackScreen() {
       <Screen>
         <View style={styles.centre}>
           <StateView
-            icon="link-outline"
+            icon="link"
             tone="danger"
             title={t('callback.failedTitle')}
             body={errorMessage}

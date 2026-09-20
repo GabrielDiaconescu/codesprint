@@ -55,7 +55,7 @@ export default function ProgressScreen() {
         <Stack.Screen options={{ title: t('title') }} />
         <View style={styles.centre}>
           <StateView
-            icon="cloud-offline-outline"
+            icon="cloud-offline"
             tone="danger"
             title={t('error.title')}
             body={t('error.body')}
