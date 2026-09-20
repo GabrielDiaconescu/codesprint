@@ -4,10 +4,12 @@ module.exports = {
   // runtime. This resolver (shipped by the package) makes Jest pick the JS implementation.
   resolver: 'react-native-worklets/jest/resolver',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  // `@revenuecat/*` ships modern ESM that Jest cannot parse untransformed. It arrives as a
-  // transitive dependency of react-native-purchases, which the registry now imports.
+  // Packages that ship modern ESM Jest cannot parse untransformed:
+  //   * `@revenuecat/*`, a transitive dependency of react-native-purchases;
+  //   * `standard-navigation`, which expo-router imports — without it, no component that
+  //     navigates can be rendered in a test at all.
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*|@revenuecat/.*|react-native-google-mobile-ads)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*|@revenuecat/.*|react-native-google-mobile-ads|standard-navigation)',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',

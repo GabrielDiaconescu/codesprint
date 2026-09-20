@@ -1,7 +1,7 @@
 import { buildFromDisk } from '../build';
 import { allQuestions, loadContent } from '../load';
 import { collectRunnables } from '../runnables';
-import { runValidation, summarise } from '../validate';
+import { lessonPayloadBytes, runValidation, summarise } from '../validate';
 
 /**
  * Runs the pipeline against the REAL content on every `npm test`.
@@ -34,6 +34,23 @@ describe('the published content', () => {
   it('has been reviewed in full', () => {
     const stats = summarise(loadContent().courses);
     expect(stats.reviewed).toBe(stats.questions);
+  });
+
+  it('keeps every lesson inside the 50 KB payload budget (SPEC §45)', () => {
+    // A lesson arrives in one RPC response, often on a phone on mobile data. `validate`
+    // enforces the ceiling; this names the worst offender, so Phase 19 sees the headroom
+    // shrinking rather than discovering it gone.
+    const largest = loadContent()
+      .courses.flatMap((course) => course.modules)
+      .flatMap((module) => module.lessons)
+      .map((lesson) => ({ file: lesson.file, kb: lessonPayloadBytes(lesson.data) / 1024 }))
+      .sort((a, b) => b.kb - a.kb)[0];
+
+    expect(largest).toBeDefined();
+    expect({ file: largest?.file, under50KB: (largest?.kb ?? 0) < 50 }).toEqual({
+      file: largest?.file,
+      under50KB: true,
+    });
   });
 });
 

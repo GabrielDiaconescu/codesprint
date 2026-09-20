@@ -71,11 +71,14 @@ export const TextField = ({
   const [focused, setFocused] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
+  // A text field is identified by its outline and nothing else, which makes that outline a
+  // user interface component under WCAG 1.4.11 and puts it at 3:1 — `border`, the decorative
+  // one used for cards, is 1.25:1 (SPEC §47).
   const borderColor = error
     ? theme.colors.danger
     : focused
       ? theme.colors.primary
-      : theme.colors.border;
+      : theme.colors.borderStrong;
 
   return (
     <View style={{ gap: theme.spacing.xs }}>

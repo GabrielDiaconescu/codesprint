@@ -1,0 +1,35 @@
+{
+  "appearance": {
+    "title": "Appearance",
+    "theme": {
+      "label": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "haptics": {
+      "label": "Vibration",
+      "description": "A short buzz when an answer is right or wrong."
+    }
+  },
+  "subscription": {
+    "title": "Subscription",
+    "plan": {
+      "free": "Free",
+      "no_ads": "No Ads",
+      "premium": "Premium"
+    },
+    "lifetime": "Yours for good — no renewal.",
+    "active": "Your subscription is active.",
+    "renews": "Renews on {{date}}.",
+    "expires": "Access runs until {{date}}.",
+    "none": "You are on the free plan. Ads support the lessons.",
+    "upgrade": "See plans",
+    "restore": "Restore purchases",
+    "manage": "Manage subscription"
+  },
+  "about": {
+    "title": "About",
+    "version": "Version {{value}}"
+  }
+}

@@ -12,6 +12,10 @@ import {
   useRefreshEntitlements,
 } from '@/features/paywall/hooks/useEntitlements';
 import { useCapture, useCaptureOnce } from '@/features/analytics/hooks/useAnalytics';
+import {
+  useManageSubscriptionUrl,
+  useRestorePurchases,
+} from '@/features/subscriptions/hooks/useSubscription';
 import { annualSavingPercent, buildPlans, type Plan } from '@/features/paywall/logic/plans';
 import { PAYWALL_TRIGGERS, type PaywallTrigger } from '@/features/paywall/logic/prompts';
 import { getEnv } from '@/lib/env';
@@ -55,6 +59,8 @@ export default function PaywallScreen() {
   const offerings = useOfferings();
   const { data: entitlements } = useEntitlements();
   const refresh = useRefreshEntitlements();
+  const { restore, isRestoring } = useRestorePurchases();
+  const manageUrl = useManageSubscriptionUrl();
   const [busyRole, setBusyRole] = useState<string | null>(null);
 
   // Once per open, whatever re-renders happen while offerings load — otherwise the
@@ -92,24 +98,6 @@ export default function PaywallScreen() {
         capture('purchase_failed', { product: plan.role });
         showToast({ message: t('purchase.failed'), tone: 'error' });
       })
-      .finally(() => setBusyRole(null));
-  };
-
-  const restore = () => {
-    setBusyRole('restore');
-    capture('restore_started');
-
-    void services.billing
-      .restorePurchases()
-      .then(async () => {
-        const restored = await refresh.mutateAsync();
-        capture('restore_completed', { restored: restored.active.length });
-        showToast({
-          message: restored.active.length > 0 ? t('restore.done') : t('restore.nothing'),
-          tone: restored.active.length > 0 ? 'success' : 'info',
-        });
-      })
-      .catch(() => showToast({ message: t('restore.failed'), tone: 'error' }))
       .finally(() => setBusyRole(null));
   };
 
@@ -187,7 +175,7 @@ export default function PaywallScreen() {
             label={t('restore.action')}
             variant="secondary"
             icon="refresh-outline"
-            loading={busyRole === 'restore'}
+            loading={isRestoring}
             onPress={restore}
             fullWidth
           />
@@ -196,7 +184,9 @@ export default function PaywallScreen() {
             label={t('manage')}
             variant="ghost"
             icon="open-outline"
-            onPress={() => void Linking.openURL(t('manageUrl'))}
+            // Hidden rather than pointed at a guess when there is no store to open.
+            disabled={manageUrl === null}
+            onPress={() => manageUrl && void Linking.openURL(manageUrl)}
             fullWidth
           />
         </View>

@@ -89,7 +89,14 @@ export const LeaderboardRowItem = ({ row, isMe, onReport }: LeaderboardRowItemPr
           accessibilityLabel={t('report.action', { name: row.display_name })}
           hitSlop={12}
           onPress={() => onReport(row)}
-          style={({ pressed }) => [styles.report, { opacity: pressed ? 0.6 : 1 }]}
+          style={({ pressed }) => [
+            styles.report,
+            {
+              width: theme.a11y.minTouchTarget,
+              height: theme.a11y.minTouchTarget,
+              opacity: pressed ? 0.6 : 1,
+            },
+          ]}
         >
           <Icon name="ellipsis-horizontal" size="sm" color={theme.colors.textSecondary} />
         </Pressable>
@@ -102,6 +109,7 @@ const styles = StyleSheet.create({
   root: { flexDirection: 'row', alignItems: 'center' },
   rank: { minWidth: 34, alignItems: 'center' },
   name: { flex: 1 },
-  // 44x44 is the iOS minimum target; the icon itself is far smaller (SPEC §47).
-  report: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  // Sized from the theme's target, which is 48 — the ANDROID minimum, and the larger of the
+  // two the spec names. A hardcoded 44 met iOS and missed Android (SPEC §47).
+  report: { alignItems: 'center', justifyContent: 'center' },
 });

@@ -98,7 +98,12 @@ export const NoopAdService: AdService = {
   },
 };
 
-const NO_ENTITLEMENTS: CustomerEntitlements = { active: [], isAdFree: false, isPremium: false };
+const NO_ENTITLEMENTS: CustomerEntitlements = {
+  active: [],
+  isAdFree: false,
+  isPremium: false,
+  managementUrl: null,
+};
 
 export const NoopBillingService: BillingService = {
   serviceName: 'BillingService',

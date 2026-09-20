@@ -2,18 +2,20 @@ import { Link, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { Button, PlaceholderState, Screen, SkeletonLines } from '@/components/ui';
+import { Button, Screen, SkeletonLines } from '@/components/ui';
 import { SessionCard } from '@/features/auth/components/SessionCard';
 import { PrivacySettingsCard } from '@/features/analytics/components/PrivacySettingsCard';
 import { LeaderboardSettingsCard } from '@/features/leaderboard/components/LeaderboardSettingsCard';
 import { ReminderSettingsCard } from '@/features/notifications/components/ReminderSettingsCard';
+import { AboutCard } from '@/features/settings/components/AboutCard';
+import { AppearanceSettingsCard } from '@/features/settings/components/AppearanceSettingsCard';
+import { SubscriptionCard } from '@/features/subscriptions/components/SubscriptionCard';
 import { LevelCard } from '@/features/progress/components/LevelCard';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useUserStats } from '@/features/progress/hooks/useProgress';
 import { useTheme } from '@/theme';
 
 export default function ProfileScreen() {
-  const { t } = useTranslation('profile');
   const { t: progress } = useTranslation('progress');
   const theme = useTheme();
   const router = useRouter();
@@ -48,7 +50,11 @@ export default function ProfileScreen() {
           />
         )}
 
+        <SubscriptionCard />
+
         {profile && <ReminderSettingsCard profile={profile} />}
+
+        <AppearanceSettingsCard />
 
         {profile && <LeaderboardSettingsCard profile={profile} />}
 
@@ -63,7 +69,7 @@ export default function ProfileScreen() {
           fullWidth
         />
 
-        <PlaceholderState title={t('placeholder.title')} body={t('placeholder.body')} />
+        <AboutCard />
       </ScrollView>
 
       {/* Development-only entry point to the design-system gallery (SPEC §57, Phase 2).

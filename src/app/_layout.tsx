@@ -21,6 +21,7 @@ import { getEnv } from '@/lib/env';
 import { createQueryClient } from '@/lib/queryClient';
 import { assertNoNoopServicesInProduction, services } from '@/services';
 import { useSessionStore } from '@/store/sessionStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { ThemeProvider, useAppFonts, useTheme } from '@/theme';
 
 initI18n();
@@ -156,9 +157,15 @@ export default function RootLayout() {
   useAuthBootstrap();
   const sessionResolved = useSessionStore((state) => state.status !== 'loading');
 
+  // Read before the first frame, not after it: applying a stored dark theme one render late
+  // is a flash of white that the user reads as the app being broken (SPEC §29).
+  const settingsHydrated = useSettingsStore((state) => state.hydrated);
+  const hydrateSettings = useSettingsStore((state) => state.hydrate);
+
   useEffect(() => {
+    void hydrateSettings();
     void services.config.initialize();
-  }, []);
+  }, [hydrateSettings]);
 
   useEffect(() => {
     // A font failure must not leave the user on a permanent splash screen: report it and
@@ -168,7 +175,7 @@ export default function RootLayout() {
     }
   }, [fontError]);
 
-  const ready = (fontsLoaded || fontError) && sessionResolved;
+  const ready = (fontsLoaded || fontError) && sessionResolved && settingsHydrated;
 
   useEffect(() => {
     if (ready) void SplashScreen.hideAsync();

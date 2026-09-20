@@ -16,4 +16,3 @@ export { CodeBlock, type CodeBlockProps } from './CodeBlock';
 export { AnswerFeedback, type AnswerFeedbackProps } from './AnswerFeedback';
 export { BottomSheet, type BottomSheetProps } from './BottomSheet';
 export { ToastHost } from './ToastHost';
-export { PlaceholderState } from './PlaceholderState';

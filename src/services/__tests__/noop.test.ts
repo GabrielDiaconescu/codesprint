@@ -26,7 +26,13 @@ describe('no-op services', () => {
 
   it('grants no entitlements', async () => {
     const info = await NoopBillingService.getCustomerInfo();
-    expect(info).toEqual({ active: [], isAdFree: false, isPremium: false });
+    expect(info).toEqual({
+      active: [],
+      isAdFree: false,
+      isPremium: false,
+      // No customer, so nothing to manage — the Settings button hides itself (SPEC §29).
+      managementUrl: null,
+    });
   });
 
   it('serves bundled config defaults so the app boots without a network', () => {

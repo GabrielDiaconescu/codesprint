@@ -57,7 +57,6 @@
     "failed": "Could not restore purchases. Please try again."
   },
   "manage": "Manage subscription",
-  "manageUrl": "https://apps.apple.com/account/subscriptions",
   "unavailable": {
     "title": "Could not load the plans",
     "body": "We show prices straight from the store, so there is nothing to show until it answers. Check your connection and try again."

@@ -19,21 +19,35 @@ export interface BadgeProps {
  *
  * Tone always pairs colour with a label, and optionally an icon, so meaning never depends on
  * colour alone (SPEC §47).
+ *
+ * The label and the icon may be different colours, and for the gamification tones they are.
+ * WCAG asks 4.5:1 of text and 3:1 of a graphic (1.4.3, 1.4.11), and the orange that makes a
+ * flame read as a flame is not dark enough to be read as a word — `streak` on the warm badge
+ * surface is 3.1:1. So the flame keeps the accent and the label takes a colour that can
+ * actually be read.
  */
 export const Badge = ({ label, tone = 'neutral', icon, testID }: BadgeProps) => {
   const theme = useTheme();
 
-  const tones: Record<BadgeTone, { background: string; foreground: string }> = {
+  const tones: Record<BadgeTone, { background: string; foreground: string; graphic?: string }> = {
     neutral: { background: theme.colors.border, foreground: theme.colors.textSecondary },
     accent: { background: theme.colors.primary, foreground: theme.colors.onPrimary },
     success: { background: theme.colors.successSurface, foreground: theme.colors.success },
     danger: { background: theme.colors.dangerSurface, foreground: theme.colors.danger },
     warning: { background: theme.colors.warningSurface, foreground: theme.colors.warning },
-    streak: { background: theme.colors.warningSurface, foreground: theme.colors.streak },
-    xp: { background: theme.colors.warningSurface, foreground: theme.colors.xp },
+    streak: {
+      background: theme.colors.warningSurface,
+      foreground: theme.colors.warning,
+      graphic: theme.colors.streak,
+    },
+    xp: {
+      background: theme.colors.warningSurface,
+      foreground: theme.colors.warning,
+      graphic: theme.colors.xp,
+    },
   };
 
-  const { background, foreground } = tones[tone];
+  const { background, foreground, graphic } = tones[tone];
 
   return (
     <View
@@ -49,7 +63,7 @@ export const Badge = ({ label, tone = 'neutral', icon, testID }: BadgeProps) => 
         },
       ]}
     >
-      {icon && <Icon name={icon} size="sm" color={foreground} />}
+      {icon && <Icon name={icon} size="sm" color={graphic ?? foreground} />}
       <Text variant="label" style={{ color: foreground }}>
         {label}
       </Text>

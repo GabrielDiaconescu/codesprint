@@ -17,6 +17,11 @@ export const useAppConfig = () =>
     // Bundled defaults render instantly on first launch; the fetched values replace them.
     // Always present, never undefined: SPEC §50 requires the app to work on its own defaults
     // before any network call, so every caller can read `data` without a null branch.
+    //
+    // `initialDataUpdatedAt: 0` marks those defaults as already stale, so the real config is
+    // fetched straight away. Without it the defaults would be treated as freshly fetched and
+    // every flag — including the force-update version — would be five minutes late.
+    initialDataUpdatedAt: 0,
     initialData: () =>
       ({
         ads_enabled: services.config.get('ads_enabled'),

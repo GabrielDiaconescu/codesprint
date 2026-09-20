@@ -19,6 +19,7 @@ import paywall from './locales/en/paywall.json';
 import privacy from './locales/en/privacy.json';
 import profile from './locales/en/profile.json';
 import progress from './locales/en/progress.json';
+import settings from './locales/en/settings.json';
 
 /**
  * i18n setup (SPEC §38).
@@ -47,6 +48,7 @@ export const resources = {
     privacy,
     profile,
     progress,
+    settings,
   },
 } as const;
 

@@ -17,6 +17,15 @@ import { allQuestions, loadContent, type Issue, type LoadedCourse } from './load
 const MIN_QUESTIONS_PER_LESSON = 4;
 const MAX_QUESTIONS_PER_LESSON = 8;
 
+/**
+ * SPEC §45: a lesson payload stays under 50 KB.
+ *
+ * Measured here rather than on a device, because by the time a lesson feels slow it has
+ * already been written, reviewed and published. The number is what `get_lesson` sends — the
+ * blocks and the questions WITHOUT their answer keys, which never leave the server (§40).
+ */
+const MAX_LESSON_PAYLOAD_BYTES = 50 * 1024;
+
 /** SPEC §35, development seed. Launch volume (§19) is checked separately in Phase 19. */
 const SEED_MIN_MODULES = 2;
 const SEED_MIN_EXAM_POOL = 30;
@@ -189,6 +198,25 @@ export const runValidation = (root?: string): Issue[] => {
     }
   }
 
+  /* ------------------------------------------------------------------ payload size */
+
+  for (const course of courses) {
+    for (const module of course.modules) {
+      for (const lesson of module.lessons) {
+        const bytes = lessonPayloadBytes(lesson.data);
+
+        if (bytes > MAX_LESSON_PAYLOAD_BYTES) {
+          add(
+            lesson.file,
+            `lesson payload is ${Math.round(bytes / 1024)} KB, over the ${
+              MAX_LESSON_PAYLOAD_BYTES / 1024
+            } KB budget (SPEC §45) — split it or shorten the code samples`,
+          );
+        }
+      }
+    }
+  }
+
   for (const entry of questions) {
     const where = `question ${entry.question.id}`;
     checkText(entry.file, `${where}.prompt`, entry.question.prompt);
@@ -233,6 +261,21 @@ export const runValidation = (root?: string): Issue[] => {
 };
 
 /** Counts worth printing on success, so a green run still says what it checked. */
+/**
+ * What one lesson costs a phone on a slow connection.
+ *
+ * Answer keys are removed before measuring because they are never sent — counting them would
+ * budget for bytes that do not travel, and would make a lesson look expensive for being well
+ * covered by questions.
+ */
+export const lessonPayloadBytes = (lesson: unknown): number => {
+  const withoutAnswers = JSON.stringify(lesson, (key, value: unknown) =>
+    key === 'answer' || key === 'accepted_answers' ? undefined : value,
+  );
+
+  return Buffer.byteLength(withoutAnswers, 'utf8');
+};
+
 export const summarise = (courses: LoadedCourse[]) => {
   const questions = allQuestions(courses);
   return {

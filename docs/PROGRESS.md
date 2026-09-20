@@ -2,37 +2,37 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 17 complete — awaiting approval for Phase 20 (Polish,
-accessibility, performance). Agreed order from here: **17 → 20 → 21**, with Phase 19
-(content to launch volume) running in parallel because it is long, and Phase 18 once a
-domain exists.
-**Last updated:** 2026-09-19
+**Current phase:** Phase 20 complete — awaiting approval for Phase 21 (E2E & regression
+hardening). Agreed order from here: **20 → 21**, with Phase 19 (content to launch volume)
+running in parallel because it is long, and Phase 18 once a domain exists.
+**Last updated:** 2026-09-20
 
 ---
 
 ## Phase status
 
-| Phase | Scope                                | Status                                |
-| ----- | ------------------------------------ | ------------------------------------- |
-| 0     | Human prerequisites & open decisions | **In progress** (parallel, see below) |
-| 1     | Project setup & architecture         | **Complete** — device check deferred  |
-| 2     | Design system                        | **Complete** — pending device check   |
-| 3     | Database foundation                  | **Complete** — pending device check   |
-| 4     | Authentication                       | **Complete** — pending device check   |
-| 5     | Onboarding, age gate, consent        | **Complete** — pending device check   |
-| 6     | Content pipeline & development seed  | **Complete** — pending device check   |
-| 7     | Course & lesson engine               | **Complete** — pending device check   |
-| 8     | Question engine & grading RPCs       | **Complete** — pending device check   |
-| 9     | XP, levels, progress                 | **Complete** — pending device check   |
-| 10    | Streak, lives, achievements          | **Complete** — pending device check   |
-| 11    | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
-| 12    | Leaderboard, display names, reports  | **Complete** — pending device check   |
-| 13    | Exam mode                            | **Complete** — pending device check   |
-| 14    | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
-| 15    | Ads, consent, rewarded rewards       | **Complete** — pending device check   |
-| 16    | Analytics + monitoring               | **Complete** — pending device check   |
-| 17    | Local notifications                  | **Complete** — pending device check   |
-| 18–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| Phase         | Scope                                | Status                                |
+| ------------- | ------------------------------------ | ------------------------------------- |
+| 0             | Human prerequisites & open decisions | **In progress** (parallel, see below) |
+| 1             | Project setup & architecture         | **Complete** — device check deferred  |
+| 2             | Design system                        | **Complete** — pending device check   |
+| 3             | Database foundation                  | **Complete** — pending device check   |
+| 4             | Authentication                       | **Complete** — pending device check   |
+| 5             | Onboarding, age gate, consent        | **Complete** — pending device check   |
+| 6             | Content pipeline & development seed  | **Complete** — pending device check   |
+| 7             | Course & lesson engine               | **Complete** — pending device check   |
+| 8             | Question engine & grading RPCs       | **Complete** — pending device check   |
+| 9             | XP, levels, progress                 | **Complete** — pending device check   |
+| 10            | Streak, lives, achievements          | **Complete** — pending device check   |
+| 11            | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
+| 12            | Leaderboard, display names, reports  | **Complete** — pending device check   |
+| 13            | Exam mode                            | **Complete** — pending device check   |
+| 14            | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
+| 15            | Ads, consent, rewarded rewards       | **Complete** — pending device check   |
+| 16            | Analytics + monitoring               | **Complete** — pending device check   |
+| 17            | Local notifications                  | **Complete** — pending device check   |
+| 20            | Polish, accessibility, performance   | **Complete** — pending device check   |
+| 18, 19, 21–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -1598,6 +1598,109 @@ database    supabase test db ......... unchanged (no migration in this phase)
 9. **The notification icon reuses the monochrome adaptive layer.** Android draws the icon from
    its alpha channel only; a full-colour app icon arrives as a white square.
 
+## Phase 20 — what was implemented (Polish, accessibility, performance)
+
+No database changes. Three defects were found by measuring things that had only been claimed.
+
+**Contrast is now arithmetic, not a comment** — `src/theme/contrast.ts`
+
+The palettes carried a comment saying they met WCAG AA. Measuring every pair the app actually
+renders found three that did not, all in the light theme:
+
+- `success` on `successSurface` was **4.39:1** — under AA for the label inside a success
+  badge, which is exactly where that pair is used. Darkened to 5.8:1.
+- the **streak** and **xp** badge labels were **3.1:1** and **4.35:1**. The fix was not a
+  darker orange — an orange dark enough to read as a word is no longer an orange. `Badge` now
+  colours the label and the icon separately: the flame keeps the accent (a graphic needs 3:1,
+  WCAG 1.4.11) and the label takes a colour that can be read (4.5:1, 1.4.3).
+- a text field's outline was **1.25:1** against the surface. A field is identified by its
+  outline and nothing else, which makes it a user interface component under 1.4.11 — so there
+  is now a separate `borderStrong` at 3.3:1 for controls, while cards keep the light
+  decorative edge.
+
+76 assertions cover it, in both themes, including every syntax colour on the code surface.
+
+**Two touch and text fixes**
+
+- The leaderboard's report button was 44×44 — the iOS minimum, missing Android's 48dp. It now
+  comes from the theme token, which is the larger of the two.
+- A module's number sat in a fixed 32×32 box. It is text, so it grew with the OS font size and
+  clipped "01" to "0" at the larger accessibility sizes. Minimum size and padding instead.
+
+**A paying customer was shown as free for the first minute after every launch**
+
+`useEntitlements` and `useAppConfig` both supply placeholder data so no screen has to branch
+on `undefined`. TanStack treats `initialData` as _freshly fetched_, so with a `staleTime` it
+skipped the request entirely — 60 seconds for entitlements, 5 minutes for remote config,
+including `min_supported_app_version`. `initialDataUpdatedAt: 0` marks the placeholder as
+already stale: render it now, fetch immediately. Access control was never affected — it is
+server-side — but the paywall was offering plans to people who already owned them.
+
+**Manage subscription sent Android customers to Apple**
+
+The URL was a hardcoded Apple link in a translation file. It now comes from RevenueCat's
+`managementURL`, which is right for the store the purchase was actually made in, with the
+platform's own subscriptions page as the fallback and no button at all when there is nowhere
+to send them. An app that makes cancelling hard gets a chargeback rather than a cancellation.
+
+**Settings, finished** (SPEC §29)
+
+Profile no longer ends in a placeholder. It carries subscription status (from the **server's**
+entitlements, so a purchase made on another device shows up), restore purchases — reachable
+without walking through an offer — manage subscription, reminders, theme, vibration, privacy,
+leaderboard visibility and the version line support asks for.
+
+Theme and vibration now **persist**, which they never did: they are read before the first
+frame, so a stored dark theme is not a flash of white.
+
+**Performance**
+
+- The exam review rendered all 30 questions at once, most with a code snippet, which meant
+  running the syntax highlighter thirty times before the first frame — on the screen that
+  appears the moment somebody finishes an exam. It is a windowed list now.
+- Lesson payloads have a **50 KB budget** (SPEC §45), enforced by `content:validate` and
+  reported by the test suite, so Phase 19 sees the headroom shrinking rather than discovering
+  it gone. The largest lesson today is well inside it.
+
+**Removed:** `PlaceholderState`, the "ships in a later phase" component. Its last user was the
+Profile screen, and there is nothing left to promise.
+
+### Phase 20 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+format      prettier --check ......... clean
+unit        jest ..................... 68 suites, 1099 tests, all passing
+content     content:validate ......... valid, and now inside the payload budget
+database    supabase test db ......... unchanged (no migration in this phase)
+bundle      expo export (android) .... succeeds
+```
+
+## Decisions and interpretations made during Phase 20
+
+1. **Contrast is a test, not a claim.** A colour nudged half a shade for looks is exactly the
+   change nobody re-measures, so the palette now fails the build instead of a user.
+2. **A label and an icon in the same badge may be different colours.** WCAG asks 4.5:1 of text
+   and 3:1 of a graphic; forcing one colour to satisfy both would have cost the brand accents.
+3. **`borderStrong` is separate from `border`.** Putting a 3:1 outline round every card would
+   make the whole app look boxed in; only controls that are identified by their outline need
+   it.
+4. **Device settings stay on the device.** Theme and vibration are not synced to `profiles`: a
+   tablet in dark mode and a phone in light mode is a preference, not a conflict.
+5. **No sound in V1.** SPEC §29 lists a sound setting, and `expo-audio` is in the stack, but
+   there are no audio assets and inventing them is not a code decision. A switch for something
+   that does not happen is worse than no switch, so the setting is absent rather than dead —
+   see the human actions below.
+6. **The version line carries the build number**, falling back to the environment name. Two
+   TestFlight builds share a version and differ only in the build, which is the one thing
+   support needs.
+7. **A Premium subscriber is offered nothing.** There is nothing above Premium, and an upgrade
+   button that leads to what they already own reads as a billing error.
+8. **Restore purchases lives in Settings as well as the paywall.** Somebody reinstalling has
+   already paid; making them look at an offer first to get their own purchase back is the kind
+   of thing that ends in a support email.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -1665,14 +1768,24 @@ Rewritten at the end of each phase, so this describes the product as it stands t
   scheduled; the deterministic pick covers it.
 - Onboarding does not let an intermediate learner choose a starting module (SPEC §11). Their
   answer is stored and unused; every module up to the free boundary is reachable anyway.
-- Profile still shows a placeholder for the rest of Settings (SPEC §29) — theme, sound,
-  account management and the legal links arrive with Phases 18 and 20. Reminders, privacy
-  and leaderboard visibility are done.
+- Settings is complete except for what Phase 18 owns: account management (change email or
+  password, link sign-in methods, export my data, delete account) and the legal links,
+  which wait for the pages they would point at.
 - Avatars are an initial on a colour derived from `avatar_key`, not preset artwork. No photo
   uploads in V1 by design (SPEC §29); the preset set is a content decision, not a code one.
-- Sounds (SPEC §29) are not wired; haptics are.
+- **No sounds (SPEC §29).** Haptics are wired and now have a working setting; audio has no
+  assets, and a toggle for silence would be a dead switch. Three or four short, licensed
+  sounds (correct, incorrect, level up) would make it a small change — see human actions.
 - `lottie-react-native` and `expo-image` are still not installed. Nothing has needed them:
   Reanimated covers the achievement unlock, and there are no remote images to load.
+- **The performance targets in SPEC §45 are unmeasured on hardware.** Cold start under
+  2.5 s and 60 fps navigation need a release build on a mid-range Android phone; what is
+  enforced today is the lesson payload budget and the one screen that rendered thirty
+  syntax-highlighted snippets at once.
+- **Large text and screen reader have been reasoned about, not used.** Every animation
+  respects reduce-motion, every control carries a role and a label, and the one clipping
+  layout found is fixed — but a real VoiceOver and TalkBack pass is on the device
+  checklist and has not happened.
 
 **Housekeeping:**
 
@@ -2561,3 +2674,56 @@ eas build --profile development --platform android
 11. Turn notifications off for CodeSprint in the phone's own settings, then return to the app.
     The switch is disabled and the card offers **Open phone settings**.
 12. Reinstall or clear the app's data and confirm nothing is left scheduled afterwards.
+
+---
+
+## Phase 20 device checklist (SPEC §57)
+
+The build from Phase 17 covers this — no native module was added.
+
+**Screen reader** (TalkBack on Android, VoiceOver on iOS)
+
+1. Swipe through Home. The streak, XP and lives are each announced with what they mean, not
+   as bare numbers.
+2. Answer a question wrong. The verdict is spoken as a word, not conveyed by the red alone.
+3. Swipe through a code block. It is reachable and announced, not skipped.
+4. On Learn, the course title is announced as a heading.
+5. In the leaderboard, each row reads as rank, name and XP in one phrase, and the report
+   button is announced as a button.
+
+**Large text**
+
+6. Set the system font to the largest accessibility size. Open Learn: the module numbers still
+   read as "01", "02" — not clipped to one digit.
+7. Home, the lesson player and the paywall all stay usable: nothing is cut off, no text sits
+   on top of other text, and every button is still reachable by scrolling.
+
+**Reduce motion**
+
+8. Turn on Reduce Motion. Finish a lesson: the achievement toast appears without sliding, the
+   progress bars jump rather than animate, and nothing is lost.
+
+**Theme and settings**
+
+9. Profile → Appearance. Switch to Dark, then Light, then System. The whole app follows
+   immediately.
+10. Force-quit the app and reopen it. **The theme you chose is still there** — this is the
+    part that never worked before.
+11. Turn Vibration off, answer a question wrong: no buzz. Turn it on: a buzz.
+12. Check the version line at the bottom of Profile shows a version and a build.
+
+**Subscription**
+
+13. With the Test Store customer that has Premium, Profile shows **Premium** and offers **no**
+    upgrade button — only restore and manage.
+14. Tap **Manage subscription** on Android. It opens Google Play's subscriptions page, not
+    Apple's.
+15. Tap **Restore purchases** from Profile as a free learner: "No previous purchases found",
+    in a neutral tone rather than an error.
+
+**Performance**
+
+16. Finish a 30-question exam and open the review. It opens immediately rather than pausing on
+    a white screen while the code snippets are highlighted.
+17. Cold start from a killed app to a usable Home: under 2.5 seconds on a mid-range phone
+    (SPEC §45). Note the number rather than guessing — a release build, not the dev client.

@@ -560,6 +560,14 @@ export interface CustomerEntitlements {
   active: EntitlementId[];
   isAdFree: boolean;
   isPremium: boolean;
+  /**
+   * Where this customer manages their subscription, as the STORE reports it (SPEC §29).
+   *
+   * From RevenueCat, so it is right for the store the purchase was actually made in — and
+   * null when there is nothing to manage. A hardcoded Apple URL would send every Android
+   * customer to a page that knows nothing about them.
+   */
+  managementUrl: string | null;
 }
 
 export type { ServerEntitlements } from './billing/entitlementSchema';

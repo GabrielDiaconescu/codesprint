@@ -25,6 +25,11 @@ export const useEntitlements = () => {
     queryFn: () => services.entitlements.get(),
     enabled: userId !== null,
     initialData: NO_SERVER_ENTITLEMENTS,
+    // Without this, TanStack treats `initialData` as having just been fetched and skips the
+    // request for the whole `staleTime` — a paying customer would be shown as free for the
+    // first minute after every launch. Zero means "this placeholder is already stale": render
+    // it now, fetch immediately.
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   });
 };

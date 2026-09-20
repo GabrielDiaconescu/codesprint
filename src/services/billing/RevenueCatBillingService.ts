@@ -48,6 +48,9 @@ const asEntitlements = (info: CustomerInfo): CustomerEntitlements => {
     // Premium grants both, so this is `no_ads OR premium` (SPEC §32).
     isAdFree: isPremium || active.includes('no_ads'),
     isPremium,
+    // Null for a customer with nothing active, and for a one-time purchase that has no
+    // subscription to manage.
+    managementUrl: info.managementURL,
   };
 };
 

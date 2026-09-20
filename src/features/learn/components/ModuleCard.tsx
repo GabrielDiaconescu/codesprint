@@ -81,9 +81,12 @@ export const ModuleCard = ({ module, onPress }: ModuleCardProps) => {
 
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center' },
+  // MIN rather than fixed: the module number is text, and text grows with the OS font size.
+  // A fixed 32x32 box clipped "01" to "0" at the larger accessibility sizes (SPEC §47).
   number: {
-    width: 32,
-    height: 32,
+    minWidth: 32,
+    minHeight: 32,
+    paddingHorizontal: 6,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
