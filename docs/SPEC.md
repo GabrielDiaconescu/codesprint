@@ -284,23 +284,47 @@ Rules:
 
 ---
 
-# 8. DESIGN SYSTEM
+# 8. DESIGN SYSTEM (PLAYFUL 3D GAMIFIED UI/UX)
 
-The UI must be modern, polished, minimal and mobile-first: clean, contemporary, friendly, technical but approachable, highly readable, strong hierarchy, subtle gamification, premium visual quality. It must not look like a generic educational template and must not copy another company's branding or proprietary UI.
+The UI must be highly gamified, vibrant, and addictive (similar to Duolingo). Do NOT use a generic or boring corporate template.
 
-Create:
+- Aesthetic: Playful, friendly, and dynamic. Focus on physical-looking UI elements that invite tapping.
+- Background: Warm cream or very light off-white (e.g., #F7F7F7) to make the white cards pop.
+- Colors: Highly saturated, vibrant core colors. Bright sky/cobalt blue for primary actions, fiery orange for challenges, and golden-yellow for stars/XP.
+- Shapes & Cards: Chunky solid white cards (100% opacity, no glassmorphism). Use exaggerated, highly rounded corners (pill shapes or heavy border-radius).
+- Buttons (CRITICAL): Buttons must look like physical, 3D pressable objects. Use a solid background color with a heavy, non-blurred bottom shadow of a darker shade (e.g., a blue button with a dark-blue bottom shadow). When pressed, the button should visually push down (translateY) to cover the shadow.
+- Typography: Use a friendly, rounded sans-serif font (e.g., Nunito, Varela Round, or a similar system equivalent) with heavy font-weights for headings and numbers.
+- Icons & Assets: Use large, cartoony, 3D-style icons. No thin wireframe icons.
 
-- design tokens: color, typography scale, spacing scale, radius, elevation, motion durations
-- icon system
-- buttons, cards, chips, progress bars and rings, badges
-- modal/bottom-sheet system, toast/snackbar system
-- loading (skeleton), empty and error states
-- **CodeBlock** component: monospace font, no wrapping, horizontal scroll, lightweight local Python syntax highlighter (no heavy web-oriented highlighting library), always left-to-right, screen-reader friendly
-- answer feedback panel (correct / incorrect / explanation / hint)
+## Retained requirements
 
-Support light and dark mode; dark mode must be designed intentionally, not inverted.
+The list above is art direction. The following are not aesthetic choices — other sections of this
+document and the shipped code depend on them, so they survive the restyle.
 
-Motion must respect the OS reduce-motion setting. Fonts must have licenses that allow app embedding (for example SIL OFL).
+- **Design tokens** remain the only place colour, typography scale, spacing, radius, elevation and
+  motion durations are defined. The style above is expressed by changing token values, not by
+  writing literals into screens.
+- **Component inventory:** buttons, cards, chips, progress bars and rings, badges; modal and
+  bottom-sheet system; toast/snackbar system; loading (skeleton), empty and error states.
+- **CodeBlock:** monospace font, no wrapping, horizontal scroll, lightweight local Python syntax
+  highlighter (no heavy web-oriented highlighting library), always left-to-right, screen-reader
+  friendly. Monospace is the one place the rounded display font does not apply — code must remain
+  aligned and unambiguous.
+- **Answer feedback panel** (correct / incorrect / explanation / hint).
+- **Light and dark mode**, both designed intentionally rather than inverted. §13 puts a theme
+  toggle on Home, so the 3D treatment must be authored twice: a raised surface in dark mode comes
+  from a lighter face and a darker rim, not from the light-mode shadow reused.
+- **Motion respects the OS reduce-motion setting** (§47). A button's press-down is a state change
+  and stays; decorative bounces, confetti and idle animation do not.
+- **Fonts must permit app embedding.** Nunito and Varela Round are both SIL OFL, so the
+  typography above is licensable as written.
+- **Contrast is measured, not claimed** (§47). Saturated fills are surfaces and graphics, which
+  need 3:1 (WCAG 1.4.11); text drawn on them still needs 4.5:1 (1.4.3). Where a vibrant colour
+  cannot carry a readable label, the label and the icon beside it take different colours — the
+  fill keeps the brand, the text keeps the ratio. Golden-yellow and fiery orange do not pass as
+  text colours on a light background at any saturation worth having.
+- **Do not copy another company's branding, mascot, character or trade dress.** The playful 3D
+  genre is open; a specific owned character, logo or screen is not.
 
 ---
 
@@ -362,29 +386,39 @@ Handle loading, invalid credentials, unverified email, network errors. Never sto
 
 ---
 
-# 13. HOME SCREEN
+# 13. HOME SCREEN (REDESIGN & UI/UX RULES)
 
-The most important screen. Display:
+The Home screen must feel like a fun game dashboard. Implement these exact UI specifications:
 
-- current streak, total XP, level, lives (Free/No Ads only)
-- today's goal as XP progress
-- primary CTA: continue learning (next lesson)
-- daily challenge card
-- course progress
-- practice CTA (review mistakes)
+- Header (Top Bar): 'Home' title on the left in a bold, rounded font. Below it, a playful welcome message: "Hello [Username]! Ready to play?".
+- Quick Toggles (Top Right): Group 3 chunky, circular mini-buttons:
+  1. Language Toggle (EN/RO).
+  2. Theme Toggle (Sun/Moon icon).
+  3. Settings (chunky gear icon).
+- Profile Card (Level & XP): Make this prominent. The Level indicator should be a bold, colorful badge. The XP progress bar should be thick, vibrant, and have a highlight on top to look cylindrical/3D. Highlight the Streak and Lives using large, brightly colored icons.
+- Goal Card: When a goal is met, the card should look like a glowing treasure/reward. The progress bar must be a thick, bright green pill.
+- Today's Learning Card: The lesson title should use a bold, legible font. The 'Continue' button MUST be a massive, primary blue 3D button with a heavy bottom shadow and a chunky play icon.
+- Daily Challenge Card: Give this card a warm, contrasting background (e.g., very light orange or yellow tint). The '+25 XP' reward must look like a physical golden coin or badge. The 'Start Challenge' button must be a vibrant orange 3D button with a lightning bolt.
 
-Example:
+## Retained requirements
 
-```
-HEADER        🔥 12 day streak   ⭐ 2,840 XP   ❤️ 4
-MAIN CARD     Today's Learning — Lesson 3.2: Type conversion   [ CONTINUE ]
-GOAL          ████████░░ 48 / 60 XP today
-PROGRESS      Python Fundamentals ████████░░ 72%
-SECONDARY     Daily Challenge — Loops   +25 XP   [ Start Challenge ]
-              Review mistakes (7)                 [ Practice ]
-```
-
-New users see a welcoming "Start your first lesson" state. The Home screen must never feel empty and must never show a blank screen while loading (skeletons).
+- **Lives are shown to Free and No Ads users only.** Premium has unlimited lives (§22); a row of
+  five hearts that can never go down is noise on the most important screen.
+- **Course progress** and the **practice CTA** ("Review mistakes", with a count) stay on Home.
+  Practice is how a learner who has run out of lesson time still does something (§23).
+- **A new user sees a welcoming "Start your first lesson" state.** Home must never feel empty and
+  must never show a blank screen while loading — skeletons, not spinners on white.
+- **"Hello [Username]" needs a guest form.** Guest mode is on by default (D1) and a guest has no
+  display name, so the greeting falls back to a name-free variant rather than rendering
+  "Hello !". Both variants are i18n keys (§38) — the exclamation and the word order are not
+  ours to hardcode.
+- **Icons are assets, not emoji characters.** Emoji render differently on every OS version, are
+  announced literally by screen readers, and cannot be recoloured for dark mode. The flame, the
+  hearts, the coin and the lightning bolt are drawn assets styled by the design tokens.
+- **The language toggle waits for a second locale.** §29 and §38 make language a hidden setting
+  until one ships, and Romanian content does not exist yet. The toggle is built but stays hidden
+  behind the same condition, so it appears the day the locale does rather than shipping as a
+  control that changes nothing.
 
 ---
 
