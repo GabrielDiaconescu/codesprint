@@ -79,7 +79,7 @@ and is green: typecheck, lint, 102 tests, and a gitleaks scan of the full histor
 | D9  | Python semantics         | 3.12 + latest stable 3.x              | **Resolved** — 3.12.10 and 3.14.4 both present; `py -3.12` / `py -3.14` on Windows            |
 | D10 | Minimum age              | 13                                    |                                                                                               |
 | D11 | Personalized ads         | Consent + 16+ only                    |                                                                                               |
-| D12 | Google Play account type | **Organization**                      | Decided 2026-09-17. Exempt from the 12-tester / 14-day closed test. Requires a D-U-N-S number |
+| D12 | Google Play account type | **Organization**                      | Decided 2026-09-17, reaffirmed 2026-09-20. Exempt from the 12-tester / 14-day closed test. Requires a D-U-N-S number |
 
 Plan approved 2026-09-16. Defaults apply for everything not marked OPEN.
 
@@ -1807,6 +1807,17 @@ Rewritten at the end of each phase, so this describes the product as it stands t
   cannot be requested before the entity legally exists, so these are strictly sequential:
   PFA registration → D-U-N-S (days to weeks) → Organization enrolment on both stores.
   This chain is the longest lead time in the project and gates Phases 14 and 22.
+  Reconsidered on 2026-09-20 against enrolling as a plain individual and kept, for three
+  reasons that are independent of each other: revenue arrives from Apple Distribution
+  International and Google Ireland as intra-community B2B services, so reverse charge
+  applies and an art. 317 VAT number plus the D390 return are needed **regardless of the
+  VAT threshold** — AdMob in particular cannot be reported as occasional income; a Personal
+  Play account would add the 12-tester / 14-day closed test in series at the end of the
+  project, when nothing else can run in parallel; and the Play account type is not cleanly
+  convertible after creation, unlike Apple's Individual → Organization path. Started now,
+  the whole chain costs no critical-path time, because Phase 19 is longer than it.
+  The DSA trader details are public either way, so privacy is not a factor in this choice
+  (see open question 2). Not tax advice — confirm the ANAF side with an accountant.
 - **Decide the public trader address.** Under the EU DSA both stores publish the trader's name,
   address, email and phone. If the PFA is registered at a home address, that address becomes
   public. A separate registered office avoids that.
