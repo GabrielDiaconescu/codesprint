@@ -1,0 +1,249 @@
+id: 8e0aadeb-48fd-438e-b2cf-26546a943d23
+slug: elif
+title:
+  en: More than two choices — elif
+summary:
+  en: Chains of conditions, why the first match wins, and why the order you write them in matters.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `elif` means "else if". It adds another condition to check, but only when everything
+        above it was False. Python goes down the chain and runs the **first** block whose
+        condition is True, then skips the rest.
+
+  - type: code
+    code: |
+      score = 72
+      if score >= 90:
+          print("A")
+      elif score >= 70:
+          print("B")
+      elif score >= 50:
+          print("C")
+      else:
+          print("F")
+    output: 'B'
+    runnable: true
+    caption:
+      en: 72 is also at least 50, but the chain stopped at the first match.
+
+  - type: text
+    body:
+      en: |
+        Because the first match wins, the order of the conditions matters. Put the widest
+        condition first and the narrower ones below it never get a chance.
+
+  - type: code
+    code: |
+      score = 95
+      if score >= 50:
+          print("C")
+      elif score >= 90:
+          print("A")
+    output: 'C'
+    runnable: true
+    caption:
+      en: 95 is at least 50, so the chain stops there — the A branch is never checked.
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        When conditions overlap, go from the most specific to the most general. In a grading
+        chain that means highest threshold first.
+
+  - type: question
+    question:
+      id: 6ffc7716-119e-4b06-b745-de8e4746c5b0
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: In an if / elif / else chain, how many blocks run?
+      payload:
+        options:
+          - id: one
+            text:
+              en: One — the first whose condition is True, or the else
+          - id: every-true
+            text:
+              en: Every block whose condition is True
+          - id: all
+            text:
+              en: All of them, top to bottom
+          - id: last
+            text:
+              en: Only the last one
+      answer:
+        option_id: one
+      explanation:
+        en: >
+          The chain stops at the first True condition. If none is True, the `else` runs — so
+          with an `else`, exactly one block always runs.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 668cce95-c43d-46cd-a2d6-616593090160
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`elif` is short for "else if".'
+      answer:
+        value: true
+      explanation:
+        en: >
+          It means: if nothing above matched, check this condition next.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 77b6cabb-7ea7-4e97-8b3a-7ae6f8ef1a25
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        temp = 15
+        if temp > 25:
+            print("hot")
+        elif temp > 10:
+            print("mild")
+        else:
+            print("cold")
+      payload:
+        input: text
+      answer:
+        value: mild
+        match_mode: trimmed
+      explanation:
+        en: >
+          15 is not above 25, so the first block is skipped. It is above 10, so "mild" prints
+          and the `else` is never reached.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0e34bf48-95f3-413c-bbfb-fd8255908e11
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        n = 0
+        if n > 0:
+            print("positive")
+        elif n < 0:
+            print("negative")
+        else:
+            print("zero")
+      payload:
+        input: text
+      answer:
+        value: zero
+        match_mode: trimmed
+      explanation:
+        en: >
+          0 is neither greater than 0 nor less than 0, so both conditions are False and the
+          `else` catches it.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0fc974ea-ae63-45d0-bf9f-4e11f5cbeb91
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these scores would make this chain print B?
+      code_snippet: |
+        if score >= 90:
+            print("A")
+        elif score >= 70:
+            print("B")
+        else:
+            print("C")
+      payload:
+        options:
+          - id: seventy
+            text:
+              en: '70'
+          - id: eighty-nine
+            text:
+              en: '89'
+          - id: ninety
+            text:
+              en: '90'
+          - id: sixty-nine
+            text:
+              en: '69'
+          - id: seventy-five
+            text:
+              en: '75'
+      answer:
+        option_ids: [seventy, eighty-nine, seventy-five]
+      explanation:
+        en: >
+          B needs a score that fails the first test (below 90) and passes the second (at least
+          70). 90 stops at A, and 69 falls through to C.
+      hint:
+        en: Check the boundary values carefully — `>=` includes the number itself.
+      skill_tags: [conditions, comparisons]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 24d72f0b-743d-4d00-8911-0edfbfee206d
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: >
+          The rule is: 90 and above is an A, 50 to 89 is a C. But a score of 95 gets a C.
+          Which change makes the program follow the rule for every score?
+      code_snippet: |
+        score = 95
+        if score >= 50:
+            grade = "C"
+        elif score >= 90:
+            grade = "A"
+        print(grade)
+      payload:
+        mode: choose_fix
+        options:
+          - id: reorder
+            text:
+              en: Check score >= 90 first, then score >= 50
+          - id: strict
+            text:
+              en: Change >= 50 to > 50
+          - id: add-else
+            text:
+              en: Add an else branch at the end
+          - id: swap-letters
+            text:
+              en: Swap the letters "C" and "A"
+      answer:
+        option_id: reorder
+      runnable: true
+      fixed_code: |
+        score = 95
+        if score >= 90:
+            grade = "A"
+        elif score >= 50:
+            grade = "C"
+        print(grade)
+      fixed_output: A
+      explanation:
+        en: >
+          95 passes the first test, so the chain stops at C. Putting the narrower condition
+          first fixes it. Swapping the letters would make 95 an A but every 60 an A too.
+      hint:
+        en: Which condition does 95 meet first?
+      skill_tags: [conditions, debugging]
+      review_status: draft

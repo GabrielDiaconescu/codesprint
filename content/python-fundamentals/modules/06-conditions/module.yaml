@@ -1,0 +1,14 @@
+id: a8a15e10-b5bc-44cf-9c14-c60dd75b9807
+slug: conditions
+title:
+  en: Conditions
+description:
+  en: Making decisions — running some lines only when something is true, and choosing between paths.
+order_index: 6
+estimated_minutes: 32
+lessons:
+  - if-statements
+  - else
+  - elif
+  - combining-conditions
+  - truthiness

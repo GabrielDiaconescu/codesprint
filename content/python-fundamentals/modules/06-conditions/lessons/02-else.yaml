@@ -1,0 +1,171 @@
+id: d8e1f3f4-3857-4b1b-a3ad-a4e75d8eaff9
+slug: else
+title:
+  en: Otherwise — else
+summary:
+  en: Giving the program a second path, so that exactly one of two things happens.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `else` gives an `if` a second path. When the condition is True, the `if` block runs;
+        when it is False, the `else` block runs instead. Exactly one of the two always happens.
+
+  - type: code
+    code: |
+      age = 15
+      if age >= 18:
+          print("Adult")
+      else:
+          print("Minor")
+    output: 'Minor'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `else` has no condition of its own. It catches everything the `if` did not, which
+        makes it perfect for splitting things into two groups.
+
+  - type: code
+    code: |
+      n = 7
+      if n % 2 == 0:
+          print("even")
+      else:
+          print("odd")
+    output: 'odd'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        `else` lines up with its `if` — same indentation, not further in. Its own block is then
+        indented beneath it, just like the `if` block.
+
+  - type: question
+    question:
+      id: 67f03725-aab9-49ad-8da8-33f803e2da55
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        n = 4
+        if n > 10:
+            print("big")
+        else:
+            print("small")
+      payload:
+        input: text
+      answer:
+        value: small
+        match_mode: trimmed
+      explanation:
+        en: >
+          4 is not greater than 10, so the `if` block is skipped and the `else` block runs.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ccb6aee2-6970-4446-a092-59f495e363e6
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: An `else` can have its own condition, like `else x > 5:`.
+      answer:
+        value: false
+      explanation:
+        en: >
+          `else` never takes a condition — it simply means "in every other case". To test a
+          second condition you need `elif`, which is the next lesson.
+      skill_tags: [conditions, syntax]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1aa3ef4f-9078-4301-b7f5-0c4e65603873
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the program so the second message appears when there is not enough money.
+      code_snippet: |
+        if balance >= price:
+            print("Bought")
+        ___:
+            print("Not enough money")
+      payload:
+        input: tokens
+        tokens: [else, elif, if, then]
+      answer:
+        value: else
+        match_mode: trimmed
+      explanation:
+        en: >
+          `else` covers the one remaining case. `elif` and `if` would both need a condition,
+          and `then` is not a Python keyword.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 07341cbb-364d-4c8e-954f-5b68aa339023
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: When does the `else` block run?
+      payload:
+        options:
+          - id: when-false
+            text:
+              en: When the if condition is False
+          - id: always
+            text:
+              en: Always, after the if block
+          - id: when-true
+            text:
+              en: When the if condition is True
+          - id: on-error
+            text:
+              en: Only when the program hits an error
+      answer:
+        option_id: when-false
+      explanation:
+        en: >
+          `if` and `else` are two halves of one decision. The `else` half runs exactly when the
+          `if` half does not.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d520a066-0bdf-4a8f-96e6-be829b7d2659
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = 10
+        if x > 5:
+            x = x - 8
+        else:
+            x = x + 8
+        print(x)
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          10 > 5, so the `if` block sets `x` to 2. The condition is not checked again after
+          that — once one branch has run, the `else` is skipped, even though `x` is now small.
+      hint:
+        en: Is the condition checked a second time after `x` changes?
+      skill_tags: [conditions, variables]
+      review_status: draft

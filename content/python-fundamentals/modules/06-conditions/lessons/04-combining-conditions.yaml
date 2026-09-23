@@ -1,0 +1,203 @@
+id: c0c663c6-9bd5-4bb6-929a-fe0c32662a1f
+slug: combining-conditions
+title:
+  en: Combining and nesting conditions
+summary:
+  en: Several checks in one if, and an if inside an if.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        The `and`, `or` and `not` you already know work inside an `if`. They let one
+        condition check several things at once.
+
+  - type: code
+    code: |
+      age = 25
+      has_licence = True
+      if age >= 18 and has_licence:
+          print("Can drive")
+    output: 'Can drive'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        An `if` can also sit inside another `if`. This is called **nesting**: the inner
+        condition is only checked when the outer one was True.
+
+  - type: code
+    code: |
+      logged_in = True
+      is_admin = False
+      if logged_in:
+          print("Welcome")
+          if is_admin:
+              print("Admin panel")
+    output: 'Welcome'
+    runnable: true
+    caption:
+      en: The inner block is indented twice — once for each `if` it belongs to.
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Two nested `if` statements with nothing else between them can usually become one `if`
+        joined with `and`. Flatter code is easier to read.
+
+  - type: question
+    question:
+      id: d93d6c81-9ed7-4347-b973-86d31d937fdf
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = 5
+        if x > 0 and x < 10:
+            print("in range")
+      payload:
+        input: text
+      answer:
+        value: in range
+        match_mode: trimmed
+      explanation:
+        en: >
+          5 is above 0 and below 10, so both halves of the `and` are True.
+      skill_tags: [conditions, logic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 4be79f7e-7474-4fc4-bd38-b0d0a0954bc6
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A nested `if` is only checked when the outer `if` condition is True.
+      answer:
+        value: true
+      explanation:
+        en: >
+          The inner `if` lives inside the outer block. If the outer block is skipped, so is
+          everything in it, including the inner check.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7df95cef-4b60-4950-b105-6d946e628d5f
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        rain = True
+        cold = False
+        if rain or cold:
+            print("coat")
+        if rain and cold:
+            print("scarf")
+      payload:
+        input: text
+      answer:
+        value: coat
+        match_mode: trimmed
+      explanation:
+        en: >
+          `or` needs just one True value, and `rain` is True, so "coat" prints. `and` needs
+          both, and `cold` is False, so "scarf" does not.
+      skill_tags: [conditions, logic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1c061773-3fce-460b-96aa-e56b45d3f48b
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: Which single `if` does the same job as this nested pair?
+      code_snippet: |
+        if a:
+            if b:
+                print("yes")
+      payload:
+        options:
+          - id: and
+            text:
+              en: 'if a and b:'
+          - id: or
+            text:
+              en: 'if a or b:'
+          - id: not
+            text:
+              en: 'if not a:'
+          - id: equal
+            text:
+              en: 'if a == b:'
+      answer:
+        option_id: and
+      explanation:
+        en: >
+          "yes" prints only when `a` is True **and** `b` is True — exactly what `and` means.
+          `a == b` would also be True when both are False, which the nested version never
+          prints for.
+      skill_tags: [conditions, logic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 4784193d-7810-4c8c-bbf6-536706a6e9d9
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Members and ticket holders may both come in. Complete the condition.
+      code_snippet: |
+        if is_member ___ has_ticket:
+            print("Come in")
+      payload:
+        input: tokens
+        tokens: [or, and, not, else]
+      answer:
+        value: or
+        match_mode: trimmed
+      explanation:
+        en: >
+          Either one is enough, which is what `or` expresses. `and` would turn away a member
+          without a ticket.
+      skill_tags: [conditions, logic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d3b3189d-8e06-4845-bf41-0cfc9c3b9358
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = 15
+        if x > 10:
+            if x > 20:
+                print("A")
+            else:
+                print("B")
+        else:
+            print("C")
+      payload:
+        input: text
+      answer:
+        value: B
+        match_mode: trimmed
+      explanation:
+        en: >
+          15 passes the outer test, so Python goes inside. It fails the inner test, so the
+          inner `else` runs. The outer `else` belongs to the outer `if` and is skipped. The
+          indentation tells you which `else` belongs to which `if`.
+      hint:
+        en: Match each `else` to its `if` by lining up the indentation.
+      skill_tags: [conditions]
+      review_status: draft

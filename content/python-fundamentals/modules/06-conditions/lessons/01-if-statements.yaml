@@ -1,0 +1,199 @@
+id: c37dd7cc-f1df-4bd0-a741-63174d5dd4e2
+slug: if-statements
+title:
+  en: Doing something only sometimes
+summary:
+  en: The if statement, the colon, and why indentation matters in Python.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        An `if` statement runs some lines only when a condition is True. The line ends with a
+        colon, and the lines that belong to it are **indented** — pushed in by four spaces.
+
+  - type: code
+    code: |
+      temperature = 30
+      if temperature > 25:
+          print("It's hot")
+      print("Done")
+    output: |-
+      It's hot
+      Done
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        The indentation is not decoration. It is how Python knows which lines belong to the
+        `if`. The line that is not indented runs whatever happens.
+
+  - type: code
+    code: |
+      temperature = 10
+      if temperature > 25:
+          print("It's hot")
+      print("Done")
+    output: 'Done'
+    runnable: true
+    caption:
+      en: 10 is not above 25, so the indented line is skipped. "Done" still prints.
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Two errors you will meet early: forgetting the colon at the end of the `if` line gives
+        a SyntaxError, and indenting lines by different amounts gives an IndentationError.
+
+  - type: question
+    question:
+      id: 4ef18f70-2100-4bef-aea3-106901dbc542
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: The lines indented under an `if` run only when its condition is True.
+      answer:
+        value: true
+      explanation:
+        en: >
+          That is exactly what the indentation says: these lines belong to the `if`. When the
+          condition is False, Python skips them and carries on with the next unindented line.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: fa2e0990-70fd-4ab9-ba28-9405645447bb
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What must come at the end of an `if` line?
+      payload:
+        options:
+          - id: colon
+            text:
+              en: A colon (:)
+          - id: semicolon
+            text:
+              en: A semicolon (;)
+          - id: nothing
+            text:
+              en: Nothing at all
+          - id: brace
+            text:
+              en: An opening brace ({)
+      answer:
+        option_id: colon
+      explanation:
+        en: >
+          The colon says "a block starts here". Python uses indentation instead of braces to
+          mark where the block begins and ends.
+      skill_tags: [conditions, syntax]
+      review_status: draft
+
+  - type: question
+    question:
+      id: b5af4e72-abbd-420c-8b2c-fabdc6120f2c
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = 3
+        if x > 5:
+            print("big")
+        print("end")
+      payload:
+        input: text
+      answer:
+        value: end
+        match_mode: trimmed
+      explanation:
+        en: >
+          3 is not greater than 5, so the indented `print("big")` is skipped. The last line is
+          not indented, so it runs regardless.
+      skill_tags: [conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ecea39aa-60eb-46b5-a71a-152ceb6b6dbb
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This will not run at all. Which line is the problem?
+      code_snippet: |
+        score = 90
+        if score > 50
+            print("Pass")
+      payload:
+        mode: select_line
+        lines:
+          - id: assign
+            text: 'score = 90'
+          - id: condition
+            text: 'if score > 50'
+          - id: body
+            text: '    print("Pass")'
+      answer:
+        line_id: condition
+      runnable: true
+      fixed_code: |
+        score = 90
+        if score > 50:
+            print("Pass")
+      fixed_output: Pass
+      explanation:
+        en: >
+          The `if` line is missing its colon, so Python cannot tell where the condition ends
+          and the block begins. It refuses to run anything and reports a SyntaxError.
+      hint:
+        en: Look at how the `if` line ends.
+      skill_tags: [conditions, syntax, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 9cb611ad-025b-45c8-af77-d1aa6a66eda3
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = 2
+        if x > 5:
+            print("A")
+        print("B")
+        if x < 5:
+            print("C")
+      payload:
+        input: choice
+        options:
+          - id: b-c
+            text:
+              en: "B\nC"
+          - id: all
+            text:
+              en: "A\nB\nC"
+          - id: b-only
+            text:
+              en: B
+          - id: c-only
+            text:
+              en: C
+      answer:
+        value: "B\nC"
+        match_mode: exact
+      explanation:
+        en: >
+          Two separate `if` statements, each checked on its own. The first is False, so "A" is
+          skipped; "B" is not indented, so it always prints; the second `if` is True, so "C"
+          prints.
+      hint:
+        en: Check each `if` separately, and notice which line belongs to neither.
+      skill_tags: [conditions]
+      review_status: draft

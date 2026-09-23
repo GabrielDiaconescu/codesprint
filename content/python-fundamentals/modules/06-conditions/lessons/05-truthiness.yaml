@@ -1,0 +1,208 @@
+id: 099bf83e-ec7b-40b3-8cf2-df36c7cd2ae2
+slug: truthiness
+title:
+  en: When is a value "true enough"?
+summary:
+  en: Which values an if treats as False, and the empty-looking values that are not.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        An `if` does not need a comparison. You can give it any value, and Python decides
+        whether that value counts as True or False. Zero, an empty string and `None` count as
+        False. Almost everything else counts as True.
+
+  - type: code
+    code: |
+      name = ""
+      if name:
+          print("Hello, " + name)
+      else:
+          print("No name given")
+    output: 'No name given'
+    runnable: true
+    caption:
+      en: An empty string counts as False, so the else runs.
+
+  - type: text
+    body:
+      en: |
+        `bool()` shows how any value would be judged.
+
+  - type: code
+    code: |
+      print(bool(0))
+      print(bool("hi"))
+      print(bool(None))
+      print(bool(" "))
+    output: |-
+      False
+      True
+      False
+      True
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        A string holding a single space is not empty — it has one character in it — so it
+        counts as True. So does the text `"False"` and the text `"0"`.
+
+  - type: question
+    question:
+      id: 60417e1e-5d45-4ed2-8a5d-e9963a9b1f92
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which of these values counts as False in an `if`?
+      payload:
+        options:
+          - id: zero
+            text:
+              en: '0'
+          - id: zero-text
+            text:
+              en: '"0"'
+          - id: space
+            text:
+              en: '" "'
+          - id: minus-one
+            text:
+              en: '-1'
+      answer:
+        option_id: zero
+      explanation:
+        en: >
+          The number 0 is False. `"0"` and `" "` are non-empty strings, and -1 is a non-zero
+          number, so all three count as True.
+      skill_tags: [conditions, booleans]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0a364aef-0d64-4761-b1f6-b10d9365c630
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`bool("")` is `False`.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          An empty string has nothing in it, so it counts as False.
+      skill_tags: [booleans]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1b756faf-fca5-43a4-bc79-eb0d7b881959
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(bool("False"))
+      payload:
+        input: text
+      answer:
+        value: 'True'
+        match_mode: trimmed
+      explanation:
+        en: >
+          This is the five-letter text "False", not the boolean. Any non-empty string counts as
+          True, whatever the letters say.
+      hint:
+        en: Look at the quotes.
+      skill_tags: [booleans, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 25e3e0e1-1cb3-49d8-a8b7-ceaa07ee1cec
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these count as False?
+      payload:
+        options:
+          - id: zero
+            text:
+              en: '0'
+          - id: empty
+            text:
+              en: '""'
+          - id: none
+            text:
+              en: None
+          - id: zero-text
+            text:
+              en: '"0"'
+          - id: small
+            text:
+              en: '0.1'
+      answer:
+        option_ids: [zero, empty, none]
+      explanation:
+        en: >
+          Zero, the empty string and `None` are the "nothing" values, and they count as False.
+          `"0"` is a string with one character in it, and 0.1 is not zero.
+      skill_tags: [booleans]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 22a51a4d-8edc-46f6-a633-1925284e3467
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        count = 0
+        if count:
+            print("items")
+        else:
+            print("empty")
+      payload:
+        input: text
+      answer:
+        value: empty
+        match_mode: trimmed
+      explanation:
+        en: >
+          `if count:` asks whether `count` counts as True. Zero counts as False, so the
+          `else` runs.
+      skill_tags: [conditions, booleans]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e3640abe-7d79-4e98-8ff6-8d283876859f
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = None
+        if x == 0:
+            print("zero")
+        elif not x:
+            print("falsy")
+        else:
+            print("value")
+      payload:
+        input: text
+      answer:
+        value: falsy
+        match_mode: trimmed
+      explanation:
+        en: >
+          `None` is not equal to 0 — they are different things — so the first test fails. But
+          `None` counts as False, so `not x` is True and "falsy" prints.
+      hint:
+        en: Is `None` equal to 0? Does it count as False?
+      skill_tags: [conditions, none]
+      review_status: draft
