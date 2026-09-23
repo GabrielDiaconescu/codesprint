@@ -7,9 +7,10 @@ module.exports = {
   // Packages that ship modern ESM Jest cannot parse untransformed:
   //   * `@revenuecat/*`, a transitive dependency of react-native-purchases;
   //   * `standard-navigation`, which expo-router imports — without it, no component that
-  //     navigates can be rendered in a test at all.
+  //     navigates can be rendered in a test at all;
+  //   * `@formatjs/*`, the plural-rules polyfill Hermes needs (src/i18n/pluralRules.ts).
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*|@revenuecat/.*|react-native-google-mobile-ads|standard-navigation)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*|@revenuecat/.*|react-native-google-mobile-ads|standard-navigation|@formatjs/.*)',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',

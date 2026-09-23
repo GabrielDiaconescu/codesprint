@@ -1,3 +1,6 @@
+// First, before i18next can pluralise anything — see the file for why.
+import './pluralRules';
+
 import { getLocales } from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';

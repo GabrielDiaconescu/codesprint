@@ -4,8 +4,9 @@
 
 **Current phase:** Phase 19 complete — awaiting approval for Phase 21 (E2E & regression
 hardening). All 17 modules are drafted and live on staging; 395 of 435 questions await human
-review before production. Order from here: **21 → 18 → 22 → 23**, with the PFA → D-U-N-S
-chain and the content review running in parallel.
+review before production. The interface also speaks Romanian now (lessons stay English).
+Order from here: **21 → 18 → 22 → 23**, with the PFA → D-U-N-S chain and the content review
+running in parallel.
 **Last updated:** 2026-09-23
 
 ---
@@ -35,6 +36,7 @@ chain and the content review running in parallel.
 | 20        | Polish, accessibility, performance   | **Complete** — pending device check   |
 | —         | Playful 3D restyle (SPEC §8, §13)    | **Complete** — pending device check   |
 | 19        | Content to launch volume             | **Complete** — drafts await review    |
+| —         | Romanian interface (SPEC §38)        | **Complete** — verified on emulator   |
 | 18, 21–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
@@ -2007,9 +2009,63 @@ database    supabase test db ......... unchanged (no migration in this phase)
 6. **`lambda` is not introduced.** Sorting by a key uses a named function. One more syntax on
    the last module was not worth what it adds for a beginner.
 
+## Romanian interface (SPEC §29, §38) — added 2026-09-23
+
+Asked for outside the phase plan ("mi-ai adăugat și limba română/engleză?"). Scope chosen by
+the user: **the interface in Romanian; lessons stay English for now.**
+
+- **All 18 namespaces translated** (`src/i18n/locales/ro/`, 592 strings). Informal "tu",
+  comma-below ș/ț only, Romanian plural forms (`one` / `few` / `other`: "1 zi", "3 zile",
+  "20 de zile").
+- **Language preference** in `settingsStore`: `system` (follows the phone), `en` or `ro`.
+  Stored on the device, like the theme — it belongs to the phone, not the account. Applied
+  during `hydrate()`, before the splash lifts, so the first frame is already in the right
+  language. A stored locale this build no longer ships falls back to `system`.
+- **Home**: the EN/RO toggle that SPEC §13 kept hidden "until a second locale ships" is now
+  visible. **Profile**: a Language card (phone language / English / Română), each language
+  named in itself, and a note that lessons are English for now — shown only while the
+  interface is not English.
+- **Query keys carry the locale** for Home, Practice and the Daily Challenge, so switching
+  refetches in the new language instead of showing the old cache.
+- **Plural rules on Hermes** (`src/i18n/pluralRules.ts`). Hermes has no `Intl.PluralRules`,
+  so i18next fell back to `one`/`other` and the phone said "0 de zile" and "4 de lecții". The
+  FormatJS polyfill installs itself only where the engine lacks the rules, with data for `en`
+  and `ro` only. Found on the emulator — Jest runs on Node, whose `Intl` is complete.
+
+### Verification
+
+- `npm run verify`: typecheck clean, lint clean (0 warnings), **75 suites / 1284 tests**.
+- New tests: locale parity (every key, `{{variable}}` and plural category of English exists in
+  Romanian, and nothing extra), no cedilla ş/ţ, language-preference parsing and storage, the
+  Language card, the Home toggle, and `pluralRules.test.ts`, which removes
+  `Intl.PluralRules` to stand in for Hermes and proves both the failure and the fix.
+  Deleting the `ro` data import makes two of its tests fail.
+- Emulator (dev build against staging): onboarding → Home in English; the toggle switches
+  every visible string at once; "0 zile" and "4 lecții" after the polyfill; the choice
+  survives a force-stop; the Profile Language card shows all three options with the note.
+- In passing: 9 un-awaited `fireEvent` calls fixed (CLAUDE.md), and an `act()` warning in
+  `ReminderSettingsCard.test.tsx` that predated this work — tests now wait for the mutation
+  to settle, not only to be called. `renderWithProviders` returns its `queryClient` for that.
+
+### Decisions
+
+1. **New dependency: `@formatjs/intl-pluralrules`.** JavaScript only, no native code. Needed
+   because Hermes lacks `Intl.PluralRules`; without it every Romanian count with a `few` form
+   is wrong. Writing CLDR rules by hand would have to be repeated for every future locale.
+2. **Onboarding is not given a language switch.** A phone set to Romanian gets Romanian from
+   the first screen (`system` is the default); a switch there would be a seventh step.
+3. **The language is not synced to `profiles.locale`.** Content RPCs take the locale per
+   call, and a device preference in the account would make two phones disagree.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
+
+**Romanian is the interface only.** Lesson text, questions, module titles and achievement
+names are English in both languages (2,308 localized content fields, English only today). The
+content schema is already localized JSONB with English fallback, so translating content is a
+data change — but it doubles the review work, and the English review comes first. The
+Romanian UI text was written by me and wants a native speaker's read.
 
 **Integrations not built yet** (SPEC §59.11 — no fakes; the contract and the UI slot exist):
 
@@ -2137,6 +2193,9 @@ Rewritten at the end of each phase, so this describes the product as it stands t
   `review_status` flipped too, or its questions will not ship. Run
   `npm run content:check` after each batch.
 - **Re-read "Reading an error message"** (module 01, lesson 04), whose layout changed.
+- **Read the Romanian interface once as a user** (switch with EN/RO on Home). Anything that
+  sounds translated rather than written goes in `src/i18n/locales/ro/*.json`; the parity test
+  catches a missing key, not a clumsy one.
 
 **Staging — do these now:**
 
@@ -3191,3 +3250,22 @@ of the content review.
 10. Open Exams and start the sample exam. It draws ten questions from the whole course now,
     not just the first two modules.
 11. Start the Daily Challenge. Its questions can come from any free module.
+
+## Romanian interface device checklist
+
+Use the **preview** build against staging (link in the report for this change).
+
+1. With the phone in English, finish onboarding. Home is in English; the toggle at the top
+   right reads **EN**.
+2. Tap **EN**. Every string on Home changes at once to Romanian and the toggle reads **RO**.
+   Lesson and module titles stay English — that is expected.
+3. Check the forms: the streak reads **"0 zile"** (not "0 de zile"); Learn shows
+   **"4 lecții"**; after 20 or more of anything, **"de"** appears ("20 de întrebări").
+4. Check the letters: ă, â, î, ș, ț all render in the rounded font, with commas under ș and ț
+   (not cedillas).
+5. Profile → **Limbă**: three options — _Ca telefonul_, _English_, _Română_ — and a note that
+   lessons are English for now. Choose _English_: the note disappears.
+6. Choose _Română_, swipe the app away, reopen it. It opens in Romanian with no flash of
+   English after the splash screen.
+7. Choose _Ca telefonul_ and set the phone's own language to Română in system settings; the
+   app follows it.
