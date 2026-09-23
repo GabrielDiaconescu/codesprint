@@ -4,6 +4,7 @@ import { queryKeys } from '@/lib/queryClient';
 import { services, type OnboardingAnswers, type UserProfile } from '@/services';
 import { useSessionStore } from '@/store/sessionStore';
 
+import { refuseUnderageAccount } from '../logic/refuseUnderage';
 import { useOnboardingStore } from '../store';
 
 /**
@@ -43,18 +44,22 @@ export const useCompleteOnboarding = () => {
  *
  * The sign-out afterwards is local cleanup. It is deliberately not conditional on the delete
  * succeeding — if the server call fails, the user must still not end up inside the app.
+ *
+ * `showRefusal` navigates to the refusal screen, and runs BEFORE the sign-out; the order and
+ * the reason for it are in `logic/refuseUnderage.ts`.
  */
-export const useRejectUnderageAccount = () => {
+export const useRejectUnderageAccount = ({ showRefusal }: { showRefusal: () => void }) => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, void>({
-    mutationFn: async () => {
-      try {
-        await services.profile.rejectUnderageAccount();
-      } finally {
-        await services.auth.signOut();
-        queryClient.clear();
-      }
-    },
+    mutationFn: () =>
+      refuseUnderageAccount({
+        deleteAccount: () => services.profile.rejectUnderageAccount(),
+        showRefusal,
+        signOut: async () => {
+          await services.auth.signOut();
+          queryClient.clear();
+        },
+      }),
   });
 };

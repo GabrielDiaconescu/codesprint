@@ -127,9 +127,9 @@ export const SupabaseAuthService: AuthService = {
     return { user: toAuthUser(data.user), needsConfirmation: true };
   },
 
-  async resendConfirmation(email) {
+  async resendConfirmation(email, kind) {
     const { error } = await getSupabaseClient().auth.resend({
-      type: 'signup',
+      type: kind,
       email,
       options: { emailRedirectTo: redirectUrl('signup') },
     });

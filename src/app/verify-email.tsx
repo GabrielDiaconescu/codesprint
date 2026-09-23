@@ -6,12 +6,26 @@ import { Button, Icon, Text } from '@/components/ui';
 import { AuthErrorBanner, AuthScreen } from '@/features/auth/components/AuthScreen';
 import { useResendConfirmation } from '@/features/auth/hooks/useAuthActions';
 import { useAuthErrorText } from '@/features/auth/hooks/useAuthForm';
+import { useSessionStore } from '@/store/sessionStore';
 import { useTheme } from '@/theme';
 
+/**
+ * "Check your email" (SPEC §12), for both ways an address gets there.
+ *
+ * Outside the (auth) group on purpose, next to `auth-callback`: a new account arrives here
+ * signed OUT, but a guest who has just added an email arrives signed IN, still as a guest until
+ * the link is opened. Inside (auth) the guest was refused the route — silently, so after
+ * "Create account" nothing seemed to happen although the email had gone out. The E2E
+ * guest-to-account flow found it.
+ *
+ * What the screen offers follows from which of the two it is: a guest goes back to learning
+ * (their progress is theirs either way), a new account goes back to try another address.
+ */
 export default function VerifyEmailScreen() {
   const { t } = useTranslation('auth');
   const theme = useTheme();
   const router = useRouter();
+  const isGuest = useSessionStore((state) => state.status === 'guest');
 
   const params = useLocalSearchParams<{ email?: string }>();
   const email = typeof params.email === 'string' ? params.email : '';
@@ -41,16 +55,17 @@ export default function VerifyEmailScreen() {
           testID="verify-resend"
           variant="secondary"
           label={t('verifyEmail.resend')}
-          onPress={() => resend.mutate({ email })}
+          onPress={() => resend.mutate({ email, kind: isGuest ? 'email_change' : 'signup' })}
           loading={resend.isPending}
           disabled={email.length === 0}
           fullWidth
         />
 
         <Button
+          testID="verify-back"
           variant="ghost"
-          label={t('verifyEmail.back')}
-          onPress={() => router.replace('/sign-in')}
+          label={t(isGuest ? 'verifyEmail.keepLearning' : 'verifyEmail.back')}
+          onPress={() => router.replace(isGuest ? '/' : '/sign-in')}
           disabled={resend.isPending}
         />
       </View>

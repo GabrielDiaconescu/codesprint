@@ -25,10 +25,9 @@
   "finish": "Termină lecția",
   "complete": {
     "title": "Lecție terminată",
-    "body": "Ai citit {{title}}.",
-    "xpPending": "Practica și provocarea zilnică vin în versiunea următoare.",
+    "body": "Bravo! Progresul tău e salvat.",
     "next": "Lecția următoare",
-    "backToModule": "Înapoi la modul",
+    "continue": "Continuă",
     "xpEarned": "+{{count}} XP câștigat în această lecție",
     "score": "{{correct}} din {{total}} corecte din prima încercare",
     "perfect": "Lecție perfectă — toate răspunsurile corecte din prima.",

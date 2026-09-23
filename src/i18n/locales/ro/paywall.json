@@ -43,6 +43,7 @@
     "body": "Modulele de la 1 la {{modules}}, provocarea zilnică, practica, XP-ul, seriile, realizările și clasamentul săptămânal — cu vieți și reclame."
   },
   "action": {
+    "buyOnce": "Cumpără o singură dată",
     "subscribe": "Abonează-te",
     "upgrade": "Treci la Premium"
   },

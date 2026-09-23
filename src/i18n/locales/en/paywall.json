@@ -44,6 +44,7 @@
   },
   "action": {
     "subscribe": "Subscribe",
+    "buyOnce": "Buy once",
     "upgrade": "Upgrade to Premium"
   },
   "purchase": {

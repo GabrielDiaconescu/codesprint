@@ -143,6 +143,8 @@ const ThemedApp = () => {
         {/* Outside every guard on purpose. An auth email can arrive in either state, and the
             age-gate refusal screen has to survive the sign-out that precedes it. */}
         <Stack.Screen name="auth-callback" options={{ headerShown: false }} />
+        {/* Reached signed out (a new account) and signed in (a guest adding an email). */}
+        <Stack.Screen name="verify-email" options={{ headerShown: false }} />
         <Stack.Screen name="blocked" options={{ headerShown: false, gestureEnabled: false }} />
       </Stack>
       <ToastHost dismissLabel={t('actions.close')} />

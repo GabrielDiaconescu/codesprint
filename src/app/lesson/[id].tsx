@@ -165,14 +165,18 @@ export default function LessonScreen() {
             testID="lesson-complete"
             icon="checkmark-circle"
             title={t('complete.title')}
-            body={t('complete.body', { title: lesson.title })}
-            actionLabel={t('complete.backToModule')}
+            body={t('complete.body')}
+            actionLabel={t('complete.continue')}
             onAction={() => {
               // SPEC §30: at a natural break, and only AFTER the completion screen is
               // dismissed — never between a question and its explanation. Every pacing rule
-              // is checked inside; most of the time nothing happens at all.
-              capture('interstitial_shown');
-              void showInterstitial(stats?.lessons_completed ?? 0).finally(() => router.back());
+              // is checked inside; most of the time nothing happens at all, and then nothing
+              // is reported either (SPEC §43: the event is for an ad that was shown).
+              void showInterstitial(stats?.lessons_completed ?? 0)
+                .then((shown) => {
+                  if (shown) capture('interstitial_shown');
+                })
+                .finally(() => router.back());
             }}
           />
           {questionTotal > 0 && (
@@ -203,9 +207,6 @@ export default function LessonScreen() {
               name={nameFor(achievement.slug)}
             />
           ))}
-          <Text variant="caption" tone="secondary" style={styles.pendingNote}>
-            {t('complete.xpPending')}
-          </Text>
         </ScrollView>
       </Screen>
     );
@@ -278,6 +279,8 @@ export default function LessonScreen() {
 const styles = StyleSheet.create({
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { paddingVertical: 16, flexGrow: 1 },
-  completeContent: { flexGrow: 1, justifyContent: 'center', paddingVertical: 24 },
-  pendingNote: { textAlign: 'center', paddingHorizontal: 24 },
+  // Anchored to the top, not centred: the score, XP, streak and any achievements arrive a
+  // moment after the screen does, and centred content would slide the Continue button up
+  // under a finger already on its way to it.
+  completeContent: { flexGrow: 1, paddingTop: 48, paddingBottom: 24 },
 });

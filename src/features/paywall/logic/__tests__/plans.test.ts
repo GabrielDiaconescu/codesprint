@@ -6,7 +6,9 @@ import {
   buildPlans,
   formatMicros,
   hasBuyablePlan,
+  needsNoAdsDisclaimer,
   planState,
+  purchaseAction,
   type HeldEntitlements,
 } from '../plans';
 
@@ -219,5 +221,27 @@ describe('a lifetime No Ads purchase (D2)', () => {
 
   it('counts as something worth showing the paywall for', () => {
     expect(hasBuyablePlan(buildPlans([premiumMonthly], noAdsForever))).toBe(true);
+  });
+});
+
+describe('what the paywall says about each plan (SPEC §33)', () => {
+  it('tells every No Ads plan that it does not unlock Premium — the lifetime one too', () => {
+    expect(needsNoAdsDisclaimer('no_ads_monthly')).toBe(true);
+    expect(needsNoAdsDisclaimer('no_ads_lifetime')).toBe(true);
+  });
+
+  it('does not put that sentence on the plans that ARE Premium', () => {
+    expect(needsNoAdsDisclaimer('premium_monthly')).toBe(false);
+    expect(needsNoAdsDisclaimer('premium_annual')).toBe(false);
+  });
+
+  it('says "Subscribe" only for what renews', () => {
+    expect(purchaseAction('available', 'monthly')).toBe('subscribe');
+    expect(purchaseAction('available', 'annual')).toBe('subscribe');
+    expect(purchaseAction('available', 'lifetime')).toBe('buyOnce');
+  });
+
+  it('offers an upgrade as an upgrade', () => {
+    expect(purchaseAction('upgrade', 'monthly')).toBe('upgrade');
   });
 });

@@ -25,10 +25,9 @@
   "finish": "Finish lesson",
   "complete": {
     "title": "Lesson complete",
-    "body": "You've read {{title}}.",
-    "xpPending": "Practice and the daily challenge arrive in the next release.",
+    "body": "Nice work. Your progress is saved.",
     "next": "Next lesson",
-    "backToModule": "Back to the module",
+    "continue": "Continue",
     "xpEarned": "+{{count}} XP earned in this lesson",
     "score": "{{correct}} of {{total}} correct on the first try",
     "perfect": "Perfect lesson — every question right first time.",

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 
-import { services, type AuthUser, type SignUpResult } from '@/services';
+import { services, type AuthUser, type ConfirmationKind, type SignUpResult } from '@/services';
 import { useSessionStore } from '@/store/sessionStore';
 
 import { normalizeEmail } from '../logic/validation';
@@ -52,10 +52,12 @@ export const useSendPasswordReset = (options?: Options<void, { email: string }>)
     mutationFn: ({ email }) => services.auth.sendPasswordReset(normalizeEmail(email)),
   });
 
-export const useResendConfirmation = (options?: Options<void, { email: string }>) =>
-  useMutation<void, Error, { email: string }>({
+export const useResendConfirmation = (
+  options?: Options<void, { email: string; kind: ConfirmationKind }>,
+) =>
+  useMutation<void, Error, { email: string; kind: ConfirmationKind }>({
     ...options,
-    mutationFn: ({ email }) => services.auth.resendConfirmation(normalizeEmail(email)),
+    mutationFn: ({ email, kind }) => services.auth.resendConfirmation(normalizeEmail(email), kind),
   });
 
 export const useUpdatePassword = (options?: Options<void, { password: string }>) => {

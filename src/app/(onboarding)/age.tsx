@@ -25,7 +25,9 @@ export default function AgeStep() {
 
   const { data: config } = useAppConfig();
   const setBirthYear = useOnboardingStore((state) => state.setBirthYear);
-  const rejectUnderage = useRejectUnderageAccount();
+  const rejectUnderage = useRejectUnderageAccount({
+    showRefusal: () => router.replace('/blocked'),
+  });
 
   const [value, setValue] = useState('');
   const [attempted, setAttempted] = useState(false);
@@ -46,9 +48,7 @@ export default function AgeStep() {
     if (verdict === 'too-young') {
       // Acted on immediately rather than at the end of the flow: the account must not exist,
       // and the remaining questions would be a waste of this person's time.
-      rejectUnderage.mutate(undefined, {
-        onSettled: () => router.replace('/blocked'),
-      });
+      rejectUnderage.mutate();
       return;
     }
 

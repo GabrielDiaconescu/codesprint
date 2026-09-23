@@ -79,6 +79,8 @@ export interface SignUpResult {
   needsConfirmation: boolean;
 }
 
+export type ConfirmationKind = 'signup' | 'email_change';
+
 export interface AuthService extends ServiceIdentity {
   /** The restored session, if SecureStore still holds a valid refresh token. */
   getUser(): Promise<AuthUser | null>;
@@ -95,7 +97,12 @@ export interface AuthService extends ServiceIdentity {
    */
   linkEmail(email: string, password: string): Promise<SignUpResult>;
 
-  resendConfirmation(email: string): Promise<void>;
+  /**
+   * Sends the confirmation link again. `signup` for an account created while signed out;
+   * `email_change` for a guest who added an email to their own session (`linkEmail`), whose
+   * pending confirmation Supabase files as a change of address.
+   */
+  resendConfirmation(email: string, kind: ConfirmationKind): Promise<void>;
   sendPasswordReset(email: string): Promise<void>;
   /** Valid only inside a recovery session opened by the reset deep link. */
   updatePassword(newPassword: string): Promise<void>;

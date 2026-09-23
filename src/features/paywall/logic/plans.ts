@@ -158,3 +158,29 @@ export const hasBuyablePlan = (plans: Plan[]): boolean =>
   plans.some(
     (plan) => plan.state === 'available' || plan.state === 'upgrade' || plan.state === 'add-on',
   );
+
+/**
+ * Whether a plan must say in so many words that it does not unlock Premium (SPEC §33).
+ *
+ * Decided by what the plan GRANTS, not by its name: keyed on `no_ads_monthly` alone, the
+ * statement silently disappeared from the paywall when the offering moved to the lifetime
+ * No Ads product (D2) — which the E2E paywall flow caught.
+ */
+export const needsNoAdsDisclaimer = (role: PackageRole): boolean => {
+  const granted = grants(role);
+  return granted.includes('no_ads') && !granted.includes('premium');
+};
+
+export type PurchaseAction = 'subscribe' | 'buyOnce' | 'upgrade';
+
+/**
+ * The purchase button's wording. "Subscribe" only for something that renews: on a one-off
+ * purchase it would describe a commitment the customer is not making (SPEC §33).
+ */
+export const purchaseAction = (
+  state: PlanState,
+  billingPeriod: StoreProduct['billingPeriod'],
+): PurchaseAction => {
+  if (state === 'upgrade') return 'upgrade';
+  return billingPeriod === 'lifetime' ? 'buyOnce' : 'subscribe';
+};

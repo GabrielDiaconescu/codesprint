@@ -21,7 +21,6 @@ export default function AuthCallbackScreen() {
   const router = useRouter();
 
   const params = useLocalSearchParams();
-  const status = useSessionStore((state) => state.status);
   const beginPasswordReset = useSessionStore((state) => state.beginPasswordReset);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -31,20 +30,27 @@ export default function AuthCallbackScreen() {
   // dependency array would re-run this effect and do exactly that.
   const consumed = useRef(false);
 
+  // Whether there is still a screen to act on — the ONLY thing that may stop the outcome from
+  // being acted on. It used to be the effect's own cleanup, with the session status among the
+  // effect's dependencies: but exchanging the code IS what changes the status (a guest becomes
+  // a registered user), so the exchange cancelled its own result and the screen stayed on
+  // "Signing you in…" for good. The E2E guest-to-account flow caught it.
+  const mounted = useRef(true);
+  useEffect(
+    () => () => {
+      mounted.current = false;
+    },
+    [],
+  );
+
   useEffect(() => {
     if (consumed.current) return;
     consumed.current = true;
 
-    let active = true;
-
-    const leave = () => {
-      if (active) router.replace(status === 'signed-out' ? '/sign-in' : '/');
-    };
-
     services.auth
       .consumeAuthCallback(params)
       .then((outcome) => {
-        if (!active) return;
+        if (!mounted.current) return;
 
         switch (outcome.kind) {
           case 'recovery':
@@ -60,18 +66,15 @@ export default function AuthCallbackScreen() {
             setErrorMessage(t(`errors.${outcome.code}`));
             break;
           case 'ignored':
-            leave();
+            // Read now, not captured when the effect started: the session may have changed.
+            router.replace(useSessionStore.getState().status === 'signed-out' ? '/sign-in' : '/');
             break;
         }
       })
       .catch(() => {
-        if (active) setErrorMessage(t('errors.unknown'));
+        if (mounted.current) setErrorMessage(t('errors.unknown'));
       });
-
-    return () => {
-      active = false;
-    };
-  }, [params, router, status, t, beginPasswordReset]);
+  }, [params, router, t, beginPasswordReset]);
 
   if (errorMessage) {
     return (

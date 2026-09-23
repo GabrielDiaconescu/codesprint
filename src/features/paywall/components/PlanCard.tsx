@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { Badge, Button, Card, Text } from '@/components/ui';
 import { useTheme } from '@/theme';
 
-import { formatMicros, type Plan } from '../logic/plans';
+import { formatMicros, needsNoAdsDisclaimer, purchaseAction, type Plan } from '../logic/plans';
 
 export interface PlanCardProps {
   plan: Plan;
@@ -77,9 +77,9 @@ export const PlanCard = ({ plan, savingPercent, onSelect, busy }: PlanCardProps)
           {t(`plans.${role}.body`)}
         </Text>
 
-        {role === 'no_ads_monthly' && (
+        {needsNoAdsDisclaimer(role) && (
           <Text testID="no-ads-disclaimer" variant="caption" tone="secondary">
-            {t('plans.no_ads_monthly.limits')}
+            {t(`plans.${role}.limits`)}
           </Text>
         )}
 
@@ -92,7 +92,7 @@ export const PlanCard = ({ plan, savingPercent, onSelect, busy }: PlanCardProps)
         ) : (
           <Button
             testID={`plan-buy-${role}`}
-            label={t(state === 'upgrade' ? 'action.upgrade' : 'action.subscribe')}
+            label={t(`action.${purchaseAction(state, product.billingPeriod)}`)}
             variant={plan.recommended ? 'primary' : 'secondary'}
             loading={busy}
             onPress={() => onSelect(plan)}
