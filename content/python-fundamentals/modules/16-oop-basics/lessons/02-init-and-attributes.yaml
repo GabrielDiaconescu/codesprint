@@ -1,0 +1,228 @@
+id: 659f290a-3e00-4b81-9972-4e598d2b42dc
+slug: init-and-attributes
+title:
+  en: Setting up a new object
+summary:
+  en: __init__, self, and giving every object its own attributes from the start.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A method called `__init__` runs automatically every time an object is created. Its
+        first parameter, `self`, is the new object itself, and assigning to `self.something`
+        gives that object an attribute.
+
+  - type: code
+    code: |
+      class Dog:
+          def __init__(self, name, age):
+              self.name = name
+              self.age = age
+
+      rex = Dog("Rex", 3)
+      print(rex.name, rex.age)
+    output: 'Rex 3'
+    runnable: true
+    caption:
+      en: You pass only name and age. Python supplies self for you.
+
+  - type: text
+    body:
+      en: |
+        Every object gets its own attributes. Changing one dog's name has no effect on any
+        other dog.
+
+  - type: code
+    code: |
+      class Dog:
+          def __init__(self, name):
+              self.name = name
+
+      a = Dog("Rex")
+      b = Dog("Fido")
+      print(a.name)
+      print(b.name)
+    output: |-
+      Rex
+      Fido
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Writing `name = name` inside `__init__` only creates a local variable, which vanishes
+        when `__init__` ends. It must be `self.name = name` for the object to keep it.
+
+  - type: question
+    question:
+      id: e7f83003-447d-498a-91c8-edd153c5900e
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`__init__` runs automatically when an object is created.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          You never call it by name. `Dog("Rex")` builds the object and runs `__init__` on it
+          straight away.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 9b29f805-37fc-4213-a04a-93c2305493e2
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Book:
+            def __init__(self, title):
+                self.title = title
+
+        b = Book("Dune")
+        print(b.title)
+      payload:
+        input: text
+      answer:
+        value: Dune
+        match_mode: trimmed
+      explanation:
+        en: >
+          "Dune" is passed to `__init__`, which stores it as the book's `title` attribute.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 940e37d7-3289-46db-aada-2d07d7ad960a
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: In `def __init__(self, name):`, what is `self`?
+      payload:
+        options:
+          - id: object
+            text:
+              en: The object being created
+          - id: class
+            text:
+              en: The class itself
+          - id: first-arg
+            text:
+              en: The first argument you pass when calling
+          - id: keyword
+            text:
+              en: A word you have to type when creating the object
+      answer:
+        option_id: object
+      explanation:
+        en: >
+          `self` is the particular object being set up. Python fills it in automatically, so
+          your first argument goes to `name`.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6e782a0c-f07d-4384-82c8-0a1f916a8183
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so every cat keeps its name.
+      code_snippet: |
+        class Cat:
+            def __init__(self, name):
+                ___.name = name
+      payload:
+        input: tokens
+        tokens: [self, Cat, name, init]
+      answer:
+        value: self
+        match_mode: trimmed
+      explanation:
+        en: >
+          Attributes belong to the object, so they are set on `self`. `Cat.name` would put the
+          name on the class, shared by every cat.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0c7ed0dd-091b-4270-bd9a-0425af8c2afc
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Counter:
+            def __init__(self):
+                self.count = 0
+
+        a = Counter()
+        b = Counter()
+        a.count = 5
+        print(a.count, b.count)
+      payload:
+        input: text
+      answer:
+        value: 5 0
+        match_mode: trimmed
+      explanation:
+        en: >
+          Each counter got its own `count` when it was built. Changing `a`'s leaves `b`'s at 0.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d58dd52d-24c2-4136-8096-457ddb912b1f
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This stops with an AttributeError. Which line is the problem?
+      code_snippet: |
+        class Player:
+            def __init__(self, name):
+                name = name
+
+        p = Player("Ann")
+        print(p.name)
+      payload:
+        mode: select_line
+        lines:
+          - id: class
+            text: 'class Player:'
+          - id: init
+            text: '    def __init__(self, name):'
+          - id: assign
+            text: '        name = name'
+          - id: create
+            text: 'p = Player("Ann")'
+          - id: show
+            text: 'print(p.name)'
+      answer:
+        line_id: assign
+      runnable: true
+      fixed_code: |
+        class Player:
+            def __init__(self, name):
+                self.name = name
+
+        p = Player("Ann")
+        print(p.name)
+      fixed_output: Ann
+      explanation:
+        en: >
+          `name = name` assigns the parameter to itself and changes nothing on the object. The
+          error only surfaces at the last line, but the fault is inside `__init__`:
+          it needed `self.name = name`.
+      hint:
+        en: Where should the name be stored?
+      skill_tags: [oop, debugging]
+      review_status: draft

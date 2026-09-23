@@ -1,0 +1,215 @@
+id: 40305ec5-0370-4985-ad6e-554134c14d81
+slug: str-method
+title:
+  en: Choosing how an object prints
+summary:
+  en: __str__, and making print, str() and f-strings show something useful.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Printing an object of your own class normally shows its class name and a memory
+        address — accurate, but useless to a person. Define a method called `__str__` that
+        returns a string, and that string is what `print` shows.
+
+  - type: code
+    code: |
+      class Point:
+          def __init__(self, x, y):
+              self.x = x
+              self.y = y
+
+          def __str__(self):
+              return f"({self.x}, {self.y})"
+
+      p = Point(2, 5)
+      print(p)
+    output: '(2, 5)'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `str()` and f-strings use the same method, so one definition covers every way the
+        object is turned into text.
+
+  - type: code
+    code: |
+      class Point:
+          def __init__(self, x, y):
+              self.x = x
+              self.y = y
+
+          def __str__(self):
+              return f"({self.x}, {self.y})"
+
+      p = Point(2, 5)
+      print(f"Point: {p}")
+      print(str(p) == "(2, 5)")
+    output: |-
+      Point: (2, 5)
+      True
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        `__str__` must **return** a string. Printing inside it and returning nothing makes
+        Python stop with a TypeError the moment the object is printed.
+
+  - type: question
+    question:
+      id: b8ac82ed-d2ce-46e5-917d-218d97e9f093
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What decides what `print(obj)` shows for an object of your own class?
+      payload:
+        options:
+          - id: str
+            text:
+              en: Its __str__ method
+          - id: init
+            text:
+              en: Its __init__ method
+          - id: variable
+            text:
+              en: The name of the variable holding it
+          - id: class
+            text:
+              en: The class name, always
+      answer:
+        option_id: str
+      explanation:
+        en: >
+          `print` asks the object for its text form, which comes from `__str__`. Without one,
+          you get the class name and an address.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7a79455c-e362-424c-abd4-281799b79bef
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`__str__` must return a string.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          Anything else — including the `None` you get from forgetting `return` — is refused
+          with a TypeError.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d3632037-f3b2-4669-816c-bc9c2074401d
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Temp:
+            def __init__(self, c):
+                self.c = c
+
+            def __str__(self):
+                return f"{self.c} degrees"
+
+        print(Temp(21))
+      payload:
+        input: text
+      answer:
+        value: 21 degrees
+        match_mode: trimmed
+      explanation:
+        en: >
+          `print` uses `__str__`, which builds the text from the object's attribute.
+      skill_tags: [oop, f-strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6001b7df-dd23-448e-ae29-862af8cbeaa2
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Pet:
+            def __init__(self, name):
+                self.name = name
+
+            def __str__(self):
+                return "Pet(" + self.name + ")"
+
+        p = Pet("Tom")
+        print(f"Found {p}")
+      payload:
+        input: text
+      answer:
+        value: Found Pet(Tom)
+        match_mode: trimmed
+      explanation:
+        en: >
+          An f-string turns `{p}` into text by calling `__str__`, exactly as `print` does.
+      skill_tags: [oop, f-strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6c5e2cf7-8f55-4271-ac84-6d1074eefd88
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This prints "Card K" and then crashes with a TypeError. Which line is the problem?
+      code_snippet: |
+        class Card:
+            def __init__(self, rank):
+                self.rank = rank
+
+            def __str__(self):
+                print("Card " + self.rank)
+
+        print(Card("K"))
+      payload:
+        mode: select_line
+        lines:
+          - id: init
+            text: '    def __init__(self, rank):'
+          - id: store
+            text: '        self.rank = rank'
+          - id: str
+            text: '    def __str__(self):'
+          - id: body
+            text: '        print("Card " + self.rank)'
+          - id: show
+            text: 'print(Card("K"))'
+      answer:
+        line_id: body
+      runnable: true
+      fixed_code: |
+        class Card:
+            def __init__(self, rank):
+                self.rank = rank
+
+            def __str__(self):
+                return "Card " + self.rank
+
+        print(Card("K"))
+      fixed_output: Card K
+      explanation:
+        en: >
+          `__str__` prints the text itself and then returns `None`, which `print` cannot use.
+          The text appears once — from inside `__str__` — before the crash. Returning it fixes
+          both.
+      hint:
+        en: What does `__str__` have to give back?
+      skill_tags: [oop, debugging]
+      review_status: draft

@@ -1,0 +1,14 @@
+id: f2d1b38d-ae5a-4308-a7b3-79ae8d5a2f01
+slug: oop-basics
+title:
+  en: OOP Basics
+description:
+  en: Designing your own types — classes, objects, their data and behaviour, and building one class on top of another.
+order_index: 16
+estimated_minutes: 34
+lessons:
+  - classes-and-objects
+  - init-and-attributes
+  - methods
+  - str-method
+  - inheritance

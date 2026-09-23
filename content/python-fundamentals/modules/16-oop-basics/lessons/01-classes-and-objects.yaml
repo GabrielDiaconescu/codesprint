@@ -1,0 +1,194 @@
+id: ef7e193a-d1e2-4f37-9b65-bc9c25e97f69
+slug: classes-and-objects
+title:
+  en: Blueprints and the things made from them
+summary:
+  en: Classes, objects, and giving an object its own data.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A **class** is a blueprint for a kind of thing. An **object** is one thing built from
+        that blueprint. You have used objects all along — every string and every list is one.
+        Now you can design your own.
+
+  - type: code
+    code: |
+      class Dog:
+          pass
+
+      rex = Dog()
+      fido = Dog()
+      print(isinstance(rex, Dog))
+      print(rex is fido)
+    output: |-
+      True
+      False
+    runnable: true
+    caption:
+      en: '`pass` means "nothing here yet". Two calls to `Dog()` build two separate dogs.'
+
+  - type: text
+    body:
+      en: |
+        An object can carry its own data in **attributes**, reached with a dot. The next
+        lesson shows the proper way to set them up; for now, one can simply be assigned.
+
+  - type: code
+    code: |
+      class Dog:
+          pass
+
+      rex = Dog()
+      rex.name = "Rex"
+      print(rex.name)
+    output: 'Rex'
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        Class names are written in CapitalisedWords — `Dog`, `BankAccount` — which tells a
+        reader at a glance that the name is a class and not a variable.
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        The brackets matter. `rex = Dog()` builds a new dog; `rex = Dog` just gives the
+        blueprint itself a second name.
+
+  - type: question
+    question:
+      id: 5191e30e-d6d4-425c-9b6c-f209366f52cc
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What is an object?
+      payload:
+        options:
+          - id: instance
+            text:
+              en: One particular thing built from a class
+          - id: blueprint
+            text:
+              en: The blueprint that describes a kind of thing
+          - id: function
+            text:
+              en: A function that belongs to a module
+          - id: module
+            text:
+              en: A file of Python code
+      answer:
+        option_id: instance
+      explanation:
+        en: >
+          The class is the blueprint; each object is one thing made from it. A single class can
+          produce any number of objects.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e4e86d2b-571b-42a5-942d-4edfa00265c8
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Two objects made from the same class are the same object.
+      answer:
+        value: false
+      explanation:
+        en: >
+          Each call to the class builds a brand-new object. They share a blueprint, not an
+          identity.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 12a22054-2a7d-44e1-92f3-e334c3e89dd5
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Box:
+            pass
+
+        a = Box()
+        b = Box()
+        print(a is b)
+      payload:
+        input: text
+      answer:
+        value: 'False'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `is` asks whether two names refer to the very same object. Two calls made two boxes.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7a215518-1a69-44d9-b734-a42b160f7a0b
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: Which line creates a new object from a class called `Car`?
+      payload:
+        options:
+          - id: call
+            text:
+              en: my_car = Car()
+          - id: no-brackets
+            text:
+              en: my_car = Car
+          - id: new
+            text:
+              en: my_car = new Car()
+          - id: class
+            text:
+              en: class my_car(Car)
+      answer:
+        option_id: call
+      explanation:
+        en: >
+          Calling the class, with brackets, builds an object. Without brackets you only get
+          the class itself, and Python has no `new` keyword.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 9eb5dc5d-5f4f-43fb-84ad-337f052a69a2
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Point:
+            pass
+
+        p = Point()
+        p.x = 3
+        q = p
+        q.x = 10
+        print(p.x)
+      payload:
+        input: text
+      answer:
+        value: '10'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `q = p` does not copy the point — it gives the same object a second name, exactly as
+          with lists. Changing `q.x` changes the one and only point.
+      hint:
+        en: How many Point objects exist?
+      skill_tags: [oop]
+      review_status: draft

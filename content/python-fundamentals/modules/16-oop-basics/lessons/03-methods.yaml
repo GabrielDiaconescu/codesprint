@@ -1,0 +1,260 @@
+id: 21ecdae3-8c50-46eb-b368-e36591f98e73
+slug: methods
+title:
+  en: Giving objects behaviour
+summary:
+  en: Methods that read and change an object's attributes, and the self you never pass yourself.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A **method** is a function defined inside a class. Its first parameter is always
+        `self`, which gives it access to the object's attributes.
+
+  - type: code
+    code: |
+      class Rectangle:
+          def __init__(self, w, h):
+              self.w = w
+              self.h = h
+
+          def area(self):
+              return self.w * self.h
+
+      r = Rectangle(3, 4)
+      print(r.area())
+    output: '12'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Methods can change an object as well as read it. The changes last, because they are
+        made to the object's own attributes.
+
+  - type: code
+    code: |
+      class Account:
+          def __init__(self):
+              self.balance = 0
+
+          def deposit(self, amount):
+              self.balance += amount
+
+      acc = Account()
+      acc.deposit(50)
+      acc.deposit(25)
+      print(acc.balance)
+    output: '75'
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        When calling a method you never pass `self`. Python passes the object before the dot
+        for you: `r.area()` is really `Rectangle.area(r)`.
+
+  - type: question
+    question:
+      id: 4022d91c-58f8-49ce-85a3-2c8f3f0ab363
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: When calling `r.area()`, you must pass `r` yourself as an argument.
+      answer:
+        value: false
+      explanation:
+        en: >
+          The object before the dot is passed automatically as `self`. You pass only the
+          arguments after it.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2377c20d-f693-4989-b2b7-501335001297
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Greeter:
+            def hello(self):
+                return "hi"
+
+        g = Greeter()
+        print(g.hello())
+      payload:
+        input: text
+      answer:
+        value: hi
+        match_mode: trimmed
+      explanation:
+        en: >
+          Calling the method runs its body, which returns "hi".
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e2474450-e270-4cce-868a-6344c24d1f2b
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Jar:
+            def __init__(self):
+                self.coins = 0
+
+            def add(self, n):
+                self.coins += n
+
+        j = Jar()
+        j.add(3)
+        j.add(4)
+        print(j.coins)
+      payload:
+        input: text
+      answer:
+        value: '7'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Each call adds to the same jar's `coins`, so they build up: 0, then 3, then 7.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 789e7ca4-e82e-4d48-b46e-6e4beb370686
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This should print 10 but stops with a TypeError. How do you fix it?
+      code_snippet: |
+        class Circle:
+            def __init__(self, r):
+                self.r = r
+
+            def diameter():
+                return self.r * 2
+
+        c = Circle(5)
+        print(c.diameter())
+      payload:
+        mode: choose_fix
+        options:
+          - id: add-self
+            text:
+              en: Give diameter a self parameter
+          - id: call-class
+            text:
+              en: Call Circle.diameter() instead
+          - id: no-brackets
+            text:
+              en: Write c.diameter without brackets
+          - id: plain-r
+            text:
+              en: Return r * 2 instead of self.r * 2
+      answer:
+        option_id: add-self
+      runnable: true
+      fixed_code: |
+        class Circle:
+            def __init__(self, r):
+                self.r = r
+
+            def diameter(self):
+                return self.r * 2
+
+        c = Circle(5)
+        print(c.diameter())
+      fixed_output: '10'
+      explanation:
+        en: >
+          Python passes the object to every method call, so a method with no `self` parameter
+          receives one argument more than it can take. Every method needs `self` first.
+      hint:
+        en: What does Python always pass to a method?
+      skill_tags: [oop, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 42cb0f90-a903-42a1-bf77-c7d96ff647da
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: With this class and `r = Rectangle(2, 5)`, which lines print 10?
+      code_snippet: |
+        class Rectangle:
+            def __init__(self, w, h):
+                self.w = w
+                self.h = h
+
+            def area(self):
+                return self.w * self.h
+      payload:
+        options:
+          - id: method
+            text:
+              en: print(r.area())
+          - id: attributes
+            text:
+              en: print(r.w * r.h)
+          - id: via-class
+            text:
+              en: print(Rectangle.area(r))
+          - id: no-call
+            text:
+              en: print(r.area)
+          - id: bare
+            text:
+              en: print(area(r))
+      answer:
+        option_ids: [method, attributes, via-class]
+      explanation:
+        en: >
+          The first three all multiply the same two attributes. Without brackets you print the
+          method itself rather than calling it, and `area` on its own is not a name that exists
+          outside the class.
+      skill_tags: [oop]
+      review_status: draft
+
+  - type: question
+    question:
+      id: abf28095-14cf-46df-aa83-b0ee84971488
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Counter:
+            def __init__(self):
+                self.n = 0
+
+            def tick(self):
+                self.n += 1
+                return self
+
+        c = Counter()
+        c.tick().tick().tick()
+        print(c.n)
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `tick` returns the object itself, so the next `.tick()` is called on the same
+          counter. Three calls in a chain add three.
+      hint:
+        en: What does each `tick()` return?
+      skill_tags: [oop]
+      review_status: draft

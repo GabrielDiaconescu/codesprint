@@ -1,0 +1,261 @@
+id: 7d62e2b5-b672-40a5-8d4e-72cea26fb726
+slug: inheritance
+title:
+  en: Building one class on another
+summary:
+  en: Inheriting methods, replacing some of them, and calling the parent's version with super().
+estimated_minutes: 8
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A class can **inherit** from another: write the parent in brackets after the new
+        class's name. The child gets every method of the parent, and can replace — or
+        **override** — any of them with its own version.
+
+  - type: code
+    code: |
+      class Animal:
+          def __init__(self, name):
+              self.name = name
+
+          def speak(self):
+              return "..."
+
+      class Dog(Animal):
+          def speak(self):
+              return "Woof"
+
+      class Cat(Animal):
+          def speak(self):
+              return "Meow"
+
+      for pet in [Dog("Rex"), Cat("Tom")]:
+          print(pet.name, pet.speak())
+    output: |-
+      Rex Woof
+      Tom Meow
+    runnable: true
+    caption:
+      en: Neither Dog nor Cat defines __init__, so both use Animal's.
+
+  - type: text
+    body:
+      en: |
+        When a child needs to add to the parent's setup rather than replace it, `super()`
+        calls the parent's version.
+
+  - type: code
+    code: |
+      class Animal:
+          def __init__(self, name):
+              self.name = name
+
+      class Dog(Animal):
+          def __init__(self, name, breed):
+              super().__init__(name)
+              self.breed = breed
+
+      d = Dog("Rex", "Beagle")
+      print(d.name, d.breed)
+    output: 'Rex Beagle'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Inherit when the child really is a kind of the parent — a Dog is an Animal. When one
+        thing merely uses another, give it an attribute instead.
+
+  - type: question
+    question:
+      id: 477c626d-febf-4b8b-8f0d-cbf6180da4e4
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A child class can use methods it inherits without defining them itself.
+      answer:
+        value: true
+      explanation:
+        en: >
+          That is the point of inheriting. The child only defines what it wants to add or do
+          differently.
+      skill_tags: [oop, inheritance]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 8aa2e230-9a56-4588-afca-09d67237f0cf
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: How do you make a class `Dog` inherit from `Animal`?
+      payload:
+        options:
+          - id: brackets
+            text:
+              en: 'class Dog(Animal):'
+          - id: extends
+            text:
+              en: 'class Dog extends Animal:'
+          - id: inherits
+            text:
+              en: 'class Dog inherits Animal:'
+          - id: backwards
+            text:
+              en: 'class Animal(Dog):'
+      answer:
+        option_id: brackets
+      explanation:
+        en: >
+          The parent goes in brackets after the child's name. The last option has them the
+          wrong way round, making Animal a kind of Dog.
+      skill_tags: [oop, inheritance]
+      review_status: draft
+
+  - type: question
+    question:
+      id: b3bbc269-0537-4bf6-abad-50399d1b4ec6
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Vehicle:
+            def wheels(self):
+                return 4
+
+        class Bike(Vehicle):
+            def wheels(self):
+                return 2
+
+        class Car(Vehicle):
+            pass
+
+        print(Bike().wheels() + Car().wheels())
+      payload:
+        input: text
+      answer:
+        value: '6'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Bike overrides `wheels` and gives 2. Car does not, so it uses Vehicle's 4.
+      skill_tags: [oop, inheritance]
+      review_status: draft
+
+  - type: question
+    question:
+      id: dcacb064-2af9-4a62-b267-180863d75ac9
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class Shape:
+            def __init__(self, name):
+                self.name = name
+
+        class Square(Shape):
+            def __init__(self, side):
+                super().__init__("square")
+                self.side = side
+
+        s = Square(3)
+        print(s.name, s.side * s.side)
+      payload:
+        input: text
+      answer:
+        value: square 9
+        match_mode: trimmed
+      explanation:
+        en: >
+          Square's `__init__` hands "square" to Shape's `__init__` through `super()`, then adds
+          its own `side`. The object ends up with both attributes.
+      skill_tags: [oop, inheritance]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ae6e155f-e419-476c-b4f8-d711848c11e2
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each term to its meaning.
+      payload:
+        concepts:
+          - id: parent
+            text:
+              en: Parent class
+          - id: child
+            text:
+              en: Child class
+          - id: override
+            text:
+              en: Overriding
+          - id: super
+            text:
+              en: super()
+        definitions:
+          - id: inherited-from
+            text:
+              en: The class being inherited from
+          - id: inherits
+            text:
+              en: The class that inherits
+          - id: replace
+            text:
+              en: Defining a method again in the child to replace the parent's
+          - id: call-parent
+            text:
+              en: Calling the parent's version of a method
+      answer:
+        pairs:
+          parent: inherited-from
+          child: inherits
+          override: replace
+          super: call-parent
+      explanation:
+        en: >
+          A child inherits from a parent, may override what it wants to change, and can still
+          reach the parent's version through `super()`.
+      skill_tags: [oop, inheritance]
+      review_status: draft
+
+  - type: question
+    question:
+      id: f2b1c927-5189-406a-b0ac-47d2745e7087
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        class A:
+            def who(self):
+                return "A"
+
+            def hello(self):
+                return "I am " + self.who()
+
+        class B(A):
+            def who(self):
+                return "B"
+
+        print(B().hello())
+      payload:
+        input: text
+      answer:
+        value: I am B
+        match_mode: trimmed
+      explanation:
+        en: >
+          `hello` is inherited from A, but `self` is a B. When it calls `self.who()`, Python
+          looks on the object first and finds B's version. Methods are chosen by what the
+          object is, not by where the calling code was written.
+      hint:
+        en: What kind of object is `self` inside `hello`?
+      skill_tags: [oop, inheritance]
+      review_status: draft
