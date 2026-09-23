@@ -1,0 +1,217 @@
+id: a2f08dae-1e33-412d-9ac9-0ebd9ea3266b
+slug: unpacking
+title:
+  en: Unpacking into separate names
+summary:
+  en: Taking a tuple apart in one line, swapping two values, and returning more than one thing.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        **Unpacking** gives each item of a tuple its own name in a single line. Put as many
+        names on the left as there are items on the right.
+
+  - type: code
+    code: |
+      point = (3, 4)
+      x, y = point
+      print(x)
+      print(y)
+    output: |-
+      3
+      4
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        The same trick swaps two variables without a temporary third one. The right-hand side
+        is worked out first, then unpacked into the names on the left.
+
+  - type: code
+    code: |
+      a = 1
+      b = 2
+      a, b = b, a
+      print(a, b)
+    output: '2 1'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        A function can return several values separated by commas. Python packs them into a
+        tuple, and the caller unpacks them.
+
+  - type: code
+    code: |
+      def min_max(nums):
+          return min(nums), max(nums)
+
+      low, high = min_max([4, 9, 1])
+      print(low, high)
+    output: '1 9'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        The number of names must match the number of items exactly. Too few or too many and
+        Python stops with a ValueError rather than guessing which ones you meant.
+
+  - type: question
+    question:
+      id: a3a740fa-70eb-4144-8231-e4836059a814
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        a, b = (7, 8)
+        print(b)
+      payload:
+        input: text
+      answer:
+        value: '8'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The first item goes to the first name and the second to the second, so `b` is 8.
+      skill_tags: [tuples, unpacking]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1f13623d-4195-4104-9918-6afde3374279
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`a, b = b, a` swaps the values of `a` and `b`.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          The right side is built first as the tuple `(b, a)`, using the old values. Only then
+          is it unpacked into `a` and `b`.
+      skill_tags: [unpacking]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0224dc49-3b33-41c2-965f-6237bbbaa09a
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def pair():
+            return 1, 2
+
+        result = pair()
+        print(result)
+      payload:
+        input: choice
+        options:
+          - id: tuple
+            text:
+              en: (1, 2)
+          - id: spaced
+            text:
+              en: 1 2
+          - id: list
+            text:
+              en: '[1, 2]'
+          - id: first
+            text:
+              en: '1'
+      answer:
+        value: (1, 2)
+        match_mode: exact
+      explanation:
+        en: >
+          Returning two values actually returns one tuple. Stored in a single name, it stays a
+          tuple; it is only split apart when you unpack it into two names.
+      skill_tags: [tuples, functions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: dc7ace75-5bcd-4a09-bbda-0cdcc291f53a
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What happens when you run `a, b = (1, 2, 3)`?
+      payload:
+        options:
+          - id: error
+            text:
+              en: A ValueError — three items do not fit two names
+          - id: dropped
+            text:
+              en: a is 1, b is 2, and the 3 is ignored
+          - id: rest
+            text:
+              en: a is 1 and b is (2, 3)
+          - id: last
+            text:
+              en: a is 1 and b is 3
+      answer:
+        option_id: error
+      explanation:
+        en: >
+          Plain unpacking needs an exact match. Python refuses rather than silently dropping or
+          grouping items.
+      skill_tags: [unpacking, errors]
+      review_status: draft
+
+  - type: question
+    question:
+      id: f000d6ea-2dd3-4a72-855b-7bac547636e7
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the second line so the program prints `9 5`.
+      code_snippet: |
+        x, y = 5, 9
+        x, y = ___
+        print(x, y)
+      payload:
+        input: tokens
+        tokens: ['y, x', 'x, y', 'y', '(x)']
+      answer:
+        value: 'y, x'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `x, y = y, x` swaps them. `x, y` would leave both unchanged, and a single value
+          cannot be unpacked into two names.
+      skill_tags: [unpacking]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7df53ac2-7525-4174-816b-e3546e11fde4
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        a, b, c = "cat"
+        print(b)
+      payload:
+        input: text
+      answer:
+        value: a
+        match_mode: trimmed
+      explanation:
+        en: >
+          Anything you can loop over can be unpacked, and a string is a sequence of characters.
+          "cat" has three, so `a` gets "c", `b` gets "a" and `c` gets "t".
+      hint:
+        en: How many characters does "cat" have?
+      skill_tags: [unpacking, strings]
+      review_status: draft

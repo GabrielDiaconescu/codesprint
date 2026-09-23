@@ -1,0 +1,13 @@
+id: a5e260d3-fede-4421-8a12-60590f45c369
+slug: tuples-and-sets
+title:
+  en: Tuples & Sets
+description:
+  en: Two more collections — tuples for values that belong together and never change, sets for values that must be unique.
+order_index: 10
+estimated_minutes: 26
+lessons:
+  - tuples
+  - unpacking
+  - sets
+  - set-operations

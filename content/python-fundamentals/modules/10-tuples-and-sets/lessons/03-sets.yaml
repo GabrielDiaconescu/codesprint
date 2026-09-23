@@ -1,0 +1,222 @@
+id: ab1753c6-d426-4e26-bc24-af2259924d57
+slug: sets
+title:
+  en: Sets — every value once
+summary:
+  en: Collections without duplicates or order, and the fastest way to remove repeats from a list.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A **set** holds each value at most once. It is written with curly braces, duplicates
+        are dropped automatically, and the items have no fixed order.
+
+  - type: code
+    code: |
+      nums = {3, 1, 3, 2, 1}
+      print(len(nums))
+      print(sorted(nums))
+    output: |-
+      3
+      [1, 2, 3]
+    runnable: true
+    caption:
+      en: '`sorted` gives a list in a predictable order — useful because a set has none.'
+
+  - type: text
+    body:
+      en: |
+        Turning a list into a set is the quickest way to find its distinct values.
+
+  - type: code
+    code: |
+      names = ["ann", "bo", "ann"]
+      unique = set(names)
+      print(len(unique))
+    output: '2'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `add` puts a value in (doing nothing if it is already there), and `in` checks
+        membership — very quickly, even for huge sets.
+
+  - type: code
+    code: |
+      seen = set()
+      seen.add("a")
+      seen.add("a")
+      seen.add("b")
+      print(sorted(seen))
+      print("b" in seen)
+    output: |-
+      ['a', 'b']
+      True
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        `{}` is an empty **dictionary**, not an empty set. Write `set()` when you need an
+        empty set. And because a set has no order, it has no positions: `s[0]` is an error.
+
+  - type: question
+    question:
+      id: 67ed400e-3e29-4c5d-81a4-e06dcbac67fb
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A set can contain the same value twice.
+      answer:
+        value: false
+      explanation:
+        en: >
+          That is the defining rule of a set. Adding a value that is already there changes
+          nothing.
+      skill_tags: [sets]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e1709c38-90db-4a97-91cb-da70ce146b70
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(len({1, 2, 2, 3, 3, 3}))
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Duplicates are dropped as the set is built, leaving 1, 2 and 3.
+      skill_tags: [sets]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 63c60114-bafa-4b36-b646-c025191361c1
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: How do you create an empty set?
+      payload:
+        options:
+          - id: set
+            text:
+              en: set()
+          - id: braces
+            text:
+              en: '{}'
+          - id: list
+            text:
+              en: '[]'
+          - id: tuple
+            text:
+              en: ()
+      answer:
+        option_id: set
+      explanation:
+        en: >
+          Empty curly braces were claimed by dictionaries long before sets existed, so an empty
+          set has to be written `set()`.
+      skill_tags: [sets]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 83bed6ad-5a68-48ae-bec3-c108110c2907
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(sorted(set([3, 1, 3, 2])))
+      payload:
+        input: choice
+        options:
+          - id: unique-sorted
+            text:
+              en: '[1, 2, 3]'
+          - id: all-sorted
+            text:
+              en: '[1, 2, 3, 3]'
+          - id: original
+            text:
+              en: '[3, 1, 2]'
+          - id: set
+            text:
+              en: '{1, 2, 3}'
+      answer:
+        value: '[1, 2, 3]'
+        match_mode: exact
+      explanation:
+        en: >
+          `set` removes the repeated 3, and `sorted` returns the survivors as a list in order.
+      skill_tags: [sets, sorting]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c3cd2823-8169-419e-9f14-9fe98133150d
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these are true of sets?
+      payload:
+        options:
+          - id: dedupe
+            text:
+              en: Duplicates are removed automatically
+          - id: ordered
+            text:
+              en: Items stay in the order you added them
+          - id: membership
+            text:
+              en: You can check membership with in
+          - id: index
+            text:
+              en: You can get the first item with s[0]
+          - id: add
+            text:
+              en: add() puts a new item in
+      answer:
+        option_ids: [dedupe, membership, add]
+      explanation:
+        en: >
+          Sets drop duplicates, support `in`, and grow with `add`. They make no promise about
+          order, which is also why they cannot be indexed.
+      skill_tags: [sets]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 28a0eef2-de28-43b7-aa3c-c181152606d8
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        words = ["a", "b", "a", "c", "b"]
+        print(len(words) - len(set(words)))
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The list has 5 items and 3 distinct values. The difference, 2, is exactly how many
+          items were repeats — a quick way to count duplicates.
+      hint:
+        en: How many distinct letters are there?
+      skill_tags: [sets, lists]
+      review_status: draft

@@ -1,0 +1,226 @@
+id: 15bfa7f2-5148-4a07-a77a-715843c0f20a
+slug: tuples
+title:
+  en: Tuples — lists that cannot change
+summary:
+  en: Grouping values that belong together, and the comma that makes a one-item tuple.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A **tuple** is written with round brackets instead of square ones. You read it like a
+        list — by index, with `len`, in a loop — but once made, it can never be changed.
+
+  - type: code
+    code: |
+      point = (3, 4)
+      print(point)
+      print(point[0])
+      print(len(point))
+    output: |-
+      (3, 4)
+      3
+      2
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Use a tuple for values that belong together and should stay together: a pair of
+        coordinates, a date, a colour. Trying to change an item stops with a TypeError.
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        A tuple with one item needs a trailing comma: `(5,)`. Without it, `(5)` is just the
+        number 5 in brackets — the comma makes the tuple, not the brackets.
+
+  - type: code
+    code: |
+      print(type((5,)))
+      print(type((5)))
+    output: |-
+      <class 'tuple'>
+      <class 'int'>
+    runnable: true
+
+  - type: question
+    question:
+      id: 02e40778-0056-42ed-bf57-d1ee9d904841
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which of these creates a tuple?
+      payload:
+        options:
+          - id: round
+            text:
+              en: (1, 2)
+          - id: square
+            text:
+              en: '[1, 2]'
+          - id: curly
+            text:
+              en: '{1, 2}'
+          - id: text
+            text:
+              en: '"1, 2"'
+      answer:
+        option_id: round
+      explanation:
+        en: >
+          Round brackets with a comma make a tuple. Square brackets make a list, curly braces
+          make a set, and the quoted version is a string.
+      skill_tags: [tuples]
+      review_status: draft
+
+  - type: question
+    question:
+      id: b7a5eb75-06f8-4eb8-a3e0-83544f89812c
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: You can change an item of a tuple after creating it.
+      answer:
+        value: false
+      explanation:
+        en: >
+          Tuples are **immutable**. To "change" one you build a new tuple and assign it to the
+          name.
+      skill_tags: [tuples]
+      review_status: draft
+
+  - type: question
+    question:
+      id: aca22f62-cc85-4a16-bd45-581e09990f22
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        t = (10, 20, 30)
+        print(t[-1] + t[0])
+      payload:
+        input: text
+      answer:
+        value: '40'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Indexing works exactly as for lists: `t[-1]` is 30 and `t[0]` is 10.
+      skill_tags: [tuples, indexing]
+      review_status: draft
+
+  - type: question
+    question:
+      id: fd168007-e40b-4d76-b29b-5a4fc8054e9c
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print((1, 2) + (3,))
+      payload:
+        input: choice
+        options:
+          - id: joined
+            text:
+              en: (1, 2, 3)
+          - id: nested
+            text:
+              en: (1, 2, (3,))
+          - id: list
+            text:
+              en: '[1, 2, 3]'
+          - id: error
+            text:
+              en: A TypeError
+      answer:
+        value: (1, 2, 3)
+        match_mode: exact
+      explanation:
+        en: >
+          `+` joins two tuples into a new, longer tuple — nothing is changed, a new tuple is
+          built. `(3,)` is a one-item tuple, thanks to its comma.
+      skill_tags: [tuples]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0003f234-e5b4-4ea2-9941-1ebbae11bd12
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This should move the point to x = 5, but it crashes. Which line is the problem?
+      code_snippet: |
+        point = (3, 4)
+        point[0] = 5
+        print(point)
+      payload:
+        mode: select_line
+        lines:
+          - id: create
+            text: 'point = (3, 4)'
+          - id: assign
+            text: 'point[0] = 5'
+          - id: show
+            text: 'print(point)'
+      answer:
+        line_id: assign
+      runnable: true
+      fixed_code: |
+        point = (3, 4)
+        point = (5, point[1])
+        print(point)
+      fixed_output: (5, 4)
+      explanation:
+        en: >
+          A tuple's items cannot be replaced, so assigning to `point[0]` raises a TypeError.
+          Build a new tuple instead and give it the old name.
+      hint:
+        en: What can you never do to a tuple?
+      skill_tags: [tuples, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: eade48ee-8dd5-4446-bf4c-dcd5b026bfca
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = (5)
+        y = (5,)
+        print(x * 2)
+        print(y * 2)
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "10\n(5, 5)"
+          - id: both-tuples
+            text:
+              en: "(5, 5)\n(5, 5)"
+          - id: both-numbers
+            text:
+              en: "10\n10"
+          - id: reversed
+            text:
+              en: "(5, 5)\n10"
+      answer:
+        value: "10\n(5, 5)"
+        match_mode: exact
+      explanation:
+        en: >
+          `(5)` is just the number 5, so doubling gives 10. `(5,)` is a tuple, and multiplying
+          a tuple repeats its items, just as it does for lists and strings.
+      hint:
+        en: Which of the two has a comma?
+      skill_tags: [tuples]
+      review_status: draft
