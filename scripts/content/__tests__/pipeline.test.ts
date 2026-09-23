@@ -31,9 +31,41 @@ describe('the published content', () => {
     expect(stats.challengePool).toBeGreaterThanOrEqual(14);
   });
 
-  it('has been reviewed in full', () => {
-    const stats = summarise(loadContent().courses);
-    expect(stats.reviewed).toBe(stats.questions);
+  /**
+   * NOT "everything is reviewed". SPEC §35 lets drafts live in the repository and on staging,
+   * where a human reads them in the real app; `publish.ts --production` drops them. The rule
+   * that matters is that dropping them still leaves a course: while Phase 19 drafts pile up,
+   * the reviewed part alone must stay shippable.
+   */
+  it('keeps a reviewed core that production could publish on its own', () => {
+    const reviewed = allQuestions(loadContent().courses).filter(
+      (q) => q.question.review_status === 'reviewed',
+    );
+
+    expect(new Set(reviewed.map((q) => q.moduleSlug)).size).toBeGreaterThanOrEqual(2);
+    expect(new Set(reviewed.map((q) => q.question.type)).size).toBe(8);
+    expect(reviewed.filter((q) => q.question.is_exam_eligible).length).toBeGreaterThanOrEqual(30);
+    expect(reviewed.filter((q) => q.question.is_challenge_eligible).length).toBeGreaterThanOrEqual(
+      14,
+    );
+  });
+
+  it('never lets a reviewed question sit in an unreviewed lesson, where it would never ship', () => {
+    // publish.ts keeps a question only if its lesson is reviewed too. A question marked
+    // reviewed inside a draft lesson looks finished in the file and never reaches a learner.
+    const stranded = loadContent()
+      .courses.flatMap((course) => course.modules)
+      .flatMap((module) => module.lessons)
+      .filter((lesson) => lesson.data.review_status !== 'reviewed')
+      .flatMap((lesson) =>
+        lesson.data.blocks
+          .filter((block) => block.type === 'question')
+          .map((block) => (block as Extract<typeof block, { type: 'question' }>).question)
+          .filter((question) => question.review_status === 'reviewed')
+          .map((question) => `${lesson.file} ${question.id}`),
+      );
+
+    expect(stranded).toEqual([]);
   });
 
   it('keeps every lesson inside the 50 KB payload budget (SPEC §45)', () => {

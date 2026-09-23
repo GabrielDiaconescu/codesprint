@@ -1,5 +1,6 @@
 import { QUESTION_TYPES, type LocalizedText } from '../../src/lib/content/schema';
 
+import { answerReferenceProblems } from './answerRefs';
 import { allQuestions, loadContent, type Issue, type LoadedCourse } from './load';
 
 /**
@@ -164,6 +165,16 @@ export const runValidation = (root?: string): Issue[] => {
           );
         }
       }
+    }
+  }
+
+  /* ------------------------------------------------------------- answer references */
+
+  // A question whose answer points at nothing parses, publishes and renders, and is then
+  // graded wrong for everyone who gets it right. See answerRefs.ts.
+  for (const { file, question } of allQuestions(courses)) {
+    for (const message of answerReferenceProblems(question)) {
+      add(file, `question ${question.id}: ${message}`, 'answer');
     }
   }
 
