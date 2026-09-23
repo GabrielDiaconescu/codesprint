@@ -1,0 +1,211 @@
+id: c67de1e5-fb2c-4114-9177-b0b3f72df446
+slug: breaking-down-problems
+title:
+  en: From a problem to a plan
+summary:
+  en: Describing the steps in plain words first, and testing with small and awkward examples.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Most problems feel hard until they are broken into steps. Before writing any code,
+        describe what you would do by hand, in plain words. Each step usually becomes a few
+        lines of code — or a function of its own.
+
+  - type: text
+    body:
+      en: |
+        Take "find the longest word in a sentence". By hand: split the sentence into words,
+        remember the longest one seen so far, compare each word with it, and hand back the
+        winner. That description is already most of the program.
+
+  - type: code
+    code: |
+      def longest_word(sentence):
+          best = ""
+          for word in sentence.split():
+              if len(word) > len(best):
+                  best = word
+          return best
+
+      print(longest_word("the quick brown fox"))
+    output: 'quick'
+    runnable: true
+    caption:
+      en: '"quick" and "brown" are both five letters. `>` only replaces on a strictly longer word, so the first one wins.'
+
+  - type: text
+    body:
+      en: |
+        Then test with small examples — especially awkward ones. What happens with an empty
+        sentence? With a tie? Knowing the answer to those is what separates code that works
+        from code that happens to work.
+
+  - type: code
+    code: |
+      def longest_word(sentence):
+          best = ""
+          for word in sentence.split():
+              if len(word) > len(best):
+                  best = word
+          return best
+
+      print(longest_word("") == "")
+    output: 'True'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        When you are stuck, solve a tiny version on paper first and write down exactly what you
+        did. Those notes are the plan.
+
+  - type: question
+    question:
+      id: f63f5f1f-e3e9-4539-abbc-4511683e6e65
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What is a good first step when facing a new problem?
+      payload:
+        options:
+          - id: plan
+            text:
+              en: Describe the steps in plain words
+          - id: type
+            text:
+              en: Start typing code straight away
+          - id: copy
+            text:
+              en: Find the longest program you can and copy it
+          - id: prints
+            text:
+              en: Add print calls everywhere
+      answer:
+        option_id: plan
+      explanation:
+        en: >
+          A plain-words plan tells you what code to write and in what order. Code written
+          without one tends to be rewritten.
+      skill_tags: [problem-solving]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 8952c80d-4290-43d5-9201-e1dc4141974a
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: In `longest_word`, when two words have the same length, the first one is kept.
+      answer:
+        value: true
+      explanation:
+        en: >
+          The comparison is `>`, not `>=`, so a word of equal length never replaces the
+          current best.
+      skill_tags: [problem-solving, comparisons]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 10bdcc64-5027-49c8-a47d-fb406de78b36
+      type: code_ordering
+      difficulty: medium
+      prompt:
+        en: Arrange the steps so the program prints the length of the longest word, 3.
+      payload:
+        lines:
+          - id: split
+            text: words = "a bb ccc".split()
+          - id: lengths
+            text: lengths = [len(w) for w in words]
+          - id: longest
+            text: longest = max(lengths)
+          - id: show
+            text: print(longest)
+      answer:
+        order: [split, lengths, longest, show]
+      runnable: true
+      expected_output: '3'
+      explanation:
+        en: >
+          Each step feeds the next: words, then their lengths, then the biggest length, then
+          the output. Breaking a problem down usually produces exactly this kind of chain.
+      skill_tags: [problem-solving, comprehensions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 647d8445-b52e-448a-8825-21290203b32c
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def count_long(words, n):
+            return len([w for w in words if len(w) > n])
+
+        print(count_long(["hi", "hello", "hey", "howdy"], 3))
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Only "hello" and "howdy" are longer than 3 letters. "hey" has exactly 3, which is
+          not more than 3.
+      skill_tags: [problem-solving, comprehensions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: a5b4a90d-32fa-411e-86c5-fd308ed31b08
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This works for most lists but crashes for an empty one. How do you fix it?
+      code_snippet: |
+        def average(nums):
+            return sum(nums) / len(nums)
+
+        print(average([]))
+      payload:
+        mode: choose_fix
+        options:
+          - id: guard
+            text:
+              en: Check for an empty list first and return 0
+          - id: floor
+            text:
+              en: Use // instead of /
+          - id: max
+            text:
+              en: Use max(nums) instead of sum(nums)
+          - id: no-len
+            text:
+              en: Divide by 1 instead of len(nums)
+      answer:
+        option_id: guard
+      runnable: true
+      fixed_code: |
+        def average(nums):
+            if not nums:
+                return 0
+            return sum(nums) / len(nums)
+
+        print(average([]))
+      fixed_output: '0'
+      explanation:
+        en: >
+          An empty list has length 0, and dividing by zero is never allowed — `//` fails the
+          same way. Handling the awkward case first is exactly what testing with small examples
+          is meant to catch.
+      hint:
+        en: What is `len([])`?
+      skill_tags: [problem-solving, debugging]
+      review_status: draft

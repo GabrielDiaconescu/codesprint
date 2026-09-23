@@ -1,0 +1,256 @@
+id: 9c569460-bf7e-4954-a766-a690a521a17e
+slug: sorting
+title:
+  en: How sorting works, and sorting by anything
+summary:
+  en: Selection sort by hand, then sorted() with a key function to choose what to sort by.
+estimated_minutes: 8
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `sorted()` does the work for you, but seeing one sort built by hand shows what it
+        involves. **Selection sort** repeatedly finds the smallest remaining item and swaps
+        it to the front.
+
+  - type: code
+    code: |
+      def selection_sort(items):
+          items = items[:]
+          for i in range(len(items)):
+              smallest = i
+              for j in range(i + 1, len(items)):
+                  if items[j] < items[smallest]:
+                      smallest = j
+              items[i], items[smallest] = items[smallest], items[i]
+          return items
+
+      print(selection_sort([5, 2, 9, 1]))
+    output: '[1, 2, 5, 9]'
+    runnable: true
+    caption:
+      en: "`items[:]` makes a copy first, so the caller's list is left untouched."
+
+  - type: text
+    body:
+      en: |
+        In real code, use `sorted`. Its `key` argument takes a function that says **what** to
+        sort by. With `key=len`, words are sorted by their length.
+
+  - type: code
+    code: |
+      words = ["banana", "fig", "cherry"]
+      print(sorted(words, key=len))
+    output: "['fig', 'banana', 'cherry']"
+    runnable: true
+    caption:
+      en: banana and cherry tie on length, so they keep their original order.
+
+  - type: code
+    code: |
+      def age(person):
+          return person[1]
+
+      people = [("Ann", 31), ("Bo", 25), ("Cy", 40)]
+      print(sorted(people, key=age))
+    output: "[('Bo', 25), ('Ann', 31), ('Cy', 40)]"
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        `key` takes the function itself, without brackets: `key=len`, not `key=len()`.
+        `sorted` calls it once for every item.
+
+  - type: question
+    question:
+      id: 72157474-3210-4c3f-a6b8-827cc3d4f47f
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(sorted([3, 1, 2]))
+      payload:
+        input: choice
+        options:
+          - id: sorted
+            text:
+              en: '[1, 2, 3]'
+          - id: reversed
+            text:
+              en: '[3, 2, 1]'
+          - id: original
+            text:
+              en: '[3, 1, 2]'
+          - id: none
+            text:
+              en: None
+      answer:
+        value: '[1, 2, 3]'
+        match_mode: exact
+      explanation:
+        en: >
+          `sorted` returns a new list in smallest-first order.
+      skill_tags: [sorting]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ec9c6a27-8a70-4dd8-9dc4-b49d5463c65b
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: In selection sort, each pass moves the smallest remaining item into its final place.
+      answer:
+        value: true
+      explanation:
+        en: >
+          After the first pass the smallest item is at the front, after the second the next
+          smallest is second, and so on.
+      skill_tags: [sorting]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1743b141-96c6-4e59-b025-414608bb9f6a
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(sorted(["bb", "a", "ccc"], key=len))
+      payload:
+        input: choice
+        options:
+          - id: by-length
+            text:
+              en: "['a', 'bb', 'ccc']"
+          - id: original
+            text:
+              en: "['bb', 'a', 'ccc']"
+          - id: lengths
+            text:
+              en: '[1, 2, 3]'
+          - id: reversed
+            text:
+              en: "['ccc', 'bb', 'a']"
+      answer:
+        value: "['a', 'bb', 'ccc']"
+        match_mode: exact
+      explanation:
+        en: >
+          `key=len` sorts by length, shortest first. The result still holds the words
+          themselves, not their lengths.
+      skill_tags: [sorting]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5c036228-c9d9-4dd9-aa79-0ded7be58b33
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This should sort the words by length but stops with a TypeError. Which line is the problem?
+      code_snippet: |
+        words = ["pear", "fig", "apple"]
+        print(sorted(words, key=len()))
+      payload:
+        mode: select_line
+        lines:
+          - id: words
+            text: 'words = ["pear", "fig", "apple"]'
+          - id: sort
+            text: 'print(sorted(words, key=len()))'
+      answer:
+        line_id: sort
+      runnable: true
+      fixed_code: |
+        words = ["pear", "fig", "apple"]
+        print(sorted(words, key=len))
+      fixed_output: "['fig', 'pear', 'apple']"
+      explanation:
+        en: >
+          `len()` calls the function immediately, with nothing to measure. `key` needs the
+          function itself — `key=len` — so `sorted` can call it on each word.
+      hint:
+        en: Should the function be called here, or handed over?
+      skill_tags: [sorting, functions, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ef7df51d-6374-496b-85bd-3b1334b336c6
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def last_letter(w):
+            return w[-1]
+
+        print(sorted(["cab", "abc", "bca"], key=last_letter))
+      payload:
+        input: choice
+        options:
+          - id: by-last
+            text:
+              en: "['bca', 'cab', 'abc']"
+          - id: alphabetical
+            text:
+              en: "['abc', 'bca', 'cab']"
+          - id: original
+            text:
+              en: "['cab', 'abc', 'bca']"
+          - id: letters
+            text:
+              en: "['a', 'b', 'c']"
+      answer:
+        value: "['bca', 'cab', 'abc']"
+        match_mode: exact
+      explanation:
+        en: >
+          The last letters are b, c and a. Sorting by those puts "bca" (a) first, then "cab"
+          (b), then "abc" (c).
+      skill_tags: [sorting, functions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 356e7236-1507-47f0-993e-b2093fb748d9
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(sorted(["bee", "ant", "cow", "ox"], key=len))
+      payload:
+        input: choice
+        options:
+          - id: stable
+            text:
+              en: "['ox', 'bee', 'ant', 'cow']"
+          - id: alphabetical-ties
+            text:
+              en: "['ox', 'ant', 'bee', 'cow']"
+          - id: reversed-ties
+            text:
+              en: "['ox', 'cow', 'ant', 'bee']"
+          - id: alphabetical
+            text:
+              en: "['ant', 'bee', 'cow', 'ox']"
+      answer:
+        value: "['ox', 'bee', 'ant', 'cow']"
+        match_mode: exact
+      explanation:
+        en: >
+          Only the length is compared. "ox" is shortest; the three three-letter words tie, and
+          Python's sort is **stable** — tied items keep their original order, so "bee" stays
+          ahead of "ant".
+      hint:
+        en: What happens to items that tie on the key?
+      skill_tags: [sorting]
+      review_status: draft

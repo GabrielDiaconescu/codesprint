@@ -1,0 +1,241 @@
+id: 81eb31bd-096a-48a2-8a45-f0eee17f7453
+slug: complexity
+title:
+  en: How work grows with data
+summary:
+  en: Counting steps, and the names — O(1), O(log n), O(n), O(n²) — for how fast they grow.
+estimated_minutes: 8
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Two programs can give the same answer and still differ hugely in how much work they
+        do. The useful question is how that work **grows** as the data gets bigger. You can
+        find out by counting steps.
+
+  - type: code
+    code: |
+      def count_steps(n):
+          steps = 0
+          for i in range(n):
+              steps += 1
+          return steps
+
+      print(count_steps(10), count_steps(100))
+    output: '10 100'
+    runnable: true
+    caption:
+      en: One loop — ten times the data, ten times the work.
+
+  - type: code
+    code: |
+      def pair_steps(n):
+          steps = 0
+          for i in range(n):
+              for j in range(n):
+                  steps += 1
+          return steps
+
+      print(pair_steps(10), pair_steps(100))
+    output: '100 10000'
+    runnable: true
+    caption:
+      en: A loop inside a loop — ten times the data, a hundred times the work.
+
+  - type: text
+    body:
+      en: |
+        **Big-O** notation names these growth rates. **O(1)** is constant, like reading
+        `items[0]`. **O(log n)** grows very slowly, like binary search. **O(n)** grows in step
+        with the data, like linear search. **O(n²)** is a loop inside a loop over the same
+        data.
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        For a few hundred items none of this matters. It matters as data grows: ten times
+        more means ten times the work for O(n), a hundred times for O(n²), and barely any
+        more for O(log n).
+
+  - type: question
+    question:
+      id: 03c44efe-fe67-4e7a-b589-0e1af7c4ff40
+      type: concept_matching
+      difficulty: easy
+      prompt:
+        en: Match each task to how its work grows.
+      payload:
+        concepts:
+          - id: first
+            text:
+              en: Reading items[0]
+          - id: binary
+            text:
+              en: Binary search in a sorted list
+          - id: linear
+            text:
+              en: Linear search in a list
+          - id: nested
+            text:
+              en: Comparing every item with every other item
+        definitions:
+          - id: constant
+            text:
+              en: O(1)
+          - id: log
+            text:
+              en: O(log n)
+          - id: n
+            text:
+              en: O(n)
+          - id: n-squared
+            text:
+              en: O(n²)
+      answer:
+        pairs:
+          first: constant
+          binary: log
+          linear: n
+          nested: n-squared
+      explanation:
+        en: >
+          One step whatever the size; halving each time; one pass; and a pass for every item —
+          from slowest-growing to fastest-growing.
+      skill_tags: [complexity]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 556fcb7a-5c52-4495-8a74-3000b26049b3
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Doubling the data roughly doubles the work of an O(n) algorithm.
+      answer:
+        value: true
+      explanation:
+        en: >
+          O(n) means the work grows in step with the data — twice as much in, twice as much
+          work.
+      skill_tags: [complexity]
+      review_status: draft
+
+  - type: question
+    question:
+      id: b3eaf188-9c1e-4ce5-a54f-1e4487315c55
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def pair_steps(n):
+            steps = 0
+            for i in range(n):
+                for j in range(n):
+                    steps += 1
+            return steps
+
+        print(pair_steps(3))
+      payload:
+        input: text
+      answer:
+        value: '9'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The inner loop runs 3 times for each of the outer loop's 3 rounds: 3 × 3 = 9.
+      skill_tags: [complexity, loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: b7f5a017-85d0-43da-a7a3-f93bf57efc62
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: A loop inside a loop over the same list takes 1 second for 1,000 items. Roughly how long for 10,000?
+      payload:
+        options:
+          - id: hundred
+            text:
+              en: About 100 seconds
+          - id: ten
+            text:
+              en: About 10 seconds
+          - id: same
+            text:
+              en: About 1 second
+          - id: thousand
+            text:
+              en: About 1,000 seconds
+      answer:
+        option_id: hundred
+      explanation:
+        en: >
+          This is O(n²): ten times the data means ten times ten — a hundred times — the work.
+      skill_tags: [complexity]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 9fb55aff-f7b1-467c-8092-b5da56f3a70b
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: You need to check, again and again, whether values are in a huge collection. Which is fastest?
+      payload:
+        options:
+          - id: set
+            text:
+              en: Keep the values in a set and use in
+          - id: list
+            text:
+              en: Keep the values in a list and use in
+          - id: sort-each
+            text:
+              en: Sort the list before every check
+          - id: count
+            text:
+              en: Loop through the list counting matches
+      answer:
+        option_id: set
+      explanation:
+        en: >
+          A set answers `in` in roughly constant time, however big it is. A list has to be
+          searched item by item, and sorting before every check is slower still.
+      skill_tags: [complexity, sets]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 85b325e3-0acc-4378-bf3b-62353a5f9dcc
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def triangle_steps(n):
+            steps = 0
+            for i in range(n):
+                for j in range(i):
+                    steps += 1
+            return steps
+
+        print(triangle_steps(5))
+      payload:
+        input: text
+      answer:
+        value: '10'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The inner loop runs 0, 1, 2, 3 and 4 times, which adds up to 10. It is about half of
+          n² — still O(n²), because the growth rate is what Big-O describes, not the exact
+          count.
+      hint:
+        en: How many times does the inner loop run when i is 0? When i is 4?
+      skill_tags: [complexity, loops]
+      review_status: draft

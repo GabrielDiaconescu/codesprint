@@ -1,0 +1,14 @@
+id: 005294d5-f070-4884-adce-adb37dfc08c7
+slug: problem-solving
+title:
+  en: Problem Solving
+description:
+  en: Turning a problem into steps, searching and sorting, and a feel for how fast a program is as its data grows.
+order_index: 17
+estimated_minutes: 36
+lessons:
+  - breaking-down-problems
+  - linear-search
+  - binary-search
+  - sorting
+  - complexity

@@ -1,0 +1,211 @@
+id: bf086c8a-ca58-41e4-9895-86cb77574926
+slug: linear-search
+title:
+  en: Searching one item at a time
+summary:
+  en: Linear search, stopping as soon as you find it, and what "not found" should return.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        **Linear search** checks each item in turn until it finds the target. It returns the
+        position where it found it, or -1 to say "not here".
+
+  - type: code
+    code: |
+      def find(items, target):
+          for i in range(len(items)):
+              if items[i] == target:
+                  return i
+          return -1
+
+      print(find([4, 8, 15], 8))
+      print(find([4, 8, 15], 99))
+    output: |-
+      1
+      -1
+    runnable: true
+    caption:
+      en: The `return` inside the loop stops the search the moment the target is found.
+
+  - type: text
+    body:
+      en: |
+        Python already does linear search for you: `in` answers yes or no, and a list's
+        `index` method gives the position. Unlike `find` above, `index` raises a ValueError
+        when the item is missing.
+
+  - type: code
+    code: |
+      nums = [4, 8, 15]
+      print(15 in nums)
+      print(nums.index(15))
+    output: |-
+      True
+      2
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        In the worst case — the target is last, or not there at all — linear search looks at
+        every single item. Twice the data means twice the checks.
+
+  - type: question
+    question:
+      id: e243dda0-6dbd-4305-b621-99bc63281d86
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def find(items, target):
+            for i in range(len(items)):
+                if items[i] == target:
+                    return i
+            return -1
+
+        print(find([3, 5, 7], 7))
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          7 is the third item, which is at index 2.
+      skill_tags: [searching]
+      review_status: draft
+
+  - type: question
+    question:
+      id: dbb8cb4a-0987-4742-9373-bfec05fd5369
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A linear search can stop as soon as it finds the target.
+      answer:
+        value: true
+      explanation:
+        en: >
+          Once it is found there is nothing left to learn, so returning straight away saves
+          checking the rest.
+      skill_tags: [searching]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1ac71d7c-01fb-4222-a634-9d1e42831160
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def find(items, target):
+            for i in range(len(items)):
+                if items[i] == target:
+                    return i
+            return -1
+
+        print(find(["a", "b"], "z"))
+      payload:
+        input: text
+      answer:
+        value: '-1'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The loop finishes without a match, so the line after it runs and returns -1.
+      skill_tags: [searching]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 455a6f98-0480-42d4-911d-76d6de5b32ef
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: In a list of 1,000 items, what is the largest number of comparisons a linear search might need?
+      payload:
+        options:
+          - id: thousand
+            text:
+              en: '1,000'
+          - id: ten
+            text:
+              en: '10'
+          - id: five-hundred
+            text:
+              en: '500'
+          - id: one
+            text:
+              en: '1'
+      answer:
+        option_id: thousand
+      explanation:
+        en: >
+          If the target is last, or missing, every item has to be checked. 500 is only the
+          average when the target is present.
+      skill_tags: [searching, complexity]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 9b247d5b-684d-4736-86c5-2e2dedbf1e8d
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the last line so "not found" can never be mistaken for a real position.
+      code_snippet: |
+        def find(items, target):
+            for i in range(len(items)):
+                if items[i] == target:
+                    return i
+            return ___
+      payload:
+        input: tokens
+        tokens: ['-1', '0', 'i', 'target']
+      answer:
+        value: '-1'
+        match_mode: trimmed
+      explanation:
+        en: >
+          No real position is ever negative, so -1 cannot be confused with a find. 0 is the
+          first position, and returning `target` or `i` would look like success.
+      skill_tags: [searching]
+      review_status: draft
+
+  - type: question
+    question:
+      id: bdeabf1b-dba9-4494-ac3c-b5bcf569ff56
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def count_checks(items, target):
+            checks = 0
+            for item in items:
+                checks += 1
+                if item == target:
+                    break
+            return checks
+
+        print(count_checks([9, 4, 7, 4], 4))
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The search checks 9, then 4 — a match — and stops. The second 4 is never reached,
+          so only 2 checks are made.
+      hint:
+        en: Does the loop carry on after the first match?
+      skill_tags: [searching, loops]
+      review_status: draft
