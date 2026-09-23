@@ -1,0 +1,245 @@
+id: 4853a1ed-eb9c-4c8f-9387-6c2b7aaa2fdf
+slug: converting-types
+title:
+  en: Turning one type into another
+summary:
+  en: int(), float() and str() — and the one conversion that surprises almost everyone.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Each type has a function with the same name that builds a new value of that type:
+        `int()`, `float()` and `str()`. You need them most when text arrives and you want to do
+        arithmetic with it, or when a number needs to be joined to text.
+
+  - type: code
+    code: |
+      print(int("25") + 5)
+      print(float("2.5") * 2)
+      print(str(99) + "!")
+    output: |-
+      30
+      5.0
+      99!
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Converting a float to an int does **not** round it. `int()` simply drops everything
+        after the decimal point. If you want rounding, ask for it with `round()`.
+
+  - type: code
+    code: |
+      print(int(3.9))
+      print(round(3.9))
+    output: |-
+      3
+      4
+    runnable: true
+    caption:
+      en: '`int(3.9)` is 3, not 4. This one catches almost everyone at least once.'
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        `int("3.5")` fails with a ValueError: the text has to look like a whole number. Go
+        through `float()` first when the text might have a decimal point.
+
+  - type: code
+    code: |
+      print(int(float("3.5")))
+    output: '3'
+    runnable: true
+
+  - type: question
+    question:
+      id: 5dedd6e1-6fed-4171-b9ea-4f41fa58f35e
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(int("7") * 2)
+      payload:
+        input: text
+      answer:
+        value: '14'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `int("7")` turns the text into the number 7, so `* 2` multiplies it. Without the
+          conversion, `"7" * 2` would repeat the text and give `77`.
+      skill_tags: [type-conversion]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 3aa8b19e-d725-4beb-ae3b-47d23e9b96d7
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`str(10) + str(5)` produces the text `105`.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          Both numbers become text first, so `+` joins them rather than adding them. Joining
+          "10" and "5" gives "105".
+      skill_tags: [type-conversion, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 596d6609-d882-4297-b007-ceb1f1b1b629
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What does `int(4.8)` give?
+      payload:
+        options:
+          - id: four
+            text:
+              en: '4'
+          - id: five
+            text:
+              en: '5'
+          - id: same
+            text:
+              en: '4.8'
+          - id: error
+            text:
+              en: A ValueError
+      answer:
+        option_id: four
+      explanation:
+        en: >
+          `int()` cuts off the decimal part without rounding, so 4.8 becomes 4. Use `round()`
+          when you want the nearest whole number.
+      skill_tags: [type-conversion, numbers]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 08e80b18-640c-483d-a908-9c3126eb8635
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What happens when you run `int("3.5")`?
+      payload:
+        options:
+          - id: value-error
+            text:
+              en: A ValueError, because the text is not a whole number
+          - id: three
+            text:
+              en: It gives 3
+          - id: four
+            text:
+              en: It gives 4
+          - id: float
+            text:
+              en: It gives 3.5
+      answer:
+        option_id: value-error
+      explanation:
+        en: >
+          `int()` can drop the decimals of a float, but it will not read a decimal point inside
+          text. Convert with `float()` first, then with `int()`.
+      skill_tags: [type-conversion, errors]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 535c4b97-d472-46a4-b0fe-5c5d8b301676
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so the price can be doubled.
+      code_snippet: |
+        price = "4.50"
+        total = ___(price) * 2
+        print(total)
+      payload:
+        input: tokens
+        tokens: [float, int, str, round]
+      answer:
+        value: float
+        match_mode: trimmed
+      explanation:
+        en: >
+          The text contains a decimal point, so it has to become a float. `int()` would fail
+          on the decimal point, and `str()` would leave it as text.
+      hint:
+        en: The price has a decimal point in it.
+      skill_tags: [type-conversion]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7a270675-4baf-4d32-be72-af11fe9ab41d
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(str(2) * 3)
+      payload:
+        input: choice
+        options:
+          - id: repeated
+            text:
+              en: '222'
+          - id: product
+            text:
+              en: '6'
+          - id: spaced
+            text:
+              en: '2 2 2'
+          - id: error
+            text:
+              en: A TypeError
+      answer:
+        value: '222'
+        match_mode: exact
+      explanation:
+        en: >
+          `str(2)` is the text "2", and multiplying text by a number repeats it. So the result
+          is "2" three times in a row, with no spaces added.
+      hint:
+        en: What does `*` do when one side is text?
+      skill_tags: [type-conversion, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6047dd29-2efc-43ac-b87b-ec496d00bbf4
+      type: code_ordering
+      difficulty: hard
+      prompt:
+        en: Arrange the lines so the program reads a number from text, adds 8, and prints 20.
+      payload:
+        lines:
+          - id: text
+            text: text = "12"
+          - id: convert
+            text: number = int(text)
+          - id: add
+            text: total = number + 8
+          - id: show
+            text: print(total)
+      answer:
+        order: [text, convert, add, show]
+      runnable: true
+      expected_output: '20'
+      explanation:
+        en: >
+          Each line uses a name the line before created: the text, then the number made from
+          it, then the total made from the number. A name has to exist before a later line can
+          use it.
+      skill_tags: [type-conversion, variables]
+      review_status: draft

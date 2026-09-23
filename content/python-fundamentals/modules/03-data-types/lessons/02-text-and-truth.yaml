@@ -1,0 +1,233 @@
+id: 2b995cc8-265a-440c-b602-a63eca6a08ad
+slug: text-and-truth
+title:
+  en: Text and true-or-false
+summary:
+  en: Strings for text, booleans for yes-or-no, and why quotes change everything.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Text in Python is called a **string**, and its type is `str`. The quotes are what make
+        it text: `42` is a number, but `"42"` is two characters that happen to be digits.
+
+  - type: code
+    code: |
+      print(type("42"))
+      print(type(42))
+    output: |-
+      <class 'str'>
+      <class 'int'>
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `len()` counts the characters in a string. Spaces and punctuation count too.
+
+  - type: code
+    code: |
+      print(len("Python"))
+      print(len("hi there!"))
+    output: |-
+      6
+      9
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        A **boolean** holds one of exactly two values: `True` or `False`. Its type is `bool`.
+        You rarely type them by hand — comparisons produce them for you.
+
+  - type: code
+    code: |
+      print(3 > 2)
+      print(10 == 11)
+      print(type(True))
+    output: |-
+      True
+      False
+      <class 'bool'>
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        `True` and `False` must start with a capital letter. Lowercase `true` is not a value
+        Python knows — it looks for a variable called `true` and stops with a NameError.
+
+  - type: question
+    question:
+      id: e3ce4890-1d0b-496f-94de-1648107212d4
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`"42"`, written with quotes, is a number.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          The quotes make it a string — text made of the characters 4 and 2. To do arithmetic
+          with it you would first have to convert it.
+      skill_tags: [data-types, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 855ff9dc-c9b3-4af2-a161-bc2b7445ab64
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which of these is a boolean value in Python?
+      payload:
+        options:
+          - id: capital
+            text:
+              en: 'True'
+          - id: lower
+            text:
+              en: 'true'
+          - id: upper
+            text:
+              en: 'TRUE'
+          - id: quoted
+            text:
+              en: '"True"'
+      answer:
+        option_id: capital
+      explanation:
+        en: >
+          Only `True`, with a capital T and no quotes, is the boolean. `"True"` in quotes is a
+          string, and the other spellings are not values Python recognises at all.
+      skill_tags: [booleans]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 15cac6fb-f82c-4769-a6ca-47ce3feb372a
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(len("hello world"))
+      payload:
+        input: text
+      answer:
+        value: '11'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Five letters, one space, five letters. The space is a character like any other, so
+          the total is 11.
+      hint:
+        en: Count the space as well.
+      skill_tags: [strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c432c489-9171-4e39-9a1e-856c51a451fb
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(10 == 10.0)
+      payload:
+        input: text
+      answer:
+        value: 'True'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `==` compares values, and ten is ten whether it is written as an int or a float. The
+          two values are different types, but they are equal.
+      skill_tags: [booleans, numbers]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 4b76e759-379a-451b-9586-2e7e0c7d1239
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each value to its type.
+      payload:
+        concepts:
+          - id: seven-text
+            text:
+              en: '"7"'
+          - id: seven
+            text:
+              en: '7'
+          - id: seven-half
+            text:
+              en: '7.5'
+          - id: false-value
+            text:
+              en: 'False'
+        definitions:
+          - id: str
+            text:
+              en: str
+          - id: int
+            text:
+              en: int
+          - id: float
+            text:
+              en: float
+          - id: bool
+            text:
+              en: bool
+      answer:
+        pairs:
+          seven-text: str
+          seven: int
+          seven-half: float
+          false-value: bool
+      explanation:
+        en: >
+          Quotes make a string, a whole number is an int, a decimal point makes a float, and
+          `False` is one of the two boolean values.
+      skill_tags: [data-types]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7189db76-c3df-40d8-b022-86b67b79a76e
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This program stops with a NameError. Which line causes it?
+      code_snippet: |
+        is_ready = true
+        print(is_ready)
+      payload:
+        mode: select_line
+        lines:
+          - id: assign
+            text: 'is_ready = true'
+          - id: show
+            text: 'print(is_ready)'
+      answer:
+        line_id: assign
+      runnable: true
+      fixed_code: |
+        is_ready = True
+        print(is_ready)
+      fixed_output: 'True'
+      explanation:
+        en: >
+          Lowercase `true` is not a boolean, so Python looks for a variable called `true`,
+          finds none, and raises a NameError. The error is reported on the first line, before
+          `print` ever runs.
+      hint:
+        en: Check the capital letters.
+      skill_tags: [booleans, errors]
+      review_status: draft

@@ -1,0 +1,207 @@
+id: 6cdd8360-333c-4eee-ae88-b7aa7120493c
+slug: none-and-type-checks
+title:
+  en: Nothing at all, and checking types
+summary:
+  en: None, the value that means "no value", and how to ask what type something is.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Sometimes a variable needs to exist before it has anything useful in it. Python has a
+        special value for that: `None`. It means "nothing here yet", and it has a type of its
+        own.
+
+  - type: code
+    code: |
+      result = None
+      print(result)
+      print(type(result))
+    output: |-
+      None
+      <class 'NoneType'>
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        You also get `None` back from anything that does its job without producing a value.
+        `print()` is one: it shows text on the screen, but the value it returns is `None`.
+
+  - type: code
+    code: |
+      x = print("hi")
+      print(x)
+    output: |-
+      hi
+      None
+    runnable: true
+    caption:
+      en: The first line prints "hi"; the value stored in `x` is `None`.
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        `None` is not zero and not an empty string. It is its own thing: the absence of a
+        value, rather than a value that happens to be small or empty.
+
+  - type: text
+    body:
+      en: |
+        `isinstance(value, type)` asks a yes-or-no question: is this value of that type? It
+        answers with a boolean, which makes it easy to use in decisions later on.
+
+  - type: code
+    code: |
+      print(isinstance(3, int))
+      print(isinstance("3", int))
+      print(isinstance(2.5, float))
+    output: |-
+      True
+      False
+      True
+    runnable: true
+
+  - type: question
+    question:
+      id: 8850d187-073e-4873-8d4c-a2f22c18757c
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`None` is the same as `0`.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          `0` is a number with a value of zero. `None` means there is no value at all — it has
+          its own type, `NoneType`.
+      skill_tags: [none, data-types]
+      review_status: draft
+
+  - type: question
+    question:
+      id: bba88ba8-52b7-4ffb-ac24-2b84c1eb027d
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(type(None))
+      payload:
+        input: choice
+        options:
+          - id: nonetype
+            text:
+              en: "<class 'NoneType'>"
+          - id: none-class
+            text:
+              en: "<class 'None'>"
+          - id: bare
+            text:
+              en: None
+          - id: zero
+            text:
+              en: '0'
+      answer:
+        value: "<class 'NoneType'>"
+        match_mode: exact
+      explanation:
+        en: >
+          `None` is the only value of the type `NoneType`, and `type()` reports the type. It is
+          one of the few type names that is not simply the value's name.
+      skill_tags: [none, data-types]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 87dabe33-20ab-44ce-989c-0f1c12098b69
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = print("A")
+        print(x)
+      payload:
+        input: choice
+        options:
+          - id: a-none
+            text:
+              en: "A\nNone"
+          - id: a-a
+            text:
+              en: "A\nA"
+          - id: none
+            text:
+              en: None
+          - id: a
+            text:
+              en: A
+      answer:
+        value: "A\nNone"
+        match_mode: exact
+      explanation:
+        en: >
+          The first line prints "A" while it runs, and stores what `print` returns, which is
+          `None`. The second line then prints that `None`.
+      hint:
+        en: What does `print` give back, as opposed to what it shows?
+      skill_tags: [none, printing]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ff17234b-2f61-4398-963a-a36a0029d38c
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these are `True`?
+      payload:
+        options:
+          - id: int-int
+            text:
+              en: isinstance(5, int)
+          - id: float-int
+            text:
+              en: isinstance(5.0, int)
+          - id: str-str
+            text:
+              en: isinstance("5", str)
+          - id: int-float
+            text:
+              en: isinstance(5, float)
+      answer:
+        option_ids: [int-int, str-str]
+      explanation:
+        en: >
+          `5` is an int and `"5"` is a string, so those two are true. `5.0` is a float, not an
+          int, and `5` is an int, not a float — Python does not treat them as each other.
+      skill_tags: [data-types]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 97b67f1b-3915-4b3b-88cb-d34ded78907a
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(isinstance(True, int))
+      payload:
+        input: text
+      answer:
+        value: 'True'
+        match_mode: trimmed
+      explanation:
+        en: >
+          A surprise: in Python a boolean is a special kind of int, with `True` behaving like 1
+          and `False` like 0. So `True` counts as an instance of `int`.
+      hint:
+        en: Try `print(True + True)` in your head.
+      skill_tags: [booleans, data-types]
+      review_status: draft

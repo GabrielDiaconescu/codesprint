@@ -1,0 +1,231 @@
+id: b2755a55-41d3-4e4f-83c0-afef79f9be61
+slug: numbers
+title:
+  en: Whole numbers and decimals
+summary:
+  en: The two kinds of number, how to tell them apart, and why decimals are not always exact.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Python has two everyday kinds of number. Whole numbers like `7` or `-3` are called
+        **int**, short for integer. Numbers with a decimal point like `7.0` or `2.5` are called
+        **float**. The built-in `type()` tells you which one you are holding.
+
+  - type: code
+    code: |
+      print(type(7))
+      print(type(7.0))
+    output: |-
+      <class 'int'>
+      <class 'float'>
+    runnable: true
+    caption:
+      en: The decimal point alone is enough to make `7.0` a float.
+
+  - type: text
+    body:
+      en: |
+        Most arithmetic keeps the type you started with, but division is different: `/` always
+        gives a float, even when the answer is a whole number. Mixing an int and a float also
+        gives a float.
+
+  - type: code
+    code: |
+      print(10 / 2)
+      print(10 * 2)
+      print(3 + 0.5)
+    output: |-
+      5.0
+      20
+      3.5
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        `7` and `7.0` compare as equal, but they are still different types. Python keeps track
+        of the difference even when the value looks the same.
+
+  - type: text
+    body:
+      en: |
+        Floats are stored in binary, so some decimals cannot be represented exactly. The error
+        is tiny, but it shows when you print the raw result. `round()` tidies it up for display.
+
+  - type: code
+    code: |
+      print(0.1 + 0.2)
+      print(round(0.1 + 0.2, 2))
+    output: |-
+      0.30000000000000004
+      0.3
+    runnable: true
+    caption:
+      en: This is not a Python bug — almost every programming language behaves the same way.
+
+  - type: question
+    question:
+      id: ea50311a-4796-4b21-8610-4868aa91e956
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What type is the value `3.0`?
+      payload:
+        options:
+          - id: float
+            text:
+              en: float
+          - id: int
+            text:
+              en: int
+          - id: str
+            text:
+              en: str
+          - id: decimal
+            text:
+              en: decimal
+      answer:
+        option_id: float
+      explanation:
+        en: >
+          The decimal point makes it a float, even though the value is a whole number. Python
+          has no built-in type called `decimal` in everyday use — floats cover decimals.
+      skill_tags: [data-types, numbers]
+      review_status: draft
+
+  - type: question
+    question:
+      id: de36e0df-ace2-4d08-88c7-dd0996bd9f88
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(9 / 3)
+      payload:
+        input: text
+      answer:
+        value: '3.0'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Division with `/` always produces a float, so the result is `3.0` rather than `3` —
+          even though 9 divides by 3 exactly.
+      hint:
+        en: What kind of number does `/` always give back?
+      skill_tags: [numbers, arithmetic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1888a90a-fb27-43f9-be70-593e413ddb7b
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`5` and `5.0` are the same type.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          They are equal in value, but `5` is an int and `5.0` is a float. `type()` would show
+          the difference.
+      skill_tags: [data-types, numbers]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c9c099ea-454f-4d6f-bf47-b5db8b522daf
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(type(2 * 3.0))
+      payload:
+        input: choice
+        options:
+          - id: float
+            text:
+              en: "<class 'float'>"
+          - id: int
+            text:
+              en: "<class 'int'>"
+          - id: value
+            text:
+              en: '6.0'
+          - id: number
+            text:
+              en: "<class 'number'>"
+      answer:
+        value: "<class 'float'>"
+        match_mode: exact
+      explanation:
+        en: >
+          Multiplying an int by a float gives a float, and `type()` reports the type, not the
+          value. So the answer is the float class, not `6.0`.
+      skill_tags: [data-types, numbers]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d06ac792-4b99-4520-8e22-340efc8ebeaa
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these expressions produce a float?
+      payload:
+        options:
+          - id: divide
+            text:
+              en: 8 / 4
+          - id: multiply
+            text:
+              en: 8 * 4
+          - id: add-half
+            text:
+              en: 8 + 0.5
+          - id: subtract
+            text:
+              en: 8 - 3
+          - id: times-one
+            text:
+              en: 2 * 1.0
+      answer:
+        option_ids: [divide, add-half, times-one]
+      explanation:
+        en: >
+          `/` always gives a float, and any arithmetic involving a float gives a float. Adding,
+          subtracting and multiplying two ints keeps the result an int.
+      hint:
+        en: Look for a `/`, or for a number with a decimal point.
+      skill_tags: [numbers, arithmetic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 727abeac-6d68-437a-8634-ad4d3b12264c
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(round(2.675, 2))
+      payload:
+        input: text
+      answer:
+        value: '2.67'
+        match_mode: trimmed
+      explanation:
+        en: >
+          On paper 2.675 rounds up to 2.68, but the float actually stored is a hair below
+          2.675, so it rounds down to 2.67. It is the same binary approximation that makes
+          `0.1 + 0.2` print with a long tail.
+      hint:
+        en: Remember that floats are not always stored exactly.
+      skill_tags: [numbers, floats]
+      review_status: draft
