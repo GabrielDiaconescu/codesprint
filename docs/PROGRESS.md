@@ -2,38 +2,40 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 19 (content to launch volume) — **in progress**, approved 2026-09-23.
-Hosted staging is live (see below). Agreed order from here: **19 → 21 → 18 → 22 → 23**,
-with the PFA → D-U-N-S chain running in parallel.
+**Current phase:** Phase 19 complete — awaiting approval for Phase 21 (E2E & regression
+hardening). All 17 modules are drafted and live on staging; 395 of 435 questions await human
+review before production. Order from here: **21 → 18 → 22 → 23**, with the PFA → D-U-N-S
+chain and the content review running in parallel.
 **Last updated:** 2026-09-23
 
 ---
 
 ## Phase status
 
-| Phase         | Scope                                | Status                                |
-| ------------- | ------------------------------------ | ------------------------------------- |
-| 0             | Human prerequisites & open decisions | **In progress** (parallel, see below) |
-| 1             | Project setup & architecture         | **Complete** — device check deferred  |
-| 2             | Design system                        | **Complete** — pending device check   |
-| 3             | Database foundation                  | **Complete** — pending device check   |
-| 4             | Authentication                       | **Complete** — pending device check   |
-| 5             | Onboarding, age gate, consent        | **Complete** — pending device check   |
-| 6             | Content pipeline & development seed  | **Complete** — pending device check   |
-| 7             | Course & lesson engine               | **Complete** — pending device check   |
-| 8             | Question engine & grading RPCs       | **Complete** — pending device check   |
-| 9             | XP, levels, progress                 | **Complete** — pending device check   |
-| 10            | Streak, lives, achievements          | **Complete** — pending device check   |
-| 11            | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
-| 12            | Leaderboard, display names, reports  | **Complete** — pending device check   |
-| 13            | Exam mode                            | **Complete** — pending device check   |
-| 14            | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
-| 15            | Ads, consent, rewarded rewards       | **Complete** — pending device check   |
-| 16            | Analytics + monitoring               | **Complete** — pending device check   |
-| 17            | Local notifications                  | **Complete** — pending device check   |
-| 20            | Polish, accessibility, performance   | **Complete** — pending device check   |
-| —             | Playful 3D restyle (SPEC §8, §13)    | **Complete** — pending device check   |
-| 18, 19, 21–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| Phase     | Scope                                | Status                                |
+| --------- | ------------------------------------ | ------------------------------------- |
+| 0         | Human prerequisites & open decisions | **In progress** (parallel, see below) |
+| 1         | Project setup & architecture         | **Complete** — device check deferred  |
+| 2         | Design system                        | **Complete** — pending device check   |
+| 3         | Database foundation                  | **Complete** — pending device check   |
+| 4         | Authentication                       | **Complete** — pending device check   |
+| 5         | Onboarding, age gate, consent        | **Complete** — pending device check   |
+| 6         | Content pipeline & development seed  | **Complete** — pending device check   |
+| 7         | Course & lesson engine               | **Complete** — pending device check   |
+| 8         | Question engine & grading RPCs       | **Complete** — pending device check   |
+| 9         | XP, levels, progress                 | **Complete** — pending device check   |
+| 10        | Streak, lives, achievements          | **Complete** — pending device check   |
+| 11        | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
+| 12        | Leaderboard, display names, reports  | **Complete** — pending device check   |
+| 13        | Exam mode                            | **Complete** — pending device check   |
+| 14        | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
+| 15        | Ads, consent, rewarded rewards       | **Complete** — pending device check   |
+| 16        | Analytics + monitoring               | **Complete** — pending device check   |
+| 17        | Local notifications                  | **Complete** — pending device check   |
+| 20        | Polish, accessibility, performance   | **Complete** — pending device check   |
+| —         | Playful 3D restyle (SPEC §8, §13)    | **Complete** — pending device check   |
+| 19        | Content to launch volume             | **Complete** — drafts await review    |
+| 18, 21–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -1883,6 +1885,128 @@ SUPABASE_URL=... SUPABASE_SECRET_KEY=... npm run content:publish
 Both values are in `.env.staging`. Schema changes go through `supabase db push --db-url` with
 the pooler URL from the same file — never by editing an applied migration (SPEC §59.28).
 
+## Phase 19 — what was implemented (Content to launch volume)
+
+**Seventeen modules, as SPEC §14 lays them out.** Modules 03–17 are new; 01–02 were the
+development seed.
+
+```
+                 SPEC §35 launch target    now
+modules          17                         17
+lessons          60–100                     76
+questions        300–500                    435   (all 8 types, every module mixes difficulty)
+exam pool        ≥ 60                       433
+challenge pool   ≥ 60                       434
+```
+
+Every runnable code block and every `predict_output`, `code_ordering` and `debugging`
+question — 443 snippets — runs on Python 3.12 **and** 3.14 and prints exactly what the
+content claims. The debugging questions are proven both ways: the broken code really fails
+or prints the wrong thing, and the fix really prints the stated output.
+
+**All 395 new questions are `review_status: draft`.** SPEC §35 is explicit that nothing ships
+without human review, so none of it is marked reviewed. `publish.ts --production` would
+publish only the reviewed 40; staging carries everything, so the drafts can be read in the
+real app. That review is now the longest item between here and a store build.
+
+**Verified on hardware, against staging.** A second preview build was installed on the
+emulator and walked through as a new guest: consent, onboarding, Home, a lesson, and the
+Learn list showing all seventeen modules with 07–17 locked as Premium (D5) and Google's test
+banner in the list (SPEC §59.31).
+
+**What determinism cost, and where**
+
+Output that differs between interpreters or between runs cannot be verified, so the content
+avoids it on purpose:
+
+- **Sets are printed through `sorted()`.** The iteration order of a set of strings changes
+  between runs.
+- **Exception handlers print the content's own message**, never Python's error text, which is
+  not promised to stay the same across versions.
+- **Nothing asks a learner to predict a random value.** The `random` lessons print properties
+  that hold for every outcome — a roll is between 1 and 6, a shuffle keeps the same sum.
+- **Dates are fixed**, never `date.today()`.
+- **No object is printed without a `__str__`.** The default representation contains a memory
+  address.
+- **File lessons create the files they read**, so each snippet runs alone in the verifier's
+  temporary directory.
+
+**The validator learned four rules, three of them from real defects**
+
+Writing 400 questions is exactly the volume at which "caught by eye" stops working. Each rule
+below was added before or during the phase, and each is proven by a test that plants the
+fault in a copy of the real content and asserts the rule names it
+(`validateRules.test.ts`).
+
+1. **Every answer must point at something the learner can pick** (`answerRefs.ts`). The schema
+   checked an answer's shape, never what it referred to: a `multiple_choice` with a typo in
+   its `option_id`, a `code_ordering` missing a line, or a choice-style `predict_output` whose
+   right option differs from `answer.value` by one space would all publish and then be graded
+   wrong for every correct learner. The last check reproduces the server's
+   `normalize_answer_text` exactly, because that is what grading compares.
+2. **No Markdown lists or headings in lesson text.** The renderer does bold, inline code and
+   paragraphs only. This found a **shipped defect**: "Reading an error message", a reviewed
+   seed lesson, introduced three exception types as a bulleted list that every learner had
+   been seeing as one run-on line with dashes in it.
+3. **A code block that shows an output must be runnable.** A non-runnable block with an output
+   shows learners whatever the author typed. One slipped into the draft of module 17 — a
+   nested loop shown printing `10 10000` instead of `100 10000`, marked non-runnable, so the
+   verifier would never have run it. Caught before commit.
+4. **"Reviewed in full" became the rule SPEC §35 actually sets.** The old test demanded every
+   question be reviewed, which drafted content can never satisfy without lying. It now checks
+   that the reviewed part alone is still a publishable course, and that no reviewed question is
+   stranded inside a draft lesson where it would never ship.
+
+**Two defects found by running the release-like build, both fixed**
+
+- **The onboarding reminder step showed raw translation keys** — "00.label" five times. Since
+  Phase 17 the times are `HH:MM`, and i18next splits keys on `:` to find a namespace, so
+  `reminder.options.08:00.label` looked up `00.label` in a namespace called
+  `reminder.options.08`. The resource tests passed throughout because the keys existed in the
+  JSON; nothing checked that the key the screen built could reach them. Every onboarding option
+  key now goes through `optionKey()`, which strips both characters i18next splits on, and a
+  test resolves every option of all four questions through the real i18n instance.
+- **The tab bar sat under Android's gesture bar.** The restyle gave it a fixed height, which
+  replaces the one React Navigation computes — the one that included the bottom safe area.
+
+Both were invisible in Jest and in the dev client over Metro, and both were found in minutes
+on the preview APK. That is an argument for making a preview build part of every phase's
+device check from now on.
+
+### Phase 19 verification results
+
+```
+typecheck   tsc --noEmit ............. 0 errors
+lint        eslint --max-warnings=0 .. 0 errors, 0 warnings
+format      prettier --check ......... clean
+unit        jest ..................... 73 suites, 1210 tests, all passing
+content     content:validate ......... valid — 17 modules, 76 lessons, 435 questions
+python      content:verify ........... 443 snippets, identical on 3.12 and 3.14
+staging     content:publish .......... content_version 4, all 17 modules live
+device      preview APK on emulator .. onboarding, Home, lesson, Learn with Premium locks
+database    supabase test db ......... unchanged (no migration in this phase)
+```
+
+## Decisions and interpretations made during Phase 19
+
+1. **Drafts stay drafts.** I wrote the content, so I cannot also be its reviewer. Marking it
+   reviewed to satisfy a test would have been the test lying.
+2. **Four to five lessons per module, five to six questions per lesson.** That lands at 76
+   lessons and 435 questions — inside both SPEC ranges with room either way — and keeps every
+   lesson inside SPEC §15's 3–8 minutes.
+3. **Difficulty is roughly 35% easy, 45% medium, 20% hard in every module.** The validator
+   only requires some easy, some medium and nothing above 75% of one kind; the rest is a
+   choice, and hard questions are where the traps live (`-2 ** 2`, `"10" < "9"`, `find()`
+   returning 0, a stable sort).
+4. **`code_ordering` never uses indented lines.** The renderer and the verifier both join lines
+   in answer order, and leading spaces are the easiest thing to lose on the way. Every ordering
+   question is a chain in which each line needs the one before, so exactly one order works.
+5. **Debugging distractors are checked for accidentally being right.** Twice an option would
+   also have fixed the stated symptom (swapping the grade letters; printing instead of
+   returning); the prompts now state the full rule so only one change satisfies it.
+6. **`lambda` is not introduced.** Sorting by a key uses a named function. One more syntax on
+   the last module was not worth what it adds for a beginner.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -1964,6 +2088,16 @@ Rewritten at the end of each phase, so this describes the product as it stands t
   2.5 s and 60 fps navigation need a release build on a mid-range Android phone; what is
   enforced today is the lesson payload budget and the one screen that rendered thirty
   syntax-highlighted snippets at once.
+- **395 questions are unreviewed.** They are verified by machine — schema, references,
+  real execution on two interpreters — but not read by a person, which is what SPEC §35
+  requires before production. Pedagogical judgement (is this explanation clear? is this
+  distractor fair?) is exactly what the pipeline cannot check.
+- **One reviewed lesson changed.** "Reading an error message" (module 01) lost its bullet
+  list for three paragraphs with the same wording; it is still marked reviewed and should be
+  re-read.
+- **The Learn screen has an empty band under its header** on the preview build — visible
+  in the Phase 19 device screenshots. Not a content problem; it belongs to the screens the
+  restyle only re-tokened.
 - **The restyle is unseen on hardware.** Every claim above is from tests, a typecheck and a
   successful bundle. The 3D press, the rounded font, the drawn icons and the warm
   background have not been looked at on a phone in either theme — that is the whole of the
@@ -1994,6 +2128,15 @@ Rewritten at the end of each phase, so this describes the product as it stands t
 ---
 
 ## Human actions required before the next phases
+
+**Content review — the longest item before a store build:**
+
+- **Review the 395 draft questions** (modules 03–17) and flip `review_status` to `reviewed`
+  in the YAML, lesson by lesson. They are live on staging, so the fastest way is to take each
+  lesson in the preview app and edit the file alongside. A reviewed lesson needs its own
+  `review_status` flipped too, or its questions will not ship. Run
+  `npm run content:check` after each batch.
+- **Re-read "Reading an error message"** (module 01, lesson 04), whose layout changed.
 
 **Staging — do these now:**
 
@@ -3008,3 +3151,43 @@ JavaScript bundle alone will not show this.
     new corner radius clips content, or an icon that changed meaning when it was filled.
 23. Open a code block. It is still monospace and still dark in both themes — the rounded font
     must **not** have reached the code.
+
+---
+
+## Phase 19 device checklist (SPEC §57 — "spot-check lessons across all modules")
+
+Use the **preview** build against staging:
+https://expo.dev/artifacts/eas/PyyEnROSHPB_6syCvbIHsr5Ay_yrCizOuiQV__lL0Sw.apk
+
+**Onboarding (the fixed defect)**
+
+1. Install fresh and continue as a guest. At step 5, the reminder options read Morning,
+   Midday, After work, Evening, Before bed, each with its time — **not** "00.label".
+
+**Learn**
+
+2. Scroll the whole list. There are 17 modules; 01–06 open, 07–17 carry a Premium lock.
+3. The tab labels sit clear of the gesture bar at the bottom.
+
+**Spot-check, one lesson per module band** — read it as a learner, and answer every question:
+
+4. Module 03, "Turning one type into another": the `int(3.9)` example and the code-ordering
+   question.
+5. Module 05, "Quotes and special characters": the hard "C:\new" question shows two lines.
+6. Module 07, "Leaving early and skipping ahead": the break and continue questions differ only
+   by one word.
+7. Module 11, "Counting things, and data inside data": the nested inventory question.
+8. Module 13, "else and finally": the `finally` that runs through a `return`.
+9. Module 17, "How sorting works": the stable-sort question.
+
+Modules 07–17 need Premium to open. Use the Test Store purchase from Phase 14 on a dev build,
+or read the YAML alongside — the preview build has no RevenueCat key (see Hosted staging).
+
+**For each question, note anything that is wrong, unclear or unfair.** That list is the start
+of the content review.
+
+**Exams and challenge**
+
+10. Open Exams and start the sample exam. It draws ten questions from the whole course now,
+    not just the first two modules.
+11. Start the Daily Challenge. Its questions can come from any free module.
