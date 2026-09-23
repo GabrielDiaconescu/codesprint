@@ -86,7 +86,7 @@ blocks:
       type: true_false
       difficulty: easy
       prompt:
-        en: "`'hello'` and `\"hello\"` are the same string."
+        en: '`''hello''` and `"hello"` are the same string.'
       answer:
         value: true
       explanation:
