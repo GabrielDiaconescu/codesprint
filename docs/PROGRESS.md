@@ -2,10 +2,10 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Restyle complete (not a numbered phase — see below) — awaiting approval
-for Phase 19 (content to launch volume). Agreed order from here: **19 → 21 → 18 → 22 → 23**,
+**Current phase:** Phase 19 (content to launch volume) — **in progress**, approved 2026-09-23.
+Hosted staging is live (see below). Agreed order from here: **19 → 21 → 18 → 22 → 23**,
 with the PFA → D-U-N-S chain running in parallel.
-**Last updated:** 2026-09-20
+**Last updated:** 2026-09-23
 
 ---
 
@@ -1828,6 +1828,61 @@ database    supabase test db ......... unchanged (no migration)
 9. **Home hides the navigator's header.** It draws its own with the greeting and the toggles,
    so the built-in one was the word "Home" twice.
 
+## Hosted staging (SPEC §6) — live since 2026-09-23
+
+Not a numbered phase. A backend the app can reach from any network, so a preview build works
+on a phone that is not on the developer's Wi-Fi — which is what a demo, a tester, and Phase 22
+all need.
+
+|           |                                                                                          |
+| --------- | ---------------------------------------------------------------------------------------- |
+| Project   | `uzmqmmvpunkxogvtbypl`, Supabase free plan                                               |
+| Region    | `eu-central-1` (Frankfurt) — EU residency, SPEC §41                                      |
+| Schema    | all 18 migrations, applied with `supabase db push` via the session pooler                |
+| Content   | `content_version` 1 — 2 modules, 8 lessons, 40 questions, 2 exams, via `content:publish` |
+| Auth      | anonymous sign-in **on** (D1); email uses Supabase's built-in sender                     |
+| App build | `preview` profile, pinned to the EAS `preview` environment in `eas.json`                 |
+
+Credentials live only in `.env.staging`, which is gitignored and excluded from the EAS archive
+(checked). The EAS `preview` environment holds the two PUBLIC values and nothing else.
+
+**What was deliberately left out**
+
+1. **`seed.sql` was not run.** Besides content it creates three test accounts whose password is
+   written in the repository, one of them with a Premium fixture. On a project reachable from
+   the internet that is a free Premium login for anyone who has seen the repo. Content went
+   through `content:publish` instead, which is the pipeline production will use anyway.
+2. **No RevenueCat key in `preview`.** The SDK warns that it crashes when a Test Store key is
+   used "in production", and a preview APK is a release build. With no key, `initialize()`
+   throws, `useBillingBootstrap` catches it, and the paywall shows its load-error state with a
+   retry — honest, and not a crash. Real store keys arrive with the store accounts.
+3. **Edge Functions are not deployed.** `sync-entitlements` and `revenuecat-webhook` need a
+   Supabase access token to deploy and RevenueCat secrets to run. Without them nothing breaks;
+   server-side entitlements simply never change on staging.
+
+**Verified from the outside, with only the publishable key** — the way the app sees it:
+
+```
+PASS guest sign-in works
+PASS app_config readable (44 keys)
+PASS sync_session
+PASS get_home_summary returns a next lesson ("What is Python?")
+PASS get_lesson opens the first lesson
+PASS lesson payload carries no answer keys
+PASS answer keys are NOT readable by a client        (403)
+PASS questions table not directly readable           (403)
+PASS client cannot grant itself Premium              (403)
+```
+
+**Re-publishing content to staging**
+
+```
+SUPABASE_URL=... SUPABASE_SECRET_KEY=... npm run content:publish
+```
+
+Both values are in `.env.staging`. Schema changes go through `supabase db push --db-url` with
+the pooler URL from the same file — never by editing an applied migration (SPEC §59.28).
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -1939,6 +1994,17 @@ Rewritten at the end of each phase, so this describes the product as it stands t
 ---
 
 ## Human actions required before the next phases
+
+**Staging — do these now:**
+
+- **Rotate the staging secret key and database password.** Both were pasted into a chat
+  transcript while staging was being set up. Project Settings → API Keys, and Project
+  Settings → Database → Reset database password; then update `.env.staging`.
+- **Optional: a Supabase access token** in `.env.staging` as `SUPABASE_ACCESS_TOKEN`, to
+  deploy the two Edge Functions to staging.
+- **Before email sign-up is shown to anyone on staging:** add the preview app's scheme to
+  Authentication → URL Configuration → Redirect URLs, or the verification link lands on
+  `localhost`. Guest mode does not need it.
 
 **Critical path — start now:**
 
