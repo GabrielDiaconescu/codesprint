@@ -2,12 +2,12 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 19 complete — awaiting approval for Phase 21 (E2E & regression
-hardening). All 17 modules are drafted and live on staging; 395 of 435 questions await human
-review before production. The interface also speaks Romanian now (lessons stay English).
-Order from here: **21 → 18 → 22 → 23**, with the PFA → D-U-N-S chain and the content review
+**Current phase:** Phase 21 complete — awaiting approval for Phase 18 (privacy & legal).
+The E2E suite passes 8 of 8 on the emulator, and on the way it found six live bugs in the
+app, the guest-to-account journey among them. Two findings await a decision (out of lives; rate
+limits). Order from here: **18 → 22 → 23**, with the PFA → D-U-N-S chain and the content review
 running in parallel.
-**Last updated:** 2026-09-23
+**Last updated:** 2026-09-24
 
 ---
 
@@ -37,7 +37,8 @@ running in parallel.
 | —         | Playful 3D restyle (SPEC §8, §13)    | **Complete** — pending device check   |
 | 19        | Content to launch volume             | **Complete** — drafts await review    |
 | —         | Romanian interface (SPEC §38)        | **Complete** — verified on emulator   |
-| 18, 21–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 21        | E2E & regression hardening           | **Complete** — see verification       |
+| 18, 22–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -2057,6 +2058,118 @@ the user: **the interface in Romanian; lessons stay English for now.**
 3. **The language is not synced to `profiles.locale`.** Content RPCs take the locale per
    call, and a device preference in the account would make two phones disagree.
 
+## Phase 21 — what was implemented (E2E & regression hardening)
+
+### The E2E suite (SPEC §53)
+
+- **Maestro 2.10**, eight flows in `e2e/flows/`, run by **`npm run e2e`** (`scripts/e2e/run.ts`):
+  preflight (device, installed dev build, Maestro, local Supabase, with a 30 s leash on adb) →
+  `supabase db reset` → E2E fixtures → its own Metro on port 8082 against local Supabase →
+  flows → JUnit report in `e2e/results/`. It refuses to reuse a Metro already on the port, so a
+  bundle built against staging can never write test accounts there.
+- **Answers are generated from the content**, not typed into flows (`scripts/e2e/steps.ts` →
+  `e2e/generated/`, gitignored). Module 1 is the E2E course: reviewed, free, and between its
+  four lessons it holds all eight question types, so one flow exercises every renderer against
+  the real grading functions.
+- **Fixtures** (`scripts/e2e/fixtures.ts`): the seeded free and premium accounts have finished
+  onboarding; the free account has finished three lessons **through `submit_answer` and
+  `complete_lesson`**, so the lives grace period is over; the Daily Challenge is pinned to three
+  known questions for yesterday, today and tomorrow.
+- **Flows:** onboarding as a guest · age gate · module 1 with every question type · wrong
+  answers down to 0 lives · Daily Challenge claimed once · paywall and restore · interface
+  language · guest keeps progress after creating an account (confirmed through Mailpit).
+- New `testID`s only where a flow needed one: tab buttons, the feedback and state-view actions
+  (derived from their parent's id), onboarding skip, the refusal screen, the challenge bonus.
+- `docs/TESTING.md`: every test layer, how to run it, and the E2E setup and pitfalls.
+
+### Regressions found and fixed
+
+The suite earned its keep before it was green. Each of these was live in the app:
+
+1. **CI had been red since Phase 19.** Modules 03–17 went to staging through `publish`, but
+   `supabase/seed.sql` still held two modules, and `npm run verify` never looked. Regenerated;
+   the pipeline test now compares the file with `renderSeed()`, so a stale seed fails the
+   ordinary test run. Three pgTAP assertions that hardcoded the old seed's size now count from
+   the catalogue.
+2. **The age gate showed a child the sign-in screen.** The refusal navigated in a `mutate()`
+   callback, and the sign-out inside the mutation unmounted the screen that owned it, so the
+   callback never ran — the account was deleted, but the child landed one tap from "Continue as
+   guest" with no explanation. Now the refusal is shown first and the sign-out follows
+   (`logic/refuseUnderage.ts`, unit-tested for order, including a failed delete).
+3. **Guest → account did nothing visible.** `verify-email` lived in the signed-out `(auth)`
+   group, so a signed-in guest was silently refused the route: the confirmation email went out,
+   the screen stayed on the form. Moved outside the guards; for a guest it offers "Keep
+   learning" instead of "Use a different email", and resends as `email_change`, not `signup`.
+4. **Opening the confirmation link left the app on "Signing you in…" for good.** The
+   callback screen's effect listed the session status among its dependencies — but exchanging
+   the code is what changes the status (guest → registered), so the exchange cancelled its own
+   result. The server had signed the user in; the screen never moved. Now only unmounting stops
+   it; a component test reproduces the status change mid-exchange, and fails on the old code.
+   Together with 3, the D1 guest-to-account journey had never worked end to end.
+5. **The paywall dropped the SPEC §33 statement for lifetime No Ads.** The "does not unlock
+   Premium lessons or unlimited lives" line was keyed on `no_ads_monthly`; the offering sells
+   `no_ads_lifetime` (D2). Now decided by what a plan grants (`needsNoAdsDisclaimer`), and the
+   one-off purchase says **"Buy once"**, not "Subscribe".
+6. **The lesson completion screen** still said "Practice and the daily challenge arrive in the
+   next release" (both shipped in Phase 11), read "You've read What is Python?." and offered
+   "Back to the module" while returning wherever the lesson was opened from. Its centred layout
+   also slid the button upwards as the score and achievements arrived — under a finger, or a
+   test, already on its way to it. Now top-anchored, "Nice work. Your progress is saved.",
+   "Continue".
+7. **`interstitial_shown` was sent on every lesson completion**, ad or no ad. Now only when one
+   was shown (SPEC §43).
+8. Nine un-awaited `fireEvent` calls (CLAUDE.md), and an `act()` warning that predated the
+   phase: tests now wait for mutations to settle (`renderWithProviders` returns its client).
+
+### Verification
+
+- **E2E: 8 of 8 flows passed** in one run (`npm run e2e`, 15 min 30 s, Pixel 7 emulator,
+  Android 15, development build against local Supabase): onboarding 1 m 4 s · age gate 43 s ·
+  module 1 with every question type 5 m 34 s · wrong answers and lives 2 m 9 s · Daily
+  Challenge 1 m 32 s · paywall and restore 1 m 11 s · interface language 1 m 11 s · guest keeps
+  progress 2 m 23 s. Restore was checked to fail honestly: no local RevenueCat secret.
+- It took ten runs to get there. Items 2–7 above were bugs in the app; the rest was the
+  flows learning the emulator — see Decisions, and `docs/TESTING.md`, "When it goes wrong".
+- `npm run verify`: typecheck clean, lint clean, **78 suites / 1322 tests** (was 75 / 1284).
+- New tests: the E2E generator (every question type's mapping, lesson paging, fixtures, and
+  that every `runFlow` resolves and parses), the age-gate refusal order, the auth callback
+  surviving a session change mid-exchange, the paywall wording rules, and seed freshness.
+- CI green again after the seed fix (all four jobs), for the first time since Phase 19.
+
+### Decisions
+
+1. **E2E runs on the development build against local Supabase**, not on the preview build
+   against staging: deterministic state (reset + fixtures), no test accounts on staging, and
+   Mailpit for auth email. A release-like E2E run belongs with the store builds (Phase 22).
+2. **No E2E in CI.** It needs an Android emulator and a native build per run; the flows run
+   locally before a phase is closed. CI keeps everything that does not need a device.
+3. **Flows target `testID`s**, except Google's consent form and toasts, which the app does not
+   draw. The consent form is always declined: development builds force the EEA form, and the
+   non-personalised path is also what every under-16 learner gets.
+4. **The dev build is opened through its own `codesprint-dev://` scheme.** The preview build
+   also claims `exp+codesprint`, and Android then stops to ask which app should open the link.
+5. **No `hideKeyboard` in any flow.** On Android it presses Back; when the keyboard is not up
+   at that instant, Back leaves the screen — on the first onboarding step, the app. Enter does
+   what a person does instead: it submits a form, or closes the keyboard on the answer box.
+6. **Restore is checked against what the local stack can honestly do.** It needs the RevenueCat
+   secret key in the local Edge Functions. The runner looks: with the key, the flow expects
+   "nothing to restore"; without it, the plain failure message — and says so in its output.
+7. **New dependency: none.** Maestro is a developer tool installed outside the repository.
+
+### Found, not fixed — needs a decision
+
+- **Out of lives does not stop anyone answering.** At 0 lives the card appears (the flow
+  asserts it), but the next question can be answered as normal; a wrong answer just costs
+  nothing more (a Phase 10 decision: "never negative"). SPEC §22 lists what a learner _can_ do
+  when out of lives — wait, watch an ad, review without answering, upgrade — which reads as
+  answering being blocked, and without that, Premium's "unlimited lives" has no value.
+  **Recommendation:** block answering in lesson, practice and challenge at 0 lives, server-side
+  in `submit_answer`, with the out-of-lives card as the screen's state.
+- **No per-user rate limits on the answer and reward RPCs** (SPEC §40, §42). Grading is
+  server-side and the ledger is idempotent, so this is abuse-resistance rather than a hole, but
+  the SPEC asks for it. **Recommendation:** a small migration with a per-user, per-minute cap
+  on `submit_answer` and the reward RPCs, before the store builds (Phase 22).
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -2184,6 +2297,15 @@ Romanian UI text was written by me and wants a native speaker's read.
 ---
 
 ## Human actions required before the next phases
+
+**Decisions from Phase 21 (see "Found, not fixed"):**
+
+- **Out of lives:** should 0 lives stop answering in lessons, practice and the challenge?
+  Recommended: yes, checked in `submit_answer`.
+- **Rate limits** on the answer and reward RPCs (SPEC §40, §42): add them before Phase 22?
+  Recommended: yes, one small migration.
+- Optional: export `REVENUECAT_SECRET_API_KEY` (from the RevenueCat dashboard) in the shell
+  before `npx supabase start`, so the E2E suite checks restore end to end, not only its failure.
 
 **Content review — the longest item before a store build:**
 
@@ -3269,3 +3391,24 @@ Use the **preview** build against staging (link in the report for this change).
    English after the splash screen.
 7. Choose _Ca telefonul_ and set the phone's own language to Română in system settings; the
    app follows it.
+
+## Phase 21 device checklist (SPEC §57 — "Maestro suite green")
+
+**The suite, on your machine** (setup once: `docs/TESTING.md`, "E2E"):
+
+1. Start the Android emulator (or plug in the phone), start Docker, then `npx supabase start`.
+2. `npm run e2e`. About 12 minutes. It ends with **"✔ E2E suite passed"** and eight
+   `[Passed]` lines. It resets the LOCAL database — nothing on staging is touched.
+
+**The fixes, on the preview build** (the APK from the Romanian-interface build is older than
+these fixes; a new preview build is needed to see them on the phone):
+
+3. **Age gate:** as a new guest, enter a birth year that makes you 10. The screen that explains
+   why appears — not the sign-in screen.
+4. **Guest → account:** finish a lesson as a guest, Profile → create an account. After
+   **Create account** the "Confirm your email" screen appears, with **Keep learning** (not "Use a
+   different email"). On staging the link needs the redirect URL from "Human actions".
+5. **Paywall:** the "No Ads, forever" plan says it does not unlock Premium lessons or
+   unlimited lives, and its button reads **Buy once**.
+6. **Lesson completion:** no "arrive in the next release" line; the button reads **Continue**
+   and does not move while the XP and achievements appear under it.
