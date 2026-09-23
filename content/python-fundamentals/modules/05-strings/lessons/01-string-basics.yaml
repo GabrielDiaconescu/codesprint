@@ -1,0 +1,190 @@
+id: 2aa52e4e-d060-476c-a7c3-ab6f3f0bae46
+slug: string-basics
+title:
+  en: Quotes and special characters
+summary:
+  en: Single or double quotes, putting quotes inside text, and characters you cannot type directly.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A string can be written with single quotes or double quotes — Python treats them the
+        same. The useful part is that one kind can appear inside the other without trouble.
+
+  - type: code
+    code: |
+      print('She said "hi"')
+      print("It's fine")
+    output: |-
+      She said "hi"
+      It's fine
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Some characters cannot be typed straight into a string. A backslash starts an
+        **escape sequence**: `\n` means a new line, `\"` means a double quote, and `\\` means
+        one real backslash.
+
+  - type: code
+    code: |
+      print("line one\nline two")
+      print("C:\\files")
+    output: |-
+      line one
+      line two
+      C:\files
+    runnable: true
+    caption:
+      en: '`\n` is one character — a line break — even though it takes two keystrokes to write.'
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        The quotes at each end must match. `"hi'` starts with a double quote and ends with a
+        single one, so Python never finds the end of the string and reports a SyntaxError.
+
+  - type: question
+    question:
+      id: 6531dfd0-cc1e-41a4-b8b4-5bd7bcbe94d9
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which of these lines is valid Python?
+      payload:
+        options:
+          - id: double-outside
+            text:
+              en: 'print("It''s")'
+          - id: single-clash
+            text:
+              en: "print('It's')"
+          - id: mismatch-a
+            text:
+              en: 'print("hi'')'
+          - id: mismatch-b
+            text:
+              en: 'print(''hi")'
+      answer:
+        option_id: double-outside
+      explanation:
+        en: >
+          Double quotes on the outside let the apostrophe sit inside safely. In the second, the
+          apostrophe ends the string early. The last two open with one kind of quote and close
+          with the other, so the string never ends.
+      skill_tags: [strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2c86eb73-0e8b-4922-9cfd-efa5113c3f5b
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: "`'hello'` and `\"hello\"` are the same string."
+      answer:
+        value: true
+      explanation:
+        en: >
+          The kind of quote only marks where the string starts and ends. The text inside is the
+          same five characters either way.
+      skill_tags: [strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2b0a4eb1-eabd-4ceb-974c-3e777d0a3b8a
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("up\ndown")
+      payload:
+        input: choice
+        options:
+          - id: two-lines
+            text:
+              en: "up\ndown"
+          - id: literal
+            text:
+              en: 'up\ndown'
+          - id: space
+            text:
+              en: up down
+          - id: joined
+            text:
+              en: updown
+      answer:
+        value: "up\ndown"
+        match_mode: exact
+      explanation:
+        en: >
+          `\n` inside a string is a line break, so the text is printed on two lines. The
+          backslash and the n never appear on screen.
+      skill_tags: [strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e8b29806-b74c-4f8a-824b-3ebb28b07e20
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(len("a\nb"))
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The string holds three characters: "a", a line break, and "b". The escape `\n` is
+          written with two keystrokes but stored as a single character.
+      hint:
+        en: How many characters does `\n` really stand for?
+      skill_tags: [strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 289e7203-f369-4460-b7a5-ddf3d3934357
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: A Windows path, printed. What appears?
+      code_snippet: |
+        print("C:\new")
+      payload:
+        input: choice
+        options:
+          - id: broken
+            text:
+              en: "C:\new"
+          - id: literal
+            text:
+              en: 'C:\new'
+          - id: dropped
+            text:
+              en: 'C:new'
+          - id: error
+            text:
+              en: A SyntaxError
+      answer:
+        value: "C:\new"
+        match_mode: exact
+      explanation:
+        en: >
+          Python reads `\n` as a line break, so "C:" is printed, then a new line, then "ew".
+          Paths are a common trap: write `\\` for a real backslash, or use forward slashes.
+      hint:
+        en: What does Python do when it sees a backslash followed by n?
+      skill_tags: [strings]
+      review_status: draft

@@ -1,0 +1,14 @@
+id: e76d177b-bd6b-4eb1-91b9-07f5c258b875
+slug: strings
+title:
+  en: Strings
+description:
+  en: Working with text — picking out characters, cutting out pieces, and building sentences from values.
+order_index: 5
+estimated_minutes: 32
+lessons:
+  - string-basics
+  - indexing
+  - slicing
+  - f-strings
+  - string-methods

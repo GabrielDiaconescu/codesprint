@@ -1,0 +1,237 @@
+id: ec113538-c53e-4725-858f-e002722477c1
+slug: string-methods
+title:
+  en: String methods
+summary:
+  en: Changing case, trimming spaces, replacing text — and why the original never changes.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A **method** is a function that belongs to a value. You call it with a dot after the
+        value: `text.upper()`. Strings come with dozens of them; a handful cover most needs.
+
+  - type: code
+    code: |
+      word = "Hello"
+      print(word.upper())
+      print(word.lower())
+    output: |-
+      HELLO
+      hello
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `strip()` removes spaces from both ends — handy for text someone typed. `replace()`
+        swaps every copy of one piece of text for another.
+
+  - type: code
+    code: |
+      raw = "  hi  "
+      print(raw.strip() + "!")
+      print("cat".replace("c", "b"))
+    output: |-
+      hi!
+      bat
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Strings can never be changed in place. A method does not alter the string you called
+        it on — it hands back a **new** string. To keep the result, store it.
+
+  - type: code
+    code: |
+      name = "sam"
+      name.upper()
+      print(name)
+      name = name.upper()
+      print(name)
+    output: |-
+      sam
+      SAM
+    runnable: true
+    caption:
+      en: The second line builds "SAM" and throws it away. The fourth line keeps it.
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Calling a method on its own line and expecting the variable to change is one of the
+        most common string bugs. Nothing breaks — the variable simply stays the same.
+
+  - type: question
+    question:
+      id: a8bf8dbb-a9fd-4869-ad57-b2728e095a2d
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("python".upper())
+      payload:
+        input: text
+      answer:
+        value: PYTHON
+        match_mode: exact
+      explanation:
+        en: >
+          `upper()` returns a copy of the string with every letter in capitals.
+      skill_tags: [string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 72e13076-03dd-42e4-a331-19a841b1d5e2
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`strip()` removes the spaces from the middle of a string.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          `strip()` only removes spaces from the two ends. Spaces between words are left
+          alone.
+      skill_tags: [string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 4bc46b6f-6b7f-4acc-a361-e5116a913626
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        s = "banana"
+        print(s.replace("a", "o"))
+      payload:
+        input: text
+      answer:
+        value: bonono
+        match_mode: trimmed
+      explanation:
+        en: >
+          `replace()` swaps **every** "a", not just the first one. All three become "o".
+      skill_tags: [string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: f1c958d5-9e51-4c79-80a6-6dd98507e393
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each method to what it gives back.
+      payload:
+        concepts:
+          - id: upper
+            text:
+              en: upper()
+          - id: lower
+            text:
+              en: lower()
+          - id: strip
+            text:
+              en: strip()
+          - id: replace
+            text:
+              en: replace("a", "b")
+        definitions:
+          - id: capitals
+            text:
+              en: The text in capital letters
+          - id: small
+            text:
+              en: The text in lowercase letters
+          - id: trimmed
+            text:
+              en: The text without spaces at either end
+          - id: swapped
+            text:
+              en: The text with every a changed to b
+      answer:
+        pairs:
+          upper: capitals
+          lower: small
+          strip: trimmed
+          replace: swapped
+      explanation:
+        en: >
+          Each one returns a new string built from the old one. None of them changes the
+          original.
+      skill_tags: [string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5b507580-b48d-4c30-a901-ec4feabb2989
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: 'Starting from `s = "Hi"`, which lines leave `s` still holding `"Hi"`?'
+      payload:
+        options:
+          - id: discarded
+            text:
+              en: s.upper()
+          - id: reassigned
+            text:
+              en: s = s.upper()
+          - id: other-name
+            text:
+              en: t = s.lower()
+          - id: printed
+            text:
+              en: print(s.replace("H", "J"))
+          - id: extended
+            text:
+              en: s = s + "!"
+      answer:
+        option_ids: [discarded, other-name, printed]
+      explanation:
+        en: >
+          Methods never change `s` itself. Only a line that assigns back to `s` — the second
+          and the last — gives it a new value. The others build a new string and either throw
+          it away, store it elsewhere, or print it.
+      hint:
+        en: Look for `s =` at the start of the line.
+      skill_tags: [string-methods, variables]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5547081d-873d-47f2-a6eb-fd38514ac781
+      type: code_ordering
+      difficulty: hard
+      prompt:
+        en: Arrange the lines so the program prints `HELLO!`.
+      payload:
+        lines:
+          - id: raw
+            text: raw = "  hello  "
+          - id: clean
+            text: clean = raw.strip()
+          - id: loud
+            text: loud = clean.upper()
+          - id: show
+            text: print(loud + "!")
+      answer:
+        order: [raw, clean, loud, show]
+      runnable: true
+      expected_output: HELLO!
+      explanation:
+        en: >
+          Each line works on the result of the one before: strip the spaces, then shout, then
+          add the exclamation mark. Because strings never change in place, every step needs
+          its own name to keep its result.
+      skill_tags: [string-methods, variables]
+      review_status: draft

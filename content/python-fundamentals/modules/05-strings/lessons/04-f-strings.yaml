@@ -1,0 +1,221 @@
+id: 4a9f9773-c6c9-4873-8084-cf230f79c381
+slug: f-strings
+title:
+  en: Building text with f-strings
+summary:
+  en: Dropping values straight into a sentence, doing sums inside the braces, and tidy decimals.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Joining text with `+` and `str()` works, but it gets clumsy fast. An **f-string** is
+        simpler: put an `f` just before the opening quote, then write any value inside curly
+        braces `{}` wherever you want it to appear.
+
+  - type: code
+    code: |
+      name = "Ada"
+      age = 36
+      print(f"{name} is {age} years old")
+    output: 'Ada is 36 years old'
+    runnable: true
+    caption:
+      en: No `str()` needed — the f-string converts the number for you.
+
+  - type: text
+    body:
+      en: |
+        Whatever is inside the braces is real Python, worked out before the text is built. You
+        can do arithmetic right there.
+
+  - type: code
+    code: |
+      age = 36
+      print(f"Next year: {age + 1}")
+    output: 'Next year: 37'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        After a colon inside the braces you can say how a value should look. `:.2f` means
+        "as a decimal with exactly two digits after the point" — ideal for prices.
+
+  - type: code
+    code: |
+      price = 3.5
+      print(f"Total: {price:.2f}")
+    output: 'Total: 3.50'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Forget the `f` and nothing is filled in: `print("{name}")` prints the braces and the
+        word exactly as written.
+
+  - type: question
+    question:
+      id: 41b7ecbc-6373-47b6-be68-3527ecff4f66
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = 4
+        print(f"x is {x}")
+      payload:
+        input: text
+      answer:
+        value: x is 4
+        match_mode: trimmed
+      explanation:
+        en: >
+          The value of `x` replaces `{x}`. The rest of the text, including the letter x at the
+          start, is printed exactly as written.
+      skill_tags: [strings, f-strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ca7a8093-efdf-4f07-952e-89f198850e3a
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What turns an ordinary string into an f-string?
+      payload:
+        options:
+          - id: prefix
+            text:
+              en: The letter f just before the opening quote
+          - id: braces
+            text:
+              en: Curly braces anywhere inside it
+          - id: format
+            text:
+              en: The word format at the end
+          - id: dollar
+            text:
+              en: A $ sign before each value
+      answer:
+        option_id: prefix
+      explanation:
+        en: >
+          The `f` prefix is what tells Python to fill in the braces. Braces in an ordinary
+          string are printed as they are.
+      skill_tags: [f-strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 96b2ca33-d0a8-45a1-b292-13a777454d18
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        n = 3
+        print(f"{n} * 2 = {n * 2}")
+      payload:
+        input: text
+      answer:
+        value: 3 * 2 = 6
+        match_mode: trimmed
+      explanation:
+        en: >
+          Only the parts inside braces are worked out. The `* 2 =` between them is ordinary
+          text, while `{n * 2}` is a calculation that gives 6.
+      skill_tags: [f-strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: babf8462-5bcc-4f75-9b50-c99a507dcdd8
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: 'This should print "Hello, Sam!", but it prints "Hello, {name}!". How do you fix it?'
+      code_snippet: |
+        name = "Sam"
+        print("Hello, {name}!")
+      payload:
+        mode: choose_fix
+        options:
+          - id: add-f
+            text:
+              en: Put an f just before the opening quote
+          - id: wrap-str
+            text:
+              en: Write str(name) inside the braces
+          - id: brackets
+            text:
+              en: Use square brackets instead of braces
+          - id: drop-braces
+            text:
+              en: Remove the braces
+      answer:
+        option_id: add-f
+      runnable: true
+      fixed_code: |
+        name = "Sam"
+        print(f"Hello, {name}!")
+      fixed_output: 'Hello, Sam!'
+      explanation:
+        en: >
+          Without the `f`, braces are just characters. Every other fix still leaves an ordinary
+          string that prints its contents as written.
+      skill_tags: [f-strings, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c6770581-a5bb-404e-b07a-0b354d24962b
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so it prints `2.50`.
+      code_snippet: |
+        price = 2.5
+        print(f"{price:___}")
+      payload:
+        input: tokens
+        tokens: ['.2f', '.1f', '2f', '2']
+      answer:
+        value: '.2f'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `.2f` asks for two digits after the decimal point. `.1f` would give 2.5, and the
+          last two do not control decimal places at all.
+      hint:
+        en: How many digits do you want after the point?
+      skill_tags: [f-strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 3362370d-e7ee-4bf8-bc64-aabe91c36e4c
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(f"{2.5:.0f}")
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          A value exactly halfway is rounded to the nearest **even** number, not always up. 2.5
+          is halfway between 2 and 3, and 2 is even. `round(2.5)` does the same, while
+          `round(3.5)` gives 4.
+      hint:
+        en: Halfway cases do not always round up in Python.
+      skill_tags: [f-strings, numbers]
+      review_status: draft

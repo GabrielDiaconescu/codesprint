@@ -1,0 +1,198 @@
+id: 337a55fa-37c4-4d19-87bb-eb125093290c
+slug: indexing
+title:
+  en: Picking out one character
+summary:
+  en: Positions that start from zero, counting from the end, and the error when you go too far.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Every character in a string has a position, called its **index**. Square brackets
+        after the string pick one out. The first character is at index `0`, not 1.
+
+  - type: code
+    code: |
+      word = "Python"
+      print(word[0])
+      print(word[5])
+    output: |-
+      P
+      n
+    runnable: true
+    caption:
+      en: Six characters, so the positions run from 0 to 5.
+
+  - type: text
+    body:
+      en: |
+        Negative indexes count backwards from the end. `-1` is always the last character, `-2`
+        the one before it, however long the string is.
+
+  - type: code
+    code: |
+      word = "Python"
+      print(word[-1])
+      print(word[-2])
+    output: |-
+      n
+      o
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        The last index is always one less than the length. Asking for `word[6]` on a
+        six-letter word is past the end, and Python stops with an IndexError.
+
+  - type: question
+    question:
+      id: 0253124a-2c47-46f2-bbd5-95c55914913b
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("hello"[1])
+      payload:
+        input: text
+      answer:
+        value: e
+        match_mode: trimmed
+      explanation:
+        en: >
+          Counting starts at 0, so index 0 is "h" and index 1 is "e".
+      skill_tags: [strings, indexing]
+      review_status: draft
+
+  - type: question
+    question:
+      id: a78877a5-ee39-44e8-a074-aa9d9e5366bd
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What is the index of the first character in a string?
+      payload:
+        options:
+          - id: zero
+            text:
+              en: '0'
+          - id: one
+            text:
+              en: '1'
+          - id: minus-one
+            text:
+              en: '-1'
+          - id: depends
+            text:
+              en: It depends on the string
+      answer:
+        option_id: zero
+      explanation:
+        en: >
+          Python always counts positions from 0. `-1` is the last character, not the first.
+      skill_tags: [indexing]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5ca3ac04-b028-4701-8e41-b219ea27c65a
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        word = "banana"
+        print(word[-1] + word[0])
+      payload:
+        input: text
+      answer:
+        value: ab
+        match_mode: trimmed
+      explanation:
+        en: >
+          `word[-1]` is the last letter, "a", and `word[0]` is the first, "b". Joined in that
+          order they give "ab".
+      skill_tags: [strings, indexing]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c2aedeeb-d57b-4635-ad68-87602e5221ec
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so it prints the last character of any word, whatever its length.
+      code_snippet: |
+        print(word[___])
+      payload:
+        input: tokens
+        tokens: ['-1', '0', '1', 'len(word)']
+      answer:
+        value: '-1'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `-1` always means the last character. `len(word)` is one past the end and would raise
+          an IndexError.
+      hint:
+        en: Count from the end instead of the start.
+      skill_tags: [indexing]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 525f80ed-f057-4aaf-8b6d-0c3ffd4ada58
+      type: true_false
+      difficulty: medium
+      prompt:
+        en: For a five-letter string `s`, `s[5]` gives its last character.
+      answer:
+        value: false
+      explanation:
+        en: >
+          Five characters sit at positions 0 to 4. `s[5]` is past the end and raises an
+          IndexError. The last character is `s[4]`, or `s[-1]`.
+      skill_tags: [indexing, errors]
+      review_status: draft
+
+  - type: question
+    question:
+      id: be69e6ef-d979-41ab-88e5-934a12f22220
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This should print the last letter of "cat", but it crashes. Which line is wrong?
+      code_snippet: |
+        word = "cat"
+        last = word[3]
+        print(last)
+      payload:
+        mode: select_line
+        lines:
+          - id: assign
+            text: 'word = "cat"'
+          - id: pick
+            text: 'last = word[3]'
+          - id: show
+            text: 'print(last)'
+      answer:
+        line_id: pick
+      runnable: true
+      fixed_code: |
+        word = "cat"
+        last = word[-1]
+        print(last)
+      fixed_output: t
+      explanation:
+        en: >
+          "cat" has three letters at positions 0, 1 and 2, so index 3 does not exist. `word[2]`
+          or `word[-1]` both give "t".
+      hint:
+        en: How many positions does a three-letter word have, starting from 0?
+      skill_tags: [indexing, debugging]
+      review_status: draft
