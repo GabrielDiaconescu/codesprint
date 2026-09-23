@@ -1,0 +1,24 @@
+{
+  "title": "Învață",
+  "module": {
+    "locked": "Premium",
+    "lessons_one": "{{count}} lecție",
+    "lessons_few": "{{count}} lecții",
+    "lessons_other": "{{count}} de lecții",
+    "minutes_one": "{{count}} min",
+    "minutes_few": "{{count}} min",
+    "minutes_other": "{{count}} min"
+  },
+  "empty": {
+    "title": "Încă nu sunt lecții",
+    "body": "Cursul este în pregătire. Revino în curând."
+  },
+  "error": {
+    "title": "Nu am putut încărca cursul",
+    "body": "Verifică-ți conexiunea și încearcă din nou."
+  },
+  "comingSoon": {
+    "title": "Aproape gata",
+    "body": "Deschiderea lecțiilor vine în versiunea următoare."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "appName": "CodeSprint",
+  "tagline": "Învață să programezi. 5 minute pe zi.",
+  "promoLine": "Lecții scurte. Provocări zilnice. Progres real în programare.",
+  "actions": {
+    "retry": "Încearcă din nou",
+    "continue": "Continuă",
+    "close": "Închide",
+    "cancel": "Anulează"
+  },
+  "states": {
+    "loading": "Se încarcă…",
+    "offlineTitle": "Nu ai conexiune la internet",
+    "offlineBody": "Verifică-ți conexiunea și încearcă din nou.",
+    "errorTitle": "Ceva n-a mers",
+    "errorBody": "Nu am putut încărca asta. Încearcă din nou."
+  }
+}

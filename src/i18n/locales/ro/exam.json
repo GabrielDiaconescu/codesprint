@@ -1,0 +1,91 @@
+{
+  "title": "Examene",
+  "intro": "Pune tot cursul cap la cap. Examenele sunt corectate pe server și nu îți arată niciun răspuns până nu predai.",
+  "bankedXp": "{{xp, number}} XP adunat din examene până acum",
+  "premium": "Premium",
+  "entry": {
+    "title": "Examenul final",
+    "body": "Gata să testezi tot? Dă gratuit examenul de probă sau examenul complet, de 30 de întrebări, cu Premium.",
+    "action": "Mergi la examene"
+  },
+  "facts": {
+    "questions_one": "{{count}} întrebare",
+    "questions_few": "{{count}} întrebări",
+    "questions_other": "{{count}} de întrebări",
+    "minutes_one": "{{count}} minut",
+    "minutes_few": "{{count}} minute",
+    "minutes_other": "{{count}} de minute",
+    "untimed": "Fără limită de timp",
+    "pass": "Promovare la {{pct}}%"
+  },
+  "best": {
+    "passed": "Promovat — cel mai bun rezultat: {{pct}}%",
+    "notYet": "Cel mai bun rezultat până acum: {{pct}}%"
+  },
+  "action": {
+    "start": "Începe examenul",
+    "resume": "Continuă examenul",
+    "retry": "Dă-l din nou",
+    "locked": "Indisponibil"
+  },
+  "locked": {
+    "requires_premium": "Examenul complet face parte din Premium, împreună cu toate modulele și viețile nelimitate.",
+    "requires_premiumTitle": "Examen Premium",
+    "no_attempts_left": "Ai folosit încercarea din această săptămână. Se resetează luni.",
+    "no_attempts_leftTitle": "Revino luni",
+    "cooldown": "Tocmai l-ai dat. Va fi disponibil din nou în curând.",
+    "cooldownTitle": "Mai așteaptă puțin",
+    "pool_too_small": "Încă nu sunt destule întrebări pentru acest examen. Vin lecții noi.",
+    "pool_too_smallTitle": "Încă nu e gata",
+    "disabled": "Examenele sunt temporar indisponibile. Încearcă din nou mai târziu.",
+    "disabledTitle": "Temporar indisponibil",
+    "not_found": "Acest examen nu mai este disponibil.",
+    "not_foundTitle": "Examenul nu a fost găsit",
+    "unknown": "Examenul nu a putut fi pornit. Încearcă din nou.",
+    "unknownTitle": "Ceva n-a mers"
+  },
+  "disabled": {
+    "title": "Examenele sunt oprite",
+    "body": "Sunt oprite temporar. Progresul tău rămâne neatins — revino mai târziu."
+  },
+  "error": {
+    "title": "Nu am putut încărca examenele",
+    "body": "Verifică-ți conexiunea și încearcă din nou."
+  },
+  "progress": "Întrebarea {{current}} din {{total}}",
+  "answeredOf": "Cu răspuns: {{answered}} din {{total}}",
+  "previous": "Înapoi",
+  "next": "Înainte",
+  "handIn": "Predă",
+  "unrenderable": "Această întrebare nu poate fi afișată în această versiune a aplicației. Va fi considerată fără răspuns.",
+  "timer": {
+    "untimed": "Fără limită de timp",
+    "accessibility": "Timp rămas: {{time}}"
+  },
+  "results": {
+    "title": "Rezultate",
+    "accessibility": "Ai obținut {{pct}} la sută",
+    "passed": "Promovat",
+    "notPassed": "Încă nepromovat",
+    "correctOf": "Corecte: {{correct}} din {{total}}",
+    "short_one": "Încă un răspuns corect și ai fi promovat.",
+    "short_few": "Încă {{count}} răspunsuri corecte și ai fi promovat.",
+    "short_other": "Încă {{count}} de răspunsuri corecte și ai fi promovat.",
+    "xp": "+{{xp}} XP",
+    "xpExplainer": "Examenele se punctează după cel mai bun rezultat, așa că, dacă îl depășești, câștigi diferența.",
+    "weakAreas": "Merită reluate",
+    "weakAreasHint": "Subiectele care te-au costat cele mai multe puncte.",
+    "review": "Revezi fiecare întrebare",
+    "done": "Gata"
+  },
+  "review": {
+    "title": "Recapitulare",
+    "subtitle": "Răspunsuri corecte: {{correct}} din {{total}}. Toate întrebările sunt aici, cu explicații.",
+    "number": "Întrebarea {{number}}",
+    "correct": "Corect",
+    "wrong": "Greșit",
+    "accessibilityCorrect": "Întrebarea {{number}}, corect. {{prompt}}",
+    "accessibilityWrong": "Întrebarea {{number}}, greșit. {{prompt}}",
+    "done": "Înapoi la rezultate"
+  }
+}

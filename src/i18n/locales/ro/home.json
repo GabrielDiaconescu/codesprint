@@ -1,0 +1,63 @@
+{
+  "title": "Acasă",
+  "greeting": {
+    "named": "Salut, {{name}}! Gata de joacă?",
+    "anonymous": "Gata de joacă?"
+  },
+  "toggles": {
+    "language": "Schimbă limba",
+    "themeLight": "Treci la tema luminoasă",
+    "themeDark": "Treci la tema întunecată",
+    "settings": "Deschide setările"
+  },
+  "xp": "XP",
+  "level": {
+    "short": "NIV"
+  },
+  "lives": {
+    "count_one": "{{count}} viață rămasă din {{max}}",
+    "count_few": "{{count}} vieți rămase din {{max}}",
+    "count_other": "{{count}} de vieți rămase din {{max}}",
+    "unlimited": "Vieți nelimitate"
+  },
+  "greetingNew": "Gata să începi?",
+  "greetingBack": "Bine ai revenit",
+  "startFirst": "Începe prima lecție",
+  "startFirstBody": "Ai nevoie doar de cinci minute. Prima lecție te așteaptă.",
+  "continueTitle": "Lecția de azi",
+  "continueCta": "Continuă",
+  "startCta": "Începe",
+  "lessonMeta": "{{module}} · {{minutes}} min",
+  "allDoneTitle": "Ai terminat tot ce e disponibil",
+  "allDoneBody": "Vin module noi. Până atunci, exersează ce știi.",
+  "goal": {
+    "title": "Obiectivul de azi",
+    "metTitle": "Obiectiv atins!",
+    "progress": "{{earned}} / {{target}} XP azi",
+    "met": "Obiectiv atins. Tot ce faci în plus e bonus."
+  },
+  "course": {
+    "title": "Python Fundamentals",
+    "progress": "Lecții terminate: {{completed}} din {{total}}"
+  },
+  "challenge": {
+    "title": "Provocarea zilei",
+    "body": "Trei întrebări, o dată pe zi.",
+    "reward": "+{{count}} XP",
+    "cta": "Începe provocarea",
+    "done": "Gata pentru azi"
+  },
+  "practice": {
+    "title": "Reia greșelile",
+    "body_one": "{{count}} întrebare de reluat",
+    "body_few": "{{count}} întrebări de reluat",
+    "body_other": "{{count}} de întrebări de reluat",
+    "cta": "Exersează",
+    "none": "Nimic de reluat — tot ce ai răspuns e corect.",
+    "mixed": "Practică mixtă"
+  },
+  "error": {
+    "title": "Nu am putut încărca ecranul principal",
+    "body": "Verifică-ți conexiunea și încearcă din nou."
+  }
+}

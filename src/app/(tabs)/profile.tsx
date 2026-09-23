@@ -9,6 +9,7 @@ import { LeaderboardSettingsCard } from '@/features/leaderboard/components/Leade
 import { ReminderSettingsCard } from '@/features/notifications/components/ReminderSettingsCard';
 import { AboutCard } from '@/features/settings/components/AboutCard';
 import { AppearanceSettingsCard } from '@/features/settings/components/AppearanceSettingsCard';
+import { LanguageSettingsCard } from '@/features/settings/components/LanguageSettingsCard';
 import { SubscriptionCard } from '@/features/subscriptions/components/SubscriptionCard';
 import { LevelCard } from '@/features/progress/components/LevelCard';
 import { useProfile } from '@/features/profile/hooks/useProfile';
@@ -55,6 +56,7 @@ export default function ProfileScreen() {
         {profile && <ReminderSettingsCard profile={profile} />}
 
         <AppearanceSettingsCard />
+        <LanguageSettingsCard />
 
         {profile && <LeaderboardSettingsCard profile={profile} />}
 

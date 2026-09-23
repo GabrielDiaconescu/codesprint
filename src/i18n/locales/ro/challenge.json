@@ -1,0 +1,23 @@
+{
+  "title": "Provocarea zilei",
+  "subtitle": "Trei întrebări. Termină-le pe toate ca să primești bonusul.",
+  "progress": "Întrebarea {{current}} din {{total}}",
+  "claimed": {
+    "title": "Ai terminat-o deja azi",
+    "body": "Revino mâine pentru o provocare nouă.",
+    "back": "Înapoi acasă"
+  },
+  "done": {
+    "title": "Provocare terminată",
+    "score": "{{correct}} din {{total}} corecte",
+    "bonus": "+{{count}} XP bonus",
+    "noBonus": "Ai primit deja bonusul de azi.",
+    "claim": "Ia-ți bonusul",
+    "back": "Înapoi acasă"
+  },
+  "error": {
+    "title": "Nu am putut încărca provocarea de azi",
+    "body": "Verifică-ți conexiunea și încearcă din nou.",
+    "claimFailed": "Nu am putut acorda bonusul. Încearcă din nou."
+  }
+}

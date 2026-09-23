@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 
 import { REMINDER_TIMES } from '@/features/notifications/logic/schedule';
+import { SUPPORTED_LOCALES } from '@/i18n';
 import { DAILY_GOAL_MINUTES, EXPERIENCE_LEVELS, MOTIVATIONS } from '@/services/types';
 
 import { optionKey, type OptionFamily } from '../optionKeys';
@@ -23,16 +24,19 @@ const families: [OptionFamily, readonly (string | number)[]][] = [
 ];
 
 describe.each(families)('%s options', (family, values) => {
-  it.each(values.map(String))('%s has a real label and description', (value) => {
-    for (const field of ['label', 'description']) {
-      const key = `${optionKey(family, value)}.${field}`;
+  it.each(values.map(String))('%s has a real label and description in every language', (value) => {
+    for (const lng of SUPPORTED_LOCALES) {
+      for (const field of ['label', 'description']) {
+        const key = `${optionKey(family, value)}.${field}`;
 
-      expect({ key, exists: i18n.exists(key, { ns: 'onboarding' }) }).toEqual({
-        key,
-        exists: true,
-      });
-      // What a failed lookup looks like on screen: a dotted key ending in the field name.
-      expect(i18n.t(key, { ns: 'onboarding' })).not.toMatch(/\.(label|description)$/);
+        expect({ lng, key, exists: i18n.exists(key, { ns: 'onboarding', lng }) }).toEqual({
+          lng,
+          key,
+          exists: true,
+        });
+        // What a failed lookup looks like on screen: a dotted key ending in the field name.
+        expect(i18n.t(key, { ns: 'onboarding', lng })).not.toMatch(/\.(label|description)$/);
+      }
     }
   });
 });

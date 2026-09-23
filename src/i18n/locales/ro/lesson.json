@@ -1,0 +1,113 @@
+{
+  "progress": "{{percent}}% citit",
+  "estimated": "{{count}} min",
+  "callout": {
+    "note": "Notă",
+    "tip": "Sfat",
+    "mistake": "Greșeală frecventă"
+  },
+  "difficulty": {
+    "easy": "Ușor",
+    "medium": "Mediu",
+    "hard": "Greu"
+  },
+  "questionType": {
+    "multiple_choice": "Alege un răspuns",
+    "multiple_select": "Alege toate variantele corecte",
+    "true_false": "Adevărat sau fals",
+    "predict_output": "Ce afișează?",
+    "fill_blank": "Completează spațiul liber",
+    "code_ordering": "Pune liniile în ordine",
+    "debugging": "Găsește problema",
+    "concept_matching": "Potrivește perechile",
+    "coding_challenge": "Scrie codul"
+  },
+  "finish": "Termină lecția",
+  "complete": {
+    "title": "Lecție terminată",
+    "body": "Ai citit {{title}}.",
+    "xpPending": "Practica și provocarea zilnică vin în versiunea următoare.",
+    "next": "Lecția următoare",
+    "backToModule": "Înapoi la modul",
+    "xpEarned": "+{{count}} XP câștigat în această lecție",
+    "score": "{{correct}} din {{total}} corecte din prima încercare",
+    "perfect": "Lecție perfectă — toate răspunsurile corecte din prima.",
+    "streak_one": "Serie de {{count}} zi",
+    "streak_few": "Serie de {{count}} zile",
+    "streak_other": "Serie de {{count}} de zile"
+  },
+  "error": {
+    "premiumTitle": "Acest modul este Premium",
+    "premiumBody": "Deblochează toate modulele, vieți nelimitate și examenul complet.",
+    "premiumAction": "Vezi Premium",
+    "notFoundTitle": "Lecția nu a fost găsită",
+    "notFoundBody": "Poate a fost retrasă de când ai deschis ultima dată aplicația.",
+    "unknownTitle": "Nu am putut încărca lecția",
+    "unknownBody": "Verifică-ți conexiunea și încearcă din nou.",
+    "back": "Înapoi"
+  },
+  "module": {
+    "lessons_one": "{{count}} lecție",
+    "lessons_few": "{{count}} lecții",
+    "lessons_other": "{{count}} de lecții",
+    "lockedTitle": "Modul Premium",
+    "lockedBody": "Acest modul face parte din Premium. Modulele de la 1 la {{freeCount}} sunt gratuite pentru toată lumea.",
+    "empty": "Acest modul nu are încă lecții."
+  },
+  "pages": {
+    "reading": "Lectură",
+    "questionOf": "Întrebarea {{current}} din {{total}}"
+  },
+  "question": {
+    "check": "Verifică",
+    "continue": "Continuă",
+    "correct": "Corect!",
+    "incorrect": "Nu chiar",
+    "hint": "Indiciu",
+    "trueLabel": "Adevărat",
+    "falseLabel": "Fals",
+    "outputPlaceholder": "Ce afișează?",
+    "blankPlaceholder": "Ce se pune în spațiul liber?",
+    "instructions": {
+      "multiple_choice": "Alege un singur răspuns.",
+      "multiple_select": "Alege toate răspunsurile corecte.",
+      "true_false": "Adevărat sau fals?",
+      "predict_output_text": "Scrie exact ce afișează programul.",
+      "predict_output_choice": "Alege ce afișează programul.",
+      "fill_blank_tokens": "Atinge bucata care se potrivește în spațiul liber.",
+      "fill_blank_text": "Scrie ce se pune în spațiul liber.",
+      "code_ordering": "Atinge liniile în ordinea în care ar trebui să ruleze.",
+      "debugging_select_line": "Atinge linia cu problema.",
+      "debugging_choose_fix": "Alege corectura.",
+      "debugging_both": "Atinge linia greșită, apoi alege corectura.",
+      "concept_matching": "Atinge un concept, apoi definiția lui."
+    },
+    "ordering": {
+      "answer": "Programul tău",
+      "bank": "Linii disponibile",
+      "empty": "Atinge liniile de mai jos ca să le adaugi aici.",
+      "position": "Linia {{position}}: {{line}}. Atinge ca s-o elimini.",
+      "add": "{{line}}. Atinge ca s-o adaugi."
+    },
+    "matching": {
+      "concepts": "Concepte",
+      "definitions": "Definiții",
+      "pairSelected": "{{concept}}, așteaptă o definiție",
+      "paired": "{{concept}} potrivit cu {{definition}}. Atinge ca să anulezi."
+    },
+    "blankMarker": "spațiu liber",
+    "submitError": "Nu am putut verifica răspunsul. Selecția ta rămâne — încearcă din nou.",
+    "unrenderable": "Întrebarea nu a putut fi afișată și a fost sărită.",
+    "expected": "Răspuns așteptat:",
+    "outputLabel": "Ieșire",
+    "blankLabel": "Spațiul liber",
+    "livesLeft_one": "{{count}} viață rămasă",
+    "livesLeft_few": "{{count}} vieți rămase",
+    "livesLeft_other": "{{count}} de vieți rămase"
+  },
+  "choice": {
+    "correctChosen": "Răspuns corect, ales",
+    "correctMissed": "Răspuns corect, neales",
+    "wrongChosen": "Răspunsul tău, greșit"
+  }
+}

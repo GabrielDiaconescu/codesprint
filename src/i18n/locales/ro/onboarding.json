@@ -1,0 +1,92 @@
+{
+  "progress": "Pasul {{current}} din {{total}}",
+  "age": {
+    "title": "În ce an te-ai născut?",
+    "subtitle": "Întrebăm ca să setăm corect opțiunile de confidențialitate. Nu îți cerem niciodată data completă a nașterii.",
+    "label": "Anul nașterii",
+    "placeholder": "2005",
+    "hint": "Patru cifre, de exemplu 2005.",
+    "errors": {
+      "required": "Introdu anul în care te-ai născut.",
+      "not-a-year": "Introdu un an din patru cifre, de exemplu 2005.",
+      "in-the-future": "Anul acesta încă n-a venit.",
+      "implausible": "Nu pare corect. Verifică anul și încearcă din nou."
+    }
+  },
+  "blocked": {
+    "title": "Mai trebuie să aștepți puțin",
+    "body": "CodeSprint este pentru cursanți de cel puțin {{minAge}} ani, așa că încă nu putem crea un cont. Nu am salvat nimic, iar când vei avea vârsta potrivită ești binevenit înapoi.",
+    "action": "Închide"
+  },
+  "experience": {
+    "title": "Cât ai programat până acum?",
+    "subtitle": "Asta decide doar de unde îți sugerăm să începi. Toate lecțiile îți rămân deschise.",
+    "options": {
+      "complete_beginner": {
+        "label": "Începător total",
+        "description": "N-am scris niciodată cod."
+      },
+      "beginner": {
+        "label": "Începător",
+        "description": "Am încercat puțin, dar nu mă simt încă sigur."
+      },
+      "intermediate": {
+        "label": "Intermediar",
+        "description": "Am mai scris programe într-un limbaj."
+      }
+    }
+  },
+  "motivation": {
+    "title": "Ce te aduce aici?",
+    "subtitle": "Ne ajută să te încurajăm în mod potrivit.",
+    "options": {
+      "university": { "label": "Facultate", "description": "Un curs, un examen sau o temă." },
+      "career": { "label": "Carieră", "description": "Vreau să-mi schimb jobul sau să avansez." },
+      "interview": {
+        "label": "Pregătire pentru interviuri",
+        "description": "Am interviuri în curând."
+      },
+      "personal": { "label": "Interes personal", "description": "Pur și simplu vreau să învăț." },
+      "improve": {
+        "label": "Să devin mai bun",
+        "description": "Programez deja și vreau să mă perfecționez."
+      }
+    }
+  },
+  "goal": {
+    "title": "Cât timp pe zi?",
+    "subtitle": "Constanța contează mai mult decât durata. Poți schimba asta oricând.",
+    "options": {
+      "5": {
+        "label": "5 minute",
+        "description": "O lecție pe zi. Cel mai ușor obicei de păstrat."
+      },
+      "10": { "label": "10 minute", "description": "O lecție plus puțină practică." },
+      "15": { "label": "15 minute", "description": "O sesiune zilnică serioasă." }
+    }
+  },
+  "reminder": {
+    "title": "Când să-ți amintim?",
+    "subtitle": "Un memento la aceeași oră în fiecare zi te ajută cel mai mult să-ți păstrezi seria.",
+    "explanation": "Îți cerem permisiunea pentru notificări doar dacă alegi o oră. Le poți opri oricând din Setări.",
+    "options": {
+      "0800": { "label": "Dimineața", "description": "8:00" },
+      "1200": { "label": "La prânz", "description": "12:00" },
+      "1800": { "label": "După muncă", "description": "18:00" },
+      "2000": { "label": "Seara", "description": "20:00" },
+      "2130": { "label": "Înainte de culcare", "description": "21:30" }
+    },
+    "skip": "Fără mementouri, mulțumesc"
+  },
+  "consent": {
+    "title": "Câteva alegeri de confidențialitate",
+    "subtitle": "Le poți schimba pe amândouă mai târziu, din Setări.",
+    "analytics": {
+      "label": "Ajută-ne să îmbunătățim CodeSprint",
+      "description": "Trimite date anonime de utilizare, ca să vedem ce lecții îi încurcă pe oameni. Niciodată răspunsurile, emailul sau numele tău."
+    },
+    "minorNotice": "Pentru că ai sub {{protectionAge}} ani, am oprit deja statisticile, nu apari în clasamentul public, iar reclamele sunt doar nepersonalizate. Nu trebuie să faci nimic.",
+    "adsNote": "Dacă ești în UE, Regatul Unit sau Elveția, te întrebăm separat despre reclame înainte să vezi una.",
+    "finish": "Începe să înveți"
+  }
+}

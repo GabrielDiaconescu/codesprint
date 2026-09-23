@@ -42,9 +42,12 @@ export const queryKeys = {
   },
   user: {
     profile: (userId: string) => ['user', userId, 'profile'] as const,
-    home: (userId: string) => ['user', userId, 'home'] as const,
-    practice: (userId: string) => ['user', userId, 'practice'] as const,
-    challenge: (userId: string) => ['user', userId, 'challenge'] as const,
+    // Home, practice and the challenge carry lesson and question text, so the locale is part of
+    // the key: switching language must fetch the other language's text, not reuse the cache.
+    // The locale comes last so a prefix like ['user', id] still invalidates every language.
+    home: (userId: string, locale: string) => ['user', userId, 'home', locale] as const,
+    practice: (userId: string, locale: string) => ['user', userId, 'practice', locale] as const,
+    challenge: (userId: string, locale: string) => ['user', userId, 'challenge', locale] as const,
     progress: (userId: string) => ['user', userId, 'progress'] as const,
     summary: (userId: string, locale: string) => ['user', userId, 'summary', locale] as const,
     stats: (userId: string) => ['user', userId, 'stats'] as const,

@@ -1,0 +1,71 @@
+{
+  "title": "Fără reclame sau Premium",
+  "heading": "Învață în continuare, în felul tău",
+  "recommended": "Cel mai popular",
+  "saving": "Economisești {{percent}}%",
+  "perMonth": "{{price}} pe lună, facturat anual",
+  "included": "Inclus în planul tău",
+  "upgradeNote": "Acesta îți înlocuiește abonamentul actual — nu plătești pentru amândouă.",
+  "trigger": {
+    "manual": "Iată exact ce include fiecare plan și ce nu include.",
+    "module_locked": "Ai ajuns la finalul modulelor gratuite.",
+    "out_of_lives": "Ai rămas fără vieți? Cu Premium nu se termină niciodată.",
+    "premium_feature": "Aceasta e o funcție Premium. Iată ce include.",
+    "after_ad": "Reclamele țin CodeSprint gratuit. Le poți opri."
+  },
+  "period": {
+    "monthly": "pe lună",
+    "annual": "pe an",
+    "lifetime": "o singură dată"
+  },
+  "plans": {
+    "no_ads_monthly": {
+      "name": "Fără reclame",
+      "body": "Tot ce ai în planul gratuit, fără reclame.",
+      "limits": "Nu deblochează lecțiile Premium sau viețile nelimitate. Acestea fac parte din Premium."
+    },
+    "premium_monthly": {
+      "name": "Premium",
+      "body": "Toate modulele, examenul complet de 30 de întrebări cu reîncercări, seturi de practică dificile, vieți nelimitate, statistici detaliate și fără reclame."
+    },
+    "premium_annual": {
+      "name": "Premium, anual",
+      "body": "Tot ce include Premium, plătit o dată pe an."
+    },
+    "no_ads_lifetime": {
+      "name": "Fără reclame, pentru totdeauna",
+      "body": "Tot ce ai în planul gratuit, fără reclame. Plătit o singură dată.",
+      "limits": "Nu deblochează lecțiile Premium sau viețile nelimitate. Acestea fac parte din Premium."
+    }
+  },
+  "free": {
+    "name": "Gratuit",
+    "body": "Modulele de la 1 la {{modules}}, provocarea zilnică, practica, XP-ul, seriile, realizările și clasamentul săptămânal — cu vieți și reclame."
+  },
+  "action": {
+    "subscribe": "Abonează-te",
+    "upgrade": "Treci la Premium"
+  },
+  "purchase": {
+    "done": "Gata, totul e pregătit. Spor la învățat!",
+    "failed": "Achiziția nu a putut fi finalizată. Nu ți s-a debitat nimic."
+  },
+  "restore": {
+    "action": "Restaurează achizițiile",
+    "done": "Achizițiile tale au revenit.",
+    "nothing": "Nu am găsit achiziții anterioare pentru acest cont.",
+    "failed": "Nu am putut restaura achizițiile. Încearcă din nou."
+  },
+  "manage": "Gestionează abonamentul",
+  "unavailable": {
+    "title": "Nu am putut încărca planurile",
+    "body": "Prețurile vin direct din magazin, așa că nu avem ce afișa până nu răspunde. Verifică-ți conexiunea și încearcă din nou."
+  },
+  "terms": "Abonamentele se reînnoiesc automat până la anulare. Le poți anula oricând din contul tău din magazin, cu cel puțin 24 de ore înainte de finalul perioadei. Plata se face din contul tău din magazin, la confirmare.",
+  "legal": {
+    "terms": "Termeni",
+    "privacy": "Politica de confidențialitate"
+  },
+  "addOnNote": "Achiziția fără reclame este permanentă și rămâne a ta. Premium este un abonament separat, în plus.",
+  "owned": "Ai deja acest plan"
+}

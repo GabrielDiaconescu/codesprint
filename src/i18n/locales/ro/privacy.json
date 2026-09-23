@@ -1,0 +1,13 @@
+{
+  "title": "Confidențialitate",
+  "failed": "Setarea nu a putut fi salvată. Încearcă din nou.",
+  "analytics": {
+    "label": "Ajută-ne să îmbunătățim CodeSprint",
+    "description": "Trimite date anonime de utilizare — ce lecții sunt terminate, unde se blochează oamenii. Niciodată răspunsurile, numele sau emailul tău.",
+    "minor": "Statisticile rămân oprite pentru cursanții sub {{age}} ani. Nu se trimite nimic despre felul în care folosești aplicația."
+  },
+  "ads": {
+    "description": "Preferințele pentru reclame sunt gestionate prin formularul de consimțământ al Google, de unde îți poți și retrage acordul.",
+    "action": "Opțiuni de confidențialitate pentru reclame"
+  }
+}

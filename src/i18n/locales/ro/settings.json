@@ -1,0 +1,45 @@
+{
+  "appearance": {
+    "title": "Aspect",
+    "theme": {
+      "label": "Temă",
+      "system": "Sistem",
+      "light": "Luminoasă",
+      "dark": "Întunecată"
+    },
+    "haptics": {
+      "label": "Vibrații",
+      "description": "O vibrație scurtă când un răspuns e corect sau greșit."
+    }
+  },
+  "language": {
+    "title": "Limbă",
+    "label": "Limba aplicației",
+    "system": "Ca telefonul",
+    "names": {
+      "en": "English",
+      "ro": "Română"
+    },
+    "contentNote": "Lecțiile sunt deocamdată disponibile doar în engleză. Restul aplicației se schimbă imediat."
+  },
+  "subscription": {
+    "title": "Abonament",
+    "plan": {
+      "free": "Gratuit",
+      "no_ads": "Fără reclame",
+      "premium": "Premium"
+    },
+    "lifetime": "Al tău pentru totdeauna — fără reînnoire.",
+    "active": "Abonamentul tău este activ.",
+    "renews": "Se reînnoiește pe {{date}}.",
+    "expires": "Acces până pe {{date}}.",
+    "none": "Folosești planul gratuit. Reclamele susțin lecțiile.",
+    "upgrade": "Vezi planurile",
+    "restore": "Restaurează achizițiile",
+    "manage": "Gestionează abonamentul"
+  },
+  "about": {
+    "title": "Despre",
+    "version": "Versiunea {{value}}"
+  }
+}

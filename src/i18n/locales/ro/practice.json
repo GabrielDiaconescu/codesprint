@@ -1,0 +1,38 @@
+{
+  "title": "Practică",
+  "modes": {
+    "review": "Reia greșelile",
+    "mixed": "Practică mixtă",
+    "hard": "Set dificil"
+  },
+  "subtitle": {
+    "review": "Întrebările la care ai greșit. Răspunde corect și dispar din listă.",
+    "mixed": "Un amestec din lecțiile pe care le-ai terminat.",
+    "hard": "Întrebările grele din ce ai terminat."
+  },
+  "progress": "Întrebarea {{current}} din {{total}}",
+  "empty": {
+    "reviewTitle": "Nimic de reluat",
+    "reviewBody": "Tot ce ai răspuns e corect. Încearcă practica mixtă.",
+    "mixedTitle": "Încă nu ai ce exersa",
+    "mixedBody": "Termină întâi o lecție, apoi întrebările ei apar aici.",
+    "hardTitle": "Încă nu sunt întrebări grele",
+    "hardBody": "Termină mai multe lecții ca să deblochezi practica dificilă."
+  },
+  "premium": {
+    "title": "Seturile dificile sunt Premium",
+    "body": "Premium deblochează seturile de practică dificile, vieți nelimitate și toate modulele."
+  },
+  "done": {
+    "title": "Practică terminată",
+    "score": "{{correct}} din {{total}} corecte",
+    "xp": "+{{count}} XP câștigat",
+    "capped": "Ai atins limita de XP din practică pentru azi. Răspunsurile contează în continuare pentru serie.",
+    "again": "Exersează din nou",
+    "back": "Înapoi acasă"
+  },
+  "error": {
+    "title": "Nu am putut încărca setul de practică",
+    "body": "Verifică-ți conexiunea și încearcă din nou."
+  }
+}

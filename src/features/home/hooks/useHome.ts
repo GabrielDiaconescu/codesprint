@@ -23,7 +23,7 @@ export const useHome = (enabled = true) => {
   const userId = useSessionStore((state) => state.userId);
 
   return useQuery<HomeSummary>({
-    queryKey: queryKeys.user.home(userId ?? 'none'),
+    queryKey: queryKeys.user.home(userId ?? 'none', i18n.language),
     queryFn: () => services.home.getHome(i18n.language),
     // `enabled` exists for the reminder reconciler, which needs today's goal and streak but
     // must not pull Home for somebody still in onboarding. Same key, so the two callers share
@@ -44,7 +44,7 @@ export const usePracticeSet = (mode: PracticeMode, size = 10, enabled = true) =>
   const userId = useSessionStore((state) => state.userId);
 
   return useQuery<PracticeSet>({
-    queryKey: [...queryKeys.user.practice(userId ?? 'none'), mode, size],
+    queryKey: [...queryKeys.user.practice(userId ?? 'none', i18n.language), mode, size],
     queryFn: () => services.home.getPracticeSet(mode, size, i18n.language),
     enabled: enabled && userId !== null,
     staleTime: 0,
@@ -58,7 +58,7 @@ export const useDailyChallenge = () => {
   const userId = useSessionStore((state) => state.userId);
 
   return useQuery<DailyChallenge>({
-    queryKey: queryKeys.user.challenge(userId ?? 'none'),
+    queryKey: queryKeys.user.challenge(userId ?? 'none', i18n.language),
     queryFn: () => services.home.getDailyChallenge(i18n.language),
     enabled: userId !== null,
     staleTime: 60_000,

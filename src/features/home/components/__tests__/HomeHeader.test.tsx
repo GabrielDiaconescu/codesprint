@@ -7,20 +7,23 @@ import { HomeHeader } from '../HomeHeader';
 /**
  * Home's header (SPEC §13, §29, §38).
  *
- * Two of the three quick toggles are worth a rendered test rather than only a unit one. The
- * **language toggle must not ship visible** while English is the only locale — a control that
- * changes nothing is the kind of thing that reaches a store screenshot. And the **theme
- * toggle must set the opposite of what is on screen**, which is a claim about the store, not
- * about a pure function.
+ * The quick toggles are worth a rendered test rather than only a unit one: the **theme toggle
+ * must set the opposite of what is on screen**, and the **language toggle must persist** the
+ * choice through the store — both are claims about the store, not about a pure function.
  */
 const mockPush = jest.fn();
 const mockSetThemePreference = jest.fn();
+const mockSetLanguagePreference = jest.fn();
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 
 jest.mock('@/store/settingsStore', () => ({
   useSettingsStore: (selector: (state: Record<string, unknown>) => unknown) =>
-    selector({ themePreference: 'light', setThemePreference: mockSetThemePreference }),
+    selector({
+      themePreference: 'light',
+      setThemePreference: mockSetThemePreference,
+      setLanguagePreference: mockSetLanguagePreference,
+    }),
 }));
 
 beforeEach(() => {
@@ -42,10 +45,20 @@ describe('HomeHeader', () => {
     expect(screen.queryByText(/Hello/)).toBeNull();
   });
 
-  it('does not show a language toggle while English is the only locale', async () => {
+  it('shows the language toggle now that Romanian ships', async () => {
     await renderWithProviders(<HomeHeader displayName="Alex" />);
 
-    expect(screen.queryByTestId('home-language')).toBeNull();
+    // The badge names the language on screen — an icon alone cannot say "EN".
+    expect(screen.getByTestId('home-language')).toHaveTextContent('EN');
+  });
+
+  it('saves a language change through the store, so it survives a restart', async () => {
+    await renderWithProviders(<HomeHeader displayName="Alex" />);
+
+    fireEvent.press(screen.getByTestId('home-language'));
+
+    // Calling i18n directly would switch the screen and forget the choice on the next launch.
+    expect(mockSetLanguagePreference).toHaveBeenCalledWith('ro');
   });
 
   it('offers the theme and settings toggles at the minimum touch target', async () => {

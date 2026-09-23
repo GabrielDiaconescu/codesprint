@@ -1,0 +1,93 @@
+{
+  "title": "Clasament",
+  "week_one": "{{count}} cursant clasat săptămâna aceasta",
+  "week_few": "{{count}} cursanți clasați săptămâna aceasta",
+  "week_other": "{{count}} de cursanți clasați săptămâna aceasta",
+  "gap_one": "{{count}} cursant între voi",
+  "gap_few": "{{count}} cursanți între voi",
+  "gap_other": "{{count}} de cursanți între voi",
+  "row": {
+    "xp": "{{xp, number}} XP",
+    "you": "Tu",
+    "accessibility": "Locul {{rank}}, {{name}}, {{xp, number}} XP",
+    "accessibilityMe": "Locul {{rank}}, {{name}}, {{xp, number}} XP. Acesta ești tu."
+  },
+  "empty": {
+    "title": "Nimeni n-a punctat încă",
+    "body": "Clasamentul se resetează în fiecare luni. Răspunde la câteva întrebări și vei fi primul nume din el."
+  },
+  "error": {
+    "title": "Nu am putut încărca clasamentul",
+    "body": "Verifică-ți conexiunea și încearcă din nou.",
+    "retry": "Încearcă din nou"
+  },
+  "absence": {
+    "guest": {
+      "title": "Invitații nu apar în clasament",
+      "body": "Creează un cont ca să-ți păstrezi progresul și să-ți iei locul în clasamentul săptămânal."
+    },
+    "no-name": {
+      "title": "Alege un nume afișat",
+      "body": "Clasamentul arată un nume, nu o adresă de email. Alege unul și ai intrat.",
+      "action": "Alege un nume"
+    },
+    "hidden": {
+      "title": "Ești ascuns din clasament",
+      "body": "Continui să câștigi XP și niveluri — doar că nu apari în clasament. Poți schimba asta din Profil."
+    },
+    "no-xp": {
+      "title": "Niciun XP săptămâna aceasta",
+      "body": "Clasamentul acoperă doar săptămâna curentă. Termină o lecție și numele tău apare."
+    }
+  },
+  "name": {
+    "title": "Nume afișat",
+    "close": "Închide",
+    "body": "Este singurul lucru pe care ceilalți cursanți îl văd despre tine. Adresa ta de email nu apare niciodată.",
+    "label": "Nume afișat",
+    "placeholder": "Ada Lovelace",
+    "hint": "Între {{min}} și {{max}} caractere. Litere, cifre, spații și . _ -",
+    "save": "Salvează numele",
+    "saved": "Acum ești {{name}}",
+    "problem": {
+      "required": "Introdu un nume.",
+      "too_short": "Puțin mai lung, te rog — cel puțin 3 caractere.",
+      "too_long": "E prea lung. Păstrează-l la cel mult 20 de caractere.",
+      "invalid_characters": "Folosește doar litere, cifre, spații și . _ -",
+      "reserved": "Numele acesta e rezervat. Alege altul.",
+      "not_allowed": "Numele acesta nu e permis. Alege altul.",
+      "taken": "Cineva are deja numele acesta. Încearcă altul.",
+      "unknown": "Numele nu a putut fi salvat. Încearcă din nou."
+    }
+  },
+  "report": {
+    "action": "Raportează {{name}}",
+    "title": "Raportează acest nume",
+    "close": "Închide",
+    "body": "Spune-ne ce e în neregulă cu „{{name}}” și îl vom verifica.",
+    "reason": {
+      "offensive_name": "Nume ofensator sau nepotrivit",
+      "impersonation": "Se dă drept altcineva",
+      "spam": "Spam sau reclamă",
+      "other": "Altceva"
+    },
+    "note": "Vrei să adaugi ceva? (opțional)",
+    "notePlaceholder": "O notă scurtă ne ajută să verificăm mai repede",
+    "noteHint": "Până la 500 de caractere",
+    "submit": "Trimite raportul",
+    "thanks": "Mulțumim — ne vom uita.",
+    "failed": "Raportul nu a putut fi trimis. Încearcă din nou."
+  },
+  "settings": {
+    "title": "Clasament",
+    "noName": "Încă nu ai un nume afișat",
+    "nameHint": "Apare în clasamentul săptămânal",
+    "noNameHint": "Necesar ca să apari în clasamentul săptămânal",
+    "chooseName": "Alege un nume afișat",
+    "changeName": "Schimbă numele afișat",
+    "hide": "Ascunde-mă din clasament",
+    "hideDescription": "Îți păstrezi toate punctele, nivelurile și realizările — doar numele tău nu apare în clasament.",
+    "hideFailed": "Setarea nu a putut fi salvată. Încearcă din nou.",
+    "hideMinor": "Cursanții sub {{age}} ani sunt mereu ascunși din clasament. Câștigi în continuare toate punctele, nivelurile și realizările."
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "outOfLives": {
+    "title": "Ai rămas fără vieți",
+    "body": "Viețile revin singure — câte una la câteva ore. Poți să te uiți acum la o reclamă scurtă pentru una sau, cu Premium, să nu mai rămâi niciodată fără.",
+    "premium": "Ia vieți nelimitate"
+  },
+  "rewarded": {
+    "watchForLife": "Urmărește o reclamă pentru o viață",
+    "granted": "Ai primit o viață înapoi.",
+    "remaining": "Folosite azi: {{used}} din {{cap}}",
+    "refused": {
+      "ads_disabled": "Recompensele din reclame nu sunt disponibile acum. Încearcă mai târziu.",
+      "cap_reached": "Asta a fost tot pentru azi. Recompensele se resetează mâine.",
+      "lives_full": "Ai deja toate viețile.",
+      "unlimited_lives": "Ai vieți nelimitate — nu e nimic de refăcut.",
+      "unknown_reward": "Recompensa nu este disponibilă.",
+      "unknown": "Recompensa nu a putut fi acordată. Încearcă din nou."
+    }
+  },
+  "testBanner": "Reclame de test — acest build nu afișează niciodată reclame reale."
+}

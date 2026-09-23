@@ -12,6 +12,16 @@
       "description": "A short buzz when an answer is right or wrong."
     }
   },
+  "language": {
+    "title": "Language",
+    "label": "App language",
+    "system": "Same as phone",
+    "names": {
+      "en": "English",
+      "ro": "Română"
+    },
+    "contentNote": "Lessons are currently available in English only. The rest of the app changes straight away."
+  },
   "subscription": {
     "title": "Subscription",
     "plan": {

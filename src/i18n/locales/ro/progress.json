@@ -1,0 +1,67 @@
+{
+  "title": "Progres",
+  "open": "Vezi progresul",
+  "level": "Nivelul {{level}}",
+  "levelProgress": "{{current}} / {{total}} XP până la nivelul {{next}}",
+  "xpTotal_one": "{{count}} XP",
+  "xpTotal_few": "{{count}} XP",
+  "xpTotal_other": "{{count}} XP",
+  "stats": {
+    "lessons": "Lecții",
+    "questions": "Întrebări",
+    "accuracy": "Precizie",
+    "streak": "Serie",
+    "streakDays_one": "{{count}} zi",
+    "streakDays_few": "{{count}} zile",
+    "streakDays_other": "{{count}} de zile"
+  },
+  "course": {
+    "title": "Cât ai terminat din curs",
+    "lessons": "Lecții: {{completed}} din {{total}}",
+    "emptyBody": "Termină prima lecție și va apărea aici."
+  },
+  "modules": {
+    "title": "Module",
+    "lessons": "{{completed}} / {{total}}",
+    "locked": "Premium"
+  },
+  "skills": {
+    "title": "Arii de competență",
+    "body": "Cât din fiecare arie ai răspuns corect.",
+    "accuracy": "Încercări corecte: {{correct}} din {{attempts}}",
+    "untouched": "Neînceput",
+    "premiumTitle": "Precizia pe arii e o funcție Premium",
+    "premiumBody": "Premium îți arată cât de precis ești în fiecare arie și ce mai trebuie exersat."
+  },
+  "error": {
+    "title": "Nu am putut încărca progresul",
+    "body": "Verifică-ți conexiunea și încearcă din nou."
+  },
+  "pending": "Practica și provocarea zilnică vin în versiunea următoare.",
+  "lives": {
+    "count_one": "{{count}} viață din {{max}}",
+    "count_few": "{{count}} vieți din {{max}}",
+    "count_other": "{{count}} de vieți din {{max}}",
+    "unlimited": "Vieți nelimitate",
+    "next": "Următoarea viață {{when}}.",
+    "inMinutes_one": "peste {{count}} minut",
+    "inMinutes_few": "peste {{count}} minute",
+    "inMinutes_other": "peste {{count}} de minute",
+    "inHours_one": "peste {{count}} oră",
+    "inHours_few": "peste {{count}} ore",
+    "inHours_other": "peste {{count}} de ore",
+    "emptyTitle": "Ai rămas fără vieți",
+    "emptyBody": "Viețile revin în timp. Între timp poți reciti lecțiile terminate sau poți trece la Premium pentru vieți nelimitate."
+  },
+  "achievements": {
+    "title": "Realizări",
+    "count": "Deblocate: {{unlocked}} din {{total}}",
+    "unlocked": "Realizare deblocată",
+    "unlockedAnnouncement": "Realizare deblocată: {{name}}",
+    "reward": "+{{count}} XP",
+    "stateUnlocked": "Deblocată.",
+    "stateLocked": "Blocată.",
+    "error": "Nu am putut încărca realizările."
+  },
+  "streakBroken": "Răspunde la cinci întrebări sau termină o lecție azi ca să începi o serie nouă."
+}

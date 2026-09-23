@@ -1,0 +1,25 @@
+{
+  "title": "Mementouri",
+  "failed": "Setarea nu a putut fi salvată. Încearcă din nou.",
+  "toggle": {
+    "label": "Memento zilnic",
+    "description": "Un memento la ora aleasă, plus unul seara, dacă obiectivul e încă neatins. Niciodată mai mult de două pe zi."
+  },
+  "time": {
+    "label": "Amintește-mi la"
+  },
+  "permission": {
+    "denied": "Notificările pentru CodeSprint sunt oprite din setările telefonului, așa că nu putem trimite nimic.",
+    "action": "Deschide setările telefonului"
+  },
+  "reminders": {
+    "daily": {
+      "title": "E timpul să programezi",
+      "body": "Sesiunea ta de 5 minute te așteaptă."
+    },
+    "streak": {
+      "title": "Păstrează-ți seria",
+      "body": "Protejează-ți seria azi."
+    }
+  }
+}
