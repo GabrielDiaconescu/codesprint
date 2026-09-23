@@ -1,0 +1,13 @@
+id: a957be54-5adf-4712-a925-8955b410784f
+slug: strings-and-comprehensions
+title:
+  en: More Strings & Comprehensions
+description:
+  en: Splitting and joining text, searching inside it, and building whole lists in a single readable line.
+order_index: 12
+estimated_minutes: 28
+lessons:
+  - split-and-join
+  - searching-text
+  - list-comprehensions
+  - filtering-comprehensions

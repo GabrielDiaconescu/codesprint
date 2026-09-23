@@ -1,0 +1,213 @@
+id: 1132c9f5-6dfc-4c9e-b637-10ef5fed4512
+slug: searching-text
+title:
+  en: Searching inside text
+summary:
+  en: startswith, endswith, count, find and isdigit — and the find result that means "not here".
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `startswith` and `endswith` answer yes-or-no questions about the ends of a string —
+        perfect for file names and prefixes.
+
+  - type: code
+    code: |
+      name = "report.pdf"
+      print(name.endswith(".pdf"))
+      print(name.startswith("rep"))
+    output: |-
+      True
+      True
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `count` tells you how often a piece appears. `find` tells you **where** it first
+        appears, as an index — or `-1` if it is not there at all.
+
+  - type: code
+    code: |
+      s = "banana"
+      print(s.count("a"))
+      print(s.find("n"))
+      print(s.find("z"))
+    output: |-
+      3
+      2
+      -1
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `isdigit` checks whether every character is a digit — a good test before handing text
+        to `int()`.
+
+  - type: code
+    code: |
+      print("2024".isdigit())
+      print("20.5".isdigit())
+    output: |-
+      True
+      False
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Never use `find` as a yes-or-no test. A match at the very start returns 0, which
+        counts as False, and "not found" returns -1, which counts as True. For yes or no, use
+        `in`.
+
+  - type: question
+    question:
+      id: c88c8ffc-d55b-44ec-bfdb-97f74209ebfc
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("hello".count("l"))
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          "hello" contains two l's, side by side.
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d48fb0c8-0541-4fa9-91b5-f3784d47ca63
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`"photo.jpg".endswith(".jpg")` is `True`.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          The last four characters are exactly ".jpg".
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5ae0cdf3-c9d9-492b-bd08-fba35ef0b581
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("banana".find("na"))
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          "na" first appears starting at index 2 — b is 0, a is 1, n is 2. `find` reports the
+          first match only.
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e7fd3142-411f-48bf-a727-904b78513a0b
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What does `"abc".find("z")` return?
+      payload:
+        options:
+          - id: minus-one
+            text:
+              en: '-1'
+          - id: zero
+            text:
+              en: '0'
+          - id: none
+            text:
+              en: None
+          - id: error
+            text:
+              en: A ValueError
+      answer:
+        option_id: minus-one
+      explanation:
+        en: >
+          -1 is `find`'s way of saying "not found". 0 would mean found at the very start.
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: efcbb282-226f-462b-85cf-083d19298ec1
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these are `True`?
+      payload:
+        options:
+          - id: plain
+            text:
+              en: '"42".isdigit()'
+          - id: decimal
+            text:
+              en: '"4.2".isdigit()'
+          - id: negative
+            text:
+              en: '"-4".isdigit()'
+          - id: zeros
+            text:
+              en: '"007".isdigit()'
+          - id: empty
+            text:
+              en: '"".isdigit()'
+      answer:
+        option_ids: [plain, zeros]
+      explanation:
+        en: >
+          Every character must be a digit. A dot or a minus sign is not a digit, and an empty
+          string has no digits at all. Leading zeros are still digits.
+      hint:
+        en: Look at every single character.
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5fb63869-9c75-4039-bf8f-37dc34764606
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        s = "cat"
+        if s.find("c"):
+            print("found")
+        else:
+            print("missing")
+      payload:
+        input: text
+      answer:
+        value: missing
+        match_mode: trimmed
+      explanation:
+        en: >
+          "c" is found at index 0 — and 0 counts as False, so the `else` runs. This is exactly
+          why `find` should not be used as a yes-or-no test. `if "c" in s:` says what is meant.
+      hint:
+        en: What index does `find` return, and how does an `if` treat it?
+      skill_tags: [strings, string-methods, conditions]
+      review_status: draft

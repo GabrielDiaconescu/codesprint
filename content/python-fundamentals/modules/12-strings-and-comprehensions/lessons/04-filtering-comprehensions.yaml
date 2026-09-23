@@ -1,0 +1,228 @@
+id: ba36487d-d2ec-4a8e-a81d-110733d61728
+slug: filtering-comprehensions
+title:
+  en: Keeping only what you want
+summary:
+  en: Adding a condition to a comprehension, and building dictionaries the same way.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Add `if condition` at the end of a comprehension and only the items that pass are
+        kept. Everything else is simply left out.
+
+  - type: code
+    code: |
+      nums = [1, 2, 3, 4, 5, 6]
+      evens = [n for n in nums if n % 2 == 0]
+      print(evens)
+    output: '[2, 4, 6]'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Transforming and filtering can happen in the same line. The condition is checked
+        first; only the survivors are transformed.
+
+  - type: code
+    code: |
+      words = ["apple", "fig", "banana"]
+      print([w.upper() for w in words if len(w) > 3])
+    output: "['APPLE', 'BANANA']"
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Curly braces with `key: value` build a dictionary instead — a **dict comprehension**.
+
+  - type: code
+    code: |
+      words = ["hi", "hello"]
+      lengths = {w: len(w) for w in words}
+      print(lengths)
+    output: "{'hi': 2, 'hello': 5}"
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        The `if` at the end filters — it decides whether an item is kept. It does not choose
+        between two values, and it takes no `else`.
+
+  - type: question
+    question:
+      id: 7a5e66c3-f24c-4685-b77c-9fa9134b9279
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print([n for n in [3, 8, 1, 9] if n > 5])
+      payload:
+        input: choice
+        options:
+          - id: kept
+            text:
+              en: '[8, 9]'
+          - id: dropped
+            text:
+              en: '[3, 1]'
+          - id: booleans
+            text:
+              en: '[False, True, False, True]'
+          - id: all
+            text:
+              en: '[3, 8, 1, 9]'
+      answer:
+        value: '[8, 9]'
+        match_mode: exact
+      explanation:
+        en: >
+          Only the numbers greater than 5 pass the condition, and they keep their original
+          order.
+      skill_tags: [comprehensions, conditions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2440dc6c-f750-4df2-99d3-22179b0b0a11
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: In `[x for x in items if x > 0]`, items that fail the condition are left out.
+      answer:
+        value: true
+      explanation:
+        en: >
+          The condition decides whether each item makes it into the new list. Failing items
+          are skipped, not replaced.
+      skill_tags: [comprehensions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 28ea0cb6-6965-495f-8908-16b585366abb
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print({n: n * n for n in range(3)})
+      payload:
+        input: choice
+        options:
+          - id: dict
+            text:
+              en: '{0: 0, 1: 1, 2: 4}'
+          - id: list
+            text:
+              en: '[0, 1, 4]'
+          - id: keys
+            text:
+              en: '{0, 1, 2}'
+          - id: shifted
+            text:
+              en: '{1: 1, 2: 4, 3: 9}'
+      answer:
+        value: '{0: 0, 1: 1, 2: 4}'
+        match_mode: exact
+      explanation:
+        en: >
+          Each number from `range(3)` becomes a key, with its square as the value.
+      skill_tags: [comprehensions, dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 72b4d213-107e-4e55-97e5-f640ba0428b3
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(len([c for c in "banana" if c == "a"]))
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The comprehension keeps only the three a's, and `len` counts them — a longer way of
+          writing `"banana".count("a")`.
+      skill_tags: [comprehensions, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 3ac4a194-a5cc-418f-b3e2-66c8b7b6cbfe
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: Which line keeps only the non-empty strings from `names`?
+      payload:
+        options:
+          - id: right
+            text:
+              en: '[n for n in names if n]'
+          - id: early-if
+            text:
+              en: '[n if n for n in names]'
+          - id: empties
+            text:
+              en: '[n for n in names if n == ""]'
+          - id: statement
+            text:
+              en: '[if n: n for n in names]'
+      answer:
+        option_id: right
+      explanation:
+        en: >
+          An empty string counts as False, so `if n` keeps exactly the non-empty ones. The
+          filter has to come at the end; the other two positions are not valid Python, and the
+          third keeps only the empty strings.
+      skill_tags: [comprehensions, booleans]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 50d2a84e-f084-47d1-8bb6-c79589496698
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        words = ["Sun", "moon", "Star"]
+        print([w.lower() for w in words if w[0].isupper()])
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "['sun', 'star']"
+          - id: unfiltered
+            text:
+              en: "['sun', 'moon', 'star']"
+          - id: original-case
+            text:
+              en: "['Sun', 'Star']"
+          - id: wrong-one
+            text:
+              en: "['moon']"
+      answer:
+        value: "['sun', 'star']"
+        match_mode: exact
+      explanation:
+        en: >
+          `isupper()` asks whether the first letter is a capital. "Sun" and "Star" pass, "moon"
+          does not. The survivors are then lowered — the check happens before the change.
+      hint:
+        en: Filter first, then transform.
+      skill_tags: [comprehensions, string-methods]
+      review_status: draft

@@ -1,0 +1,222 @@
+id: 9e5ff976-4884-4834-a3b8-6b6297a86a30
+slug: split-and-join
+title:
+  en: Splitting text apart and joining it back
+summary:
+  en: split() to turn a string into a list, and join() to go back the other way.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `split()` breaks a string into a list of pieces. With no argument it splits on any
+        run of spaces, which gives you the words. Pass a separator to split on something else.
+
+  - type: code
+    code: |
+      print("the quick fox".split())
+      print("a,b,c".split(","))
+    output: |-
+      ['the', 'quick', 'fox']
+      ['a', 'b', 'c']
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `join()` goes the other way, gluing a list of strings together. It is called on the
+        **separator**, with the list as its argument — which reads backwards at first.
+
+  - type: code
+    code: |
+      words = ["red", "green", "blue"]
+      print(", ".join(words))
+      print("-".join(words))
+    output: |-
+      red, green, blue
+      red-green-blue
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        `join` only accepts strings. A list of numbers has to be turned into strings first,
+        or Python stops with a TypeError.
+
+  - type: text
+    body:
+      en: |
+        Together they make quick work of everyday text jobs, such as counting the words in a
+        sentence.
+
+  - type: code
+    code: |
+      sentence = "Python is fun to learn"
+      print(len(sentence.split()))
+    output: '5'
+    runnable: true
+
+  - type: question
+    question:
+      id: 65dd190b-48db-4aac-ac43-4903962692a0
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(len("one two three".split()))
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `split()` gives a list of the three words, and `len` counts them.
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: b8d58212-99a3-489a-b76f-4802a8035d1d
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which line joins `["a", "b"]` into `"a+b"`?
+      payload:
+        options:
+          - id: right
+            text:
+              en: '"+".join(["a", "b"])'
+          - id: backwards
+            text:
+              en: '["a", "b"].join("+")'
+          - id: function
+            text:
+              en: 'join("+", ["a", "b"])'
+          - id: plus
+            text:
+              en: '"a" + "b"'
+      answer:
+        option_id: right
+      explanation:
+        en: >
+          `join` is a method of the separator string. Lists have no `join` method, and
+          `"a" + "b"` gives "ab" with no separator at all.
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: f6724920-1afe-4c67-8ba3-8e87a487609a
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("2024-05-17".split("-"))
+      payload:
+        input: choice
+        options:
+          - id: strings
+            text:
+              en: "['2024', '05', '17']"
+          - id: numbers
+            text:
+              en: '[2024, 5, 17]'
+          - id: kept
+            text:
+              en: "['2024-', '05-', '17']"
+          - id: whole
+            text:
+              en: "['2024-05-17']"
+      answer:
+        value: "['2024', '05', '17']"
+        match_mode: exact
+      explanation:
+        en: >
+          The dashes are removed and the pieces between them become list items. They stay
+          strings — `split` never converts to numbers — so "05" keeps its leading zero.
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 50290bbc-86b2-48f5-b4cd-5437735384fb
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("".join(["c", "a", "t"]))
+      payload:
+        input: text
+      answer:
+        value: cat
+        match_mode: trimmed
+      explanation:
+        en: >
+          Joining with an empty separator puts the pieces directly next to each other.
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 368edf22-577f-4fc5-bc1a-d338760f9d62
+      type: true_false
+      difficulty: medium
+      prompt:
+        en: '`"a   b".split()`, with three spaces, gives a list that contains empty strings.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          With no argument, `split()` treats any run of spaces as a single break, giving just
+          `['a', 'b']`. Splitting on an explicit `" "` would produce the empty strings.
+      skill_tags: [strings, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 443ffa94-c5e9-4237-ab86-0bd6262f9a0c
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This should print `1, 2, 3` but stops with a TypeError. How do you fix it?
+      code_snippet: |
+        nums = [1, 2, 3]
+        print(", ".join(nums))
+      payload:
+        mode: choose_fix
+        options:
+          - id: strings
+            text:
+              en: Store the values as strings, like "1", "2", "3"
+          - id: backwards
+            text:
+              en: Write nums.join(", ") instead
+          - id: no-space
+            text:
+              en: Use "," as the separator instead of ", "
+          - id: plus
+            text:
+              en: Use + instead of join
+      answer:
+        option_id: strings
+      runnable: true
+      fixed_code: |
+        nums = ["1", "2", "3"]
+        print(", ".join(nums))
+      fixed_output: '1, 2, 3'
+      explanation:
+        en: >
+          `join` glues strings together and refuses anything else. The separator makes no
+          difference, and lists have no `join` method. Later in this module you will see a one-line way to
+          convert a whole list of numbers.
+      hint:
+        en: What type does `join` insist on?
+      skill_tags: [strings, string-methods, debugging]
+      review_status: draft

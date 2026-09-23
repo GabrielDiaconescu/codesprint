@@ -1,0 +1,217 @@
+id: 8f9da6d6-047e-4eea-ad58-29190027b0f0
+slug: list-comprehensions
+title:
+  en: Building a list in one line
+summary:
+  en: List comprehensions — the loop-and-append pattern, written as a single expression.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        You have built new lists with a loop and `append` many times. A **list
+        comprehension** does the same in one line: `[expression for item in items]`.
+
+  - type: code
+    code: |
+      nums = [1, 2, 3]
+      doubled = [n * 2 for n in nums]
+      print(doubled)
+    output: '[2, 4, 6]'
+    runnable: true
+    caption:
+      en: Read it as "n times 2, for each n in nums".
+
+  - type: text
+    body:
+      en: |
+        It works with any sequence — a range, a string, another list — and the expression can
+        be anything, including method calls.
+
+  - type: code
+    code: |
+      print([n * n for n in range(1, 5)])
+      print([w.upper() for w in ["hi", "yo"]])
+    output: |-
+      [1, 4, 9, 16]
+      ['HI', 'YO']
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        It is also the neat way to convert a whole list at once — for example, numbers into
+        strings so they can be joined.
+
+  - type: code
+    code: |
+      nums = [1, 2, 3]
+      print(", ".join([str(n) for n in nums]))
+    output: '1, 2, 3'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        A comprehension is for building a list. If the line starts getting hard to read, a
+        normal loop is perfectly good Python.
+
+  - type: question
+    question:
+      id: a5e40663-80d5-4ec2-8abb-20c0d7856a26
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print([x + 1 for x in [1, 2, 3]])
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: '[2, 3, 4]'
+          - id: unchanged
+            text:
+              en: '[1, 2, 3]'
+          - id: sum
+            text:
+              en: '9'
+          - id: doubled
+            text:
+              en: '[2, 4, 6]'
+      answer:
+        value: '[2, 3, 4]'
+        match_mode: exact
+      explanation:
+        en: >
+          The expression `x + 1` is worked out for each item, and the results are collected
+          into a new list.
+      skill_tags: [comprehensions, lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c7cd8338-58b5-4881-a5ec-f707e32faa50
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A list comprehension always produces a list.
+      answer:
+        value: true
+      explanation:
+        en: >
+          The square brackets say so. Whatever the source was — a string, a range — the result
+          is a list.
+      skill_tags: [comprehensions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0cc6589e-e778-44db-a768-f9e425328287
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print([len(w) for w in ["a", "bb", "ccc"]])
+      payload:
+        input: choice
+        options:
+          - id: lengths
+            text:
+              en: '[1, 2, 3]'
+          - id: words
+            text:
+              en: "['a', 'bb', 'ccc']"
+          - id: total
+            text:
+              en: '6'
+          - id: count
+            text:
+              en: '3'
+      answer:
+        value: '[1, 2, 3]'
+        match_mode: exact
+      explanation:
+        en: >
+          Each word is replaced by its length, so the new list holds three numbers.
+      skill_tags: [comprehensions, lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6e4ba95a-f697-4aaf-9769-e618c5ae3186
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the comprehension so it builds `[0, 1, 4, 9]`.
+      code_snippet: |
+        squares = [n ___ 2 for n in range(4)]
+      payload:
+        input: tokens
+        tokens: ['**', '*', '+', '//']
+      answer:
+        value: '**'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Squaring is `n ** 2`. `n * 2` would double instead, giving [0, 2, 4, 6].
+      skill_tags: [comprehensions, arithmetic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: bb8b2d2a-4e36-4a07-ab91-155aac401772
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: Which of these gives `['A', 'B']`?
+      payload:
+        options:
+          - id: right
+            text:
+              en: '[c.upper() for c in "ab"]'
+          - id: lowered
+            text:
+              en: '[c for c in "AB".lower()]'
+          - id: whole
+            text:
+              en: '["ab".upper()]'
+          - id: function
+            text:
+              en: '[upper(c) for c in "ab"]'
+      answer:
+        option_id: right
+      explanation:
+        en: >
+          Looping over "ab" gives each letter, and `upper()` capitalises it. The third gives a
+          one-item list ['AB'], and `upper` is a method, not a free function.
+      skill_tags: [comprehensions, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: a32c7c2e-d9a7-4931-b27e-45e3093c59ca
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("-".join([str(n * 10) for n in range(3)]))
+      payload:
+        input: text
+      answer:
+        value: 0-10-20
+        match_mode: trimmed
+      explanation:
+        en: >
+          The comprehension builds ['0', '10', '20'] — strings, thanks to `str` — and `join`
+          glues them with dashes.
+      hint:
+        en: Work out the list first, then the join.
+      skill_tags: [comprehensions, string-methods]
+      review_status: draft
