@@ -1,0 +1,276 @@
+id: 581ae866-7516-4166-914e-1d96dc07fa6b
+slug: scope
+title:
+  en: What a function can see
+summary:
+  en: Local variables, why assigning inside a function does not touch the one outside, and the clean way in and out.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A variable created inside a function is **local**: it exists only while the function
+        runs and disappears when it finishes. Code outside cannot see it.
+
+  - type: code
+    code: |
+      def make():
+          secret = 42
+
+      make()
+      print("done")
+    output: 'done'
+    runnable: true
+    caption:
+      en: Adding `print(secret)` at the end would stop with a NameError.
+
+  - type: text
+    body:
+      en: |
+        A function can **read** a variable from outside. But assigning to a name inside a
+        function creates a new local variable, even if one with the same name exists outside.
+        The outside one is left untouched.
+
+  - type: code
+    code: |
+      count = 10
+
+      def change():
+          count = 99
+
+      change()
+      print(count)
+    output: '10'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        The clean way to get values in and out is the way you already know: parameters in,
+        `return` out, and assign the result where you need it.
+
+  - type: code
+    code: |
+      def bump(n):
+          return n + 1
+
+      count = 10
+      count = bump(count)
+      print(count)
+    output: '11'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Python does have a `global` keyword that lets a function change an outside variable.
+        It works, but it makes code hard to follow. Parameters and `return` are almost always
+        the better choice.
+
+  - type: question
+    question:
+      id: 656c1077-f4b0-419b-9940-a215ee93a31b
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A variable created inside a function can still be used after the function finishes.
+      answer:
+        value: false
+      explanation:
+        en: >
+          Local variables vanish when the function ends. To keep a value, return it.
+      skill_tags: [functions, scope]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c5636918-ec9c-4b3b-b958-194c731a3edb
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What is the clearest way to get a result out of a function?
+      payload:
+        options:
+          - id: return
+            text:
+              en: Return it
+          - id: global
+            text:
+              en: Change a global variable
+          - id: print
+            text:
+              en: Print it
+          - id: rename
+            text:
+              en: Give the local variable the same name as an outside one
+      answer:
+        option_id: return
+      explanation:
+        en: >
+          `return` makes the result the value of the call, so the caller decides what to do
+          with it. Printing keeps nothing, and a same-named local does not reach outside.
+      skill_tags: [functions, scope, return]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d3792168-03cb-4d20-aaf6-044cf785fd4b
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = 5
+
+        def f():
+            x = 1
+            print(x)
+
+        f()
+        print(x)
+      payload:
+        input: choice
+        options:
+          - id: separate
+            text:
+              en: "1\n5"
+          - id: overwritten
+            text:
+              en: "1\n1"
+          - id: outer
+            text:
+              en: "5\n5"
+          - id: swapped
+            text:
+              en: "5\n1"
+      answer:
+        value: "1\n5"
+        match_mode: exact
+      explanation:
+        en: >
+          Inside `f`, `x = 1` makes a local `x`, which is what the first print shows. The
+          outside `x` is a different variable and still holds 5.
+      skill_tags: [functions, scope]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 09c07e0b-f03c-4824-952f-bbdc7ecc11ce
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This stops with a NameError instead of printing 12. How do you fix it?
+      code_snippet: |
+        def area(w, h):
+            result = w * h
+
+        area(3, 4)
+        print(result)
+      payload:
+        mode: choose_fix
+        options:
+          - id: return
+            text:
+              en: Return w * h and write result = area(3, 4)
+          - id: rename
+            text:
+              en: Rename result to area
+          - id: call-twice
+            text:
+              en: Call area(3, 4) twice
+          - id: move-print
+            text:
+              en: Move print(result) above area(3, 4)
+      answer:
+        option_id: return
+      runnable: true
+      fixed_code: |
+        def area(w, h):
+            return w * h
+
+        result = area(3, 4)
+        print(result)
+      fixed_output: '12'
+      explanation:
+        en: >
+          `result` is local to `area` and disappears when it returns. Returning the value and
+          storing it outside gives the last line something that actually exists.
+      hint:
+        en: Where does `result` exist, and for how long?
+      skill_tags: [functions, scope, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7b8659fb-52e2-4b9f-b9f7-8a96f16b3bd3
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def bump(n):
+            n = n + 1
+            return n
+
+        x = 3
+        bump(x)
+        print(x)
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `bump` changes its own local `n` and returns 4 — but the result is never stored.
+          `x` is still 3. Writing `x = bump(x)` would keep the new value.
+      hint:
+        en: Is the value `bump` returns stored anywhere?
+      skill_tags: [functions, scope, return]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6ff913e9-3ac9-4f1b-bffe-86de45b260c1
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        total = 0
+
+        def add(n):
+            return total + n
+
+        print(add(5))
+        print(total)
+      payload:
+        input: choice
+        options:
+          - id: reads
+            text:
+              en: "5\n0"
+          - id: changes
+            text:
+              en: "5\n5"
+          - id: error
+            text:
+              en: A NameError
+          - id: zero
+            text:
+              en: "0\n0"
+      answer:
+        value: "5\n0"
+        match_mode: exact
+      explanation:
+        en: >
+          A function may read an outside variable, so `total + n` works and gives 5. Nothing
+          assigns to `total`, so it stays 0. Reading is fine; it is assigning that creates a
+          separate local.
+      hint:
+        en: Does `add` assign to `total`, or only read it?
+      skill_tags: [functions, scope]
+      review_status: draft

@@ -1,0 +1,203 @@
+id: b3d55681-24cb-451f-b9b3-ba15d269ba33
+slug: parameters
+title:
+  en: Giving a function something to work with
+summary:
+  en: Parameters and arguments, matching them up by position, and passing the wrong number.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A function becomes far more useful when it can work on different values each time.
+        Names inside the brackets of a `def` are **parameters**. The values you pass when
+        calling are **arguments**.
+
+  - type: code
+    code: |
+      def greet(name):
+          print("Hello, " + name)
+
+      greet("Ada")
+      greet("Linus")
+    output: |-
+      Hello, Ada
+      Hello, Linus
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        A function can take several parameters, separated by commas. Arguments are matched
+        to them in order: the first argument to the first parameter, and so on.
+
+  - type: code
+    code: |
+      def describe(name, age):
+          print(f"{name} is {age}")
+
+      describe("Sam", 12)
+    output: 'Sam is 12'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Pass too few or too many arguments and Python refuses with a TypeError that says how
+        many it expected. It will not guess which one you left out.
+
+  - type: question
+    question:
+      id: 38038d86-7918-4b9d-9c0e-a644a8296ae9
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def double(n):
+            print(n * 2)
+
+        double(5)
+      payload:
+        input: text
+      answer:
+        value: '10'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The argument 5 becomes the parameter `n`, and the body prints `n * 2`.
+      skill_tags: [functions, parameters]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 40549fe6-33e1-4a66-bc90-952c982e138e
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: In `def area(w, h):`, what are `w` and `h` called?
+      payload:
+        options:
+          - id: parameters
+            text:
+              en: Parameters
+          - id: returns
+            text:
+              en: Return values
+          - id: globals
+            text:
+              en: Global variables
+          - id: keywords
+            text:
+              en: Keywords
+      answer:
+        option_id: parameters
+      explanation:
+        en: >
+          The names in the definition are parameters. The actual values passed in a call, like
+          the 3 and 4 in `area(3, 4)`, are arguments.
+      skill_tags: [functions, parameters]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 24d7fb88-84a7-4fcb-9955-a56c5aba7738
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def minus(a, b):
+            print(a - b)
+
+        minus(3, 10)
+      payload:
+        input: text
+      answer:
+        value: '-7'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Arguments go to parameters in order, so `a` is 3 and `b` is 10. 3 − 10 is −7. Swap
+          the arguments and you get 7.
+      skill_tags: [functions, parameters]
+      review_status: draft
+
+  - type: question
+    question:
+      id: de783549-ba6e-49f6-9c7d-fcb7b7672867
+      type: true_false
+      difficulty: medium
+      prompt:
+        en: Plain arguments are matched to parameters by their position.
+      answer:
+        value: true
+      explanation:
+        en: >
+          The first argument fills the first parameter, the second fills the second. The next
+          lesson shows how to name them instead.
+      skill_tags: [functions, parameters]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0f1e9f43-c693-493d-ba2b-a3edb30b8e3a
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the definition so the call prints `Hi Bo`.
+      code_snippet: |
+        def greet(___):
+            print("Hi " + name)
+
+        greet("Bo")
+      payload:
+        input: tokens
+        tokens: [name, '"name"', greet, Bo]
+      answer:
+        value: name
+        match_mode: trimmed
+      explanation:
+        en: >
+          The body uses a variable called `name`, so that must be the parameter. A quoted
+          `"name"` is text, not a name, and cannot be a parameter at all.
+      skill_tags: [functions, parameters]
+      review_status: draft
+
+  - type: question
+    question:
+      id: fc21b405-77cb-4819-aff9-4a10e4a53c8b
+      type: multiple_select
+      difficulty: hard
+      prompt:
+        en: For `def box(w, h, d):`, which calls stop with a TypeError?
+      payload:
+        options:
+          - id: two
+            text:
+              en: box(1, 2)
+          - id: three
+            text:
+              en: box(1, 2, 3)
+          - id: none
+            text:
+              en: box()
+          - id: four
+            text:
+              en: box(1, 2, 3, 4)
+          - id: reversed
+            text:
+              en: box(3, 2, 1)
+      answer:
+        option_ids: [two, none, four]
+      explanation:
+        en: >
+          `box` needs exactly three arguments. Two, none or four is a TypeError. Three in a
+          different order is perfectly legal — Python cannot know you meant them another way.
+      hint:
+        en: Count the arguments. Their order does not cause an error.
+      skill_tags: [functions, parameters, errors]
+      review_status: draft

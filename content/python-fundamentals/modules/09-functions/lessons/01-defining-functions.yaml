@@ -1,0 +1,217 @@
+id: 7cdeab88-9b51-474c-89cd-351e7ff4895e
+slug: defining-functions
+title:
+  en: Your own commands
+summary:
+  en: Defining a function, calling it, and why defining one does nothing on its own.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A **function** is a named block of code you can run whenever you like. You create one
+        with `def`, a name, brackets and a colon, then indent the lines that belong to it.
+        Running it is called **calling** it: write its name followed by brackets.
+
+  - type: code
+    code: |
+      def greet():
+          print("Hello!")
+
+      greet()
+      greet()
+    output: |-
+      Hello!
+      Hello!
+    runnable: true
+    caption:
+      en: Written once, used twice.
+
+  - type: text
+    body:
+      en: |
+        Defining a function only stores it for later. Nothing inside it runs until something
+        calls it.
+
+  - type: code
+    code: |
+      def shout():
+          print("HEY")
+
+      print("start")
+    output: 'start'
+    runnable: true
+    caption:
+      en: '`shout` is defined but never called, so "HEY" is never printed.'
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Functions let you write something once and use it many times, and they let you give
+        a clear name to a step. `print_receipt()` says more than twenty lines of printing.
+
+  - type: question
+    question:
+      id: 6b491324-c74e-450e-ac92-2cd2a7cf55da
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which keyword starts a function definition in Python?
+      payload:
+        options:
+          - id: def
+            text:
+              en: def
+          - id: function
+            text:
+              en: function
+          - id: fn
+            text:
+              en: fn
+          - id: define
+            text:
+              en: define
+      answer:
+        option_id: def
+      explanation:
+        en: >
+          Python uses `def`, short for define. `function` and `fn` are used by other languages.
+      skill_tags: [functions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d0e421da-7c49-449e-87b1-85f8e8970cf8
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Defining a function runs the code inside it straight away.
+      answer:
+        value: false
+      explanation:
+        en: >
+          `def` only stores the function under its name. The body runs each time the function
+          is called.
+      skill_tags: [functions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 8cfae932-3bfb-471c-aba5-78d378d7b54c
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def ping():
+            print("ping")
+
+        ping()
+        ping()
+        ping()
+      payload:
+        input: choice
+        options:
+          - id: three
+            text:
+              en: "ping\nping\nping"
+          - id: one
+            text:
+              en: ping
+          - id: four
+            text:
+              en: "ping\nping\nping\nping"
+          - id: nothing
+            text:
+              en: Nothing at all
+      answer:
+        value: "ping\nping\nping"
+        match_mode: exact
+      explanation:
+        en: >
+          The definition prints nothing by itself. Each of the three calls runs the body once.
+      skill_tags: [functions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ca21c309-63be-4092-bef6-4e58e0863611
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This stops with a NameError. Which line is in the wrong place?
+      code_snippet: |
+        say_hi()
+        def say_hi():
+            print("hi")
+      payload:
+        mode: select_line
+        lines:
+          - id: call
+            text: 'say_hi()'
+          - id: def
+            text: 'def say_hi():'
+          - id: body
+            text: '    print("hi")'
+      answer:
+        line_id: call
+      runnable: true
+      fixed_code: |
+        def say_hi():
+            print("hi")
+        say_hi()
+      fixed_output: hi
+      explanation:
+        en: >
+          Python runs from top to bottom. When it reaches the call, the `def` below has not
+          run yet, so the name `say_hi` does not exist. Define first, then call.
+      hint:
+        en: Python reads the file from the top. What exists when the first line runs?
+      skill_tags: [functions, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 92e02a50-703b-4fab-a6c9-50488ecac8bc
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def a():
+            print("A")
+
+        def b():
+            print("B")
+            a()
+
+        b()
+      payload:
+        input: choice
+        options:
+          - id: b-a
+            text:
+              en: "B\nA"
+          - id: a-b
+            text:
+              en: "A\nB"
+          - id: b
+            text:
+              en: B
+          - id: a-b-a
+            text:
+              en: "A\nB\nA"
+      answer:
+        value: "B\nA"
+        match_mode: exact
+      explanation:
+        en: >
+          Only `b` is called from outside. It prints "B" and then calls `a`, which prints "A".
+          Defining `a` first does not run it.
+      hint:
+        en: Follow the calls, not the order of the definitions.
+      skill_tags: [functions]
+      review_status: draft

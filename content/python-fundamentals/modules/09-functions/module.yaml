@@ -1,0 +1,14 @@
+id: f648e83a-2c56-441e-b4e1-32b1eefb47ee
+slug: functions
+title:
+  en: Functions
+description:
+  en: Naming a piece of work so you can run it again — giving it inputs, getting answers back, and keeping its variables to itself.
+order_index: 9
+estimated_minutes: 34
+lessons:
+  - defining-functions
+  - parameters
+  - return-values
+  - defaults-and-keywords
+  - scope

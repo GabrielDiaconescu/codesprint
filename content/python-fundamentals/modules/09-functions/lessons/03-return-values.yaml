@@ -1,0 +1,267 @@
+id: 812a8031-d53b-4ae0-bc13-517856c5c4ab
+slug: return-values
+title:
+  en: Getting an answer back
+summary:
+  en: return versus print, the None you get when you forget, and how return ends a function early.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `return` hands a value back to whoever called the function. The call itself then
+        stands for that value, so you can store it, print it or use it in a calculation.
+
+  - type: code
+    code: |
+      def square(n):
+          return n * n
+
+      result = square(4)
+      print(result + 1)
+    output: '17'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `print` and `return` are easy to confuse. `print` shows a value on the screen and
+        keeps nothing. A function that only prints gives back `None`.
+
+  - type: code
+    code: |
+      def show(n):
+          print(n)
+
+      x = show(3)
+      print(x)
+    output: |-
+      3
+      None
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `return` also ends the function immediately. Lines after it are never reached,
+        which makes it handy for leaving early once the answer is known.
+
+  - type: code
+    code: |
+      def check(n):
+          if n < 0:
+              return "negative"
+          return "ok"
+
+      print(check(-2))
+      print(check(5))
+    output: |-
+      negative
+      ok
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Printing inside a function when you meant to return is a very common mix-up. The
+        value appears on screen, so everything looks fine — until another line tries to use
+        it and gets `None`.
+
+  - type: question
+    question:
+      id: 37c4c1fe-7d92-413d-bb0d-3ad5cc18fcc6
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def add(a, b):
+            return a + b
+
+        print(add(2, 3))
+      payload:
+        input: text
+      answer:
+        value: '5'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `add(2, 3)` returns 5, and `print` shows the value it was given.
+      skill_tags: [functions, return]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0796c892-cbf5-4f3a-a9d8-c7fe98ee6c6b
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A function with no `return` statement gives back `None`.
+      answer:
+        value: true
+      explanation:
+        en: >
+          Every call produces a value. Without a `return`, that value is `None`.
+      skill_tags: [functions, return, none]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ec9498bd-589d-4514-81ab-3004772072c7
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def f(x):
+            print(x * 2)
+
+        y = f(4)
+        print(y)
+      payload:
+        input: choice
+        options:
+          - id: eight-none
+            text:
+              en: "8\nNone"
+          - id: eight-eight
+            text:
+              en: "8\n8"
+          - id: none
+            text:
+              en: None
+          - id: eight
+            text:
+              en: '8'
+      answer:
+        value: "8\nNone"
+        match_mode: exact
+      explanation:
+        en: >
+          Calling `f(4)` prints 8 as it runs. It has no `return`, so `y` gets `None`, and the
+          last line prints that.
+      skill_tags: [functions, return, none]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0e28c005-b444-4d8e-aa3a-aa861afb973c
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each one to what it does.
+      payload:
+        concepts:
+          - id: print
+            text:
+              en: print(value)
+          - id: return
+            text:
+              en: return value
+          - id: missing
+            text:
+              en: A function with no return
+        definitions:
+          - id: shows
+            text:
+              en: Shows the value on screen and keeps nothing
+          - id: hands-back
+            text:
+              en: Hands the value back to the caller and ends the function
+          - id: gives-none
+            text:
+              en: Gives back None when it finishes
+      answer:
+        pairs:
+          print: shows
+          return: hands-back
+          missing: gives-none
+      explanation:
+        en: >
+          Only `return` passes a value on for the rest of the program to use. `print` is for
+          the person reading the screen.
+      skill_tags: [functions, return]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2adb0700-645c-4b62-a616-710f168637ac
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def sign(n):
+            if n > 0:
+                return "+"
+            return "-"
+            print("never")
+
+        print(sign(5))
+      payload:
+        input: text
+      answer:
+        value: '+'
+        match_mode: trimmed
+      explanation:
+        en: >
+          5 is positive, so the first `return` ends the function with "+". The line after the
+          last `return` can never run, whatever the argument.
+      skill_tags: [functions, return]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 99ef81cb-f07f-4fe6-864b-1fb36f3dccac
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This prints 5 and then crashes instead of printing 6. How do you fix it?
+      code_snippet: |
+        def total(prices):
+            running = 0
+            for p in prices:
+                running += p
+            print(running)
+
+        t = total([2, 3])
+        print(t + 1)
+      payload:
+        mode: choose_fix
+        options:
+          - id: return
+            text:
+              en: Replace print(running) with return running
+          - id: print-t
+            text:
+              en: Change the last line to print(t)
+          - id: call-twice
+            text:
+              en: Call total twice
+          - id: start-one
+            text:
+              en: Start running at 1 instead of 0
+      answer:
+        option_id: return
+      runnable: true
+      fixed_code: |
+        def total(prices):
+            running = 0
+            for p in prices:
+                running += p
+            return running
+
+        t = total([2, 3])
+        print(t + 1)
+      fixed_output: '6'
+      explanation:
+        en: >
+          The function prints its answer instead of returning it, so `t` is `None` and `None +
+          1` fails. Returning the total gives `t` a real number to add to.
+      hint:
+        en: What value does `t` actually hold?
+      skill_tags: [functions, return, debugging]
+      review_status: draft

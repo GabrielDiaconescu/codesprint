@@ -1,0 +1,183 @@
+id: d7ee5965-25be-4a57-bb15-7bf92ec6b0ef
+slug: defaults-and-keywords
+title:
+  en: Optional and named arguments
+summary:
+  en: Default values for parameters, and naming arguments so their order stops mattering.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A parameter can have a **default value**, written with `=` in the definition. If the
+        caller leaves that argument out, the default is used.
+
+  - type: code
+    code: |
+      def greet(name, greeting="Hello"):
+          print(f"{greeting}, {name}!")
+
+      greet("Ana")
+      greet("Ana", "Hi")
+    output: |-
+      Hello, Ana!
+      Hi, Ana!
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        You can also name an argument in the call: `parameter=value`. These are **keyword
+        arguments**, and because they say where they go, their order no longer matters.
+        You have used one already — `reverse=True` in `sorted`.
+
+  - type: code
+    code: |
+      def describe(name, age):
+          print(f"{name} is {age}")
+
+      describe(age=30, name="Kim")
+    output: 'Kim is 30'
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        In a definition, parameters with defaults must come after the ones without. In a
+        call, plain arguments must come before named ones.
+
+  - type: question
+    question:
+      id: d4330159-d1bd-469f-a2f0-0fc9e9f19350
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def power(n, exp=2):
+            return n ** exp
+
+        print(power(3))
+      payload:
+        input: text
+      answer:
+        value: '9'
+        match_mode: trimmed
+      explanation:
+        en: >
+          No second argument was given, so `exp` takes its default of 2. Three squared is 9.
+      skill_tags: [functions, parameters]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2ec5c6b3-fe02-440d-890e-31cd8999fd7c
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: An argument whose parameter has a default value can be left out of the call.
+      answer:
+        value: true
+      explanation:
+        en: >
+          That is what the default is for. Arguments without a default must always be given.
+      skill_tags: [functions, parameters]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 70805913-d33a-4b39-a439-dd29a8132d4a
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def power(n, exp=2):
+            return n ** exp
+
+        print(power(2, 3))
+      payload:
+        input: text
+      answer:
+        value: '8'
+        match_mode: trimmed
+      explanation:
+        en: >
+          This time the second argument is given, so it replaces the default: 2 to the power
+          of 3 is 8.
+      skill_tags: [functions, parameters]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6da6aca2-41d2-4d4a-8159-123e4ed12c00
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: 'For `def order(item, qty=1):`, which call is valid?'
+      payload:
+        options:
+          - id: valid
+            text:
+              en: order("tea", qty=2)
+          - id: missing
+            text:
+              en: order(qty=2)
+          - id: out-of-order
+            text:
+              en: order(item="tea", 2)
+          - id: empty
+            text:
+              en: order()
+      answer:
+        option_id: valid
+      explanation:
+        en: >
+          `item` has no default, so it must always be supplied — ruling out the second and
+          fourth. The third puts a plain argument after a named one, which Python refuses to
+          run.
+      skill_tags: [functions, parameters]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2c9184b3-009c-4cae-93cf-f8985cb4bd43
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def label(text, left="[", right="]"):
+            return left + text + right
+
+        print(label("hi"))
+        print(label("hi", right=">"))
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "[hi]\n[hi>"
+          - id: left-changed
+            text:
+              en: "[hi]\n>hi]"
+          - id: both
+            text:
+              en: "[hi]\n>hi>"
+          - id: no-defaults
+            text:
+              en: "hi\nhi>"
+      answer:
+        value: "[hi]\n[hi>"
+        match_mode: exact
+      explanation:
+        en: >
+          The first call uses both defaults. The second names `right`, so only that one
+          changes; `left` keeps its default "[".
+      hint:
+        en: A keyword argument changes only the parameter it names.
+      skill_tags: [functions, parameters]
+      review_status: draft
