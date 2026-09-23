@@ -5,6 +5,7 @@ import { OnboardingStepScreen } from '@/features/onboarding/components/Onboardin
 import { OptionList, type Option } from '@/features/onboarding/components/OptionList';
 import { useOnboardingStore } from '@/features/onboarding/store';
 import { MOTIVATIONS, type Motivation } from '@/services';
+import { optionKey } from '@/features/onboarding/logic/optionKeys';
 
 export default function MotivationStep() {
   const { t } = useTranslation('onboarding');
@@ -15,8 +16,8 @@ export default function MotivationStep() {
 
   const options: Option<Motivation>[] = MOTIVATIONS.map((motivation) => ({
     value: motivation,
-    label: t(`motivation.options.${motivation}.label`),
-    description: t(`motivation.options.${motivation}.description`),
+    label: t(`${optionKey('motivation', motivation)}.label`),
+    description: t(`${optionKey('motivation', motivation)}.description`),
   }));
 
   return (

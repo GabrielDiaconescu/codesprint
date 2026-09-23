@@ -67,11 +67,11 @@
     "subtitle": "A reminder at the same time each day is the single biggest thing that keeps a streak alive.",
     "explanation": "We'll ask permission to send notifications only if you pick a time. You can turn them off in Settings at any point.",
     "options": {
-      "08:00": { "label": "Morning", "description": "8:00" },
-      "12:00": { "label": "Midday", "description": "12:00" },
-      "18:00": { "label": "After work", "description": "18:00" },
-      "20:00": { "label": "Evening", "description": "20:00" },
-      "21:30": { "label": "Before bed", "description": "21:30" }
+      "0800": { "label": "Morning", "description": "8:00" },
+      "1200": { "label": "Midday", "description": "12:00" },
+      "1800": { "label": "After work", "description": "18:00" },
+      "2000": { "label": "Evening", "description": "20:00" },
+      "2130": { "label": "Before bed", "description": "21:30" }
     },
     "skip": "No reminders, thanks"
   },

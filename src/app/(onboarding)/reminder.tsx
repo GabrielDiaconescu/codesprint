@@ -9,6 +9,7 @@ import { useRequestNotificationPermission } from '@/features/notifications/hooks
 import { REMINDER_TIMES } from '@/features/notifications/logic/schedule';
 import { useOnboardingStore } from '@/features/onboarding/store';
 import { useTheme } from '@/theme';
+import { optionKey } from '@/features/onboarding/logic/optionKeys';
 
 /**
  * Reminder time (SPEC §11, §48).
@@ -36,8 +37,8 @@ export default function ReminderStep() {
 
   const options: Option<string>[] = REMINDER_TIMES.map((time) => ({
     value: time,
-    label: t(`reminder.options.${time}.label`),
-    description: t(`reminder.options.${time}.description`),
+    label: t(`${optionKey('reminder', time)}.label`),
+    description: t(`${optionKey('reminder', time)}.description`),
     icon: 'alarm',
   }));
 

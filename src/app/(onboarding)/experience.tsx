@@ -5,6 +5,7 @@ import { OnboardingStepScreen } from '@/features/onboarding/components/Onboardin
 import { OptionList, type Option } from '@/features/onboarding/components/OptionList';
 import { useOnboardingStore } from '@/features/onboarding/store';
 import { EXPERIENCE_LEVELS, type ExperienceLevel } from '@/services';
+import { optionKey } from '@/features/onboarding/logic/optionKeys';
 
 export default function ExperienceStep() {
   const { t } = useTranslation('onboarding');
@@ -15,8 +16,8 @@ export default function ExperienceStep() {
 
   const options: Option<ExperienceLevel>[] = EXPERIENCE_LEVELS.map((level) => ({
     value: level,
-    label: t(`experience.options.${level}.label`),
-    description: t(`experience.options.${level}.description`),
+    label: t(`${optionKey('experience', level)}.label`),
+    description: t(`${optionKey('experience', level)}.description`),
   }));
 
   return (

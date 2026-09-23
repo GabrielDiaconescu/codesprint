@@ -5,6 +5,7 @@ import { OnboardingStepScreen } from '@/features/onboarding/components/Onboardin
 import { OptionList, type Option } from '@/features/onboarding/components/OptionList';
 import { useOnboardingStore } from '@/features/onboarding/store';
 import { DAILY_GOAL_MINUTES, type DailyGoalMinutes } from '@/services';
+import { optionKey } from '@/features/onboarding/logic/optionKeys';
 
 /**
  * Daily goal (SPEC §11).
@@ -22,8 +23,8 @@ export default function GoalStep() {
 
   const options: Option<DailyGoalMinutes>[] = DAILY_GOAL_MINUTES.map((minutes) => ({
     value: minutes,
-    label: t(`goal.options.${minutes}.label`),
-    description: t(`goal.options.${minutes}.description`),
+    label: t(`${optionKey('goal', minutes)}.label`),
+    description: t(`${optionKey('goal', minutes)}.description`),
   }));
 
   return (
