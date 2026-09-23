@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { services } from '@/services';
 import { useTheme } from '@/theme';
@@ -14,6 +15,7 @@ import { useTheme } from '@/theme';
  */
 export default function TabsLayout() {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation('navigation');
   const leaderboardEnabled = services.config.get('leaderboard_enabled');
 
@@ -29,8 +31,12 @@ export default function TabsLayout() {
           borderTopColor: theme.colors.border,
           // A hairline under a chunky UI looks like a rendering mistake.
           borderTopWidth: 2,
-          height: 64,
+          // Setting a height replaces the one React Navigation computes, which is what
+          // included the bottom safe area. A bare `64` put Android's gesture bar across
+          // the tab labels on the first release-like build, so the inset is added back.
+          height: 64 + insets.bottom,
           paddingTop: 6,
+          paddingBottom: insets.bottom + 6,
         },
         tabBarLabelStyle: { fontFamily: theme.fontFamily.semibold, fontSize: 12 },
         tabBarIconStyle: { marginTop: 2 },
