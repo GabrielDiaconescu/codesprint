@@ -1,0 +1,226 @@
+id: 987d919a-d772-4bdb-b0f8-4df9a3fa70b9
+slug: changing-lists
+title:
+  en: Adding, changing and removing items
+summary:
+  en: Lists can change in place — and their methods hand back nothing, which catches people out.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Unlike strings, lists can be changed after they are made. Assigning to an index
+        replaces the item at that position.
+
+  - type: code
+    code: |
+      pets = ["cat", "dog"]
+      pets[1] = "fish"
+      print(pets)
+    output: "['cat', 'fish']"
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Four methods cover most changes. `append(x)` adds to the end, `insert(i, x)` puts `x`
+        at position `i`, `remove(x)` deletes the first item equal to `x`, and `pop()` removes
+        the last item and hands it back to you.
+
+  - type: code
+    code: |
+      items = ["a", "b"]
+      items.append("c")
+      items.insert(0, "z")
+      print(items)
+    output: "['z', 'a', 'b', 'c']"
+    runnable: true
+
+  - type: code
+    code: |
+      items = ["z", "a", "b", "c"]
+      items.remove("a")
+      last = items.pop()
+      print(items)
+      print(last)
+    output: |-
+      ['z', 'b']
+      c
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        List methods change the list itself and return `None`. Writing `items =
+        items.append("x")` replaces your list with `None` — the opposite of string methods,
+        where you must store the result.
+
+  - type: question
+    question:
+      id: 78b61558-b0e6-428d-a8c8-97dfb5a81451
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A list can be changed after it has been created.
+      answer:
+        value: true
+      explanation:
+        en: >
+          Lists are **mutable**: you can replace, add and remove items in place. Strings are
+          not — every string method builds a new string instead.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: cd97ceba-bdeb-47e2-9af8-1ac77ca1ef1e
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which method adds an item to the end of a list?
+      payload:
+        options:
+          - id: append
+            text:
+              en: append
+          - id: insert
+            text:
+              en: insert
+          - id: add
+            text:
+              en: add
+          - id: push
+            text:
+              en: push
+      answer:
+        option_id: append
+      explanation:
+        en: >
+          `append` adds to the end. `insert` needs a position, and `add` and `push` are not list
+          methods in Python.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: fc2de227-3763-4f61-8d25-2fd7e63dac5d
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        nums = [1, 2, 3]
+        nums.append(4)
+        nums[0] = 0
+        print(nums)
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: '[0, 2, 3, 4]'
+          - id: no-append
+            text:
+              en: '[0, 2, 3]'
+          - id: no-replace
+            text:
+              en: '[1, 2, 3, 4]'
+          - id: inserted
+            text:
+              en: '[0, 1, 2, 3, 4]'
+      answer:
+        value: '[0, 2, 3, 4]'
+        match_mode: exact
+      explanation:
+        en: >
+          `append` adds 4 at the end, then `nums[0] = 0` replaces the first item. Replacing does
+          not shift anything along.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0431de16-9740-46c2-88a9-536cbd108318
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        stack = [10, 20, 30]
+        top = stack.pop()
+        print(top)
+      payload:
+        input: text
+      answer:
+        value: '30'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `pop()` with no position removes the **last** item and hands it back, so `top` is 30.
+          The list is left as `[10, 20]`.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: af5b1088-9d30-49e9-b160-1081f8cf9a49
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so the program prints `['a', 'b', 'c']`.
+      code_snippet: |
+        letters = ["b", "c"]
+        letters.___(0, "a")
+        print(letters)
+      payload:
+        input: tokens
+        tokens: [insert, append, pop, remove]
+      answer:
+        value: insert
+        match_mode: trimmed
+      explanation:
+        en: >
+          `insert(0, "a")` places "a" at position 0 and moves the rest along. `append` only
+          ever adds to the end, and takes one argument.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 30d9213c-eb26-41bd-adf9-ca5c48a100d8
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This crashes instead of printing 3. Which line is the problem?
+      code_snippet: |
+        names = ["Ann", "Bo"]
+        names = names.append("Cy")
+        print(len(names))
+      payload:
+        mode: select_line
+        lines:
+          - id: create
+            text: 'names = ["Ann", "Bo"]'
+          - id: append
+            text: 'names = names.append("Cy")'
+          - id: show
+            text: 'print(len(names))'
+      answer:
+        line_id: append
+      runnable: true
+      fixed_code: |
+        names = ["Ann", "Bo"]
+        names.append("Cy")
+        print(len(names))
+      fixed_output: '3'
+      explanation:
+        en: >
+          `append` changes the list and returns `None`. Assigning that back to `names`
+          throws the list away, and `len(None)` then fails. Call `append` on its own line.
+      hint:
+        en: What does `append` give back?
+      skill_tags: [lists, debugging]
+      review_status: draft

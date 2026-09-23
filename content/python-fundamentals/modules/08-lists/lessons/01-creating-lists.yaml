@@ -1,0 +1,193 @@
+id: 44d74ec8-5c2d-4058-a32d-1f7ce23306a5
+slug: creating-lists
+title:
+  en: Many values in one place
+summary:
+  en: Making a list, reading items by position, and how Python shows a list when it prints it.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A **list** holds several values in order. You write it with square brackets, the
+        values separated by commas. `len()` tells you how many items it holds.
+
+  - type: code
+    code: |
+      scores = [90, 72, 85]
+      print(scores)
+      print(len(scores))
+    output: |-
+      [90, 72, 85]
+      3
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Items are numbered from 0, exactly like the characters of a string, and negative
+        indexes count from the end.
+
+  - type: code
+    code: |
+      scores = [90, 72, 85]
+      print(scores[0])
+      print(scores[-1])
+    output: |-
+      90
+      85
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        A list can hold any kind of value, and even a mixture. A list with nothing in it — an
+        empty list — is written `[]`.
+
+  - type: code
+    code: |
+      things = ["pen", 3, True]
+      print(things)
+      print(len([]))
+    output: |-
+      ['pen', 3, True]
+      0
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        When Python prints a list, it shows strings with single quotes, whichever quotes you
+        typed. The quotes tell you those items are text rather than numbers.
+
+  - type: question
+    question:
+      id: 8156fa2c-053b-4f5c-81fa-a2981ec6a27b
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(len([4, 8, 15, 16]))
+      payload:
+        input: text
+      answer:
+        value: '4'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `len` counts the items, not what they add up to. There are four of them.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e2ca0431-63a0-47a5-b4c4-b9dd778945a3
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which of these creates a list?
+      payload:
+        options:
+          - id: square
+            text:
+              en: '[1, 2, 3]'
+          - id: round
+            text:
+              en: (1, 2, 3)
+          - id: curly
+            text:
+              en: '{1, 2, 3}'
+          - id: text
+            text:
+              en: '"1, 2, 3"'
+      answer:
+        option_id: square
+      explanation:
+        en: >
+          Square brackets make a list. Round brackets and curly braces make two other kinds of
+          collection you will meet later, and the quoted version is a single string.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 527c9244-929b-4bcb-9d4e-e64a8f7b59e1
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        colors = ["red", "green", "blue"]
+        print(colors[1])
+      payload:
+        input: text
+      answer:
+        value: green
+        match_mode: trimmed
+      explanation:
+        en: >
+          Index 0 is "red", so index 1 is the second item, "green". Printing a single string
+          shows it without quotes.
+      skill_tags: [lists, indexing]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0f5a3f0f-157b-496e-adfd-06bcbf4da82f
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(["a", "b"])
+      payload:
+        input: choice
+        options:
+          - id: single
+            text:
+              en: "['a', 'b']"
+          - id: double
+            text:
+              en: '["a", "b"]'
+          - id: bare
+            text:
+              en: a b
+          - id: no-comma
+            text:
+              en: "['a' 'b']"
+      answer:
+        value: "['a', 'b']"
+        match_mode: exact
+      explanation:
+        en: >
+          A printed list shows its brackets, the commas between items, and single quotes around
+          each string — even though the code used double quotes.
+      skill_tags: [lists, printing]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c5cfbf37-11f3-4e59-aa8e-ddeec72cea7e
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        nums = [3, 6, 9]
+        print(nums[-1] - nums[0])
+      payload:
+        input: text
+      answer:
+        value: '6'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `nums[-1]` is the last item, 9, and `nums[0]` is the first, 3. Their difference is 6.
+      hint:
+        en: Which item is at -1, and which at 0?
+      skill_tags: [lists, indexing]
+      review_status: draft

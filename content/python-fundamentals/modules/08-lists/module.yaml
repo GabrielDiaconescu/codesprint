@@ -1,0 +1,14 @@
+id: 4d2ff6aa-4aa4-4c2d-a848-7d8f072bab1b
+slug: lists
+title:
+  en: Lists
+description:
+  en: Keeping many values together in order — adding, removing, looping, copying and sorting them.
+order_index: 8
+estimated_minutes: 34
+lessons:
+  - creating-lists
+  - changing-lists
+  - looping-over-lists
+  - copying-lists
+  - sorting-and-built-ins

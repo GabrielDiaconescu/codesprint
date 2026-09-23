@@ -1,0 +1,224 @@
+id: 7b4ae357-f8bf-4856-b6e7-be4fefe594fe
+slug: sorting-and-built-ins
+title:
+  en: Sorting and summing
+summary:
+  en: sum, min and max, and the two ways to sort — one of which hands back nothing.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Python has built-in functions for the questions you ask a list of numbers most often.
+
+  - type: code
+    code: |
+      nums = [4, 1, 7]
+      print(sum(nums))
+      print(min(nums))
+      print(max(nums))
+    output: |-
+      12
+      1
+      7
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        There are two ways to sort. `sorted(nums)` builds a **new** sorted list and leaves
+        the original alone. `nums.sort()` sorts the list **in place** and returns `None`.
+
+  - type: code
+    code: |
+      nums = [3, 1, 2]
+      print(sorted(nums))
+      print(nums)
+      nums.sort()
+      print(nums)
+    output: |-
+      [1, 2, 3]
+      [3, 1, 2]
+      [1, 2, 3]
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Both accept `reverse=True` to sort from largest to smallest.
+
+  - type: code
+    code: |
+      print(sorted([3, 1, 2], reverse=True))
+    output: '[3, 2, 1]'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        `nums = nums.sort()` sorts the list and then replaces it with `None`. Use either
+        `nums.sort()` on its own line, or `nums = sorted(nums)`.
+
+  - type: question
+    question:
+      id: e5e2b894-b717-408d-be17-6f246c6d1bb1
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(sum([1, 2, 3]))
+      payload:
+        input: text
+      answer:
+        value: '6'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `sum` adds up every item in the list: 1 + 2 + 3.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: a968fa95-141d-4083-83c1-ca57df59e7fb
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which gives the largest number in `nums`?
+      payload:
+        options:
+          - id: max
+            text:
+              en: max(nums)
+          - id: top
+            text:
+              en: top(nums)
+          - id: big
+            text:
+              en: big(nums)
+          - id: method
+            text:
+              en: nums.max()
+      answer:
+        option_id: max
+      explanation:
+        en: >
+          `max` is a built-in function that takes the list. Lists have no `.max()` method, and
+          `top` and `big` do not exist.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 293e4f1d-291c-4873-a345-0b0272bf2fd3
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        nums = [5, 2, 8]
+        print(sorted(nums, reverse=True))
+      payload:
+        input: choice
+        options:
+          - id: descending
+            text:
+              en: '[8, 5, 2]'
+          - id: ascending
+            text:
+              en: '[2, 5, 8]'
+          - id: reversed
+            text:
+              en: '[8, 2, 5]'
+          - id: none
+            text:
+              en: None
+      answer:
+        value: '[8, 5, 2]'
+        match_mode: exact
+      explanation:
+        en: >
+          `reverse=True` sorts from largest to smallest. It is a real sort, not just the
+          original list turned back to front — that would give `[8, 2, 5]`.
+      skill_tags: [lists, sorting]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 027273f0-076d-4b97-99a0-29733042272b
+      type: true_false
+      difficulty: medium
+      prompt:
+        en: '`nums.sort()` returns the sorted list.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          It sorts `nums` in place and returns `None`. `sorted(nums)` is the one that hands
+          back a sorted list.
+      skill_tags: [lists, sorting]
+      review_status: draft
+
+  - type: question
+    question:
+      id: a39d1155-48fc-4786-ba49-67d668a2f09a
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        scores = [80, 90, 70]
+        print(sum(scores) / len(scores))
+      payload:
+        input: text
+      answer:
+        value: '80.0'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The average is the total divided by how many there are: 240 / 3. Division with `/`
+          always gives a float, so it prints 80.0.
+      skill_tags: [lists, arithmetic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 90971466-ba83-4a37-8404-bd166e63fe1c
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        words = ["pear", "Apple", "fig"]
+        print(sorted(words))
+      payload:
+        input: choice
+        options:
+          - id: capitals-first
+            text:
+              en: "['Apple', 'fig', 'pear']"
+          - id: alphabetical
+            text:
+              en: "['Apple', 'pear', 'fig']"
+          - id: ignore-case
+            text:
+              en: "['fig', 'pear', 'Apple']"
+          - id: original
+            text:
+              en: "['pear', 'Apple', 'fig']"
+      answer:
+        value: "['Apple', 'fig', 'pear']"
+        match_mode: exact
+      explanation:
+        en: >
+          Strings sort character by character, and every capital letter comes before every
+          lowercase one. "Apple" starts with a capital, so it goes first; then "fig" before
+          "pear".
+      hint:
+        en: Remember how capital letters compare with lowercase ones.
+      skill_tags: [lists, sorting, strings]
+      review_status: draft

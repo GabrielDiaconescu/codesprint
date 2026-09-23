@@ -1,0 +1,250 @@
+id: 060e29d3-2c05-4689-86e1-84833ccc852d
+slug: looping-over-lists
+title:
+  en: Working through a list
+summary:
+  en: Visiting every item, adding things up, checking membership and building a new list.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A `for` loop walks through a list one item at a time, just as it walks through the
+        characters of a string.
+
+  - type: code
+    code: |
+      for name in ["Ann", "Bo", "Cy"]:
+          print("Hi " + name)
+    output: |-
+      Hi Ann
+      Hi Bo
+      Hi Cy
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        The accumulator pattern works on lists too. Adding up a list of prices is the
+        classic example.
+
+  - type: code
+    code: |
+      prices = [4, 10, 6]
+      total = 0
+      for p in prices:
+          total += p
+      print(total)
+    output: '20'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        To build a **new** list from an old one, start with an empty list and `append` to it
+        inside the loop.
+
+  - type: code
+    code: |
+      nums = [1, 2, 3]
+      doubled = []
+      for n in nums:
+          doubled.append(n * 2)
+      print(doubled)
+    output: '[2, 4, 6]'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `in` asks whether a value appears anywhere in a list, the same way it does for text.
+
+  - type: code
+    code: |
+      print("Bo" in ["Ann", "Bo"])
+    output: 'True'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Avoid removing items from a list while you are looping over it — the loop loses its
+        place and skips items. Build a new list of the items you want to keep instead.
+
+  - type: question
+    question:
+      id: ec67d062-ab75-4c43-a664-1a1cb3213895
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        for x in [3, 1]:
+            print(x)
+      payload:
+        input: choice
+        options:
+          - id: in-order
+            text:
+              en: "3\n1"
+          - id: sorted
+            text:
+              en: "1\n3"
+          - id: list
+            text:
+              en: '[3, 1]'
+          - id: indexes
+            text:
+              en: "0\n1"
+      answer:
+        value: "3\n1"
+        match_mode: exact
+      explanation:
+        en: >
+          The loop gives the items themselves, in the order they are stored — not their
+          positions, and not sorted.
+      skill_tags: [lists, loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 8d4251d2-6875-4914-a86f-d301a757b835
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`2 in [1, 2, 3]` is `True`.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          2 is one of the items, so `in` finds it.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 90c68858-651e-459b-b4fb-bb55237e6b0e
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        nums = [2, 8, 5, 9]
+        count = 0
+        for n in nums:
+            if n > 5:
+                count += 1
+        print(count)
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Only 8 and 9 are greater than 5. 5 itself is not, because `>` does not include the
+          boundary.
+      skill_tags: [lists, loops, accumulators]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1e2e8121-fe6f-4e67-b788-d8b5972cefd5
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        words = ["hi", "yo"]
+        loud = []
+        for w in words:
+            loud.append(w.upper())
+        print(loud)
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "['HI', 'YO']"
+          - id: unchanged
+            text:
+              en: "['hi', 'yo']"
+          - id: joined
+            text:
+              en: HIYO
+          - id: empty
+            text:
+              en: '[]'
+      answer:
+        value: "['HI', 'YO']"
+        match_mode: exact
+      explanation:
+        en: >
+          Each round appends the upper-case version of one word to `loud`. The original
+          `words` list is left exactly as it was.
+      skill_tags: [lists, loops, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: cb8e7982-9003-4421-9319-a3f0c5b7fb88
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: With `nums = [4, 7, 10]`, which of these are `True`?
+      payload:
+        options:
+          - id: seven
+            text:
+              en: 7 in nums
+          - id: seven-text
+            text:
+              en: '"7" in nums'
+          - id: four
+            text:
+              en: 4 in nums
+          - id: five
+            text:
+              en: 5 in nums
+          - id: length
+            text:
+              en: len(nums) == 3
+      answer:
+        option_ids: [seven, four, length]
+      explanation:
+        en: >
+          7 and 4 are items, and there are three items. The text "7" is not the number 7, so
+          `in` does not find it, and 5 is simply not there.
+      skill_tags: [lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: fc52ab2e-fa11-4174-a799-68acecb2e156
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        nums = [3, 9, 2, 7]
+        best = nums[0]
+        for n in nums:
+            if n > best:
+                best = n
+        print(best)
+      payload:
+        input: text
+      answer:
+        value: '9'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `best` starts as the first item and is replaced whenever a bigger one comes along —
+          by 9, then never again. This is how `max()` works on the inside.
+      hint:
+        en: Track `best` through each round.
+      skill_tags: [lists, loops]
+      review_status: draft
