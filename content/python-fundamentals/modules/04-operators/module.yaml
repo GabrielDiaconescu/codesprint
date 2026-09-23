@@ -1,0 +1,14 @@
+id: 7ab4abaa-788f-4690-87fd-5ae5fb91f24f
+slug: operators
+title:
+  en: Operators & Expressions
+description:
+  en: Arithmetic beyond the basics, the order Python works things out in, and asking yes-or-no questions.
+order_index: 4
+estimated_minutes: 30
+lessons:
+  - arithmetic-operators
+  - order-of-operations
+  - comparisons
+  - logical-operators
+  - operators-on-text

@@ -1,0 +1,207 @@
+id: 6e1b0021-5c8b-408c-8bd3-26299d15cfef
+slug: operators-on-text
+title:
+  en: Operators on text
+summary:
+  en: Joining, repeating, searching inside and comparing strings.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Several operators work on strings too. `+` joins two strings and `*` repeats one. The
+        `in` operator asks whether one piece of text appears anywhere inside another.
+
+  - type: code
+    code: |
+      print("ha" + "ha")
+      print("-" * 10)
+      print("py" in "python")
+    output: |-
+      haha
+      ----------
+      True
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        Every string comparison is case-sensitive. To Python, `"P"` and `"p"` are two
+        completely different characters.
+
+  - type: code
+    code: |
+      print("Py" in "python")
+      print("Python" == "python")
+    output: |-
+      False
+      False
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `<` and `>` compare strings character by character, the way a dictionary is ordered.
+        One twist: every capital letter comes before every lowercase letter.
+
+  - type: code
+    code: |
+      print("apple" < "banana")
+      print("Zebra" < "apple")
+    output: |-
+      True
+      True
+    runnable: true
+    caption:
+      en: '"Z" is a capital, so it sorts before any lowercase letter.'
+
+  - type: question
+    question:
+      id: d305bd23-4f0c-4f73-a8d6-1b04557b418c
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("ha" * 3)
+      payload:
+        input: text
+      answer:
+        value: hahaha
+        match_mode: trimmed
+      explanation:
+        en: >
+          Multiplying a string by a number repeats it that many times, with nothing added in
+          between.
+      skill_tags: [strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 8b811e1e-f896-4afc-a934-9dbf7302b3af
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`"cat" in "concatenate"` is `True`.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          Look closely: con-**cat**-enate. `in` finds the three letters together, in order,
+          anywhere inside the longer string.
+      skill_tags: [strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 3934cd27-0056-4a23-b3fd-5a82ef0565d0
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("ba" + "na" * 2)
+      payload:
+        input: text
+      answer:
+        value: banana
+        match_mode: trimmed
+      explanation:
+        en: >
+          The precedence rules still apply to strings: `*` happens before `+`. So "na" is
+          repeated first, giving "nana", and then "ba" is joined to the front.
+      hint:
+        en: Which happens first, `*` or `+`?
+      skill_tags: [strings, precedence]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0cdc7170-23f8-4738-b544-1169d4f11974
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What is the value of `"Python" == "python"`?
+      payload:
+        options:
+          - id: is-false
+            text:
+              en: 'False'
+          - id: is-true
+            text:
+              en: 'True'
+          - id: error
+            text:
+              en: A TypeError
+          - id: lower
+            text:
+              en: '"python"'
+      answer:
+        option_id: is-false
+      explanation:
+        en: >
+          The first letters differ — a capital P and a lowercase p — so the strings are not
+          equal. String comparison never ignores case unless you ask it to.
+      skill_tags: [strings, comparisons]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e2f96f83-b5bc-4be0-8522-4d403607dd92
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these are `True`?
+      payload:
+        options:
+          - id: letter
+            text:
+              en: '"a" in "cat"'
+          - id: capital
+            text:
+              en: '"A" in "cat"'
+          - id: pair
+            text:
+              en: '"at" in "cat"'
+          - id: backwards
+            text:
+              en: '"tac" in "cat"'
+          - id: prefix
+            text:
+              en: '"cat" in "category"'
+      answer:
+        option_ids: [letter, pair, prefix]
+      explanation:
+        en: >
+          `in` looks for the exact characters, together and in order. "a", "at" and "cat" all
+          appear that way. "A" is a different character from "a", and "tac" is the right
+          letters in the wrong order.
+      skill_tags: [strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ba788b60-3d6a-4acf-8b13-24c876850681
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print("10" < "9")
+      payload:
+        input: text
+      answer:
+        value: 'True'
+        match_mode: trimmed
+      explanation:
+        en: >
+          These are strings, not numbers, so they are compared character by character. The
+          first characters are "1" and "9", and "1" comes first — so "10" sorts before "9".
+          Convert with `int()` to compare them as numbers.
+      hint:
+        en: Look at the quotes. Are these numbers?
+      skill_tags: [strings, comparisons]
+      review_status: draft

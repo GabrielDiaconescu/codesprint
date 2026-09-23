@@ -1,0 +1,229 @@
+id: 175a507f-9409-48a6-8f22-1a6ec4f34c17
+slug: comparisons
+title:
+  en: Comparing values
+summary:
+  en: Asking whether things are equal, bigger or smaller — and getting True or False back.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Comparison operators ask a question about two values and answer with `True` or
+        `False`. There are six: `==` equal, `!=` not equal, `<` less than, `>` greater than,
+        `<=` less than or equal, and `>=` greater than or equal.
+
+  - type: code
+    code: |
+      x = 7
+      print(x > 5)
+      print(x == 7)
+      print(x != 7)
+    output: |-
+      True
+      True
+      False
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        One `=` **stores** a value; two `==` **compare** values. Mixing them up is one of the
+        most common beginner mistakes, and Python will often refuse to run the line at all.
+
+  - type: text
+    body:
+      en: |
+        The boundary matters. `<` does not include the value itself, and `<=` does. Getting
+        this wrong by one is so common it has a name: an off-by-one error.
+
+  - type: code
+    code: |
+      print(10 < 10)
+      print(10 <= 10)
+    output: |-
+      False
+      True
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Python lets you chain comparisons the way you would write them in maths. `13 <= age <=
+        19` means both comparisons must be true.
+
+  - type: code
+    code: |
+      age = 15
+      print(13 <= age <= 19)
+    output: 'True'
+    runnable: true
+
+  - type: question
+    question:
+      id: 0ac326d0-b910-42af-bc63-d22b220741e4
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which operator checks whether two values are equal?
+      payload:
+        options:
+          - id: double
+            text:
+              en: '=='
+          - id: single
+            text:
+              en: '='
+          - id: not-equal
+            text:
+              en: '!='
+          - id: triple
+            text:
+              en: '==='
+      answer:
+        option_id: double
+      explanation:
+        en: >
+          `==` compares. A single `=` stores a value in a variable, `!=` asks the opposite
+          question, and `===` does not exist in Python.
+      skill_tags: [comparisons]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 21fc7883-109b-4b04-8817-efb8a3ffa3f3
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(5 >= 5)
+      payload:
+        input: text
+      answer:
+        value: 'True'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `>=` means greater than **or equal to**. 5 is not greater than 5, but it is equal to
+          it, so the answer is True.
+      skill_tags: [comparisons]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 3ad72061-ec3a-4624-8a15-993d39e39d37
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = 3
+        print(x != 3)
+      payload:
+        input: text
+      answer:
+        value: 'False'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `!=` asks "are these different?". `x` is 3, so they are not different, and the
+          answer is False.
+      skill_tags: [comparisons]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2ccae378-e741-4e78-8840-b0060a3818e2
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: With `x = 10`, which of these are `True`?
+      payload:
+        options:
+          - id: greater
+            text:
+              en: x > 5
+          - id: less
+            text:
+              en: x < 10
+          - id: less-equal
+            text:
+              en: x <= 10
+          - id: float-equal
+            text:
+              en: x == 10.0
+          - id: not-equal
+            text:
+              en: x != 10
+      answer:
+        option_ids: [greater, less-equal, float-equal]
+      explanation:
+        en: >
+          10 is more than 5, and it is at most 10. It also equals 10.0, because `==` compares
+          value, not type. It is not less than 10, and it is not different from 10.
+      hint:
+        en: Watch the difference between `<` and `<=`.
+      skill_tags: [comparisons]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 8b27c027-0176-4763-924f-fb53f840ce8e
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: >
+          This should print True for any price of 10 or less, but for a price of exactly 10 it
+          prints False. Which line is wrong?
+      code_snippet: |
+        price = 10
+        print(price < 10)
+      payload:
+        mode: select_line
+        lines:
+          - id: assign
+            text: 'price = 10'
+          - id: compare
+            text: 'print(price < 10)'
+      answer:
+        line_id: compare
+      runnable: true
+      fixed_code: |
+        price = 10
+        print(price <= 10)
+      fixed_output: 'True'
+      explanation:
+        en: >
+          "10 or less" includes 10, so the comparison needs `<=`. With `<`, the boundary value
+          itself is left out — a classic off-by-one error.
+      hint:
+        en: Does the comparison include the value 10 itself?
+      skill_tags: [comparisons, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: cc092fcd-d8d0-4e5d-80ea-74ae2204bb67
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(1 < 3 > 2)
+      payload:
+        input: text
+      answer:
+        value: 'True'
+        match_mode: trimmed
+      explanation:
+        en: >
+          A chain means every link must hold: this is `1 < 3 and 3 > 2`. Both are true, so the
+          whole chain is True. It does not compare the result of `1 < 3` with 2.
+      hint:
+        en: Split the chain into two separate comparisons.
+      skill_tags: [comparisons]
+      review_status: draft

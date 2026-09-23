@@ -1,0 +1,234 @@
+id: 07903697-df6e-4c58-9684-0b81fbf1fe92
+slug: arithmetic-operators
+title:
+  en: Three more ways to do arithmetic
+summary:
+  en: Whole-number division, remainders and powers — and the odd thing they do with negatives.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        You already know `+`, `-`, `*` and `/`. Python has three more arithmetic operators
+        that come up constantly. `//` divides and throws away the remainder. `%` gives **only**
+        the remainder. `**` raises a number to a power.
+
+  - type: code
+    code: |
+      print(17 // 5)
+      print(17 % 5)
+      print(2 ** 10)
+    output: |-
+      3
+      2
+      1024
+    runnable: true
+    caption:
+      en: 17 is three fives with two left over — `//` gives the three, `%` gives the two.
+
+  - type: text
+    body:
+      en: |
+        `%` is the easiest way to tell whether a number is even: an even number leaves nothing
+        over when divided by 2.
+
+  - type: code
+    code: |
+      print(10 % 2)
+      print(7 % 2)
+    output: |-
+      0
+      1
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        `number % 2 == 0` is the standard way to ask "is this even?". You will see it in
+        almost every program that sorts things into two groups.
+
+  - type: text
+    body:
+      en: |
+        One surprise: `//` always rounds **down**, towards the smaller number. For positive
+        numbers that just drops the decimals, but for negative numbers it goes further away
+        from zero.
+
+  - type: code
+    code: |
+      print(7 // 2)
+      print(-7 // 2)
+    output: |-
+      3
+      -4
+    runnable: true
+    caption:
+      en: -3.5 rounded down is -4, not -3.
+
+  - type: question
+    question:
+      id: ec2f7e2a-3150-4053-87f4-7d352ccff0c9
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(20 // 6)
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Six goes into twenty three whole times (18), with 2 left over. `//` keeps the 3 and
+          discards the remainder.
+      skill_tags: [arithmetic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: cd1bfcc4-5907-46d8-8d52-559d9ecbb065
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(2 ** 3)
+      payload:
+        input: text
+      answer:
+        value: '8'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `**` is a power: two to the power of three is 2 × 2 × 2, which is 8. It is not 2 × 3.
+      skill_tags: [arithmetic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 930cf6d1-4bfd-4908-adea-7b8b00a3b042
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What is the value of `23 % 5`?
+      payload:
+        options:
+          - id: three
+            text:
+              en: '3'
+          - id: four
+            text:
+              en: '4'
+          - id: decimal
+            text:
+              en: '4.6'
+          - id: five
+            text:
+              en: '5'
+      answer:
+        option_id: three
+      explanation:
+        en: >
+          Five goes into 23 four times, which makes 20. What is left over is 3, and `%` gives
+          only that remainder. 4 is what `//` would give; 4.6 is what `/` would give.
+      skill_tags: [arithmetic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c5a0574a-2bcf-434e-842e-dbd0a4020e30
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so it prints `0`, showing that 12 is even.
+      code_snippet: |
+        print(12 ___ 2)
+      payload:
+        input: tokens
+        tokens: ['%', '//', '/', '**']
+      answer:
+        value: '%'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The remainder of 12 divided by 2 is 0, which is what makes 12 even. `//` would give
+          6, `/` would give 6.0, and `**` would give 144.
+      hint:
+        en: You want what is left over, not how many times it fits.
+      skill_tags: [arithmetic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7a23abe7-7374-4901-9cc6-8795fff9d58e
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each expression to its result.
+      payload:
+        concepts:
+          - id: divide
+            text:
+              en: 9 / 2
+          - id: floor
+            text:
+              en: 9 // 2
+          - id: remainder
+            text:
+              en: 9 % 2
+          - id: power
+            text:
+              en: 9 ** 2
+        definitions:
+          - id: four-half
+            text:
+              en: '4.5'
+          - id: four
+            text:
+              en: '4'
+          - id: one
+            text:
+              en: '1'
+          - id: eighty-one
+            text:
+              en: '81'
+      answer:
+        pairs:
+          divide: four-half
+          floor: four
+          remainder: one
+          power: eighty-one
+      explanation:
+        en: >
+          Same two numbers, four different questions: the exact quotient, how many whole twos
+          fit, what is left over, and nine squared.
+      skill_tags: [arithmetic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0c36abc9-f0d4-40ff-a758-051d7141afee
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(-9 // 4)
+      payload:
+        input: text
+      answer:
+        value: '-3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          -9 divided by 4 is -2.25, and `//` always rounds down — towards the smaller number.
+          Down from -2.25 is -3, not -2.
+      hint:
+        en: Which whole number is just below -2.25?
+      skill_tags: [arithmetic]
+      review_status: draft

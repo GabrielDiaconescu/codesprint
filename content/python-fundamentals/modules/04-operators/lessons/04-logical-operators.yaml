@@ -1,0 +1,198 @@
+id: 25cc8af2-388a-4aee-bceb-4c8cd486ca30
+slug: logical-operators
+title:
+  en: and, or, not
+summary:
+  en: Combining yes-or-no questions into one bigger question.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Three words combine booleans. `and` is True only when **both** sides are True. `or` is
+        True when **at least one** side is True. `not` flips a single value to its opposite.
+
+  - type: code
+    code: |
+      print(True and False)
+      print(True or False)
+      print(not True)
+    output: |-
+      False
+      True
+      False
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Their real use is joining comparisons into one question, the way you would say it in
+        a sentence: old enough **and** holding a ticket.
+
+  - type: code
+    code: |
+      age = 20
+      has_ticket = True
+      print(age >= 18 and has_ticket)
+      print(age < 12 or age > 65)
+    output: |-
+      True
+      False
+    runnable: true
+    caption:
+      en: 20 is neither under 12 nor over 65, so the `or` is False.
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        `not` is worked out before `and`, and `and` before `or`. As with arithmetic, you can
+        make the order obvious with parentheses instead of relying on the rule.
+
+  - type: question
+    question:
+      id: e635fa8e-2152-466b-8d56-507deda73d01
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`True or False` is `True`.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          `or` needs only one side to be True, and the left side is.
+      skill_tags: [logic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0811d96b-4240-4daa-8ea3-be5efefa1f9a
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(not False)
+      payload:
+        input: text
+      answer:
+        value: 'True'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `not` flips a boolean to its opposite, so not False is True.
+      skill_tags: [logic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 831e1ba4-060b-46d8-94cc-965fa183c572
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        x = 7
+        print(x > 5 and x < 10)
+      payload:
+        input: text
+      answer:
+        value: 'True'
+        match_mode: trimmed
+      explanation:
+        en: >
+          7 is greater than 5 and less than 10, so both sides of `and` are True. This is the
+          long way of writing `5 < x < 10`.
+      skill_tags: [logic, comparisons]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 436e11b6-fb85-401f-a117-4f15cf9c6ef2
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each expression to when it is True.
+      payload:
+        concepts:
+          - id: and
+            text:
+              en: a and b
+          - id: or
+            text:
+              en: a or b
+          - id: not
+            text:
+              en: not a
+        definitions:
+          - id: both
+            text:
+              en: Only when both are True
+          - id: either
+            text:
+              en: When at least one is True
+          - id: opposite
+            text:
+              en: Only when a is False
+      answer:
+        pairs:
+          and: both
+          or: either
+          not: opposite
+      explanation:
+        en: >
+          `and` is strict and needs both, `or` is generous and needs one, and `not` simply
+          turns the answer around.
+      skill_tags: [logic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 963bd77f-5961-4520-9e24-23987b7c4423
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so it prints `True`.
+      code_snippet: |
+        is_weekend = False
+        is_holiday = True
+        print(is_weekend ___ is_holiday)
+      payload:
+        input: tokens
+        tokens: [or, and, not, '==']
+      answer:
+        value: or
+        match_mode: trimmed
+      explanation:
+        en: >
+          Only one of the two is True, which is enough for `or`. `and` would need both, `==`
+          would compare them and find them different, and `not` cannot sit between two values.
+      hint:
+        en: Only one of the two values is True.
+      skill_tags: [logic]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d3f0083b-e0f0-4c3c-ad21-aabe606fbe40
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(not 3 > 5 and 2 < 1)
+      payload:
+        input: text
+      answer:
+        value: 'False'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Comparisons happen first, then `not`, then `and`. So this is `(not False) and
+          False`, which is `True and False` — False.
+      hint:
+        en: Work out the two comparisons before anything else.
+      skill_tags: [logic, precedence]
+      review_status: draft

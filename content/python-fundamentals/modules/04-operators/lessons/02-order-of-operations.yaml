@@ -1,0 +1,207 @@
+id: ba67a0e1-2d0c-4b41-b0b5-33e49b82a647
+slug: order-of-operations
+title:
+  en: Which part happens first
+summary:
+  en: Operator precedence, parentheses, and splitting a long calculation into steps.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        When an expression has several operators, Python does not simply work left to right.
+        It follows the same order as maths: powers first, then multiplication and division,
+        then addition and subtraction.
+
+  - type: code
+    code: |
+      print(2 + 3 * 4)
+      print((2 + 3) * 4)
+    output: |-
+      14
+      20
+    runnable: true
+    caption:
+      en: The multiplication happens first unless parentheses say otherwise.
+
+  - type: text
+    body:
+      en: |
+        Operators on the same level are worked out from left to right. That matters for `-`
+        and `/`, where the order changes the answer.
+
+  - type: code
+    code: |
+      print(10 - 4 - 3)
+      print(100 / 10 / 2)
+    output: |-
+      3
+      5.0
+    runnable: true
+    caption:
+      en: (10 - 4) - 3 is 3, and (100 / 10) / 2 is 5.0.
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        When you are not sure, add parentheses. They cost nothing, and the next person to read
+        the line — often you, next month — will not have to work out the rules.
+
+  - type: text
+    body:
+      en: |
+        A long calculation is easier to get right when you split it into steps and give each
+        step a name. Each line can then use the result of the line before.
+
+  - type: code
+    code: |
+      price = 20
+      discounted = price * 0.75
+      with_tax = discounted * 1.2
+      print(with_tax)
+    output: '18.0'
+    runnable: true
+
+  - type: question
+    question:
+      id: e79896d5-48d3-446f-b0c0-b8c5b9053a07
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(1 + 2 * 3)
+      payload:
+        input: text
+      answer:
+        value: '7'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Multiplication happens before addition, so this is 1 + 6, not 3 × 3.
+      skill_tags: [arithmetic, precedence]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 12ded32d-64f9-42b0-b3ff-9b98ac4d7e9c
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`(1 + 2) * 3` gives 9.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          The parentheses are worked out first, giving 3, and 3 × 3 is 9. Without them the
+          answer would be 7.
+      skill_tags: [precedence]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 70a4c1f0-f06d-4303-9cf3-150ab4ce3ce0
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(20 - 10 / 5)
+      payload:
+        input: text
+      answer:
+        value: '18.0'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Division comes first: 10 / 5 is 2.0, a float because `/` always gives one. Then 20 −
+          2.0 is 18.0.
+      hint:
+        en: Which operator goes first — and what type does it produce?
+      skill_tags: [arithmetic, precedence]
+      review_status: draft
+
+  - type: question
+    question:
+      id: edfad4eb-a21e-4cd1-8de0-a24ceada9aee
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: Which of these expressions gives 20?
+      payload:
+        options:
+          - id: grouped
+            text:
+              en: (2 + 3) * 4
+          - id: plain
+            text:
+              en: 2 + 3 * 4
+          - id: reversed
+            text:
+              en: 2 * 3 + 4
+          - id: redundant
+            text:
+              en: 2 + (3 * 4)
+      answer:
+        option_id: grouped
+      explanation:
+        en: >
+          Only the first forces the addition to happen before the multiplication. The second
+          and fourth both work out 3 × 4 first and give 14; the third gives 10.
+      skill_tags: [precedence]
+      review_status: draft
+
+  - type: question
+    question:
+      id: fb1a96b8-36ff-4532-b93b-7238acffc652
+      type: code_ordering
+      difficulty: medium
+      prompt:
+        en: Arrange the lines to average 4 and 8, round the result, and print 6.
+      payload:
+        lines:
+          - id: total
+            text: total = 4 + 8
+          - id: average
+            text: average = total / 2
+          - id: rounded
+            text: rounded = round(average)
+          - id: show
+            text: print(rounded)
+      answer:
+        order: [total, average, rounded, show]
+      runnable: true
+      expected_output: '6'
+      explanation:
+        en: >
+          Each step needs the one before it: the average needs the total, and the rounding
+          needs the average. Named steps make the order impossible to get wrong once you see
+          what each line depends on.
+      skill_tags: [arithmetic, variables]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6605e3c0-e432-4890-8166-bcf799e9f0c3
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print(-2 ** 2)
+      payload:
+        input: text
+      answer:
+        value: '-4'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `**` binds more tightly than the minus sign in front of the 2. Python reads this as
+          −(2 ** 2), which is −4. Write `(-2) ** 2` to square negative two and get 4.
+      hint:
+        en: Does the minus sign belong to the 2, or to the result?
+      skill_tags: [arithmetic, precedence]
+      review_status: draft
