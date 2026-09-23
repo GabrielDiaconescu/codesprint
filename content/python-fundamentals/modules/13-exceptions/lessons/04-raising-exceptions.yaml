@@ -1,0 +1,238 @@
+id: e5fa64cb-17c7-4ced-b065-835b001fe16a
+slug: raising-exceptions
+title:
+  en: Raising your own
+summary:
+  en: raise for inputs your code cannot accept, and reading the message with as.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Your own functions can raise exceptions too. When a function is given something it
+        cannot sensibly work with, `raise` stops it with a clear message.
+
+  - type: code
+    code: |
+      def set_age(age):
+          if age < 0:
+              raise ValueError("Age cannot be negative")
+          return age
+
+      print(set_age(20))
+    output: '20'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Callers handle your exception like any other. Adding `as e` to the `except` line gives
+        you the exception itself, and printing it shows its message.
+
+  - type: code
+    code: |
+      def set_age(age):
+          if age < 0:
+              raise ValueError("Age cannot be negative")
+          return age
+
+      try:
+          set_age(-3)
+      except ValueError as e:
+          print(e)
+    output: 'Age cannot be negative'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Raising early with a clear message beats returning an odd value like -1 that the
+        caller may forget to check. A loud problem is found; a quiet one spreads.
+
+  - type: question
+    question:
+      id: 194dc819-edc9-4c69-8b9d-d1bda6b8d15f
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which keyword makes your own code raise an exception?
+      payload:
+        options:
+          - id: raise
+            text:
+              en: raise
+          - id: throw
+            text:
+              en: throw
+          - id: error
+            text:
+              en: error
+          - id: except
+            text:
+              en: except
+      answer:
+        option_id: raise
+      explanation:
+        en: >
+          Python uses `raise`. `throw` is the word in some other languages, and `except` is for
+          catching, not raising.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: dce29517-a2c5-4781-8623-d908e4cdc09d
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: "`except ValueError as e:` lets you read the exception's message through `e`."
+      answer:
+        value: true
+      explanation:
+        en: >
+          `e` is the exception itself. Printing it shows the message it was raised with.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c975dba7-dac8-4f8a-b711-4ccbc0d95480
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        try:
+            raise ValueError("bad size")
+        except ValueError as e:
+            print(e)
+      payload:
+        input: text
+      answer:
+        value: bad size
+        match_mode: trimmed
+      explanation:
+        en: >
+          The exception is raised with the message "bad size", caught straight away, and
+          printing it shows just that message.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 476584ca-c5d9-4ca5-b7f3-0036cae600b9
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def check(n):
+            if n > 10:
+                raise ValueError("too big")
+            return n
+
+        try:
+            print(check(5))
+            print(check(50))
+        except ValueError as e:
+            print(e)
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "5\ntoo big"
+          - id: both
+            text:
+              en: "5\n50"
+          - id: only-error
+            text:
+              en: too big
+          - id: all
+            text:
+              en: "5\n50\ntoo big"
+      answer:
+        value: "5\ntoo big"
+        match_mode: exact
+      explanation:
+        en: >
+          5 passes the check and is printed. 50 raises before anything is returned, so the
+          second print never happens and the `except` shows the message.
+      skill_tags: [exceptions, functions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2e7b74d2-b6eb-4211-a666-9ef4c69e3467
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the function so it refuses to withdraw more than the balance.
+      code_snippet: |
+        def withdraw(balance, amount):
+            if amount > balance:
+                ___ ValueError("Not enough money")
+            return balance - amount
+      payload:
+        input: tokens
+        tokens: [raise, return, except, try]
+      answer:
+        value: raise
+        match_mode: trimmed
+      explanation:
+        en: >
+          `raise` stops the function with an exception the caller can catch. `return` would
+          hand the exception back as an ordinary value, which nobody would notice.
+      skill_tags: [exceptions, functions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6cfd95ad-6b69-4dc5-8c2a-52d0618d948f
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def parse(text):
+            if not text.isdigit():
+                raise ValueError("digits only")
+            return int(text)
+
+        results = []
+        for t in ["12", "x", "7"]:
+            try:
+                results.append(parse(t))
+            except ValueError:
+                results.append(0)
+        print(results)
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: '[12, 0, 7]'
+          - id: stops
+            text:
+              en: '[12]'
+          - id: skips
+            text:
+              en: '[12, 7]'
+          - id: strings
+            text:
+              en: "['12', 0, '7']"
+      answer:
+        value: '[12, 0, 7]'
+        match_mode: exact
+      explanation:
+        en: >
+          The `try` is inside the loop, so each item gets its own chance. "x" raises and is
+          replaced by 0, and the loop carries on with "7". The good items are converted to
+          numbers by `parse`.
+      hint:
+        en: Where is the try — inside the loop or around it?
+      skill_tags: [exceptions, loops]
+      review_status: draft

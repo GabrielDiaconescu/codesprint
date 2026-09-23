@@ -1,0 +1,239 @@
+id: 07725667-26a9-4d8b-87c0-53cf36f9d823
+slug: exception-types
+title:
+  en: When something goes wrong
+summary:
+  en: What an exception is, and the half-dozen types you will meet most often.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        When a problem happens while a program is running, Python **raises an exception**.
+        Each exception has a type that names the kind of problem. If nothing deals with it,
+        the program stops there and prints the error.
+
+  - type: code
+    code: |
+      print(int("42"))
+      print(int("abc"))
+      print("never reached")
+    runnable: false
+    caption:
+      en: The first line prints 42. The second stops the program with a ValueError, so the last line never runs.
+
+  - type: text
+    body:
+      en: |
+        A handful of types cover most early mistakes. A **ValueError** means the right type
+        but an unusable value, like `int("abc")`. A **TypeError** means the wrong type for the
+        operation, like `"a" + 1`.
+
+  - type: text
+    body:
+      en: |
+        A **KeyError** is a missing dictionary key, and an **IndexError** is a position past
+        the end of a list or string. A **ZeroDivisionError** is dividing by zero, and a
+        **NameError** is a name Python has never seen.
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        The last line of an error message always names the type and says what went wrong.
+        Read that line first — it usually tells you exactly where to look.
+
+  - type: question
+    question:
+      id: 4d4e8b91-884b-45b4-95d5-40af41d120a5
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which exception does `int("abc")` raise?
+      payload:
+        options:
+          - id: value
+            text:
+              en: ValueError
+          - id: type
+            text:
+              en: TypeError
+          - id: name
+            text:
+              en: NameError
+          - id: key
+            text:
+              en: KeyError
+      answer:
+        option_id: value
+      explanation:
+        en: >
+          `int` is happy to receive a string — that is the right type — but "abc" is not a
+          value it can turn into a number.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7341b873-f452-482d-9f0a-8553f8ef7400
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: An exception that nothing handles stops the program.
+      answer:
+        value: true
+      explanation:
+        en: >
+          The program ends at the line that raised it, and every line after it is skipped. The
+          next lesson shows how to handle one and carry on.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d76b9fc6-bd77-44a8-806c-e5105670d97b
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each line to the exception it raises.
+      payload:
+        concepts:
+          - id: key
+            text:
+              en: '{"a": 1}["b"]'
+          - id: index
+            text:
+              en: '[1, 2][5]'
+          - id: zero
+            text:
+              en: 10 / 0
+          - id: type
+            text:
+              en: '"a" + 1'
+        definitions:
+          - id: key-error
+            text:
+              en: KeyError
+          - id: index-error
+            text:
+              en: IndexError
+          - id: zero-error
+            text:
+              en: ZeroDivisionError
+          - id: type-error
+            text:
+              en: TypeError
+      answer:
+        pairs:
+          key: key-error
+          index: index-error
+          zero: zero-error
+          type: type-error
+      explanation:
+        en: >
+          A missing key, a position past the end, a division by zero, and text joined to a
+          number — each gets its own, precisely named, exception.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 76eb667e-3d72-470c-b581-a493ecddaf79
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What happens when Python runs `"5" + 5`?
+      payload:
+        options:
+          - id: type-error
+            text:
+              en: A TypeError
+          - id: value-error
+            text:
+              en: A ValueError
+          - id: syntax
+            text:
+              en: A SyntaxError
+          - id: joined
+            text:
+              en: Nothing goes wrong — it gives "55"
+      answer:
+        option_id: type-error
+      explanation:
+        en: >
+          Text and a number are different types, and `+` does not know whether to join or add.
+          The code is perfectly valid Python, so it is not a SyntaxError — it fails only when
+          it runs.
+      skill_tags: [exceptions, data-types]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 9562393e-68e5-481c-b8cf-034a9f8795cf
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: Which of these raise an exception?
+      payload:
+        options:
+          - id: float-text
+            text:
+              en: int("3.0")
+          - id: float
+            text:
+              en: int(3.9)
+          - id: past-end
+            text:
+              en: '[1, 2][2]'
+          - id: get
+            text:
+              en: '{"a": 1}.get("b")'
+          - id: zero
+            text:
+              en: 1 / 0
+      answer:
+        option_ids: [float-text, past-end, zero]
+      explanation:
+        en: >
+          `int` will not read a decimal point inside text, index 2 is past the end of a
+          two-item list, and dividing by zero is never allowed. `int(3.9)` simply gives 3, and
+          `get` returns None for a missing key instead of raising.
+      hint:
+        en: Two of these quietly give back a value.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5029fba1-05d1-4d7a-bc7b-d4169438e182
+      type: multiple_choice
+      difficulty: hard
+      prompt:
+        en: 'A program stops with "IndexError: list index out of range". Which line could have caused it?'
+      payload:
+        options:
+          - id: length
+            text:
+              en: items[len(items)]
+          - id: append
+            text:
+              en: items.append(5)
+          - id: len
+            text:
+              en: len(items)
+          - id: last
+            text:
+              en: items[-1], on a list with three items
+      answer:
+        option_id: length
+      explanation:
+        en: >
+          The last valid index is always one less than the length, so `items[len(items)]` is
+          always one step too far. Appending and measuring never index at all, and `-1` is fine
+          on any non-empty list.
+      hint:
+        en: What is the highest valid index for a list of length n?
+      skill_tags: [exceptions, lists, indexing]
+      review_status: draft

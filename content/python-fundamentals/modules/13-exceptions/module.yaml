@@ -1,0 +1,13 @@
+id: 35002fbe-89f7-4308-9928-034a885a79f5
+slug: exceptions
+title:
+  en: Exceptions
+description:
+  en: When things go wrong while a program runs — recognising the problem, recovering from it, and raising your own.
+order_index: 13
+estimated_minutes: 28
+lessons:
+  - exception-types
+  - try-except
+  - else-and-finally
+  - raising-exceptions

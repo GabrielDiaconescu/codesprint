@@ -1,0 +1,264 @@
+id: 5eb1acb5-fffc-424f-bd33-78f57e71fb5c
+slug: try-except
+title:
+  en: Recovering with try and except
+summary:
+  en: Catching an exception, carrying on afterwards, and catching only what you expect.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `try` runs code that might fail. If an exception of the type named in `except` happens,
+        Python jumps to the `except` block instead of stopping — and the program carries on
+        after it.
+
+  - type: code
+    code: |
+      text = "abc"
+      try:
+          number = int(text)
+          print(number)
+      except ValueError:
+          print("That is not a number")
+      print("Still running")
+    output: |-
+      That is not a number
+      Still running
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        When nothing goes wrong, the `except` block is skipped entirely.
+
+  - type: code
+    code: |
+      text = "42"
+      try:
+          number = int(text)
+          print(number)
+      except ValueError:
+          print("That is not a number")
+      print("Still running")
+    output: |-
+      42
+      Still running
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Name the exception you expect. A lookup in a dictionary can fail with a KeyError, so
+        that is what you catch.
+
+  - type: code
+    code: |
+      prices = {"tea": 2}
+      try:
+          print(prices["cake"])
+      except KeyError:
+          print("No such item")
+    output: 'No such item'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        A bare `except:` with no type catches everything — including your own typos and
+        bugs you have not found yet. Catch the specific exception you expect instead.
+
+  - type: question
+    question:
+      id: 95690bd6-0107-44e6-8e1d-108ef14dc137
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        try:
+            print(1 / 0)
+        except ZeroDivisionError:
+            print("oops")
+      payload:
+        input: text
+      answer:
+        value: oops
+        match_mode: trimmed
+      explanation:
+        en: >
+          Dividing by zero raises a ZeroDivisionError before anything is printed, and the
+          `except` block catches it.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: acb5f9f0-53e9-4c1c-9b38-7a64e4fd8fc2
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: If the `try` block runs without any error, the `except` block is skipped.
+      answer:
+        value: true
+      explanation:
+        en: >
+          `except` only runs when a matching exception actually happens.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 8738addb-c60a-422d-888b-63745d11e63c
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        try:
+            x = int("7")
+            print(x * 2)
+        except ValueError:
+            print("bad")
+        print("end")
+      payload:
+        input: choice
+        options:
+          - id: success
+            text:
+              en: "14\nend"
+          - id: failed
+            text:
+              en: "bad\nend"
+          - id: both
+            text:
+              en: "14\nbad\nend"
+          - id: only-end
+            text:
+              en: end
+      answer:
+        value: "14\nend"
+        match_mode: exact
+      explanation:
+        en: >
+          "7" converts fine, so the whole `try` block runs and the `except` is skipped. The
+          last line always runs.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: bc6ed8df-980f-41bc-bbe5-9d677624734c
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        try:
+            print("a")
+            n = int("x")
+            print("b")
+        except ValueError:
+            print("c")
+      payload:
+        input: choice
+        options:
+          - id: jumps
+            text:
+              en: "a\nc"
+          - id: all
+            text:
+              en: "a\nb\nc"
+          - id: only-c
+            text:
+              en: c
+          - id: a-b
+            text:
+              en: "a\nb"
+      answer:
+        value: "a\nc"
+        match_mode: exact
+      explanation:
+        en: >
+          "a" prints before anything goes wrong. The failing line jumps straight to `except`,
+          so the rest of the `try` block — the "b" — never runs.
+      hint:
+        en: What happens to the lines after the one that fails?
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c26ad780-73fb-45e7-8f1f-5f6346e6cd00
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the handler so a count of 0 gives a total of 0 instead of crashing.
+      code_snippet: |
+        try:
+            total = 10 / count
+        except ___:
+            total = 0
+      payload:
+        input: tokens
+        tokens: [ZeroDivisionError, ValueError, KeyError, IndexError]
+      answer:
+        value: ZeroDivisionError
+        match_mode: trimmed
+      explanation:
+        en: >
+          Dividing by a count of 0 raises a ZeroDivisionError, so that is the type to catch.
+          Catching any other type would let this one through.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5e7a2cfc-f037-4254-8d6b-7e94fbbd64db
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This should print "missing", but it crashes anyway. How do you fix it?
+      code_snippet: |
+        items = ["a", "b"]
+        try:
+            print(items[5])
+        except KeyError:
+            print("missing")
+      payload:
+        mode: choose_fix
+        options:
+          - id: index-error
+            text:
+              en: Catch IndexError instead of KeyError
+          - id: value-error
+            text:
+              en: Catch ValueError instead of KeyError
+          - id: nested
+            text:
+              en: Wrap the whole thing in a second try
+          - id: get
+            text:
+              en: Use items.get(5) instead of items[5]
+      answer:
+        option_id: index-error
+      runnable: true
+      fixed_code: |
+        items = ["a", "b"]
+        try:
+            print(items[5])
+        except IndexError:
+            print("missing")
+      fixed_output: missing
+      explanation:
+        en: >
+          A position past the end of a **list** raises an IndexError. KeyError is for
+          dictionaries, so the handler never matches and the exception escapes. Lists have no
+          `get` method.
+      hint:
+        en: Is `items` a list or a dictionary?
+      skill_tags: [exceptions, debugging]
+      review_status: draft

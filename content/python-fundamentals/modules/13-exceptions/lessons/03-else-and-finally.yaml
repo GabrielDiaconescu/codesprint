@@ -1,0 +1,269 @@
+id: 5ed29179-105c-4b68-b7e1-04ea86b59479
+slug: else-and-finally
+title:
+  en: else and finally
+summary:
+  en: Code that runs only on success, and code that runs no matter what.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        An `else` after the `except` blocks runs only when the `try` block raised nothing. It
+        is the place for code that depends on the risky part having worked.
+
+  - type: code
+    code: |
+      try:
+          n = int("5")
+      except ValueError:
+          print("bad input")
+      else:
+          print(n * 10)
+    output: '50'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `finally` runs whatever happened — after success, after a caught exception, even when
+        an exception is on its way out uncaught.
+
+  - type: code
+    code: |
+      try:
+          result = 10 / 0
+      except ZeroDivisionError:
+          print("cannot divide")
+      finally:
+          print("done")
+    output: |-
+      cannot divide
+      done
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        `finally` is for tidying up: closing something you opened, or noting that a job has
+        finished. Keep the `try` block itself as short as possible, so it is clear which line
+        you expect to fail.
+
+  - type: question
+    question:
+      id: 0f426b80-e1a3-45f2-99a8-e64e2665d5da
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: When does the `else` block of a `try` run?
+      payload:
+        options:
+          - id: no-error
+            text:
+              en: When the try block raised no exception
+          - id: error
+            text:
+              en: When an exception happened
+          - id: always
+            text:
+              en: Always, after the try block
+          - id: never
+            text:
+              en: Only when finally is missing
+      answer:
+        option_id: no-error
+      explanation:
+        en: >
+          `else` is the success path. `except` handles failure, and `finally` runs in every
+          case.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 8266f32a-5dc0-4341-928b-76f40f9c64ee
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`finally` still runs when an exception was caught by `except`.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          `finally` runs in every case — that is its whole purpose.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: a007461d-fcd4-46d0-b343-d16950b3b201
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        try:
+            n = int("x")
+        except ValueError:
+            print("A")
+        else:
+            print("B")
+        finally:
+            print("C")
+      payload:
+        input: choice
+        options:
+          - id: failed
+            text:
+              en: "A\nC"
+          - id: succeeded
+            text:
+              en: "B\nC"
+          - id: all
+            text:
+              en: "A\nB\nC"
+          - id: only-a
+            text:
+              en: A
+      answer:
+        value: "A\nC"
+        match_mode: exact
+      explanation:
+        en: >
+          The conversion fails, so `except` runs and `else` does not. `finally` runs either
+          way.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 4b6b2cb7-f022-49b2-a7bd-ed203e755cfa
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        try:
+            n = int("4")
+        except ValueError:
+            print("A")
+        else:
+            print("B")
+        finally:
+            print("C")
+      payload:
+        input: choice
+        options:
+          - id: succeeded
+            text:
+              en: "B\nC"
+          - id: failed
+            text:
+              en: "A\nC"
+          - id: only-b
+            text:
+              en: B
+          - id: all
+            text:
+              en: "A\nB\nC"
+      answer:
+        value: "B\nC"
+        match_mode: exact
+      explanation:
+        en: >
+          "4" converts without trouble, so `except` is skipped and `else` runs. `finally` runs
+          last, as always.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 9414c9e6-6237-4fa7-8b48-e0a772162b28
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each part to its job.
+      payload:
+        concepts:
+          - id: try
+            text:
+              en: try
+          - id: except
+            text:
+              en: except
+          - id: else
+            text:
+              en: else
+          - id: finally
+            text:
+              en: finally
+        definitions:
+          - id: risky
+            text:
+              en: The code that might fail
+          - id: on-failure
+            text:
+              en: What to do if it fails
+          - id: on-success
+            text:
+              en: What to do only if it did not fail
+          - id: always
+            text:
+              en: What to do either way
+      answer:
+        pairs:
+          try: risky
+          except: on-failure
+          else: on-success
+          finally: always
+      explanation:
+        en: >
+          Four blocks, four questions: what might go wrong, what if it does, what if it does
+          not, and what must happen regardless.
+      skill_tags: [exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 84d74457-926f-4867-8af7-7942f8ecc100
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        def f():
+            try:
+                return "try"
+            finally:
+                print("finally")
+
+        print(f())
+      payload:
+        input: choice
+        options:
+          - id: finally-first
+            text:
+              en: "finally\ntry"
+          - id: try-first
+            text:
+              en: "try\nfinally"
+          - id: only-try
+            text:
+              en: try
+          - id: only-finally
+            text:
+              en: finally
+      answer:
+        value: "finally\ntry"
+        match_mode: exact
+      explanation:
+        en: >
+          Even a `return` cannot skip `finally`. The function prints "finally" on its way out,
+          and only then does the caller receive "try" and print it.
+      hint:
+        en: Does `finally` still run when the function is returning?
+      skill_tags: [exceptions, functions]
+      review_status: draft
