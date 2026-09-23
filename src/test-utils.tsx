@@ -19,8 +19,12 @@ export const renderWithTheme = (ui: ReactElement) => render(<ThemeProvider>{ui}<
  * A fresh client per test: a shared one would carry one test's cached profile into the next
  * and produce a pass that depends on the order the tests happened to run in. Retries are off
  * so a deliberately failing mutation fails once, immediately.
+ *
+ * The client is returned too, so a test that starts a mutation can wait for it to SETTLE and
+ * not merely to be called: a mutation that resolves after the last assertion updates the
+ * component outside act(), and React blames whichever test runs next.
  */
-export const renderWithProviders = (ui: ReactElement) => {
+export const renderWithProviders = async (ui: ReactElement) => {
   const queryClient = new QueryClient({
     // No retries, so a deliberately failing call fails once and immediately; no garbage
     // collection timer, so Jest is not left with an open handle after the last assertion.
@@ -33,11 +37,15 @@ export const renderWithProviders = (ui: ReactElement) => {
   // Passed as `wrapper` rather than wrapped inline, because `rerender` re-renders the element
   // it is given: wrapping inline would drop the providers on the second render and fail with
   // a confusing "useTheme outside ThemeProvider".
-  return render(ui, {
+  const result = await render(ui, {
     wrapper: ({ children }) => (
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>{children}</ThemeProvider>
       </QueryClientProvider>
     ),
   });
+
+  // Assigned rather than spread: the render result has getters, and a spread would freeze
+  // them at their first value.
+  return Object.assign(result, { queryClient });
 };

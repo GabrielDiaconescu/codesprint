@@ -1,3 +1,4 @@
+import type { QueryClient } from '@tanstack/react-query';
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { renderWithProviders } from '@/test-utils';
@@ -50,6 +51,14 @@ beforeEach(() => {
   useNotificationStore.setState({ permission: { granted: true, canAskAgain: false } });
 });
 
+/**
+ * Waits for the write to FINISH, not merely to be called. `mockUpdate` is called a microtask
+ * before the mutation settles, and a settle after the last assertion re-renders the card
+ * outside act() — a warning React then attributes to whichever test runs next.
+ */
+const settled = (queryClient: QueryClient) =>
+  waitFor(() => expect(queryClient.isMutating()).toBe(0));
+
 describe('ReminderSettingsCard', () => {
   it('shows reminders as on when a time is stored, with that time selected', async () => {
     await renderWithProviders(<ReminderSettingsCard profile={profile('20:00')} />);
@@ -69,19 +78,25 @@ describe('ReminderSettingsCard', () => {
   });
 
   it('switching off clears the time — there is no second flag to disagree with it', async () => {
-    await renderWithProviders(<ReminderSettingsCard profile={profile('20:00')} />);
+    const { queryClient } = await renderWithProviders(
+      <ReminderSettingsCard profile={profile('20:00')} />,
+    );
 
     await fireEvent(screen.getByTestId('reminders-toggle'), 'valueChange', false);
 
     await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith({ reminderTime: null }));
+    await settled(queryClient);
   });
 
   it('switching on writes a time without asking again when permission is already granted', async () => {
-    await renderWithProviders(<ReminderSettingsCard profile={profile(null)} />);
+    const { queryClient } = await renderWithProviders(
+      <ReminderSettingsCard profile={profile(null)} />,
+    );
 
     await fireEvent(screen.getByTestId('reminders-toggle'), 'valueChange', true);
 
     await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith({ reminderTime: '18:00' }));
+    await settled(queryClient);
     expect(mockRequestPermissions).not.toHaveBeenCalled();
   });
 
@@ -91,7 +106,9 @@ describe('ReminderSettingsCard', () => {
     useNotificationStore.setState({ permission: { granted: false, canAskAgain: true } });
     mockRequestPermissions.mockResolvedValue({ granted: true, canAskAgain: false });
 
-    await renderWithProviders(<ReminderSettingsCard profile={profile(null)} />);
+    const { queryClient } = await renderWithProviders(
+      <ReminderSettingsCard profile={profile(null)} />,
+    );
 
     expect(screen.getByTestId('reminders-toggle')).toHaveProp('disabled', false);
     expect(screen.queryByTestId('reminders-open-settings')).toBeNull();
@@ -99,6 +116,7 @@ describe('ReminderSettingsCard', () => {
     await fireEvent(screen.getByTestId('reminders-toggle'), 'valueChange', true);
 
     await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith({ reminderTime: '18:00' }));
+    await settled(queryClient);
     expect(mockCapture).toHaveBeenCalledWith('notification_permission_result', {
       granted: true,
       source: 'settings',
@@ -111,13 +129,17 @@ describe('ReminderSettingsCard', () => {
     useNotificationStore.setState({ permission: { granted: false, canAskAgain: true } });
     mockRequestPermissions.mockResolvedValue({ granted: false, canAskAgain: false });
 
-    await renderWithProviders(<ReminderSettingsCard profile={profile(null)} />);
+    const { queryClient } = await renderWithProviders(
+      <ReminderSettingsCard profile={profile(null)} />,
+    );
     await fireEvent(screen.getByTestId('reminders-toggle'), 'valueChange', true);
 
     // The refusal comes back with `canAskAgain: false`, which is exactly the state that turns
     // this card into "go to system settings" — so waiting for that button both settles the
     // permission read and asserts what a refusal actually leaves behind.
     await waitFor(() => expect(screen.getByTestId('reminders-open-settings')).toBeOnTheScreen());
+    // The permission read is settled; the mutation that returned "nothing written" may not be.
+    await settled(queryClient);
 
     expect(screen.getByTestId('reminders-toggle')).toHaveProp('value', false);
     expect(mockUpdate).not.toHaveBeenCalled();
@@ -139,20 +161,24 @@ describe('ReminderSettingsCard', () => {
   });
 
   it('changing the time writes that time', async () => {
-    await renderWithProviders(<ReminderSettingsCard profile={profile('08:00')} />);
+    const { queryClient } = await renderWithProviders(
+      <ReminderSettingsCard profile={profile('08:00')} />,
+    );
 
     await fireEvent.press(screen.getByTestId('reminder-time-21:30'));
 
     await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith({ reminderTime: '21:30' }));
+    await settled(queryClient);
   });
 
   it('keeps the time the learner had when reminders are switched off and on again', async () => {
-    const { rerender } = await renderWithProviders(
+    const { rerender, queryClient } = await renderWithProviders(
       <ReminderSettingsCard profile={profile('08:00')} />,
     );
 
     await fireEvent(screen.getByTestId('reminders-toggle'), 'valueChange', false);
     await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith({ reminderTime: null }));
+    await settled(queryClient);
 
     // Awaited, like render and fireEvent: in RNTL v14 these all wrap act(), and an
     // un-awaited one overlaps the next.
@@ -160,5 +186,6 @@ describe('ReminderSettingsCard', () => {
     await fireEvent(screen.getByTestId('reminders-toggle'), 'valueChange', true);
 
     await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith({ reminderTime: '08:00' }));
+    await settled(queryClient);
   });
 });

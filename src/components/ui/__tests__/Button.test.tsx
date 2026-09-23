@@ -9,7 +9,7 @@ describe('Button', () => {
     const onPress = jest.fn();
     await renderWithTheme(<Button label="Continue" onPress={onPress} />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
@@ -17,7 +17,7 @@ describe('Button', () => {
     const onPress = jest.fn();
     await renderWithTheme(<Button label="Continue" onPress={onPress} disabled />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
     expect(onPress).not.toHaveBeenCalled();
   });
 
@@ -25,7 +25,7 @@ describe('Button', () => {
     const onPress = jest.fn();
     await renderWithTheme(<Button label="Check" onPress={onPress} loading />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Check' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Check' }));
     expect(onPress).not.toHaveBeenCalled();
   });
 
@@ -60,7 +60,7 @@ describe('Button', () => {
       const onPress = jest.fn();
       await renderWithTheme(<Button label="Go" variant={variant} onPress={onPress} />);
 
-      fireEvent.press(screen.getByRole('button', { name: 'Go' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Go' }));
       expect(onPress).toHaveBeenCalledTimes(1);
     },
   );

@@ -55,7 +55,7 @@ describe('HomeHeader', () => {
   it('saves a language change through the store, so it survives a restart', async () => {
     await renderWithProviders(<HomeHeader displayName="Alex" />);
 
-    fireEvent.press(screen.getByTestId('home-language'));
+    await fireEvent.press(screen.getByTestId('home-language'));
 
     // Calling i18n directly would switch the screen and forget the choice on the next launch.
     expect(mockSetLanguagePreference).toHaveBeenCalledWith('ro');
@@ -71,7 +71,7 @@ describe('HomeHeader', () => {
   it('switches to the opposite of the scheme currently on screen', async () => {
     await renderWithProviders(<HomeHeader displayName="Alex" />);
 
-    fireEvent.press(screen.getByTestId('home-theme'));
+    await fireEvent.press(screen.getByTestId('home-theme'));
 
     expect(mockSetThemePreference).toHaveBeenCalledWith('dark');
   });

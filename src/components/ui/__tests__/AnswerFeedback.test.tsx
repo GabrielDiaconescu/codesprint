@@ -60,7 +60,7 @@ describe('AnswerFeedback', () => {
       <AnswerFeedback {...baseProps} status="correct" onPrimaryAction={onPrimaryAction} />,
     );
 
-    fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
     expect(onPrimaryAction).toHaveBeenCalledTimes(1);
   });
 });

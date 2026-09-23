@@ -13,7 +13,7 @@ describe('TextField', () => {
       <TextField testID="email" label="Email" value="" onChangeText={onChangeText} />,
     );
 
-    fireEvent.changeText(screen.getByTestId('email'), 'user@example.com');
+    await fireEvent.changeText(screen.getByTestId('email'), 'user@example.com');
     expect(onChangeText).toHaveBeenCalledWith('user@example.com');
   });
 

@@ -49,7 +49,7 @@ describe('LanguageSettingsCard', () => {
   it('saves the language the learner picks', async () => {
     await renderWithProviders(<LanguageSettingsCard />);
 
-    fireEvent.press(screen.getByTestId('language-ro'));
+    await fireEvent.press(screen.getByTestId('language-ro'));
 
     expect(mockSetLanguagePreference).toHaveBeenCalledWith('ro');
   });
