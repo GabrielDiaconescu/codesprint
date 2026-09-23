@@ -33,11 +33,13 @@ blocks:
   - type: text
     body:
       en: |
-        Three types you will meet early:
+        Three types you will meet early. A **SyntaxError** means the text is not valid Python
+        at all, so nothing runs.
 
-        - **SyntaxError** — the text is not valid Python at all, so nothing runs.
-        - **NameError** — you used a name Python has never seen.
-        - **TypeError** — the values are fine, but not that kind of value for that operation.
+        A **NameError** means you used a name Python has never seen.
+
+        A **TypeError** means the values are fine, but not the right kind of value for that
+        operation.
 
   - type: callout
     variant: tip

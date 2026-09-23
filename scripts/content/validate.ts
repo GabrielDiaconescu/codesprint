@@ -187,6 +187,16 @@ export const runValidation = (root?: string): Issue[] => {
           add(file, `looks like unfinished placeholder text: "${value.slice(0, 60)}"`, path);
         }
       }
+
+      // The lesson renderer supports bold, inline code and paragraphs, nothing more
+      // (src/lib/markdown.ts). A list is joined into one run-on line with the markers left in
+      // the middle of the sentence, so it is refused here rather than seen on a phone.
+      if (/^\s*(?:[-*+]|\d+[.)])\s+\S/m.test(value)) {
+        add(file, 'uses a Markdown list, which lesson text does not render', path);
+      }
+      if (/^\s*#{1,6}\s/m.test(value)) {
+        add(file, 'uses a Markdown heading, which lesson text does not render', path);
+      }
     }
   };
 
