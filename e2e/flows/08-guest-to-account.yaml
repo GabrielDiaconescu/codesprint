@@ -1,0 +1,57 @@
+# A guest who has learnt something creates an account and keeps it (SPEC §12, D1).
+#
+# The address is confirmed through the local Mailpit inbox (e2e/scripts/confirmation-link.js)
+# — the same email a learner would get, from the same Supabase Auth.
+appId: ${APP_ID}
+name: Guest keeps progress after creating an account
+tags:
+  - auth
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow: ../subflows/guest-onboarding.yaml
+
+# Progress worth keeping: the first lesson.
+- tapOn:
+    id: home-continue
+- runFlow: ../generated/play-lesson-1.yaml
+- runFlow: ../subflows/finish-lesson.yaml
+
+# A fresh address every run, so a rerun never collides with the last one's account.
+- evalScript: ${output.email = 'e2e-' + Date.now() + '@codesprint.test'}
+
+- tapOn:
+    id: tab-profile
+- tapOn:
+    id: profile-link-account
+- tapOn:
+    id: link-email
+- inputText: ${output.email}
+- tapOn:
+    id: link-password
+- inputText: ${DEV_PASSWORD}
+# "Go" on the keyboard submits (see subflows/guest-onboarding.yaml for why not hideKeyboard).
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: verify-resend
+    timeout: 20000
+
+- runScript:
+    file: ../scripts/confirmation-link.js
+    env:
+      EMAIL: ${output.email}
+- openLink: ${output.appLink}
+
+# Signed in as the same user: no longer a guest, and the lesson is still done.
+- extendedWaitUntil:
+    visible:
+      id: player-card
+    timeout: 30000
+- assertVisible:
+    text: Showing output with print
+- tapOn:
+    id: tab-profile
+- assertNotVisible:
+    id: profile-link-account
+- assertVisible:
+    id: profile-sign-out

@@ -1,0 +1,56 @@
+# Wrong answers cost lives once the grace period is over, down to zero (SPEC §22).
+#
+# The free dev account has finished module 1's first three lessons (e2e fixtures), so the
+# three-lesson grace period is behind it and lesson 4 is next.
+appId: ${APP_ID}
+name: Wrong answers and lives
+tags:
+  - lives
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow:
+    file: ../subflows/sign-in.yaml
+    env:
+      EMAIL: free@codesprint.test
+      PASSWORD: ${DEV_PASSWORD}
+
+# The hearts row announces its count; that label is what a screen reader hears.
+- assertVisible:
+    text: 5 lives left of 5
+
+- tapOn:
+    id: home-continue
+# Five questions, five plausible wrong answers; the flow stops on the last one's feedback.
+- runFlow: ../generated/miss-lesson-4.yaml
+
+# The answer that took the last life offers every way forward (SPEC §22): the countdown, a
+# rewarded ad, and Premium. The card sits above the question; the flow ended at the feedback
+# below it.
+- scrollUntilVisible:
+    element:
+      id: out-of-lives-premium
+    direction: UP
+- assertVisible:
+    id: out-of-lives
+
+- scrollUntilVisible:
+    element:
+      id: answer-feedback-continue
+    direction: DOWN
+- tapOn:
+    id: answer-feedback-continue
+- runFlow:
+    when:
+      visible:
+        id: lesson-continue
+    commands:
+      - tapOn:
+          id: lesson-continue
+- extendedWaitUntil:
+    visible:
+      id: lesson-complete
+    timeout: 20000
+- runFlow: ../subflows/finish-lesson.yaml
+
+- assertVisible:
+    text: 0 lives left of 5

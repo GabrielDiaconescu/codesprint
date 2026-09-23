@@ -1,0 +1,37 @@
+# Switching the interface language from Home and back from Profile (SPEC §13, §29, §38).
+appId: ${APP_ID}
+name: Interface language
+tags:
+  - profile
+  - i18n
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow: ../subflows/guest-onboarding.yaml
+
+# Home's toggle: the next language, applied at once.
+- tapOn:
+    id: home-language
+- assertVisible:
+    text: Acasă
+# Romanian plural forms need the Intl.PluralRules polyfill on Hermes (src/i18n/pluralRules.ts);
+# without it this reads "0 de zile".
+- assertVisible:
+    text: 0 zile
+
+- tapOn:
+    id: tab-profile
+# In Romanian, the Language card explains that lessons are still English. The note is the
+# card's last line, so it is what the scroll goes to.
+- scrollUntilVisible:
+    element:
+      id: language-content-note
+    direction: DOWN
+- tapOn:
+    id: language-en
+- assertNotVisible:
+    id: language-content-note
+
+- tapOn:
+    id: tab-home
+- assertVisible:
+    text: Home

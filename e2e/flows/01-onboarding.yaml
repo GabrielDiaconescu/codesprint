@@ -1,0 +1,18 @@
+# A first-time learner: guest, six onboarding steps, and a Home that is not empty (SPEC §11, §13).
+appId: ${APP_ID}
+name: Onboarding as a guest
+tags:
+  - onboarding
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow: ../subflows/guest-onboarding.yaml
+
+# The welcoming "start your first lesson" state, with something to do right away.
+- assertVisible:
+    id: home-continue
+- assertVisible:
+    id: goal-card
+- assertVisible:
+    id: lives-row
+- assertVisible:
+    id: home-challenge

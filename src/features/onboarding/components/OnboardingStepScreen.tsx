@@ -90,7 +90,13 @@ export const OnboardingStepScreen = ({
             fullWidth
           />
           {skipLabel && onSkip && (
-            <Button variant="ghost" label={skipLabel} onPress={onSkip} disabled={busy} />
+            <Button
+              testID="onboarding-skip"
+              variant="ghost"
+              label={skipLabel}
+              onPress={onSkip}
+              disabled={busy}
+            />
           )}
         </View>
       </KeyboardAvoidingView>

@@ -116,5 +116,19 @@ module.exports = [
       'import/no-cycle': 'off',
     },
   },
+  // Maestro's JavaScript (e2e/scripts): a plain script run by Maestro's engine, whose `http`,
+  // `json` and `output` are provided by Maestro, and whose flow env vars arrive as globals.
+  {
+    files: ['e2e/scripts/**/*.js'],
+    languageOptions: {
+      sourceType: 'script',
+      globals: {
+        http: 'readonly',
+        json: 'readonly',
+        output: 'writable',
+        EMAIL: 'readonly',
+      },
+    },
+  },
   prettierConfig,
 ];

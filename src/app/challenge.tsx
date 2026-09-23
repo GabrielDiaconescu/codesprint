@@ -96,7 +96,7 @@ export default function ChallengeScreen() {
           {claim.isSuccess ? (
             <>
               {claim.data.xp_awarded > 0 ? (
-                <Text variant="bodyStrong" tone="accent" align="center">
+                <Text testID="challenge-bonus" variant="bodyStrong" tone="accent" align="center">
                   {t('done.bonus', { count: claim.data.xp_awarded })}
                 </Text>
               ) : (

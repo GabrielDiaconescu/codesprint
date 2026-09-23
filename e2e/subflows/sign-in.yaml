@@ -1,0 +1,17 @@
+# From the sign-in screen: signs in with EMAIL and PASSWORD, to Home.
+#
+# Used with the seeded dev accounts, whose onboarding the E2E fixtures have already completed.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: sign-in-email
+- inputText: ${EMAIL}
+- tapOn:
+    id: sign-in-password
+- inputText: ${PASSWORD}
+# "Go" on the keyboard signs in (see subflows/guest-onboarding.yaml for why not hideKeyboard).
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: player-card
+    timeout: 30000

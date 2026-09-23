@@ -47,6 +47,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: t('tabs.home'),
+          tabBarButtonTestID: 'tab-home',
           // Home draws its own header with the greeting and the quick toggles (SPEC §13),
           // so the navigator's would be the word "Home" twice.
           headerShown: false,
@@ -57,6 +58,7 @@ export default function TabsLayout() {
         name="learn"
         options={{
           title: t('tabs.learn'),
+          tabBarButtonTestID: 'tab-learn',
           tabBarIcon: ({ color, size }) => <Ionicons name="book" color={color} size={size} />,
         }}
       />
@@ -64,6 +66,7 @@ export default function TabsLayout() {
         name="leaderboard"
         options={{
           title: t('tabs.leaderboard'),
+          tabBarButtonTestID: 'tab-leaderboard',
           href: leaderboardEnabled ? undefined : null,
           tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color} size={size} />,
         }}
@@ -72,6 +75,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: t('tabs.profile'),
+          tabBarButtonTestID: 'tab-profile',
           tabBarIcon: ({ color, size }) => <Ionicons name="person" color={color} size={size} />,
         }}
       />

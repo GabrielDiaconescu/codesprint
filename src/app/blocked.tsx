@@ -21,6 +21,7 @@ export default function BlockedScreen() {
     <Screen>
       <View style={styles.centre}>
         <StateView
+          testID="age-blocked"
           icon="hourglass"
           title={t('blocked.title')}
           body={t('blocked.body', { minAge: config.min_user_age })}

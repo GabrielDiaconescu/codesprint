@@ -1,0 +1,49 @@
+# Opens the app as a first-time install would see it: no session, no settings, no language.
+#
+# The development client is pointed at the E2E Metro on METRO_PORT (set by scripts/e2e/run.ts,
+# reachable on the device through `adb reverse`). Two details that each cost a failed run:
+#   * the dev build's OWN scheme, not `exp+codesprint`: a preview build installed on the same
+#     device claims that one too, and Android stops to ask which app should open it;
+#   * the link is built here rather than passed in whole: an `&` on a Windows command line is
+#     a command separator.
+appId: ${APP_ID}
+---
+- evalScript: ${output.consentAnswered = false}
+- clearState
+- openLink: codesprint-dev://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A${METRO_PORT}&disableOnboarding=1
+
+# Two things can cover the first screen, in either order: Google's consent form (development
+# builds force the EEA one — declined, the non-personalised path every under-16 learner gets)
+# and the development client's own menu. While either covers the sign-in screen, Maestro cannot
+# see the app under it; so dismiss whatever is on top until the guest button shows. Generous,
+# because a cold bundle on an emulator is slow.
+- repeat:
+    while:
+      notVisible:
+        id: sign-in-guest
+    times: 120
+    commands:
+      - runFlow: dismiss-overlays.yaml
+      - extendedWaitUntil:
+          visible:
+            id: sign-in-guest
+          timeout: 2000
+          optional: true
+
+# The consent form is FORCED in development builds, so it always comes — but it waits on a
+# request to Google, and has arrived well after the first screen, on top of whatever a flow was
+# doing by then. So until it has been answered, wait for it; only a failed request (which leaves
+# ads off, and no flow depends on ads) lets the flow go on without it.
+- runFlow:
+    when:
+      true: ${!output.consentAnswered}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            text: Do not consent
+          timeout: 60000
+          optional: true
+      - runFlow: dismiss-overlays.yaml
+
+- assertVisible:
+    id: sign-in-guest

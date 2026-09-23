@@ -21,9 +21,10 @@ current phase, decisions taken and pending human actions.
 | `docs/PROGRESS.md` | Current phase, decisions, open questions, human actions           |
 | `PLAN.md`          | Architecture plan, database draft, risks, phase-1 detail          |
 | `CLAUDE.md`        | Working rules, phase gate, key commands                           |
+| `docs/TESTING.md`  | Test layers, the E2E suite and how to run it                      |
 
 Further documents (`ARCHITECTURE.md`, `DATABASE.md`, `CONTENT.md`, `MONETIZATION.md`,
-`LEGAL.md`, `DEPLOYMENT.md`, `TESTING.md`, `CONTRIBUTING.md`) are written in the phases that
+`LEGAL.md`, `DEPLOYMENT.md`, `CONTRIBUTING.md`) are written in the phases that
 make them meaningful, rather than as empty stubs.
 
 ## Requirements
@@ -71,6 +72,7 @@ npm run dev                                               # start Metro for the 
 | `npm run db:types`      | Regenerate database types after a migration           |
 | `npm run content:check` | Validate content and run every snippet on real Python |
 | `npm run content:seed`  | Regenerate `supabase/seed.sql` from the content files |
+| `npm run e2e`           | Maestro E2E suite on a device (see `docs/TESTING.md`) |
 
 Local services while Supabase is running: Studio on <http://127.0.0.1:54323>, the API on
 <http://127.0.0.1:54321>, and **Mailpit** — the local inbox that catches every verification and

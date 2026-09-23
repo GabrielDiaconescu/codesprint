@@ -61,3 +61,7 @@ supabase/.temp/
 *.swp
 Thumbs.db
 .tmp/
+
+# E2E: subflows generated from content on every run, and run artefacts
+e2e/generated/
+e2e/results/

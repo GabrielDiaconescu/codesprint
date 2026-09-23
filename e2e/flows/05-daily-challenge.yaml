@@ -1,0 +1,39 @@
+# The Daily Challenge pays once per local day, and says so the second time (SPEC §24).
+#
+# Its three questions are pinned for the days around today by the e2e fixtures, so the
+# flow knows the answers whatever the emulator's timezone makes "today".
+appId: ${APP_ID}
+name: Daily Challenge, claimed once
+tags:
+  - challenge
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow: ../subflows/guest-onboarding.yaml
+
+- scrollUntilVisible:
+    element:
+      id: home-challenge
+    direction: DOWN
+- tapOn:
+    id: home-challenge
+- runFlow: ../generated/play-challenge.yaml
+
+- tapOn:
+    id: challenge-claim
+- extendedWaitUntil:
+    visible:
+      id: challenge-bonus
+    timeout: 20000
+
+# Back to Home and in again: already claimed, so no questions and no second bonus.
+- back
+- scrollUntilVisible:
+    element:
+      id: home-challenge
+    direction: DOWN
+- tapOn:
+    id: home-challenge
+- extendedWaitUntil:
+    visible:
+      id: challenge-claimed
+    timeout: 20000

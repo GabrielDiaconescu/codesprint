@@ -1,0 +1,31 @@
+# Closes whatever the app did not draw that may sit on top of it, if anything is there.
+#
+# By its label, never with Back: Back pressed when the overlay has already gone lands on the
+# app, and on its first screen that exits it. Answering the consent form is recorded in
+# `output.consentAnswered`, so launch.yaml knows whether it still has to wait for it.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      visible:
+        text: Do not consent
+    commands:
+      - tapOn:
+          text: Do not consent
+      - evalScript: ${output.consentAnswered = true}
+# Android's "isn't responding" dialog: an emulator under load can show it during a cold
+# start. Waiting is what a person would do; closing would end the flow.
+- runFlow:
+    when:
+      visible:
+        text: Wait
+    commands:
+      - tapOn:
+          text: Wait
+- runFlow:
+    when:
+      visible:
+        text: React Native dev menu
+    commands:
+      - tapOn:
+          text: Close

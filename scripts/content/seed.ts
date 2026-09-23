@@ -247,7 +247,7 @@ const contentSql = (rows: ContentRows): string => {
  * free. `seed.sql` is only ever applied by `supabase db reset` against a local database;
  * `publish.ts` writes content and nothing else.
  */
-interface DevUser {
+export interface DevUser {
   id: string;
   email: string;
   /** Needed to appear on the leaderboard at all (SPEC §26). */
@@ -258,9 +258,9 @@ interface DevUser {
   entitlements: ('no_ads' | 'premium')[];
 }
 
-const DEV_PASSWORD = 'sprint2026';
+export const DEV_PASSWORD = 'sprint2026';
 
-const DEV_USERS: DevUser[] = [
+export const DEV_USERS: DevUser[] = [
   {
     id: '00000000-0000-4000-8000-000000000001',
     email: 'free@codesprint.test',

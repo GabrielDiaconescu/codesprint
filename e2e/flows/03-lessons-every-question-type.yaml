@@ -1,0 +1,39 @@
+# A guest plays all of module 1, answering every question correctly (SPEC §15, §16, §18).
+#
+# Module 1 holds every V1 question type between its four lessons, so this is also the
+# end-to-end check of all eight renderers against the real grading functions. The answers
+# come from the content files (e2e/generated/, see scripts/e2e/steps.ts).
+appId: ${APP_ID}
+name: Module 1, every question type
+tags:
+  - lesson
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow: ../subflows/guest-onboarding.yaml
+
+- tapOn:
+    id: home-continue
+- runFlow: ../generated/play-lesson-1.yaml
+# XP is shown on the completion screen, from the server's answer.
+- assertVisible:
+    id: lesson-complete
+- runFlow: ../subflows/finish-lesson.yaml
+
+- tapOn:
+    id: home-continue
+- runFlow: ../generated/play-lesson-2.yaml
+- runFlow: ../subflows/finish-lesson.yaml
+
+- tapOn:
+    id: home-continue
+- runFlow: ../generated/play-lesson-3.yaml
+- runFlow: ../subflows/finish-lesson.yaml
+
+- tapOn:
+    id: home-continue
+- runFlow: ../generated/play-lesson-4.yaml
+- runFlow: ../subflows/finish-lesson.yaml
+
+# Module 1 is done, so Home has moved on to module 2 — the server's progress, not a guess.
+- assertVisible:
+    text: Storing a value in a variable

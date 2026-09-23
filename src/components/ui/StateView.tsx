@@ -53,7 +53,13 @@ export const StateView = ({
         </Text>
       )}
       {actionLabel && onAction && (
-        <Button label={actionLabel} onPress={onAction} variant="secondary" />
+        <Button
+          // Derived, so an E2E flow can act without matching the label in every language.
+          testID={testID ? `${testID}-action` : undefined}
+          label={actionLabel}
+          onPress={onAction}
+          variant="secondary"
+        />
       )}
     </View>
   );

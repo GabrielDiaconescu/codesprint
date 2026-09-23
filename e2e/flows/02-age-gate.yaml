@@ -1,0 +1,23 @@
+# Under the minimum age there is no account and no way around it (SPEC §11, §41).
+appId: ${APP_ID}
+name: Age gate refuses a child
+tags:
+  - onboarding
+  - privacy
+---
+- runFlow: ../subflows/launch.yaml
+- tapOn:
+    id: sign-in-guest
+- tapOn:
+    id: onboarding-birth-year
+# Ten years old, whatever year the suite runs in.
+- inputText: ${new Date().getFullYear() - 10}
+# Enter submits, as on the keyboard (see subflows/guest-onboarding.yaml for why not hideKeyboard).
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: age-blocked
+    timeout: 20000
+# The blocked screen is a dead end: no way back into onboarding from here.
+- assertNotVisible:
+    id: onboarding-continue

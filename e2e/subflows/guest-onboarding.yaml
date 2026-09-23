@@ -1,0 +1,46 @@
+# From the sign-in screen: a new guest through all six onboarding steps, to Home (SPEC §11).
+appId: ${APP_ID}
+---
+- tapOn:
+    id: sign-in-guest
+
+# 1. Age gate — an adult, so no minor defaults apply. Enter submits the step, as the keyboard's
+# "next" key does for a person. Never `hideKeyboard`: on Android it presses Back, and if the
+# keyboard is not up at that instant, Back leaves the first onboarding step — and the app.
+- tapOn:
+    id: onboarding-birth-year
+- inputText: '2000'
+- pressKey: Enter
+
+# 2–4. Experience, motivation, daily goal.
+- tapOn:
+    id: experience-complete_beginner
+- tapOn:
+    id: onboarding-continue
+- tapOn:
+    id: motivation-personal
+- tapOn:
+    id: onboarding-continue
+- tapOn:
+    id: goal-5
+- tapOn:
+    id: onboarding-continue
+
+# 5. No reminder: the notification permission prompt is the OS's, not ours to script.
+- tapOn:
+    id: onboarding-skip
+
+# 6. Consent — analytics stays off. Every step's button is `onboarding-continue`, so wait for
+# THIS step first: tapped while the previous step is still leaving, the tap lands on that
+# step's button instead and nothing happens.
+- extendedWaitUntil:
+    visible:
+      id: consent-analytics
+    timeout: 20000
+- tapOn:
+    id: onboarding-continue
+
+- extendedWaitUntil:
+    visible:
+      id: next-lesson-card
+    timeout: 30000

@@ -1,0 +1,62 @@
+# The paywall is honest and restoring with nothing to restore says so (SPEC §31, §33).
+#
+# Offerings come from the RevenueCat Test Store the development build is configured with —
+# a real integration in its sandbox mode, not a mock (SPEC §59.11).
+appId: ${APP_ID}
+name: Paywall and restore purchases
+tags:
+  - billing
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow: ../subflows/guest-onboarding.yaml
+
+- tapOn:
+    id: tab-profile
+- scrollUntilVisible:
+    element:
+      id: subscription-upgrade
+    direction: DOWN
+- tapOn:
+    id: subscription-upgrade
+- extendedWaitUntil:
+    visible:
+      id: paywall
+    timeout: 20000
+
+# Top to bottom, as the screen reads. The plans come from the store, so the first one is waited
+# for; the No Ads plan says plainly that it is not Premium (SPEC §33); Free is listed too.
+- scrollUntilVisible:
+    element:
+      id: no-ads-disclaimer
+    direction: DOWN
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: plan-premium_monthly
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      id: paywall-free
+    direction: DOWN
+
+- scrollUntilVisible:
+    element:
+      id: paywall-restore
+    direction: DOWN
+- tapOn:
+    id: paywall-restore
+# Restore asks the SERVER what this learner has (sync-entitlements, SPEC §31), and the server
+# asks RevenueCat with a secret key. The runner says whether the local stack has one:
+# with it, a new guest has nothing to restore; without it, the app must say so plainly rather
+# than spin or claim success. Either way the learner is told something true.
+- extendedWaitUntil:
+    visible:
+      text: "${RESTORE_OUTCOME == 'nothing' ? 'No previous purchases found for this account.' : 'Could not restore purchases. Please try again.'}"
+    timeout: 30000
+
+# The close control works straight away (SPEC §33).
+- back
+- extendedWaitUntil:
+    visible:
+      id: subscription-upgrade
+    timeout: 10000

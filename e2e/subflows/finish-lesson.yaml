@@ -1,0 +1,30 @@
+# From a lesson's completion screen back to Home.
+#
+# Leaving the completion screen is the natural break where an interstitial may come (SPEC §30):
+# after the three-lesson grace period, a free learner who declined personalised ads still gets
+# a non-personalised one — Google's test ad, in a development build. It is closed the way a
+# person would close it, and the flow waits for Home behind it.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: lesson-complete-action
+- repeat:
+    while:
+      notVisible:
+        id: player-card
+    times: 30
+    commands:
+      - runFlow:
+          when:
+            visible:
+              text: Test Ad
+          commands:
+            - tapOn:
+                text: Close
+      - extendedWaitUntil:
+          visible:
+            id: player-card
+          timeout: 2000
+          optional: true
+- assertVisible:
+    id: player-card

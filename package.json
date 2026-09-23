@@ -25,6 +25,8 @@
     "content:seed": "tsx scripts/content/seed.ts",
     "content:publish": "tsx scripts/content/publish.ts",
     "content:check": "npm run content:validate && npm run content:verify",
+    "e2e": "tsx scripts/e2e/run.ts",
+    "e2e:generate": "tsx scripts/e2e/generate.ts",
     "verify": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {

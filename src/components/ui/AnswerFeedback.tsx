@@ -97,6 +97,8 @@ export const AnswerFeedback = ({
       )}
 
       <Button
+        // Derived, so an E2E flow can move on without matching the label in every language.
+        testID={testID ? `${testID}-continue` : undefined}
         label={primaryActionLabel}
         onPress={onPrimaryAction}
         variant={isCorrect ? 'primary' : 'secondary'}
