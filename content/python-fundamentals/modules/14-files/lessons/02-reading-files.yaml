@@ -1,0 +1,228 @@
+id: e7f1dd4d-8f04-4719-b48f-d2d0cb16358d
+slug: reading-files
+title:
+  en: Reading a file back
+summary:
+  en: The whole file at once, one line at a time, or as a list — and the new line each line keeps.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        With no mode, `open` reads. `read()` gives you the whole file as one string. Looping
+        over the file gives you one line at a time — and each line still ends with its `\n`,
+        which `strip()` removes.
+
+  - type: code
+    code: |
+      with open("fruit.txt", "w") as f:
+          f.write("apple\nbanana\ncherry\n")
+
+      with open("fruit.txt") as f:
+          for line in f:
+              print(line.strip())
+    output: |-
+      apple
+      banana
+      cherry
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `readlines()` reads every line into a list. Printing that list shows the `\n` at the
+        end of each line.
+
+  - type: code
+    code: |
+      with open("fruit.txt", "w") as f:
+          f.write("apple\nbanana\n")
+
+      with open("fruit.txt") as f:
+          lines = f.readlines()
+
+      print(lines)
+      print(len(lines))
+    output: |-
+      ['apple\n', 'banana\n']
+      2
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Forget `strip()` and every printed line is followed by a blank one: the `\n` from the
+        file, plus the one `print` always adds.
+
+  - type: question
+    question:
+      id: 4421f41c-65ac-4b3d-b601-458a892b2c0a
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Opening a file with no mode opens it for reading.
+      answer:
+        value: true
+      explanation:
+        en: >
+          Reading is the default. `open("x.txt")` and `open("x.txt", "r")` are the same.
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: fe34f8a8-13ef-4521-84c7-6b35a11bd8ff
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("m.txt", "w") as f:
+            f.write("hi there")
+
+        with open("m.txt") as f:
+            print(f.read())
+      payload:
+        input: text
+      answer:
+        value: hi there
+        match_mode: trimmed
+      explanation:
+        en: >
+          `read()` returns exactly what was written, as one string.
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: aec6f855-c84f-45f6-8860-7afcb57872cb
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("ab.txt", "w") as f:
+            f.write("a\nb\n")
+
+        with open("ab.txt") as f:
+            print(f.readlines())
+      payload:
+        input: choice
+        options:
+          - id: with-newlines
+            text:
+              en: "['a\\n', 'b\\n']"
+          - id: bare
+            text:
+              en: "['a', 'b']"
+          - id: string
+            text:
+              en: 'ab'
+          - id: extra
+            text:
+              en: "['a\\n', 'b\\n', '']"
+      answer:
+        value: "['a\\n', 'b\\n']"
+        match_mode: exact
+      explanation:
+        en: >
+          Each line keeps its line break, and a printed list shows it as `\n` inside the
+          quotes. The final line break does not create an extra empty item.
+      skill_tags: [files, lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2bfcb5b0-1a0a-419f-ae6f-0e4151bd10a2
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("n.txt", "w") as f:
+            f.write("x\ny\nz\n")
+
+        count = 0
+        with open("n.txt") as f:
+            for line in f:
+                count += 1
+        print(count)
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The loop visits each of the three lines once. Counting lines this way works however
+          large the file is.
+      skill_tags: [files, loops, accumulators]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0e4dc94c-d4b5-40e5-955d-90b5835a31b6
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so each line prints without an extra blank line after it.
+      code_snippet: |
+        with open("fruit.txt") as f:
+            for line in f:
+                print(line.___())
+      payload:
+        input: tokens
+        tokens: [strip, split, upper, read]
+      answer:
+        value: strip
+        match_mode: trimmed
+      explanation:
+        en: >
+          `strip()` removes the line break at the end of each line, leaving just the one that
+          `print` adds.
+      skill_tags: [files, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: daebbf25-2733-419a-a5de-09a3ed32716b
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("w.txt", "w") as f:
+            f.write("a\nb\n")
+
+        with open("w.txt") as f:
+            for line in f:
+                print(line)
+      payload:
+        input: choice
+        options:
+          - id: blank-lines
+            text:
+              en: "a\n\nb"
+          - id: tidy
+            text:
+              en: "a\nb"
+          - id: joined
+            text:
+              en: ab
+          - id: list
+            text:
+              en: "['a', 'b']"
+      answer:
+        value: "a\n\nb"
+        match_mode: exact
+      explanation:
+        en: >
+          Each line still ends with its own line break, and `print` adds another, so there is
+          a blank line after each one. `strip()` is the fix.
+      hint:
+        en: Count the line breaks after each letter.
+      skill_tags: [files]
+      review_status: draft

@@ -1,0 +1,230 @@
+id: 1577e1e1-6b67-4f0f-8f0c-1e28b4ab2d5c
+slug: writing-files
+title:
+  en: Writing to a file
+summary:
+  en: open, with, and write — and why write never adds a new line for you.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Variables disappear when a program ends; files do not. `open(name, "w")` opens a file
+        for **writing**, creating it if it does not exist. Doing it inside a `with` block
+        means the file is closed properly as soon as the block ends.
+
+  - type: code
+    code: |
+      with open("notes.txt", "w") as f:
+          f.write("Buy milk\n")
+          f.write("Call Ann\n")
+
+      with open("notes.txt") as f:
+          print(f.read())
+    output: |-
+      Buy milk
+      Call Ann
+    runnable: true
+    caption:
+      en: The second block reads the file back, to show what was written.
+
+  - type: text
+    body:
+      en: |
+        `write` puts exactly the text you give it into the file — nothing more. It adds no
+        space and no new line, so you write `\n` yourself wherever a line should end.
+
+  - type: code
+    code: |
+      with open("n.txt", "w") as f:
+          f.write("a")
+          f.write("b")
+
+      with open("n.txt") as f:
+          print(f.read())
+    output: 'ab'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Opening a file with `"w"` empties it immediately — before you have written a single
+        character. Whatever was in it is gone.
+
+  - type: question
+    question:
+      id: 91892586-3f70-457a-b28f-882ecf1d46da
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which mode opens a file for writing?
+      payload:
+        options:
+          - id: w
+            text:
+              en: '"w"'
+          - id: r
+            text:
+              en: '"r"'
+          - id: read
+            text:
+              en: '"read"'
+          - id: open
+            text:
+              en: '"open"'
+      answer:
+        option_id: w
+      explanation:
+        en: >
+          `"w"` is write. `"r"` is read, which is also what you get when you give no mode at
+          all. The other two are not modes.
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: f13c2eb2-a2ab-4cd8-9b0e-a7e0c1e55829
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`f.write("hi")` starts a new line after the text automatically.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          Unlike `print`, `write` adds nothing. Write `"hi\n"` when you want the line to end.
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 94af7099-d1f3-4fe0-b619-93ed1f043e18
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("t.txt", "w") as f:
+            f.write("1")
+            f.write("2")
+
+        with open("t.txt") as f:
+            print(f.read())
+      payload:
+        input: text
+      answer:
+        value: '12'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The two writes land next to each other with nothing in between, so the file holds
+          "12".
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 292c9701-f553-4096-9ad9-943a15e20a79
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What does using `with` do for a file?
+      payload:
+        options:
+          - id: closes
+            text:
+              en: Closes it automatically when the block ends
+          - id: read-only
+            text:
+              en: Makes it read-only
+          - id: backup
+            text:
+              en: Keeps a backup copy
+          - id: twice
+            text:
+              en: Opens it twice, for reading and writing
+      answer:
+        option_id: closes
+      explanation:
+        en: >
+          A file must be closed to make sure everything written is saved. `with` does that for
+          you, even if something goes wrong inside the block.
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c7677b62-d31d-467a-92d5-eb1c53db60f8
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This stops with a TypeError instead of saving the number. How do you fix it?
+      code_snippet: |
+        with open("out.txt", "w") as f:
+            f.write(42)
+      payload:
+        mode: choose_fix
+        options:
+          - id: str
+            text:
+              en: Write str(42) instead of 42
+          - id: read-mode
+            text:
+              en: Open the file with "r" instead of "w"
+          - id: print
+            text:
+              en: Use print(42) instead of f.write(42)
+          - id: newline
+            text:
+              en: Add a new line after 42
+      answer:
+        option_id: str
+      runnable: true
+      fixed_code: |
+        with open("out.txt", "w") as f:
+            f.write(str(42))
+
+        with open("out.txt") as f:
+            print(f.read())
+      fixed_output: '42'
+      explanation:
+        en: >
+          A text file holds text, so `write` accepts only strings. `print(42)` would show the
+          number on screen but put nothing in the file.
+      hint:
+        en: What type does `write` expect?
+      skill_tags: [files, data-types, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: af58fb9a-9840-4d8e-9aa7-6c80b1a816b5
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("log.txt", "w") as f:
+            f.write("first")
+
+        with open("log.txt", "w") as f:
+            f.write("second")
+
+        with open("log.txt") as f:
+            print(f.read())
+      payload:
+        input: text
+      answer:
+        value: second
+        match_mode: trimmed
+      explanation:
+        en: >
+          Each `"w"` empties the file before writing. The second open wipes "first" away, so
+          only "second" is left.
+      hint:
+        en: What does opening with "w" do to what is already there?
+      skill_tags: [files]
+      review_status: draft

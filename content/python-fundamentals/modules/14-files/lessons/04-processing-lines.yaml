@@ -1,0 +1,249 @@
+id: 6a824e33-e5cf-48ce-a6cd-b5485f595b76
+slug: processing-lines
+title:
+  en: One record per line
+summary:
+  en: Reading comma-separated records, converting their fields, and writing records back out.
+estimated_minutes: 8
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Real files usually hold one record per line, with the fields separated by a comma.
+        Strip the line, split it on the comma, and unpack the fields into names.
+
+  - type: code
+    code: |
+      with open("scores.txt", "w") as f:
+          f.write("Ann,82\nBo,75\nCy,91\n")
+
+      total = 0
+      with open("scores.txt") as f:
+          for line in f:
+              name, score = line.strip().split(",")
+              total += int(score)
+      print(total)
+    output: '248'
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Writing records works the other way: build each line with an f-string and end it with
+        `\n`.
+
+  - type: code
+    code: |
+      people = [("Ann", 31), ("Bo", 25)]
+      with open("people.txt", "w") as f:
+          for name, age in people:
+              f.write(f"{name},{age}\n")
+
+      with open("people.txt") as f:
+          print(f.read().strip())
+    output: |-
+      Ann,31
+      Bo,25
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        Everything read from a text file is a string — even "82". Convert with `int()` or
+        `float()` before doing any arithmetic.
+
+  - type: question
+    question:
+      id: b08ac551-f354-4535-8e20-30cad1c0fd7f
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Values read from a text file arrive as strings.
+      answer:
+        value: true
+      explanation:
+        en: >
+          A text file stores characters, so that is what you get back. Numbers need converting.
+      skill_tags: [files, data-types]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1501dfaa-df08-4dfd-86dd-8dcd6b277faa
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: 'For the line `"Ann,82\n"`, which expression gives `["Ann", "82"]`?'
+      payload:
+        options:
+          - id: right
+            text:
+              en: line.strip().split(",")
+          - id: spaces
+            text:
+              en: line.split()
+          - id: strip-comma
+            text:
+              en: line.strip(",")
+          - id: newline
+            text:
+              en: line.split("\n")
+      answer:
+        option_id: right
+      explanation:
+        en: >
+          `strip()` removes the line break, then `split(",")` cuts at the comma. Splitting on
+          spaces finds none here, and the other two never touch the comma in the middle.
+      skill_tags: [files, string-methods]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 97b610da-2de9-4b9b-a57b-37b04b3efd0e
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("s.txt", "w") as f:
+            f.write("Ann,82\nBo,95\n")
+
+        best = ""
+        top = 0
+        with open("s.txt") as f:
+            for line in f:
+                name, score = line.strip().split(",")
+                if int(score) > top:
+                    top = int(score)
+                    best = name
+        print(best)
+      payload:
+        input: text
+      answer:
+        value: Bo
+        match_mode: trimmed
+      explanation:
+        en: >
+          The loop keeps whoever has the highest score so far. Bo's 95 beats Ann's 82.
+      skill_tags: [files, loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: eecfb256-753d-4d67-94f8-4d3dd8f0fe13
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This should print 7 but stops with a TypeError. Which line is the problem?
+      code_snippet: |
+        with open("n.txt", "w") as f:
+            f.write("3\n4\n")
+
+        total = 0
+        with open("n.txt") as f:
+            for line in f:
+                total += line.strip()
+        print(total)
+      payload:
+        mode: select_line
+        lines:
+          - id: write
+            text: 'f.write("3\n4\n")'
+          - id: start
+            text: 'total = 0'
+          - id: add
+            text: '        total += line.strip()'
+          - id: show
+            text: 'print(total)'
+      answer:
+        line_id: add
+      runnable: true
+      fixed_code: |
+        with open("n.txt", "w") as f:
+            f.write("3\n4\n")
+
+        total = 0
+        with open("n.txt") as f:
+            for line in f:
+                total += int(line.strip())
+        print(total)
+      fixed_output: '7'
+      explanation:
+        en: >
+          `line.strip()` is the text "3", and a number cannot be added to text. Converting
+          with `int()` first gives 3 + 4 = 7.
+      hint:
+        en: What type is each line?
+      skill_tags: [files, data-types, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 3bd9492b-85ba-42f8-a0d0-e405a5fb8d7d
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("p.txt", "w") as f:
+            for n in [1, 2, 3]:
+                f.write(f"{n * n}\n")
+
+        with open("p.txt") as f:
+            print(f.read().strip())
+      payload:
+        input: choice
+        options:
+          - id: squares
+            text:
+              en: "1\n4\n9"
+          - id: one-line
+            text:
+              en: '149'
+          - id: numbers
+            text:
+              en: "1\n2\n3"
+          - id: last
+            text:
+              en: '9'
+      answer:
+        value: "1\n4\n9"
+        match_mode: exact
+      explanation:
+        en: >
+          Each round writes one square followed by a line break, all into the same open file.
+      skill_tags: [files, loops, f-strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1dd7718f-a6db-4924-890a-27112846bb3c
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("words.txt", "w") as f:
+            f.write("sun moon\nstar\n")
+
+        count = 0
+        with open("words.txt") as f:
+            for line in f:
+                count += len(line.split())
+        print(count)
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The first line splits into two words and the second into one. `split()` with no
+          argument also ignores the line break, so no strip is needed here.
+      hint:
+        en: Count the words on each line.
+      skill_tags: [files, string-methods]
+      review_status: draft

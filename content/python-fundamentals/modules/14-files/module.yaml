@@ -1,0 +1,13 @@
+id: bba2b10b-9dd8-408c-b4d5-eecfdfb6269f
+slug: files
+title:
+  en: Files
+description:
+  en: Keeping data after the program ends — writing text files, reading them back, and processing them line by line.
+order_index: 14
+estimated_minutes: 28
+lessons:
+  - writing-files
+  - reading-files
+  - file-modes
+  - processing-lines

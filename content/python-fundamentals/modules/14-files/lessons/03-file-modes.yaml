@@ -1,0 +1,231 @@
+id: e2a0ec36-4611-4139-8ea9-965a5f306bef
+slug: file-modes
+title:
+  en: Adding to a file, and missing files
+summary:
+  en: Append mode, the difference between w and a, and catching a file that is not there.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Mode `"a"` means **append**: the file is opened and everything you write goes on the
+        end. Nothing already in it is lost.
+
+  - type: code
+    code: |
+      with open("log.txt", "w") as f:
+          f.write("start\n")
+
+      with open("log.txt", "a") as f:
+          f.write("more\n")
+
+      with open("log.txt") as f:
+          print(f.read().strip())
+    output: |-
+      start
+      more
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Reading a file that does not exist raises a **FileNotFoundError**. It is caught like
+        any other exception.
+
+  - type: code
+    code: |
+      try:
+          with open("missing.txt") as f:
+              print(f.read())
+      except FileNotFoundError:
+          print("No such file")
+    output: 'No such file'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        `"r"` reads, `"w"` starts fresh, `"a"` adds to the end. Mixing up `"w"` and `"a"` is
+        the classic way to lose data, so decide which one you mean every time.
+
+  - type: question
+    question:
+      id: 10c7d616-17eb-4449-b7a1-c0e29b272a76
+      type: concept_matching
+      difficulty: easy
+      prompt:
+        en: Match each mode to what it does.
+      payload:
+        concepts:
+          - id: r
+            text:
+              en: '"r"'
+          - id: w
+            text:
+              en: '"w"'
+          - id: a
+            text:
+              en: '"a"'
+        definitions:
+          - id: read
+            text:
+              en: Read the file
+          - id: fresh
+            text:
+              en: Write, emptying the file first
+          - id: append
+            text:
+              en: Write on the end, keeping what is there
+      answer:
+        pairs:
+          r: read
+          w: fresh
+          a: append
+      explanation:
+        en: >
+          Read, write and append. Only `"w"` throws away what was already in the file.
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e543b358-bfea-4b83-ba47-c9746ac04d29
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Opening a file with `"a"` wipes what was already in it.
+      answer:
+        value: false
+      explanation:
+        en: >
+          `"a"` keeps the existing contents and adds to the end. That is `"w"`'s behaviour you
+          are thinking of.
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: ed9dc2cc-fe8d-471d-95f2-325ea6d72287
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        with open("x.txt", "w") as f:
+            f.write("1\n")
+
+        with open("x.txt", "a") as f:
+            f.write("2\n")
+
+        with open("x.txt", "a") as f:
+            f.write("3\n")
+
+        with open("x.txt") as f:
+            print(f.read().strip())
+      payload:
+        input: choice
+        options:
+          - id: all
+            text:
+              en: "1\n2\n3"
+          - id: last
+            text:
+              en: '3'
+          - id: first
+            text:
+              en: '1'
+          - id: joined
+            text:
+              en: '123'
+      answer:
+        value: "1\n2\n3"
+        match_mode: exact
+      explanation:
+        en: >
+          The `"w"` starts the file with 1, and each `"a"` adds a line to the end.
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 88b39fdd-eb52-496f-9889-5a25d6365458
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: What happens when you open a file that does not exist, for reading?
+      payload:
+        options:
+          - id: error
+            text:
+              en: A FileNotFoundError is raised
+          - id: created
+            text:
+              en: An empty file is created
+          - id: none
+            text:
+              en: open returns None
+          - id: empty
+            text:
+              en: read() returns an empty string
+      answer:
+        option_id: error
+      explanation:
+        en: >
+          Reading cannot invent a file. Only the writing modes create one that is missing.
+      skill_tags: [files, exceptions]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7497513c-c2fa-400e-abbf-c46e5ad049b1
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the mode so each run adds a line to the log instead of replacing it.
+      code_snippet: |
+        with open("log.txt", "___") as f:
+            f.write("Program started\n")
+      payload:
+        input: tokens
+        tokens: [a, w, r, rw]
+      answer:
+        value: a
+        match_mode: trimmed
+      explanation:
+        en: >
+          Append mode keeps the earlier lines. `"w"` would leave only the latest line, and
+          `"r"` cannot write at all.
+      skill_tags: [files]
+      review_status: draft
+
+  - type: question
+    question:
+      id: f440acdc-e228-4841-a4cf-95c15e5ec247
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        for i in range(3):
+            with open("c.txt", "w") as f:
+                f.write(str(i))
+
+        with open("c.txt") as f:
+            print(f.read())
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The file is reopened with `"w"` on every round, which empties it each time. Only the
+          last write — 2 — survives. With `"a"` the file would hold "012".
+      hint:
+        en: What does each round do to what the round before wrote?
+      skill_tags: [files, loops]
+      review_status: draft
