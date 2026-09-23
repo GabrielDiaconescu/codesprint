@@ -1,0 +1,217 @@
+id: d232a459-bd8d-4693-bf98-a0f9dd4dda19
+slug: looping-over-text
+title:
+  en: Going through text one character at a time
+summary:
+  en: Looping over a string directly, and reaching for positions only when you need them.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A `for` loop works with more than `range`. Give it a string and it hands you the
+        characters one at a time, in order.
+
+  - type: code
+    code: |
+      for ch in "hi!":
+          print(ch)
+    output: |-
+      h
+      i
+      !
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        Put an `if` inside the loop to act on only some of the characters.
+
+  - type: code
+    code: |
+      for ch in "banana":
+          if ch == "a":
+              print("found an a")
+    output: |-
+      found an a
+      found an a
+      found an a
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        When you need each character's position as well, loop over `range(len(word))` and use
+        the number to index the string.
+
+  - type: code
+    code: |
+      word = "ok"
+      for i in range(len(word)):
+          print(i, word[i])
+    output: |-
+      0 o
+      1 k
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Loop over the string itself whenever you only need the characters. It is shorter, and
+        there is no index to get wrong.
+
+  - type: question
+    question:
+      id: 6a55409d-8e8b-41e2-9e46-cb427caaef78
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        for ch in "abc":
+            print(ch)
+      payload:
+        input: choice
+        options:
+          - id: lines
+            text:
+              en: "a\nb\nc"
+          - id: one-line
+            text:
+              en: abc
+          - id: spaced
+            text:
+              en: a b c
+          - id: indexes
+            text:
+              en: "0\n1\n2"
+      answer:
+        value: "a\nb\nc"
+        match_mode: exact
+      explanation:
+        en: >
+          The loop gives one character per round, and each `print` puts it on its own line.
+      skill_tags: [loops, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 831e54d6-70e7-4413-8a3f-06c4e2f41e2e
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A `for` loop can go through the characters of a string one at a time.
+      answer:
+        value: true
+      explanation:
+        en: >
+          A string is a sequence of characters, and `for` walks through any sequence in order.
+      skill_tags: [loops, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6d2515fa-751c-4673-b859-04094666dcf7
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        for ch in "Hi":
+            print(ch * 2)
+      payload:
+        input: choice
+        options:
+          - id: doubled
+            text:
+              en: "HH\nii"
+          - id: whole
+            text:
+              en: HiHi
+          - id: once
+            text:
+              en: "H\ni"
+          - id: error
+            text:
+              en: A TypeError
+      answer:
+        value: "HH\nii"
+        match_mode: exact
+      explanation:
+        en: >
+          Each round handles one character. "H" repeated twice is "HH", then "i" repeated
+          twice is "ii".
+      skill_tags: [loops, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 327c0d3d-7e30-4933-af23-fdc93931dc4d
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: Which loop prints every character of `word` on its own line?
+      payload:
+        options:
+          - id: right
+            text:
+              en: 'for ch in word: print(ch)'
+          - id: range-word
+            text:
+              en: 'for ch in range(word): print(ch)'
+          - id: swapped
+            text:
+              en: 'for word in ch: print(word)'
+          - id: len
+            text:
+              en: 'for ch in len(word): print(ch)'
+      answer:
+        option_id: right
+      explanation:
+        en: >
+          `for ch in word` walks the string directly. `range` needs a number, not a string, and
+          `len(word)` is a single number that cannot be looped over on its own.
+      skill_tags: [loops, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c06dda55-c363-4905-a69b-398dcf3b8259
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        word = "code"
+        for i in range(len(word)):
+            if i % 2 == 0:
+                print(word[i])
+      payload:
+        input: choice
+        options:
+          - id: even-positions
+            text:
+              en: "c\nd"
+          - id: odd-positions
+            text:
+              en: "o\ne"
+          - id: all
+            text:
+              en: "c\no\nd\ne"
+          - id: indexes
+            text:
+              en: "0\n2"
+      answer:
+        value: "c\nd"
+        match_mode: exact
+      explanation:
+        en: >
+          `i` runs 0, 1, 2, 3. Only 0 and 2 are even, so the letters at those positions print:
+          "c" and "d".
+      hint:
+        en: Which positions are even, and which letters sit there?
+      skill_tags: [loops, strings, indexing]
+      review_status: draft

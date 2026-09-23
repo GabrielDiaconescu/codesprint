@@ -1,0 +1,14 @@
+id: 3112fe6c-6a0f-4c34-8a08-7a7b3b0fc2f4
+slug: loops
+title:
+  en: Loops
+description:
+  en: Repeating work — counting, going through text one character at a time, and knowing when to stop.
+order_index: 7
+estimated_minutes: 34
+lessons:
+  - for-and-range
+  - looping-over-text
+  - accumulating
+  - while-loops
+  - break-and-continue

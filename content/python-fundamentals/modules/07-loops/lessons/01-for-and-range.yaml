@@ -1,0 +1,240 @@
+id: 6cc91223-f2b0-4539-952b-1d175e4028bd
+slug: for-and-range
+title:
+  en: Repeating with for and range
+summary:
+  en: Running a block a set number of times, and choosing where the count starts, stops and steps.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A `for` loop runs its block once for every value it is given. `range(n)` gives the
+        whole numbers from 0 up to — but not including — `n`, so the block runs `n` times.
+
+  - type: code
+    code: |
+      for i in range(3):
+          print(i)
+    output: |-
+      0
+      1
+      2
+    runnable: true
+    caption:
+      en: Three rounds, with `i` taking the values 0, 1 and 2.
+
+  - type: text
+    body:
+      en: |
+        `range` works just like a slice. Give it a start and a stop to choose the numbers, and
+        a third value to set the step.
+
+  - type: code
+    code: |
+      for n in range(1, 10, 3):
+          print(n)
+    output: |-
+      1
+      4
+      7
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        The loop variable can be used inside the block like any other variable.
+
+  - type: code
+    code: |
+      for i in range(1, 4):
+          print(i * i)
+    output: |-
+      1
+      4
+      9
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        You choose the loop variable's name. `i` is the tradition for a plain counter, but a
+        name that says what the number means — `row`, `day`, `attempt` — reads better.
+
+  - type: question
+    question:
+      id: 21185e35-52ff-40a4-ab73-0789dea55e48
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: How many times does `for i in range(5):` run its block?
+      payload:
+        options:
+          - id: five
+            text:
+              en: '5'
+          - id: four
+            text:
+              en: '4'
+          - id: six
+            text:
+              en: '6'
+          - id: depends
+            text:
+              en: It depends on what is inside the block
+      answer:
+        option_id: five
+      explanation:
+        en: >
+          `range(5)` gives five values, 0 to 4, and the block runs once for each of them.
+      skill_tags: [loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 846e7193-56e9-4fbe-a207-430219111682
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        for i in range(3):
+            print(i)
+      payload:
+        input: choice
+        options:
+          - id: zero-two
+            text:
+              en: "0\n1\n2"
+          - id: one-three
+            text:
+              en: "1\n2\n3"
+          - id: zero-three
+            text:
+              en: "0\n1\n2\n3"
+          - id: three
+            text:
+              en: '3'
+      answer:
+        value: "0\n1\n2"
+        match_mode: exact
+      explanation:
+        en: >
+          `range(3)` starts at 0 and stops before 3, so `i` is 0, then 1, then 2.
+      skill_tags: [loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e9a61fc4-efec-4883-acf5-9edb70320ae1
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        for i in range(2, 8, 2):
+            print(i)
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "2\n4\n6"
+          - id: includes-stop
+            text:
+              en: "2\n4\n6\n8"
+          - id: no-step
+            text:
+              en: "2\n3\n4\n5\n6\n7"
+          - id: shifted
+            text:
+              en: "4\n6\n8"
+      answer:
+        value: "2\n4\n6"
+        match_mode: exact
+      explanation:
+        en: >
+          Start at 2, add 2 each time, and stop before reaching 8. So 2, 4 and 6 — 8 itself is
+          never produced.
+      skill_tags: [loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 60fabb31-7658-498e-b4ec-647ff2be2730
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the loop so it prints the numbers 1 to 5.
+      code_snippet: |
+        for i in range(1, ___):
+            print(i)
+      payload:
+        input: tokens
+        tokens: ['6', '5', '4', '1']
+      answer:
+        value: '6'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The stop is never included, so to reach 5 the stop has to be one more: 6.
+      hint:
+        en: Is the stop value itself included?
+      skill_tags: [loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 6d51da10-a311-4092-9ba7-01c8d065e5c3
+      type: true_false
+      difficulty: medium
+      prompt:
+        en: '`range(5)` includes the number 5.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          Like a slice, a range stops just before its stop value. `range(5)` gives 0, 1, 2, 3
+          and 4.
+      skill_tags: [loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 39105601-87f3-4da5-9f66-3ea3aea04afa
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        for i in range(10, 0, -3):
+            print(i)
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "10\n7\n4\n1"
+          - id: stops-early
+            text:
+              en: "10\n7\n4"
+          - id: overshoots
+            text:
+              en: "10\n7\n4\n1\n-2"
+          - id: reversed
+            text:
+              en: "1\n4\n7\n10"
+      answer:
+        value: "10\n7\n4\n1"
+        match_mode: exact
+      explanation:
+        en: >
+          A negative step counts down. From 10, subtract 3 each time: 10, 7, 4, 1. The next
+          value, -2, would be past the stop of 0, so the range ends at 1.
+      hint:
+        en: Keep subtracting 3 until you would go past 0.
+      skill_tags: [loops]
+      review_status: draft

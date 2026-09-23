@@ -1,0 +1,224 @@
+id: 4291ae6f-d928-4188-a14d-1d3d17a87d13
+slug: accumulating
+title:
+  en: Building up a result
+summary:
+  en: Totals, counts and new strings made one round at a time.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Many loops build up a single answer. The shape is always the same: create a variable
+        **before** the loop, update it **inside** the loop, and use it **after** the loop.
+        That variable is called an **accumulator**.
+
+  - type: code
+    code: |
+      total = 0
+      for n in range(1, 5):
+          total = total + n
+      print(total)
+    output: '10'
+    runnable: true
+    caption:
+      en: 0 + 1 + 2 + 3 + 4, one addition per round.
+
+  - type: text
+    body:
+      en: |
+        Counting works the same way: start at zero and add one each time something matches.
+        `+=` is the usual shorthand for "add to what is already there".
+
+  - type: code
+    code: |
+      count = 0
+      for ch in "mississippi":
+          if ch == "s":
+              count += 1
+      print(count)
+    output: '4'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Creating the accumulator **inside** the loop resets it every round, so only the last
+        round survives. If a total comes out suspiciously small, check where it starts.
+
+  - type: question
+    question:
+      id: a3a017a5-c967-41a6-84d4-302683dec12f
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        total = 0
+        for i in range(3):
+            total += 2
+        print(total)
+      payload:
+        input: text
+      answer:
+        value: '6'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The loop runs three times and adds 2 each time: 0, then 2, 4, 6.
+      skill_tags: [loops, accumulators]
+      review_status: draft
+
+  - type: question
+    question:
+      id: e242dc64-8079-48c9-8344-44df2256167a
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Where should `total = 0` go when you add up numbers in a loop?
+      payload:
+        options:
+          - id: before
+            text:
+              en: Before the loop
+          - id: inside
+            text:
+              en: Inside the loop
+          - id: after
+            text:
+              en: After the loop
+          - id: anywhere
+            text:
+              en: It makes no difference
+      answer:
+        option_id: before
+      explanation:
+        en: >
+          It has to exist before the first round adds to it, and it must not be reset during
+          the rounds. Only before the loop does both.
+      skill_tags: [accumulators]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1a06968f-91a8-4fcc-af34-6c941771a4f8
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        count = 0
+        for ch in "education":
+            if ch in "aeiou":
+                count += 1
+        print(count)
+      payload:
+        input: text
+      answer:
+        value: '5'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `ch in "aeiou"` asks whether the character is a vowel. "education" contains e, u, a,
+          i and o — five vowels.
+      hint:
+        en: Go through the word letter by letter.
+      skill_tags: [loops, accumulators, strings]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 62947901-fd50-4d57-a367-77a033513309
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This should print 6, the sum of 1, 2 and 3, but it prints 3. Which line is wrong?
+      code_snippet: |
+        for n in range(1, 4):
+            total = 0
+            total += n
+        print(total)
+      payload:
+        mode: select_line
+        lines:
+          - id: loop
+            text: 'for n in range(1, 4):'
+          - id: reset
+            text: '    total = 0'
+          - id: add
+            text: '    total += n'
+          - id: show
+            text: 'print(total)'
+      answer:
+        line_id: reset
+      runnable: true
+      fixed_code: |
+        total = 0
+        for n in range(1, 4):
+            total += n
+        print(total)
+      fixed_output: '6'
+      explanation:
+        en: >
+          `total = 0` runs at the start of every round, wiping out what was added before. Only
+          the last round's 3 survives. Moving it above the loop keeps the running total.
+      hint:
+        en: What happens to `total` at the start of each round?
+      skill_tags: [accumulators, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c465ce29-f126-46b7-ad8f-ac1a2a3cabb2
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the first line so the program prints 24, the product of 1, 2, 3 and 4.
+      code_snippet: |
+        product = ___
+        for n in range(1, 5):
+            product *= n
+        print(product)
+      payload:
+        input: tokens
+        tokens: ['1', '0', 'n', 'None']
+      answer:
+        value: '1'
+        match_mode: trimmed
+      explanation:
+        en: >
+          For multiplying, the starting value must be 1. Starting at 0 would make every product
+          0, `n` does not exist yet, and `None` cannot be multiplied.
+      hint:
+        en: Which number leaves any number unchanged when you multiply by it?
+      skill_tags: [accumulators]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7f71af00-2d68-4542-bf54-e38a83022ade
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        result = ""
+        for ch in "abc":
+            result = ch + result
+        print(result)
+      payload:
+        input: text
+      answer:
+        value: cba
+        match_mode: trimmed
+      explanation:
+        en: >
+          Each new character goes on the **front**: "a", then "b" + "a" = "ba", then "c" +
+          "ba" = "cba". Putting it on the back would rebuild the original word instead.
+      hint:
+        en: Write out `result` after each round.
+      skill_tags: [accumulators, strings]
+      review_status: draft
