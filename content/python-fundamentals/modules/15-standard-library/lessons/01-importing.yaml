@@ -1,0 +1,203 @@
+id: 6cc2a5c2-97e2-43da-b162-bff3ef0079e3
+slug: importing
+title:
+  en: Borrowing tools with import
+summary:
+  en: import, from ... import, and as — three ways to bring a module's tools into your program.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Python comes with a large **standard library**: modules full of ready-made tools.
+        `import` brings a module into your program, and you reach its tools with a dot.
+
+  - type: code
+    code: |
+      import math
+      print(math.sqrt(16))
+      print(math.pi)
+    output: |-
+      4.0
+      3.141592653589793
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `from module import name` brings in a single name, which you then use without the
+        prefix. `import module as short` gives the module a shorter name.
+
+  - type: code
+    code: |
+      from math import sqrt
+      print(sqrt(25))
+
+      import math as m
+      print(m.floor(2.7))
+    output: |-
+      5.0
+      2
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Never name your own file `math.py` or `random.py`. Python finds your file first, and
+        the real module becomes unreachable from that folder.
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Put imports at the top of the file. Plain `import math` keeps it obvious where each
+        name comes from, so prefer it until the prefix really gets in the way.
+
+  - type: question
+    question:
+      id: 07aac42b-ee0d-4b92-a829-38f1085f786b
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which line makes the math module available?
+      payload:
+        options:
+          - id: import
+            text:
+              en: import math
+          - id: include
+            text:
+              en: include math
+          - id: using
+            text:
+              en: using math
+          - id: require
+            text:
+              en: require("math")
+      answer:
+        option_id: import
+      explanation:
+        en: >
+          Python uses `import`. The other three are how some other languages do it.
+      skill_tags: [modules]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 30f46ab3-d4c5-4526-a3e8-9e978c64d299
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        import math
+        print(math.sqrt(9))
+      payload:
+        input: text
+      answer:
+        value: '3.0'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `sqrt` always returns a float, even when the square root is a whole number.
+      skill_tags: [modules, math]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 72d453c7-d766-4196-983f-bfb654da13dd
+      type: true_false
+      difficulty: medium
+      prompt:
+        en: After `from math import sqrt`, you call it as `sqrt(4)`, not `math.sqrt(4)`.
+      answer:
+        value: true
+      explanation:
+        en: >
+          Only the name `sqrt` was imported. `math` itself was not, so `math.sqrt` would be a
+          NameError.
+      skill_tags: [modules]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d2162dcf-05f4-4a3d-a5c1-cddb3002f70f
+      type: debugging
+      difficulty: medium
+      prompt:
+        en: This stops with a NameError. Which line is the problem?
+      code_snippet: |
+        import math
+        print(sqrt(16))
+      payload:
+        mode: select_line
+        lines:
+          - id: import
+            text: 'import math'
+          - id: call
+            text: 'print(sqrt(16))'
+      answer:
+        line_id: call
+      runnable: true
+      fixed_code: |
+        import math
+        print(math.sqrt(16))
+      fixed_output: '4.0'
+      explanation:
+        en: >
+          `import math` brings in the module, not its names. Its tools must be reached through
+          it: `math.sqrt`. Alternatively, write `from math import sqrt`.
+      hint:
+        en: What exactly did the first line import?
+      skill_tags: [modules, debugging]
+      review_status: draft
+
+  - type: question
+    question:
+      id: cb5e06ee-e1de-4246-b6bd-00d7a418ebfe
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the import so the second line works.
+      code_snippet: |
+        from math import ___
+        print(pi)
+      payload:
+        input: tokens
+        tokens: [pi, math, PI, sqrt]
+      answer:
+        value: pi
+        match_mode: trimmed
+      explanation:
+        en: >
+          The second line uses the bare name `pi`, so that is what must be imported. Names are
+          case-sensitive, so `PI` does not exist.
+      skill_tags: [modules]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 046c6e69-ebc9-4280-8c4e-a9a41d4735e1
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        import math as m
+        print(m.ceil(4.1) + m.floor(4.9))
+      payload:
+        input: text
+      answer:
+        value: '9'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `m` is just another name for `math`. `ceil` rounds 4.1 up to 5 and `floor` rounds
+          4.9 down to 4, which add up to 9.
+      hint:
+        en: One rounds up, the other rounds down — whatever the decimals.
+      skill_tags: [modules, math]
+      review_status: draft

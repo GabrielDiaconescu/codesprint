@@ -1,0 +1,208 @@
+id: a284ef71-f492-464a-97ca-5f58ae5b47c8
+slug: counter-and-dates
+title:
+  en: Counting and calendars
+summary:
+  en: Counter for counting in one line, and date arithmetic with datetime.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `Counter`, from the `collections` module, does the counting pattern in one line.
+        `most_common(n)` gives the `n` most frequent items with their counts.
+
+  - type: code
+    code: |
+      from collections import Counter
+      counts = Counter("banana")
+      print(counts["a"])
+      print(counts.most_common(1))
+    output: |-
+      3
+      [('a', 3)]
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        The `datetime` module handles dates. Subtracting one `date` from another gives a
+        duration, and its `.days` is the number of days between them.
+
+  - type: code
+    code: |
+      from datetime import date
+      start = date(2024, 1, 1)
+      end = date(2024, 3, 1)
+      print((end - start).days)
+      print(end.year)
+    output: |-
+      60
+      2024
+    runnable: true
+    caption:
+      en: 31 days of January plus 29 of February — 2024 was a leap year.
+
+  - type: text
+    body:
+      en: |
+        `timedelta` moves a date forward or back. Month and year boundaries are handled for
+        you.
+
+  - type: code
+    code: |
+      from datetime import date, timedelta
+      d = date(2024, 12, 30)
+      print(d + timedelta(days=3))
+    output: '2025-01-02'
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        `date.today()` gives the real current date, which is what an app usually wants. These
+        examples use fixed dates so that the answers never change.
+
+  - type: question
+    question:
+      id: 628732f3-579e-42b4-8b9e-c511dd76e832
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        from collections import Counter
+        print(Counter("hello")["l"])
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `Counter` counts every character, and "l" appears twice.
+      skill_tags: [modules, dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c8b1362a-eb04-408c-bdc6-4049cb4f2f14
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Subtracting one date from another gives a duration whose `.days` is the gap between them.
+      answer:
+        value: true
+      explanation:
+        en: >
+          Date arithmetic is built in, including leap years and months of different lengths.
+      skill_tags: [modules, dates]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 424f3bff-68c1-4df7-be46-d0d59c961e45
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        from datetime import date
+        print(date(2024, 5, 17).month)
+      payload:
+        input: text
+      answer:
+        value: '5'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The arguments are year, month and day, in that order, and `.month` reads the middle
+          one back.
+      skill_tags: [modules, dates]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d9120875-f9b5-4770-8c26-133c6caeb39e
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        from collections import Counter
+        print(Counter(["a", "b", "a"]).most_common(1))
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "[('a', 2)]"
+          - id: letter
+            text:
+              en: a
+          - id: dict
+            text:
+              en: "{'a': 2}"
+          - id: all
+            text:
+              en: "[('a', 2), ('b', 1)]"
+      answer:
+        value: "[('a', 2)]"
+        match_mode: exact
+      explanation:
+        en: >
+          `most_common(1)` returns a list holding one pair: the most frequent item and its
+          count.
+      skill_tags: [modules, dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 89eb101e-4a27-4671-9a94-d50906246020
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        from datetime import date, timedelta
+        print(date(2024, 2, 28) + timedelta(days=1))
+      payload:
+        input: text
+      answer:
+        value: 2024-02-29
+        match_mode: trimmed
+      explanation:
+        en: >
+          2024 is a leap year, so the day after 28 February is the 29th, not 1 March.
+          `datetime` knows the calendar so you do not have to.
+      hint:
+        en: Was 2024 a leap year?
+      skill_tags: [modules, dates]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5315abf0-798a-49d7-956f-d2d8b16b17c7
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        from datetime import date
+        print((date(2025, 1, 1) - date(2024, 1, 1)).days)
+      payload:
+        input: text
+      answer:
+        value: '366'
+        match_mode: trimmed
+      explanation:
+        en: >
+          A whole year passes, and it is the leap year 2024, so it has 366 days. Any "year is
+          365 days" shortcut would be wrong here.
+      hint:
+        en: Which year are you counting through?
+      skill_tags: [modules, dates]
+      review_status: draft

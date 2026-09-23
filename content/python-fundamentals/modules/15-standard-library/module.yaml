@@ -1,0 +1,13 @@
+id: 16251265-08c0-435c-9ed9-6b456ba11974
+slug: standard-library
+title:
+  en: Modules & the Standard Library
+description:
+  en: Using the tools that come with Python — importing modules, maths, randomness, counting and dates.
+order_index: 15
+estimated_minutes: 28
+lessons:
+  - importing
+  - math-module
+  - random-module
+  - counter-and-dates

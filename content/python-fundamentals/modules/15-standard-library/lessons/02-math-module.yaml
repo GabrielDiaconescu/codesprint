@@ -1,0 +1,212 @@
+id: a81d668a-48b5-4976-b445-876b96a9c304
+slug: math-module
+title:
+  en: The math module
+summary:
+  en: Rounding up and down on purpose, pi and square roots, and why floats and equality do not mix.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        `math.floor` always rounds **down** and `math.ceil` always rounds **up**, whatever the
+        decimals. `round` goes to the nearest whole number instead.
+
+  - type: code
+    code: |
+      import math
+      print(math.floor(3.7))
+      print(math.ceil(3.2))
+      print(round(3.7))
+    output: |-
+      3
+      4
+      4
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `math.pi` holds π to full precision, and `math.gcd` finds the greatest common divisor
+        of two whole numbers.
+
+  - type: code
+    code: |
+      import math
+      r = 2
+      print(round(math.pi * r ** 2, 2))
+      print(math.gcd(12, 18))
+    output: |-
+      12.57
+      6
+    runnable: true
+    caption:
+      en: The area of a circle with radius 2, rounded to two decimal places.
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        Most `math` functions work with floats and return floats. Because floats are
+        approximations, compare them with care: a result that should be exactly 2 may be off
+        in the sixteenth decimal place.
+
+  - type: question
+    question:
+      id: b23baab9-c72c-4c1c-8d1a-c089dd46f518
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        import math
+        print(math.ceil(2.1))
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `ceil` rounds up however small the decimal part is. 2.1 becomes 3.
+      skill_tags: [math]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1f3ceb11-49a6-4443-8602-d4a909d95f30
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`math.floor(4.9)` gives 5.'
+      answer:
+        value: false
+      explanation:
+        en: >
+          `floor` always rounds down, so 4.9 becomes 4. `round` would give 5.
+      skill_tags: [math]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0c48cd12-021a-4a52-b2b9-398149290bed
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        import math
+        print(math.floor(-2.5))
+      payload:
+        input: text
+      answer:
+        value: '-3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Down means towards the smaller number, and -3 is smaller than -2.5. It is the same
+          rule `//` follows.
+      skill_tags: [math]
+      review_status: draft
+
+  - type: question
+    question:
+      id: c3975d0e-b039-44f5-8b0e-01c6384f1cca
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: You need to know how many boxes of 6 hold 20 eggs. Which gives the right whole number?
+      payload:
+        options:
+          - id: ceil
+            text:
+              en: math.ceil(20 / 6)
+          - id: floor
+            text:
+              en: math.floor(20 / 6)
+          - id: round
+            text:
+              en: round(20 / 6)
+          - id: int
+            text:
+              en: int(20 / 6)
+      answer:
+        option_id: ceil
+      explanation:
+        en: >
+          20 / 6 is about 3.33, and three boxes would leave two eggs over. Any leftover needs
+          another box, so the answer must round up: 4. The others all give 3.
+      skill_tags: [math]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 0ee6853c-0c74-46c1-8924-3037ee9808f7
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each expression to its result.
+      payload:
+        concepts:
+          - id: floor
+            text:
+              en: math.floor(2.7)
+          - id: ceil
+            text:
+              en: math.ceil(2.2)
+          - id: sqrt
+            text:
+              en: math.sqrt(16)
+          - id: round
+            text:
+              en: round(4.6)
+        definitions:
+          - id: two
+            text:
+              en: '2'
+          - id: three
+            text:
+              en: '3'
+          - id: four-float
+            text:
+              en: '4.0'
+          - id: five
+            text:
+              en: '5'
+      answer:
+        pairs:
+          floor: two
+          ceil: three
+          sqrt: four-float
+          round: five
+      explanation:
+        en: >
+          Down, up, a float square root, and to the nearest whole number.
+      skill_tags: [math]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2b57a00d-ec2b-4b87-a31b-dcd988ef613d
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        import math
+        print(math.sqrt(2) ** 2 == 2)
+      payload:
+        input: text
+      answer:
+        value: 'False'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The square root of 2 cannot be stored exactly, so squaring the stored value gives
+          2.0000000000000004. Comparing floats with `==` is fragile for exactly this reason.
+      hint:
+        en: Remember how floats are stored.
+      skill_tags: [math, floats]
+      review_status: draft

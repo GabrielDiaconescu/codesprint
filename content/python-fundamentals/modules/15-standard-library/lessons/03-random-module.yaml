@@ -1,0 +1,224 @@
+id: 0960fe16-21cb-4f4b-812e-66167b5cf921
+slug: random-module
+title:
+  en: Randomness
+summary:
+  en: Dice rolls, random picks and shuffles — and making "random" repeatable with a seed.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        The `random` module produces unpredictable values. `randint(a, b)` gives a whole
+        number from `a` to `b` — both ends included, unlike `range`.
+
+  - type: code
+    code: |
+      import random
+      roll = random.randint(1, 6)
+      print(1 <= roll <= 6)
+    output: 'True'
+    runnable: true
+    caption:
+      en: The roll itself changes every run. What never changes is that it lands between 1 and 6.
+
+  - type: text
+    body:
+      en: |
+        `choice` picks one item from a list, and `shuffle` rearranges a list in place.
+
+  - type: code
+    code: |
+      import random
+      colours = ["red", "green", "blue"]
+      print(random.choice(colours) in colours)
+
+      cards = [1, 2, 3, 4]
+      random.shuffle(cards)
+      print(sorted(cards))
+    output: |-
+      True
+      [1, 2, 3, 4]
+    runnable: true
+    caption:
+      en: Shuffling changes the order, never the items.
+
+  - type: text
+    body:
+      en: |
+        `random.seed(n)` makes the sequence repeatable: the same seed always produces the same
+        "random" values. That is invaluable when testing a game.
+
+  - type: code
+    code: |
+      import random
+      random.seed(42)
+      first = random.randint(1, 100)
+      random.seed(42)
+      second = random.randint(1, 100)
+      print(first == second)
+    output: 'True'
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        `random` is fine for games and simulations. For anything secret, such as passwords or
+        tokens, Python has a separate module called `secrets`.
+
+  - type: question
+    question:
+      id: 1beca1db-9654-442f-9851-2fac22b0bda6
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: '`random.randint(1, 6)` can return 6.'
+      answer:
+        value: true
+      explanation:
+        en: >
+          Unlike `range`, `randint` includes both ends, which is why it suits dice.
+      skill_tags: [modules, random]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d4e26083-02c6-465d-89dc-41bfe3edc3f5
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: Which picks one item at random from a list called `items`?
+      payload:
+        options:
+          - id: choice
+            text:
+              en: random.choice(items)
+          - id: pick
+            text:
+              en: random.pick(items)
+          - id: randint
+            text:
+              en: random.randint(items)
+          - id: method
+            text:
+              en: items.random()
+      answer:
+        option_id: choice
+      explanation:
+        en: >
+          `choice` takes a sequence and returns one of its items. `randint` needs two numbers,
+          and the other two do not exist.
+      skill_tags: [modules, random]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5b5432b8-3b56-47ed-a3d9-7a1dd9a393c2
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: The shuffle is random, but the output is not. What does this print?
+      code_snippet: |
+        import random
+        nums = [5, 1, 4]
+        random.shuffle(nums)
+        print(sum(nums))
+      payload:
+        input: text
+      answer:
+        value: '10'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Shuffling reorders the list without changing its items, so the total is 10 whatever
+          order they end up in.
+      skill_tags: [modules, random, lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 2834ca5e-73f3-40f9-abf6-9071835e48e7
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        import random
+        random.seed(7)
+        a = [random.randint(1, 10) for _ in range(3)]
+        random.seed(7)
+        b = [random.randint(1, 10) for _ in range(3)]
+        print(a == b)
+      payload:
+        input: text
+      answer:
+        value: 'True'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Re-seeding with the same number restarts the same sequence, so both lists hold the
+          same three values. The `_` is a name for a loop variable you do not need.
+      skill_tags: [modules, random]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 8f8132ee-c982-475b-9099-a324454886fc
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: After `x = random.randint(1, 3)`, which values could `x` hold?
+      payload:
+        options:
+          - id: zero
+            text:
+              en: '0'
+          - id: one
+            text:
+              en: '1'
+          - id: two
+            text:
+              en: '2'
+          - id: three
+            text:
+              en: '3'
+          - id: four
+            text:
+              en: '4'
+      answer:
+        option_ids: [one, two, three]
+      explanation:
+        en: >
+          `randint(1, 3)` includes both 1 and 3, and nothing outside them.
+      skill_tags: [modules, random]
+      review_status: draft
+
+  - type: question
+    question:
+      id: d3582b11-daf5-471f-997e-3c239f7243ef
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        import random
+        deck = ["A", "B", "C"]
+        hand = random.sample(deck, 2)
+        print(len(hand), len(set(hand)))
+      payload:
+        input: text
+      answer:
+        value: 2 2
+        match_mode: trimmed
+      explanation:
+        en: >
+          `sample` picks the requested number of items **without repeats**, like drawing cards
+          you do not put back. So the hand has two items, and they are always two different
+          ones.
+      hint:
+        en: Can `sample` pick the same card twice?
+      skill_tags: [modules, random, sets]
+      review_status: draft
