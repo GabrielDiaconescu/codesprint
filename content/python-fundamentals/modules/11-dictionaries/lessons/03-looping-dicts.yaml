@@ -1,0 +1,248 @@
+id: a6c884c2-5be0-421f-8d45-3357817d3e3c
+slug: looping-dicts
+title:
+  en: Going through a dictionary
+summary:
+  en: Looping over keys, over key-value pairs with items(), and over values alone.
+estimated_minutes: 6
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A `for` loop over a dictionary gives you its **keys**, in the order they were added.
+
+  - type: code
+    code: |
+      ages = {"Ann": 31, "Bo": 25}
+      for name in ages:
+          print(name)
+    output: |-
+      Ann
+      Bo
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        When you need both halves, loop over `items()`. Each round hands you a key and its
+        value, which you unpack into two names.
+
+  - type: code
+    code: |
+      ages = {"Ann": 31, "Bo": 25}
+      for name, age in ages.items():
+          print(f"{name}: {age}")
+    output: |-
+      Ann: 31
+      Bo: 25
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `values()` gives just the values — handy with `sum`, `max` and friends.
+
+  - type: code
+    code: |
+      ages = {"Ann": 31, "Bo": 25}
+      print(sum(ages.values()))
+    output: '56'
+    runnable: true
+
+  - type: callout
+    variant: note
+    body:
+      en: |
+        Dictionaries remember the order entries were added in, so looping over one always
+        gives the same order. That has been guaranteed since Python 3.7.
+
+  - type: question
+    question:
+      id: 21af6227-413b-4389-8255-33cccdfc3a2f
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: What does `for k in d:` give you on each round?
+      payload:
+        options:
+          - id: keys
+            text:
+              en: The keys
+          - id: values
+            text:
+              en: The values
+          - id: pairs
+            text:
+              en: Key-value pairs
+          - id: positions
+            text:
+              en: Positions 0, 1, 2 and so on
+      answer:
+        option_id: keys
+      explanation:
+        en: >
+          Looping over a dictionary walks its keys. Use `items()` for pairs and `values()` for
+          values.
+      skill_tags: [dictionaries, loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 093a73da-de48-42ce-ace7-46ce731ebea0
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        d = {"x": 1, "y": 2}
+        for k in d:
+            print(k)
+      payload:
+        input: choice
+        options:
+          - id: keys
+            text:
+              en: "x\ny"
+          - id: values
+            text:
+              en: "1\n2"
+          - id: pairs
+            text:
+              en: "x 1\ny 2"
+          - id: reversed
+            text:
+              en: "y\nx"
+      answer:
+        value: "x\ny"
+        match_mode: exact
+      explanation:
+        en: >
+          The loop gives the keys, in the order they were added.
+      skill_tags: [dictionaries, loops]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 17d36542-6e97-4216-8398-2566ee549099
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        d = {"x": 1, "y": 2}
+        for k, v in d.items():
+            print(k * v)
+      payload:
+        input: choice
+        options:
+          - id: repeated
+            text:
+              en: "x\nyy"
+          - id: numbers
+            text:
+              en: "1\n4"
+          - id: once
+            text:
+              en: "x\ny"
+          - id: error
+            text:
+              en: A TypeError
+      answer:
+        value: "x\nyy"
+        match_mode: exact
+      explanation:
+        en: >
+          Each round unpacks a key and its value. A string times a number repeats it: "x" once,
+          then "y" twice.
+      skill_tags: [dictionaries, loops, unpacking]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 3084efe9-1c6e-46a3-a44b-8564a33b997b
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        prices = {"a": 3, "b": 4}
+        print(sum(prices.values()))
+      payload:
+        input: text
+      answer:
+        value: '7'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `values()` gives 3 and 4, and `sum` adds them. Summing the dictionary itself would
+          try to add up the keys.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 5325e94f-7f03-41b9-a0f1-5edd53c603da
+      type: concept_matching
+      difficulty: medium
+      prompt:
+        en: Match each method to what it gives you.
+      payload:
+        concepts:
+          - id: keys
+            text:
+              en: d.keys()
+          - id: values
+            text:
+              en: d.values()
+          - id: items
+            text:
+              en: d.items()
+        definitions:
+          - id: just-keys
+            text:
+              en: Just the keys
+          - id: just-values
+            text:
+              en: Just the values
+          - id: pairs
+            text:
+              en: Each key together with its value
+      answer:
+        pairs:
+          keys: just-keys
+          values: just-values
+          items: pairs
+      explanation:
+        en: >
+          The names say it: keys, values, and items — an item being one key-value pair.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7b054955-2c11-46c1-b527-098a2c9b8499
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        stock = {"tea": 0, "cake": 3, "jam": 0}
+        empty = 0
+        for item, qty in stock.items():
+            if qty == 0:
+                empty += 1
+        print(empty)
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The loop visits every pair and counts the ones whose quantity is 0: tea and jam.
+      hint:
+        en: Check each quantity in turn.
+      skill_tags: [dictionaries, loops, accumulators]
+      review_status: draft

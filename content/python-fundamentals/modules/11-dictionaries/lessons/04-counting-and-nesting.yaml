@@ -1,0 +1,220 @@
+id: b617c635-8b9a-4dea-b2a7-21ab07b142e7
+slug: counting-and-nesting
+title:
+  en: Counting things, and data inside data
+summary:
+  en: The counting pattern, and dictionaries that hold lists and other dictionaries.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Counting how often each thing appears is one of the most common jobs a dictionary
+        does. For every item, add one to its count, using `get` so a new item starts at zero.
+
+  - type: code
+    code: |
+      counts = {}
+      for ch in "banana":
+          counts[ch] = counts.get(ch, 0) + 1
+      print(counts)
+    output: "{'b': 1, 'a': 3, 'n': 2}"
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        A value can be anything — including a list or another dictionary. Read a nested
+        lookup from left to right: first the key, then whatever you do to what it holds.
+
+  - type: code
+    code: |
+      student = {"name": "Ann", "grades": [9, 7, 10]}
+      print(student["grades"][0])
+      print(max(student["grades"]))
+    output: |-
+      9
+      10
+    runnable: true
+    caption:
+      en: '`student["grades"]` is the list; `[0]` is its first item.'
+
+  - type: text
+    body:
+      en: |
+        A list of dictionaries is how most real data is shaped — one dictionary per person,
+        product or order.
+
+  - type: code
+    code: |
+      people = [{"name": "Ann", "age": 31}, {"name": "Bo", "age": 25}]
+      for p in people:
+          print(p["name"])
+    output: |-
+      Ann
+      Bo
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        When a nested lookup fails, split it into steps and print each one. You will see
+        exactly which level held something other than what you expected.
+
+  - type: question
+    question:
+      id: 4d1051d0-d2dd-45d5-80fa-1fde7dc5fb54
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        counts = {}
+        for w in ["hi", "hi", "yo"]:
+            counts[w] = counts.get(w, 0) + 1
+        print(counts["hi"])
+      payload:
+        input: text
+      answer:
+        value: '2'
+        match_mode: trimmed
+      explanation:
+        en: >
+          "hi" appears twice. The first time `get` returns 0 and the count becomes 1; the
+          second time it becomes 2.
+      skill_tags: [dictionaries, accumulators]
+      review_status: draft
+
+  - type: question
+    question:
+      id: f0c3ccc9-2d0c-4e76-b4ff-c500252d5ec1
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: A dictionary value can be a list.
+      answer:
+        value: true
+      explanation:
+        en: >
+          Values can be anything at all — numbers, strings, lists, even other dictionaries.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: a06e95c7-d429-4a90-aa07-cefc2e03b089
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        data = {"scores": [4, 8, 6]}
+        print(data["scores"][1])
+      payload:
+        input: text
+      answer:
+        value: '8'
+        match_mode: trimmed
+      explanation:
+        en: >
+          `data["scores"]` is the list [4, 8, 6], and index 1 of that list is 8.
+      skill_tags: [dictionaries, lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 19797c18-cb7d-4a46-ad0e-d5b9f94d00b5
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        counts = {}
+        for ch in "aab":
+            counts[ch] = counts.get(ch, 0) + 1
+        print(counts)
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "{'a': 2, 'b': 1}"
+          - id: every-char
+            text:
+              en: "{'a': 1, 'a': 1, 'b': 1}"
+          - id: lists
+            text:
+              en: "{'a': [1, 1], 'b': [1]}"
+          - id: letters
+            text:
+              en: "['a', 'b']"
+      answer:
+        value: "{'a': 2, 'b': 1}"
+        match_mode: exact
+      explanation:
+        en: >
+          One entry per distinct character, each holding how many times it appeared. Keys are
+          unique, so "a" is counted up rather than stored twice.
+      skill_tags: [dictionaries, accumulators]
+      review_status: draft
+
+  - type: question
+    question:
+      id: f037a66c-b82e-45ba-88c6-1a486a697365
+      type: multiple_choice
+      difficulty: medium
+      prompt:
+        en: 'With `people = [{"name": "Ann"}, {"name": "Bo"}]`, which line prints Bo?'
+      payload:
+        options:
+          - id: right
+            text:
+              en: print(people[1]["name"])
+          - id: backwards
+            text:
+              en: print(people["name"][1])
+          - id: dot
+            text:
+              en: print(people[1].name)
+          - id: by-value
+            text:
+              en: print(people["Bo"])
+      answer:
+        option_id: right
+      explanation:
+        en: >
+          `people` is a list, so first pick the second item with `[1]`. That item is a
+          dictionary, so then look up `["name"]`. The order of the steps follows the shape of
+          the data.
+      skill_tags: [dictionaries, lists]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 1165f73b-6499-4d6f-ab07-f54ff7c894de
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        inventory = {"fruit": {"apple": 3, "pear": 2}, "veg": {"leek": 1}}
+        total = 0
+        for group in inventory.values():
+            total += sum(group.values())
+        print(total)
+      payload:
+        input: text
+      answer:
+        value: '6'
+        match_mode: trimmed
+      explanation:
+        en: >
+          Each value of `inventory` is itself a dictionary. Summing the inner values gives 5
+          for fruit and 1 for veg, 6 in total.
+      hint:
+        en: What is each `group` — and what are its values?
+      skill_tags: [dictionaries, loops]
+      review_status: draft

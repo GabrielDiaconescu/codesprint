@@ -1,0 +1,13 @@
+id: 12989185-5061-4772-9bd7-ddb7c2bdb173
+slug: dictionaries
+title:
+  en: Dictionaries
+description:
+  en: Looking values up by name instead of position — storing, changing, looping over and counting with key-value pairs.
+order_index: 11
+estimated_minutes: 28
+lessons:
+  - creating-dicts
+  - changing-dicts
+  - looping-dicts
+  - counting-and-nesting

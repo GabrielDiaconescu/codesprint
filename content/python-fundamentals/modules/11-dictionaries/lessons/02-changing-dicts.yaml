@@ -1,0 +1,220 @@
+id: f151fdb9-e874-48b6-9991-84f563877631
+slug: changing-dicts
+title:
+  en: Adding, updating and removing entries
+summary:
+  en: One assignment to add or update, two ways to remove, and get for keys that may not exist.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        Assigning to a key does one of two things: it adds a new entry if the key is new, or
+        replaces the value if the key already exists.
+
+  - type: code
+    code: |
+      stock = {"apples": 5}
+      stock["pears"] = 3
+      stock["apples"] = 4
+      print(stock)
+    output: "{'apples': 4, 'pears': 3}"
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `pop(key)` removes an entry and hands back its value. `del d[key]` removes it without
+        handing anything back.
+
+  - type: code
+    code: |
+      stock = {"apples": 4, "pears": 3}
+      removed = stock.pop("pears")
+      print(removed)
+      print(stock)
+    output: |-
+      3
+      {'apples': 4}
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `get(key, default)` looks a key up without the risk of a KeyError. If the key is
+        missing, you get the default instead.
+
+  - type: code
+    code: |
+      stock = {"apples": 4}
+      print(stock.get("kiwi", 0))
+      print(stock.get("apples", 0))
+    output: |-
+      0
+      4
+    runnable: true
+
+  - type: callout
+    variant: tip
+    body:
+      en: |
+        Use `get` with a default whenever "missing" simply means zero, empty or none. It
+        turns a crash into a sensible answer.
+
+  - type: question
+    question:
+      id: a6b9c681-2b47-419f-adc5-036e6396ec9e
+      type: true_false
+      difficulty: easy
+      prompt:
+        en: Assigning to a key that does not exist yet adds it to the dictionary.
+      answer:
+        value: true
+      explanation:
+        en: >
+          `d[key] = value` never fails for a missing key — it simply creates the entry.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 7136a62f-73d9-4954-b566-ffbbdf019eb5
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        d = {"a": 1}
+        d["a"] = 5
+        print(d["a"])
+      payload:
+        input: text
+      answer:
+        value: '5'
+        match_mode: trimmed
+      explanation:
+        en: >
+          "a" already exists, so the assignment replaces its value with 5.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 9b7f51b4-ce1f-4985-bc1a-b0fa31261e82
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        scores = {"Ann": 7}
+        print(scores.get("Bo", 0))
+      payload:
+        input: text
+      answer:
+        value: '0'
+        match_mode: trimmed
+      explanation:
+        en: >
+          "Bo" is not a key, so `get` returns the default, 0, instead of raising a KeyError.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 16f5724b-9b41-48a4-b790-c84e4f610df1
+      type: fill_blank
+      difficulty: medium
+      prompt:
+        en: Complete the line so the program prints `5 {}`.
+      code_snippet: |
+        stock = {"tea": 5}
+        left = stock.___("tea")
+        print(left, stock)
+      payload:
+        input: tokens
+        tokens: [pop, get, remove, clear]
+      answer:
+        value: pop
+        match_mode: trimmed
+      explanation:
+        en: >
+          `pop` both removes the entry and returns its value. `get` would return 5 but leave
+          the entry in place, and dictionaries have no `remove` method.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 569caed6-189a-4e42-947c-ecc2776f4c7d
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        d = {"a": 1, "b": 2}
+        del d["a"]
+        d["c"] = 3
+        print(d)
+      payload:
+        input: choice
+        options:
+          - id: right
+            text:
+              en: "{'b': 2, 'c': 3}"
+          - id: kept
+            text:
+              en: "{'a': 1, 'b': 2, 'c': 3}"
+          - id: front
+            text:
+              en: "{'c': 3, 'b': 2}"
+          - id: only-c
+            text:
+              en: "{'c': 3}"
+      answer:
+        value: "{'b': 2, 'c': 3}"
+        match_mode: exact
+      explanation:
+        en: >
+          "a" is removed, and "c" is added at the end. Dictionaries keep entries in the order
+          they were added, so "b" comes before "c".
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 43b4405b-0708-45e8-9dd5-a053e422f5d4
+      type: debugging
+      difficulty: hard
+      prompt:
+        en: This should count one "x", but it crashes with a KeyError. Which line is the problem?
+      code_snippet: |
+        counts = {}
+        counts["x"] += 1
+        print(counts)
+      payload:
+        mode: select_line
+        lines:
+          - id: create
+            text: 'counts = {}'
+          - id: add
+            text: 'counts["x"] += 1'
+          - id: show
+            text: 'print(counts)'
+      answer:
+        line_id: add
+      runnable: true
+      fixed_code: |
+        counts = {}
+        counts["x"] = counts.get("x", 0) + 1
+        print(counts)
+      fixed_output: "{'x': 1}"
+      explanation:
+        en: >
+          `+=` has to read the old value first, and "x" has none yet. Reading it with
+          `get("x", 0)` starts the count from zero instead.
+      hint:
+        en: What does `+=` need to read before it can add?
+      skill_tags: [dictionaries, debugging]
+      review_status: draft

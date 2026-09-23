@@ -1,0 +1,219 @@
+id: 650f7d68-7f25-400b-a2ff-6f3612b0c279
+slug: creating-dicts
+title:
+  en: Looking things up by name
+summary:
+  en: Keys and values, reading by key, and what happens when a key is missing or repeated.
+estimated_minutes: 7
+review_status: draft
+
+blocks:
+  - type: text
+    body:
+      en: |
+        A **dictionary** stores values under **keys**, so you look things up by name rather
+        than by position. It is written with curly braces, each entry as `key: value`.
+
+  - type: code
+    code: |
+      ages = {"Ann": 31, "Bo": 25}
+      print(ages["Bo"])
+      print(len(ages))
+    output: |-
+      25
+      2
+    runnable: true
+    caption:
+      en: '`len` counts the entries — key-value pairs — not keys and values separately.'
+
+  - type: text
+    body:
+      en: |
+        Every key is unique. Write the same key twice and the later value wins; there is only
+        ever one entry per key.
+
+  - type: code
+    code: |
+      d = {"a": 1, "a": 2}
+      print(d)
+    output: "{'a': 2}"
+    runnable: true
+
+  - type: text
+    body:
+      en: |
+        `in` checks the **keys** of a dictionary, which is the safe way to ask before looking
+        something up.
+
+  - type: code
+    code: |
+      ages = {"Ann": 31, "Bo": 25}
+      print("Cy" in ages)
+    output: 'False'
+    runnable: true
+
+  - type: callout
+    variant: mistake
+    body:
+      en: |
+        Asking for a key that is not there — `ages["Cy"]` — stops with a KeyError. Check with
+        `in` first, or use `get`, which the next lesson covers.
+
+  - type: question
+    question:
+      id: 75135521-9aae-48b7-8b72-bf2423c8b2f3
+      type: multiple_choice
+      difficulty: easy
+      prompt:
+        en: How do you read the value stored under "Ann" in the dictionary `ages`?
+      payload:
+        options:
+          - id: brackets
+            text:
+              en: ages["Ann"]
+          - id: position
+            text:
+              en: ages[0]
+          - id: dot
+            text:
+              en: ages.Ann
+          - id: call
+            text:
+              en: ages("Ann")
+      answer:
+        option_id: brackets
+      explanation:
+        en: >
+          Square brackets with the key. A dictionary has no positions, so `ages[0]` would look
+          for a key that is the number 0.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 891c88ca-41b2-4d9b-b99d-eeedae98ec5c
+      type: predict_output
+      difficulty: easy
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        prices = {"tea": 2, "cake": 3}
+        print(prices["cake"])
+      payload:
+        input: text
+      answer:
+        value: '3'
+        match_mode: trimmed
+      explanation:
+        en: >
+          The key "cake" is paired with 3.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 4c697ce5-4dd3-4f90-9d47-bd3c019fc2a2
+      type: true_false
+      difficulty: medium
+      prompt:
+        en: A dictionary can hold the same key twice, with different values.
+      answer:
+        value: false
+      explanation:
+        en: >
+          Keys are unique. Using an existing key again replaces its value.
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 3bfecd74-6b24-45c2-96c0-b89adc6f89ea
+      type: predict_output
+      difficulty: medium
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        print({"x": 1, "y": 2})
+      payload:
+        input: choice
+        options:
+          - id: single
+            text:
+              en: "{'x': 1, 'y': 2}"
+          - id: double
+            text:
+              en: '{"x": 1, "y": 2}'
+          - id: values
+            text:
+              en: 1 2
+          - id: list
+            text:
+              en: "['x', 'y']"
+      answer:
+        value: "{'x': 1, 'y': 2}"
+        match_mode: exact
+      explanation:
+        en: >
+          A printed dictionary shows its braces, each `key: value` pair, and single quotes
+          around string keys — the same convention as a printed list.
+      skill_tags: [dictionaries, printing]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 41d3fe4c-ea78-46be-882a-c9325e6c7b84
+      type: multiple_select
+      difficulty: medium
+      prompt:
+        en: 'With `ages = {"Ann": 31, "Bo": 25}`, which of these are `True`?'
+      payload:
+        options:
+          - id: key
+            text:
+              en: '"Ann" in ages'
+          - id: value
+            text:
+              en: 31 in ages
+          - id: length
+            text:
+              en: len(ages) == 2
+          - id: other-key
+            text:
+              en: '"Bo" in ages'
+          - id: lowercase
+            text:
+              en: '"ann" in ages'
+      answer:
+        option_ids: [key, length, other-key]
+      explanation:
+        en: >
+          `in` looks at keys only, so it finds "Ann" and "Bo" but not the value 31. Keys are
+          matched exactly, so "ann" is not "Ann".
+      hint:
+        en: Does `in` check keys, values, or both?
+      skill_tags: [dictionaries]
+      review_status: draft
+
+  - type: question
+    question:
+      id: 12695697-963f-4a78-90ee-231969916194
+      type: predict_output
+      difficulty: hard
+      prompt:
+        en: What does this print?
+      code_snippet: |
+        d = {"a": 1, "b": 2, "a": 3}
+        print(len(d), d["a"])
+      payload:
+        input: text
+      answer:
+        value: 2 3
+        match_mode: trimmed
+      explanation:
+        en: >
+          The repeated key "a" collapses into one entry holding the later value, 3. That
+          leaves two entries in total.
+      hint:
+        en: How many distinct keys are there?
+      skill_tags: [dictionaries]
+      review_status: draft
