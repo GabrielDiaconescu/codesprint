@@ -138,6 +138,20 @@ export const runValidation = (root?: string): Issue[] => {
         if (firstBlock?.type === 'question') {
           add(lesson.file, 'starts with a question before explaining anything', 'blocks.0');
         }
+
+        // An output shown under a code block is a claim about what Python prints. Only a
+        // runnable block has that claim checked on every interpreter; a non-runnable one
+        // would show learners whatever the author typed. A fragment that cannot run should
+        // say what it does in its caption instead.
+        lesson.data.blocks.forEach((block, index) => {
+          if (block.type === 'code' && block.output !== undefined && !block.runnable) {
+            add(
+              lesson.file,
+              'states an output but is not runnable, so that output is never verified',
+              `blocks.${index}`,
+            );
+          }
+        });
       }
 
       /* ------------------------------------------------------------ difficulty mix */
