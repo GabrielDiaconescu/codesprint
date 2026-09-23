@@ -423,9 +423,12 @@ on conflict (week_start, user_id) do update set xp = excluded.xp;
 
 /* ------------------------------------------------------------------ main */
 
-const main = () => {
-  const rows = buildFromDisk();
-
+/**
+ * The whole seed file for these rows. Pure, so a test can compare it with what is on disk:
+ * `npm run verify` then catches a seed that has fallen behind the content, not only CI — which
+ * alone caught it, four commits late, after Phase 19 added fifteen modules.
+ */
+export const renderSeed = (rows: ContentRows): string => {
   const header = `-- GENERATED FILE — DO NOT EDIT.
 --
 -- Produced by \`npm run content:seed\` from the YAML in content/ (SPEC §52).
@@ -453,7 +456,13 @@ begin;
     '',
   ].join('\n');
 
-  writeFileSync(OUTPUT, header + body, 'utf8');
+  return header + body;
+};
+
+const main = () => {
+  const rows = buildFromDisk();
+
+  writeFileSync(OUTPUT, renderSeed(rows), 'utf8');
 
   console.log(`Wrote supabase/seed.sql`);
   console.log(

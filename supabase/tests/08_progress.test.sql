@@ -292,8 +292,11 @@ select is(
   'and questions answered'
 );
 
+-- Counted from the catalogue rather than written down: the seed grows with the content, and
+-- a hardcoded 2 went stale the day Phase 19 added fifteen modules.
 select ok(
-  jsonb_array_length(public.get_progress_summary() -> 'modules') = 2,
+  jsonb_array_length(public.get_progress_summary() -> 'modules')
+    = (select count(*) from public.modules where is_active),
   'every module appears, locked or not'
 );
 
@@ -355,7 +358,10 @@ select pg_temp.act_as('aaaa1111-0000-0000-0000-000000000002');
 
 select is(
   (public.get_progress_summary() ->> 'lessons_total')::integer,
-  8,
+  (select count(*)::integer
+     from public.lessons l
+     join public.modules m on m.id = l.module_id
+    where l.is_active and m.is_active),
   'a premium user''s total is the whole course'
 );
 

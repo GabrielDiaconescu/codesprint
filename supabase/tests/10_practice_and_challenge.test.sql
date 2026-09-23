@@ -100,9 +100,21 @@ select is(
   'and is not met before anything has been earned'
 );
 
+-- The free modules' lessons, counted from the catalogue: a module is free when its override
+-- says so, or when it has none and sits inside `free_module_count` (SPEC §5, D5).
 select is(
   (public.get_home_summary() -> 'course' ->> 'total')::integer,
-  8,
+  (select count(*)::integer
+     from public.lessons l
+     join public.modules m on m.id = l.module_id
+    where l.is_active
+      and m.is_active
+      and coalesce(
+            not m.is_premium_override,
+            m.order_index <= (select (value #>> '{}')::integer
+                                from public.app_config
+                               where key = 'free_module_count')
+          )),
   'course totals count the lessons the learner can reach'
 );
 

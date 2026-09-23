@@ -1,6 +1,10 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { buildFromDisk } from '../build';
 import { allQuestions, loadContent } from '../load';
 import { collectRunnables } from '../runnables';
+import { renderSeed } from '../seed';
 import { lessonPayloadBytes, runValidation, summarise } from '../validate';
 
 /**
@@ -153,6 +157,21 @@ describe('the rows that would be written', () => {
   it('gives every row a content hash, so republishing can skip what has not changed', () => {
     expect(rows.lessons.every((l) => l.content_hash.length > 0)).toBe(true);
     expect(rows.questions.every((q) => q.content_hash.length > 0)).toBe(true);
+  });
+
+  it('is what supabase/seed.sql holds, so a local reset serves the current content', () => {
+    // Line endings normalised: a Windows checkout may hand back CRLF, which is not staleness.
+    const onDisk = readFileSync(join(process.cwd(), 'supabase', 'seed.sql'), 'utf8').replace(
+      /\r\n/g,
+      '\n',
+    );
+
+    // A boolean, not the two strings: a diff of a 2,000-line file is noise, and the fix is
+    // always the same command.
+    expect({ stale: onDisk !== renderSeed(rows), fix: 'npm run content:seed' }).toEqual({
+      stale: false,
+      fix: 'npm run content:seed',
+    });
   });
 });
 
