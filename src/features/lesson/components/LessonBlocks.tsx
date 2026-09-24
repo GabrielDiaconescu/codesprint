@@ -1,11 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { CodeBlock, Icon, Text, type IconName } from '@/components/ui';
+import { CodeBlock, Icon, RichText, Text, type IconName } from '@/components/ui';
 import type { LessonBlock } from '@/services';
 import { useTheme } from '@/theme';
-
-import { RichText } from './RichText';
 
 /**
  * Renders one lesson block (SPEC §15).

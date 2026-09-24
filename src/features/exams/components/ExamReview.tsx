@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, StyleSheet, View } from 'react-native';
 
-import { Button, Card, CodeBlock, Divider, Icon, Text } from '@/components/ui';
+import { Button, Card, CodeBlock, Divider, Icon, RichText, Text } from '@/components/ui';
 import type { ExamResults, ReviewedQuestion } from '@/services';
 import { useTheme } from '@/theme';
 
@@ -53,16 +53,14 @@ export const ExamReview = ({ results, onClose }: ExamReviewProps) => {
             </Text>
           </View>
 
-          <Text variant="body">{question.prompt}</Text>
+          <RichText body={question.prompt} />
 
           {question.code_snippet && <CodeBlock code={question.code_snippet} />}
 
           {question.explanation && (
             <>
               <Divider />
-              <Text variant="body" tone="secondary">
-                {question.explanation}
-              </Text>
+              <RichText body={question.explanation} tone="secondary" />
             </>
           )}
         </View>

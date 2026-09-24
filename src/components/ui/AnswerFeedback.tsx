@@ -4,6 +4,7 @@ import { useTheme } from '@/theme';
 
 import { Button } from './Button';
 import { Icon } from './Icon';
+import { RichText } from './RichText';
 import { Text } from './Text';
 
 export interface AnswerFeedbackProps {
@@ -79,9 +80,7 @@ export const AnswerFeedback = ({
         )}
       </View>
 
-      <Text variant="body" style={{ color: theme.colors.textPrimary }}>
-        {explanation}
-      </Text>
+      <RichText body={explanation} />
 
       {!isCorrect && hint && (
         <View style={[styles.hint, { gap: theme.spacing.xs }]}>
@@ -90,9 +89,7 @@ export const AnswerFeedback = ({
               {hintLabel}
             </Text>
           )}
-          <Text variant="bodySmall" tone="secondary">
-            {hint}
-          </Text>
+          <RichText body={hint} variant="bodySmall" tone="secondary" />
         </View>
       )}
 

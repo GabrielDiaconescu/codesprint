@@ -185,6 +185,11 @@ describe.each(themes)('%s theme', (_name, palette) => {
     }
   });
 
+  it('keeps inline code readable on its chip, and the chip visible on the page', () => {
+    expect(contrastRatio(palette.textPrimary, palette.inlineCode)).toBeGreaterThanOrEqual(AA_TEXT);
+    expect(contrastRatio(palette.inlineCode, palette.background)).toBeGreaterThan(1.2);
+  });
+
   it('keeps inverse text readable on primary text, as used by toasts', () => {
     expect(contrastRatio(palette.textInverse, palette.textPrimary)).toBeGreaterThanOrEqual(AA_TEXT);
   });

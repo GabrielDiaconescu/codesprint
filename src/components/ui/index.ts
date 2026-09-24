@@ -21,5 +21,6 @@ export { Skeleton, SkeletonLines, type SkeletonProps } from './Skeleton';
 export { StateView, type StateViewProps } from './StateView';
 export { CodeBlock, type CodeBlockProps } from './CodeBlock';
 export { AnswerFeedback, type AnswerFeedbackProps } from './AnswerFeedback';
+export { RichText, type RichTextProps, type RichTextVariant } from './RichText';
 export { BottomSheet, type BottomSheetProps } from './BottomSheet';
 export { ToastHost } from './ToastHost';

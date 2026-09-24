@@ -89,6 +89,11 @@ export interface Palette {
   life: string;
   /** Code block surface. */
   codeBackground: string;
+  /**
+   * The chip behind `inline code` in prose, drawn in `textPrimary`. Not `codeBackground`: that
+   * is dark in both themes, and in the light theme it turned every `+` into a black box.
+   */
+  inlineCode: string;
 }
 
 export const lightPalette: Palette = {
@@ -131,6 +136,7 @@ export const lightPalette: Palette = {
   onGold: '#3D2A00',
   life: '#E8394B',
   codeBackground: '#11141F',
+  inlineCode: '#E0D8C8',
 };
 
 /**
@@ -181,6 +187,7 @@ export const darkPalette: Palette = {
   onGold: '#2A1F05',
   life: '#FF7A87',
   codeBackground: '#070A14',
+  inlineCode: '#2C2450',
 };
 
 export const palettes: Record<ColorScheme, Palette> = {

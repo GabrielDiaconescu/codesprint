@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { Button, Icon, ProgressBar, Text } from '@/components/ui';
+import { Button, Icon, ProgressBar, RichText, Text } from '@/components/ui';
 import { QuestionRenderer, instructionKey } from '@/features/questions/components/QuestionRenderer';
 import { isAnswerComplete } from '@/features/questions/logic/answers';
 import { parseQuestion } from '@/features/questions/payloads';
@@ -142,9 +142,7 @@ export const ExamRunner = ({ paper, onSubmit, submitting }: ExamRunnerProps) => 
               {lesson(instructionKey(current.payload))}
             </Text>
           )}
-          <Text variant="bodyStrong" accessibilityRole="header">
-            {current.question.prompt}
-          </Text>
+          <RichText body={current.question.prompt} variant="bodyStrong" heading />
         </View>
 
         {current.payload === null ? (

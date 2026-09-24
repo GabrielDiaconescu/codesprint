@@ -84,7 +84,7 @@ blocks:
         match_mode: trimmed
       explanation:
         en: >
-          Six goes into twenty three whole times (18), with 2 left over. `//` keeps the 3 and
+          6 goes into 20 three whole times (18), with 2 left over. `//` keeps the 3 and
           discards the remainder.
       skill_tags: [arithmetic]
       review_status: draft

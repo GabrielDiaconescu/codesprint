@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon, Text, type IconName } from '@/components/ui';
 import { haptics } from '@/lib/haptics';
-import { useTheme } from '@/theme';
+import { syntaxPalette, useTheme } from '@/theme';
 
 export type LineMarking = 'none' | 'selected' | 'correct' | 'wrong';
 
@@ -76,11 +76,13 @@ export const CodeLine = ({
         pressed && onPress && { opacity: theme.pressed.opacity },
       ]}
     >
-      <Text variant="monoSmall" tone="secondary" style={styles.gutter}>
+      {/* The row is the code surface, dark in both themes: its ink is the code blocks' own,
+          never the body text colours, which are dark on dark in the light theme. */}
+      <Text variant="monoSmall" style={[styles.gutter, { color: syntaxPalette.comment }]}>
         {gutter}
       </Text>
       <View style={styles.code}>
-        <Text variant="mono" numberOfLines={1}>
+        <Text variant="mono" numberOfLines={1} style={{ color: syntaxPalette.plain }}>
           {text}
         </Text>
       </View>

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { AnswerFeedback, Badge, Button, Icon, Text } from '@/components/ui';
+import { AnswerFeedback, Badge, Button, Icon, RichText, Text } from '@/components/ui';
 import { RewardedLifeCard } from '@/features/ads/components/RewardedLifeCard';
 import { LivesIndicator } from '@/features/progress/components/LivesIndicator';
 import { QuestionRenderer, instructionKey } from '@/features/questions/components/QuestionRenderer';
@@ -108,9 +108,7 @@ export const QuestionPage = ({
       {result && !result.lives.unlimited && result.lives.lives === 0 && <RewardedLifeCard />}
 
       <View style={{ gap: theme.spacing.xs }}>
-        <Text variant="heading" accessibilityRole="header">
-          {question.prompt}
-        </Text>
+        <RichText body={question.prompt} variant="heading" heading />
         <Text variant="caption" tone="secondary">
           {t(instructionKey(parsed))}
         </Text>
