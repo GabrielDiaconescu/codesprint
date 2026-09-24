@@ -1,0 +1,104 @@
+# English store listing (App Store + Google Play). Run `npm run store:build` after editing.
+#
+# Tokens, filled in by the build:
+#   {{name}} {{storeTitle}}          src/constants/brand.ts
+#   {{tagline}} {{promoLine}}        src/i18n/locales/<i18n>/common.json
+#   {{moduleCount}}                  modules in content/python-fundamentals
+#   {{freeModuleCount}}              free_module_count in the bundled app config
+#   {{termsUrl}} {{privacyUrl}} {{supportUrl}}   from websiteUrl in store/store.yaml
+#   {{billingTerms}}                 billingTerms.apple or billingTerms.google below
+#
+# Rules the tests enforce: the store limits, no prices, no feature that has not shipped, no
+# promises about jobs or speed (SPEC §62), and no other platform's name in either store.
+
+appleLocale: en-US
+googleLocale: en-US
+i18n: en
+
+# App Store, under the name. 30 characters. Words already in the name add nothing to search.
+subtitle: Python in 5 minutes a day
+
+# App Store, above the description; can change without a new version. 170 characters.
+promoText: '{{promoLine}} Your first lesson takes five minutes, and no account is needed.'
+
+# App Store search only: 100 characters joined by commas. Not repeating the name or subtitle.
+keywords:
+  - programming
+  - coding
+  - beginner
+  - lessons
+  - course
+  - practice
+  - quiz
+  - developer
+  - computer science
+  - study
+  - tutorial
+
+# Google Play, under the name. 80 characters.
+shortDescription: Learn Python in short daily lessons, with streaks, XP and a daily challenge.
+
+description: |
+  {{tagline}} {{name}} teaches Python in short, interactive sessions you can finish on a bus ride — and gives you a reason to come back tomorrow.
+
+  LEARN BY DOING
+  • Bite-sized lessons: a short explanation, a real code example, then questions.
+  • Eight kinds of exercise: multiple choice, true or false, predict the output, fill in the blank, put lines of code in order, find the bug, match concepts, and pick every right answer.
+  • Every answer is explained, right or wrong.
+
+  A CLEAR PATH THROUGH PYTHON
+  {{moduleCount}} modules of Python Fundamentals take you from print() and variables through conditions, loops, lists, functions, dictionaries, exceptions and files to your first classes and simple problem solving.
+
+  BUILD THE HABIT
+  • A daily goal of 5, 10 or 15 minutes.
+  • Streaks, XP, levels and achievements.
+  • A new Daily Challenge every day.
+  • A weekly leaderboard — or hide yourself from it.
+  • An optional daily reminder at a time you pick.
+
+  PRACTISE WHAT YOU LEARNED
+  • Review the questions you got wrong.
+  • Mixed practice from the lessons you have finished.
+  • A Python Fundamentals exam, with your results broken down by skill.
+
+  FREE, AND CLEAR ABOUT WHAT ISN'T
+  The first {{freeModuleCount}} modules are free, with lives, the Daily Challenge, practice and a 10-question sample exam each week. The free version shows ads.
+  • No Ads removes advertising, as a monthly subscription or a one-time purchase. It does not unlock Premium lessons or unlimited lives.
+  • Premium unlocks every module, the full 30-question exam with retries, hard practice sets, detailed statistics and unlimited lives — with no ads. Monthly or yearly.
+
+  {{billingTerms}}
+
+  START IN SECONDS
+  Your first lesson needs no account: start as a guest and create an account when you want to keep your progress. You can export or delete your data at any time, from inside the app.
+
+  For learners aged 13 and over. Lessons are in English; the app itself is in English or Romanian.
+
+  Terms of use: {{termsUrl}}
+  Privacy policy: {{privacyUrl}}
+  Help: {{supportUrl}}
+
+billingTerms:
+  apple: Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple Account at confirmation of purchase, and renewals are charged within 24 hours before the period ends. Manage or cancel a subscription in your App Store account settings.
+  google: Subscriptions renew automatically until you cancel them. Manage or cancel a subscription at any time in Google Play → Payments & subscriptions.
+
+# Captions over the store screenshots, in the order the stores show them.
+screenshots:
+  home:
+    title: Learn to code in 5 minutes a day
+    subtitle: Short sessions that fit your day
+  lesson:
+    title: Bite-sized Python lessons
+    subtitle: Real code, explained step by step
+  feedback:
+    title: Feedback on every answer
+    subtitle: Know why, not just whether
+  learn:
+    title: A clear path through Python
+    subtitle: '{{moduleCount}} modules, from print() to classes'
+  progress:
+    title: Watch your skills grow
+    subtitle: XP, levels, streaks and skills
+
+# Google Play's feature graphic (1024 × 500).
+featureGraphic:
+  title: '{{tagline}}'

@@ -110,6 +110,13 @@ key, and refuses to reuse anything already on that port: a Metro started by hand
 a bundle built against staging, and the suite would then write test accounts there. Results:
 `e2e/results/report.xml` (JUnit) and screenshots per failed step in `e2e/results/artifacts/`.
 
+That Metro also sets `EXPO_PUBLIC_AUTOMATION=1`: a development build then keeps React Native's
+error toasts off the screen, where a swipe could open one over the app (errors still reach
+Metro's log). The launch link passes `disableAutoLaunch=1` and `disableFab=1`, so the
+development client's own menu and floating button stay out of the way too. The store
+screenshots (`npm run store:screenshots`, `docs/STORE.md`) run on the same plumbing,
+`scripts/e2e/harness.ts`.
+
 ### When it goes wrong
 
 | Symptom                                                                                                       | Cause and fix                                                                                                                                                                                                                                            |
@@ -121,4 +128,5 @@ a bundle built against staging, and the suite would then write test accounts the
 | The app closes in the middle of a flow, on Android's home screen                                              | `hideKeyboard` pressed Back while no keyboard was up. Flows never use it: Enter submits a form, or closes the keyboard on the answer box.                                                                                                                |
 | Every flow fails at launch after installing a new dev build; logcat says `ANR ... failed to complete startup` | The build is not compiled yet, and a cold start verifies bytecode too slowly. The runner compiles it (`cmd package compile -m speed`); by hand, run that once after installing.                                                                          |
 | `Function not found` from a new Edge Function                                                                 | The local edge runtime loads the functions it found at start. `npx supabase stop && npx supabase start` after adding one.                                                                                                                                |
+| A tap becomes a long press (text selected, a menu with Copy and Select all)                                   | The emulator is overloaded after hours of runs. Cold-boot it; `npm run store:screenshots -- --only <locale>/<theme>` retakes one variant.                                                                                                                |
 | A flow fails on "Do not consent"                                                                              | Development builds force Google's EEA consent form; the launch subflow declines it. If it never appears, UMP could not reach Google — check the network.                                                                                                 |

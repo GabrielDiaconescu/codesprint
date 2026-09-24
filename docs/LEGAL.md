@@ -73,7 +73,7 @@ the auth user. A RevenueCat failure leaves the account intact and the learner ca
 - **Crash reporting:** on by default, with PII scrubbed (`sendDefaultPii: false`, request
   bodies stripped). Basis: legitimate interests — **for the lawyer to confirm.**
 
-## Store answers (drafts, to enter in Phase 23)
+## Store answers (drafts — entered as described in `docs/STORE.md`)
 
 ### Google Play — Data safety
 

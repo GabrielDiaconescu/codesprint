@@ -143,5 +143,6 @@ mapped to typed errors in `src/services/content/answerRefusal.ts`.
 | Privacy, deletion, processors           | `docs/LEGAL.md`        |
 | Test layers, E2E, device checklists     | `docs/TESTING.md`      |
 | Builds, TestFlight, Play, updates       | `docs/DEPLOYMENT.md`   |
+| Store listings, screenshots, forms      | `docs/STORE.md`        |
 | Conventions for changing the code       | `CONTRIBUTING.md`      |
 | Scope                                   | `docs/SPEC.md`         |

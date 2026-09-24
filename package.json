@@ -27,6 +27,8 @@
     "content:check": "npm run content:validate && npm run content:verify",
     "legal:licenses": "tsx scripts/legal/licenses.ts",
     "release:check": "tsx scripts/release/check.ts",
+    "store:build": "tsx scripts/store/build.ts",
+    "store:screenshots": "tsx scripts/store/capture.ts",
     "release:update": "npx eas-cli update --channel production --environment production",
     "e2e": "tsx scripts/e2e/run.ts",
     "e2e:generate": "tsx scripts/e2e/generate.ts",
@@ -76,6 +78,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",

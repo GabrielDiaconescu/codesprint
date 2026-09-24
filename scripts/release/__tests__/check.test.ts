@@ -1,8 +1,11 @@
 import {
+  TEMPLATE_ARTWORK,
   appAdsFindings,
+  artworkFindings,
   contentFindings,
   parseEnvList,
   productionEnvFindings,
+  storeFindings,
   webPlaceholderFindings,
 } from '../check';
 
@@ -164,5 +167,53 @@ describe('contentFindings', () => {
     expect(
       contentFindings({ lessons: { drafts: 0, total: 10 }, questions: { drafts: 0, total: 50 } }),
     ).toEqual([]);
+  });
+});
+
+describe('storeFindings', () => {
+  const ready = {
+    websiteUrl: 'https://codesprint.example',
+    copyright: '2026 Example PFA',
+    appLegalBaseUrl: 'https://codesprint.example/',
+    missingImages: [],
+  };
+
+  it('is quiet once the listing has its website, copyright and images', () => {
+    expect(storeFindings(ready)).toEqual([]);
+  });
+
+  it('blocks while the listing would link to a placeholder or has no rights holder', () => {
+    const messages = storeFindings({ ...ready, websiteUrl: null, copyright: null }).map(
+      (f) => f.message,
+    );
+    expect(messages).toEqual([
+      expect.stringContaining('websiteUrl is not set'),
+      expect.stringContaining('copyright is not set'),
+    ]);
+  });
+
+  it('blocks when the store and the app would link to different pages', () => {
+    expect(storeFindings({ ...ready, appLegalBaseUrl: 'https://other.example' })).toEqual([
+      expect.objectContaining({ message: expect.stringContaining('differ') }),
+    ]);
+  });
+
+  it('blocks until the store images exist', () => {
+    expect(storeFindings({ ...ready, missingImages: ['a.png', 'b.png'] })).toEqual([
+      expect.objectContaining({ message: expect.stringContaining('2 store images') }),
+    ]);
+  });
+});
+
+describe('artworkFindings', () => {
+  it("blocks while Expo's template icon is still the app's", () => {
+    expect(artworkFindings({ ...TEMPLATE_ARTWORK })).toEqual([
+      expect.objectContaining({ level: 'blocker', area: 'App icon' }),
+    ]);
+  });
+
+  it("is quiet once every file is the app's own", () => {
+    const own = Object.fromEntries(Object.keys(TEMPLATE_ARTWORK).map((path) => [path, 'f00d']));
+    expect(artworkFindings(own)).toEqual([]);
   });
 });

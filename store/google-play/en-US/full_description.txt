@@ -1,0 +1,37 @@
+Learn to Code. 5 Minutes a Day. CodeSprint teaches Python in short, interactive sessions you can finish on a bus ride — and gives you a reason to come back tomorrow.
+
+LEARN BY DOING
+• Bite-sized lessons: a short explanation, a real code example, then questions.
+• Eight kinds of exercise: multiple choice, true or false, predict the output, fill in the blank, put lines of code in order, find the bug, match concepts, and pick every right answer.
+• Every answer is explained, right or wrong.
+
+A CLEAR PATH THROUGH PYTHON
+17 modules of Python Fundamentals take you from print() and variables through conditions, loops, lists, functions, dictionaries, exceptions and files to your first classes and simple problem solving.
+
+BUILD THE HABIT
+• A daily goal of 5, 10 or 15 minutes.
+• Streaks, XP, levels and achievements.
+• A new Daily Challenge every day.
+• A weekly leaderboard — or hide yourself from it.
+• An optional daily reminder at a time you pick.
+
+PRACTISE WHAT YOU LEARNED
+• Review the questions you got wrong.
+• Mixed practice from the lessons you have finished.
+• A Python Fundamentals exam, with your results broken down by skill.
+
+FREE, AND CLEAR ABOUT WHAT ISN'T
+The first 6 modules are free, with lives, the Daily Challenge, practice and a 10-question sample exam each week. The free version shows ads.
+• No Ads removes advertising, as a monthly subscription or a one-time purchase. It does not unlock Premium lessons or unlimited lives.
+• Premium unlocks every module, the full 30-question exam with retries, hard practice sets, detailed statistics and unlimited lives — with no ads. Monthly or yearly.
+
+Subscriptions renew automatically until you cancel them. Manage or cancel a subscription at any time in Google Play → Payments & subscriptions.
+
+START IN SECONDS
+Your first lesson needs no account: start as a guest and create an account when you want to keep your progress. You can export or delete your data at any time, from inside the app.
+
+For learners aged 13 and over. Lessons are in English; the app itself is in English or Romanian.
+
+Terms of use: https://[your-domain]/terms.html
+Privacy policy: https://[your-domain]/privacy.html
+Help: https://[your-domain]/

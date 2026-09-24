@@ -2,11 +2,13 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 22 complete — awaiting approval for Phase 23 (store preparation and
-submission). The production build is configured end to end — profile, versioning, OTA updates,
-Sentry source maps, a force-update screen — and `npm run release:check` lists what still
-blocks one. No production build has been made: that needs the store accounts, the production
-Supabase project and the keys in "Human actions", in the order given there.
+**Current phase:** Phase 23 complete — the last phase in SPEC §57. The store listings (English
+and Romanian), the screenshots, and every store form with its answer are ready in the
+repository (`docs/STORE.md`). The screenshots surfaced defects that are now fixed — a
+sixteen-second answer, unreadable inline code, raw Markdown in 309 explanations, a band under
+every header — and one that is flagged: the app icon is still Expo's template. What remains is
+human: the icon, accounts, the production project, keys, the content and legal reviews, then
+submission — in the order under "Human actions".
 **Last updated:** 2026-09-24
 
 ---
@@ -41,7 +43,7 @@ Supabase project and the keys in "Human actions", in the order given there.
 | —     | Out of lives, rate limits (decided)  | **Complete**                          |
 | 18    | Privacy & legal                      | **Complete** — pages await hosting    |
 | 22    | Production builds, TestFlight, Play  | **Complete** — builds await accounts  |
-| 23    | Store preparation & submission       | Not started                           |
+| 23    | Store preparation & submission       | **Complete** — submission is human    |
 
 ---
 
@@ -2363,6 +2365,116 @@ itself, TestFlight and the Play internal track wait on the accounts (Human actio
 6. **Android goes to the internal track as a draft.** Closed and production tracks are a
    decision made in Play Console, not a side effect of `eas submit`.
 
+## Phase 23 — what was implemented (Store preparation & submission)
+
+- **Store listings as files** (`store/`): English and Romanian text for both stores, the age
+  rating questionnaire, the category and the App Review notes, with the product name from
+  `brand.ts`, the tagline from the i18n files and the module count from `content/`.
+  `npm run store:build` writes **`store.config.json`** — the App Store listing in EAS Metadata's
+  format, pushed with `eas metadata:push` and clean under `eas metadata:lint` — and Google
+  Play's text in fastlane's layout (`store/google-play/<locale>/`). **`store.config.js`** adds
+  the App Review contact from the environment, so no name or phone number is committed.
+- **Tests hold the listing to the rules** (43): every store limit, no price, no promise SPEC
+  §62 rules out, no feature that has not shipped, No Ads plainly not Premium, each store's own
+  subscription terms and never the other platform's name, Terms and Privacy links in every
+  description, ș and ț rather than ş and ţ, generated files never stale.
+- **Screenshots from the real app** — `npm run store:screenshots`: on the emulator and the
+  local database, a learner twelve lessons in (every lesson played through the real answer
+  functions; only the six earlier streak days and the name set directly) is walked through
+  Home, a lesson, a right answer, Learn and Progress by a Maestro flow generated from content,
+  in both languages and both themes. `scripts/store/compose.ts` cuts off Android's bars (an App
+  Store screenshot may not show another platform), frames each screen and captions it in the
+  app's Nunito and palette, at exactly 1290 × 2796 and 1080 × 1920; plus Google Play's feature
+  graphic and 512 px icon. Generated, not committed.
+- **`docs/STORE.md`**: every section of App Store Connect and Play Console with its answer —
+  what is pushed, what is typed by hand, the four in-app products with their texts in both
+  languages (within Apple's 30/45 limits), Data safety, content rating, target audience, ads,
+  Advertising ID, account deletion, what to do if App Review asks for Premium, and how
+  guideline 1.2 (user-generated content) is met.
+- **`release:check` now covers the store too**: the website and copyright not set, a store
+  website that differs from the one the app links to, store images not generated, and the
+  template icon.
+- The E2E runner's device, database and Metro plumbing moved to `scripts/e2e/harness.ts`, shared
+  with the screenshot capture; E2E flow 04 passes through it.
+
+### Found on the way
+
+- **An answer took sixteen seconds for a learner with ~70 answers behind them** — and it grew
+  with every answer (SPEC §45 asks for 400 ms). `local_date_for` validated its timezone against
+  `pg_timezone_names`, which reads the timezone database from disk (~30 ms a call), and the
+  daily caps call it once per row of the learner's XP history: 501 calls for one answer.
+  Migration `20260924130000_fast_local_date` catches the error instead: same signature, same
+  dates (the DST and unknown-zone tests are unchanged and pass). The same answer now takes
+  **12.6 ms**. pgTAP `17_answer_performance` gives a learner 1,500 XP events and puts a ceiling
+  on the time. Invisible to every test so far because no test account had a history.
+- **Inline code in lessons was a solid black box in the light theme** — `+`, `//`, `%` drawn in
+  the dark body ink on the code surface, which the restyle made dark in both themes (contrast
+  1.23:1), and on Android the chip sat a line too high because the span had its own line
+  height. Inline code now has its own token, `inlineCode` (a warm chip in light, a lifted one
+  in dark, ink at 10.5:1 and 12.9:1), on the paragraph's line height. `CodeLine`, the rows of
+  ordering and debugging questions, had the dark-on-dark ink too; it now uses the code blocks'
+  own. Each has a test that fails without the fix.
+- **Prompts, explanations and hints printed their Markdown as it was** — backticks around
+  every piece of code, in 110 prompts, 309 explanations and 40 hints of 435 questions. Only
+  lesson prose went through the renderer. `RichText` moved to the design system and now sets
+  all of it — lesson, question page, feedback, exam and exam review; a prompt keeps its
+  heading role and its code is set at heading size. One explanation also read "Six goes into
+  twenty three whole times" (twenty-three?); now "6 goes into 20 three whole times".
+- **An empty band under every navigation header** — Learn, Leaderboard, Profile, Progress, a
+  lesson: `Screen` padded for the status bar that the header had already cleared (the "empty
+  band under the Learn header" listed since Phase 19). It now pads only where no header does.
+- **The development client's own overlays were in the runs:** its floating debug button sat over
+  the top right of every screen (over the app's Settings button in the first screenshots), and
+  React Native's error toasts — a failed RevenueCat Test Store request, for one — could be
+  opened full-screen by a swipe. The launch link now passes `disableFab=1`, and the runners set
+  `EXPO_PUBLIC_AUTOMATION=1`, under which a development build keeps the toasts off screen (they
+  still reach Metro's log; a production build with the flag refuses to start).
+- **Maestro died silently mid-step** when it printed its steps live (no `--format`); the capture
+  now calls it as the E2E runner does.
+- **The app icon is still Expo's template** — the blue mark `create-expo-app` generated in
+  Phase 1, in the launcher, the splash, the favicon, and now the store icon and feature graphic
+  made from it. Not ours to ship (SPEC §8). Not replaced here: an icon is a design decision tied
+  to the name, which is not cleared. `release:check` now blocks while any of the six template
+  files is unchanged (by hash).
+- `docs/DATABASE.md`'s migration table had stopped at `…121700`; the four since are listed.
+
+### Verification
+
+- `npm run verify`: typecheck clean, lint clean, **93 suites / 1440 tests** (was 88 / 1373) —
+  the listing rules (43), the store images (8), the release check's store and icon findings,
+  `RichText`, `Screen`, `CodeLine`, the `inlineCode` contrast, the automation flag.
+- pgTAP: **17 files, 562 tests** (was 16 / 556), including `17_answer_performance`.
+- **E2E: 9 of 9 flows passed** (17 m 12 s, freshly booted emulator) after every app change of
+  this phase: onboarding 1 m 1 s · age gate 36 s · module 1, every question type 5 m 6 s ·
+  lives 2 m 11 s · Daily Challenge 1 m 24 s · paywall and restore 1 m 6 s · language 1 m 6 s ·
+  guest keeps progress 2 m 18 s · export and delete 2 m 22 s.
+- **Store images**: all four languages × themes captured from the app and composed — 43
+  images, sizes checked by tests; every raw capture inspected (no dev overlay, the same
+  learner throughout).
+- `npx eas-cli metadata:lint`: **no issues** with the App Review contact set; without it, a clear
+  refusal instead of an incomplete push.
+- `npm run content:check`: 443 snippets verified on Python 3.12 and 3.14 after the reworded
+  explanation.
+- `npm run release:check`: 27 blockers — the 24 of Phase 22, the website and copyright in
+  `store/store.yaml`, and the template icon. Each is a Human action below.
+- The screenshot learner's twelve lessons, replayed through the real RPCs: 0.14 s after the
+  fix, four minutes before it.
+
+### Decisions
+
+1. **New dev dependency: `@resvg/resvg-js`** (MPL-2.0, prebuilt binaries, no system libraries)
+   to render the store images from SVG with the app's own font. Never in the app bundle.
+2. **EAS Metadata for the App Store**, not typing: the listing, age rating and review notes are
+   versioned and reviewed like code. Google Play has no equivalent in EAS, so its text is
+   files to paste (or push with fastlane supply later — same layout).
+3. **Age rating 13+** by override, whatever the questionnaire computes: the app refuses accounts
+   under 13 (D10). User-generated content declared **yes** (display names), with the moderation
+   guideline 1.2 asks for.
+4. **Romanian listing**, saying plainly that the lessons are in English.
+5. **Light screenshots uploaded, dark generated** alongside; iPhone only (no tablet support).
+6. **Screenshots are not committed**: they are derived from code and content and regenerate in
+   one command — after a rename, a content change or a restyle.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -2436,6 +2548,9 @@ Romanian UI text was written by me and wants a native speaker's read.
   scheduled; the deterministic pick covers it.
 - Onboarding does not let an intermediate learner choose a starting module (SPEC §11). Their
   answer is stored and unused; every module up to the free boundary is reachable anyway.
+- **A locked module does not lead to the paywall.** It shows its lock and says what Premium
+  unlocks, but offers no button; the way in is Profile → Subscription → See plans (and the
+  out-of-lives card, and the full exam). SPEC §34's module-boundary prompt is not wired.
 - **Changing email or password while signed in is not built** (SPEC §29). A password can be
   changed through "Forgot password"; an email cannot be changed at all. Linking Apple or
   Google waits on D6. Export, deletion and the legal links are done (Phase 18).
@@ -2457,9 +2572,9 @@ Romanian UI text was written by me and wants a native speaker's read.
 - **One reviewed lesson changed.** "Reading an error message" (module 01) lost its bullet
   list for three paragraphs with the same wording; it is still marked reviewed and should be
   re-read.
-- **The Learn screen has an empty band under its header** on the preview build — visible
-  in the Phase 19 device screenshots. Not a content problem; it belongs to the screens the
-  restyle only re-tokened.
+- **A thin strip above the tab bar** on the tab screens: `Screen` also pads for the gesture
+  bar, which the tab bar already does. The top of the same bug is fixed (Phase 23); the bottom
+  needs the tab bar's height, which Expo Router does not export publicly.
 - **The restyle is unseen on hardware.** Every claim above is from tests, a typecheck and a
   successful bundle. The 3D press, the rounded font, the drawn icons and the warm
   background have not been looked at on a phone in either theme — that is the whole of the
@@ -2493,6 +2608,23 @@ Romanian UI text was written by me and wants a native speaker's read.
 ---
 
 ## Human actions required before the next phases
+
+**Phase 23 — to submit, after the Phase 22 list below** (details in `docs/STORE.md`):
+
+1. **Name clearance** (SPEC §0.3) before anything is public; after a rename, `brand.ts`, then
+   `npm run store:build` and `npm run store:screenshots`.
+2. **An app icon of our own** — replace the six template files in `assets/` at the same sizes
+   (launcher, Android adaptive layers, splash, favicon); then `store:screenshots --compose-only`
+   remakes the store icon and feature graphic.
+3. **Finish the content review** — the listing describes all 17 modules.
+4. In `store/store.yaml`: `websiteUrl` and `copyright`; then `npm run store:build`.
+5. **Read the Romanian listing once** (`store/listing/ro.yaml`) as a native speaker.
+6. **App Store Connect**: `eas metadata:push` with the App Review contact in your environment;
+   by hand: App Privacy, pricing, DSA trader details, the four in-app products with a paywall
+   screenshot each from TestFlight; submit with the first version.
+7. **Play Console**: paste the listing and upload the images; the App content declarations as
+   listed; the products after the first bundle; then production.
+8. Optional: retake the screenshots on an iPhone for the App Store.
 
 **Phase 22 — to make the first production build, in this order** (details in
 `docs/DEPLOYMENT.md`; `npm run release:check` ticks them off):
@@ -3678,3 +3810,19 @@ iPhone and a real Android phone:
    reopen the app twice — the change appears on the second launch.
 8. **Force update**: in `app_config`, set `min_supported_app_version` to `9.0.0` and reopen:
    the "Time to update" screen, with an **Update** button to the store. Set it back to `1.0.0`.
+
+## Phase 23 device checklist (SPEC §57 — "Listings, screenshots, forms complete")
+
+On the emulator or any phone with the development build, then in a browser:
+
+1. **Inline code** in any lesson with symbols (module 4, "Three more ways to do arithmetic"):
+   `//`, `%` and `**` sit on a small chip level with the words around them — warm beige in the
+   light theme, lifted purple in the dark — and read clearly in both. The same in a question's
+   explanation after Check: no backticks anywhere.
+2. **Ordering and debugging questions** (module 1): each code line and its number are readable
+   on the dark rows, in both themes.
+3. **Answers stay fast**: after many lessons, Check answers as quickly as on the first.
+4. **The screenshots**: open `store/screenshots/` — five per language and theme, captions not
+   cut, no Android status bar, the feature graphic and icon. Read the Romanian captions.
+5. **The listing**: read `store/google-play/en-US/full_description.txt` and the Romanian one as
+   a customer would. Everything it says is in the app you just used.

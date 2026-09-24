@@ -4,7 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
 import { I18nextProvider, useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, LogBox, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -32,6 +32,10 @@ initI18n();
 // visibly rather than somewhere deep in a feature (SPEC §46, §56).
 const env = getEnv();
 assertNoNoopServicesInProduction(env.EXPO_PUBLIC_APP_ENV);
+
+// An automated run (E2E, store screenshots) drives the app: the development build's error
+// toasts stay off screen, where a swipe could open one over it. They still reach Metro's log.
+if (__DEV__ && env.EXPO_PUBLIC_AUTOMATION === '1') LogBox.ignoreAllLogs(true);
 
 // Hold the splash screen until fonts and the session are ready, so the first frame is neither
 // in the system font nor the wrong screen.

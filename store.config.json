@@ -1,0 +1,110 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "categories": [
+      "EDUCATION"
+    ],
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gamblingSimulated": "NONE",
+      "gunsOrOtherWeapons": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "NONE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "gambling": false,
+      "lootBox": false,
+      "healthOrWellnessTopics": false,
+      "messagingAndChat": false,
+      "parentalControls": false,
+      "unrestrictedWebAccess": false,
+      "advertising": true,
+      "userGeneratedContent": true,
+      "ageAssurance": false,
+      "ageRatingOverrideV2": "THIRTEEN_PLUS",
+      "kidsAgeBand": null,
+      "ageRatingOverride": "NONE",
+      "koreaAgeRatingOverride": "NONE"
+    },
+    "release": {
+      "automaticRelease": false,
+      "phasedRelease": true
+    },
+    "review": {
+      "demoRequired": false,
+      "notes": "Thank you for reviewing CodeSprint.\n\nNo account is needed. On the first screen, tap \"Continue as guest\". Onboarding asks for a birth year: please enter an adult year. Accounts under 13 are refused, and learners aged 13-15 get privacy-protective defaults (non-personalised ads, analytics off, hidden from the leaderboard).\n\nAdvertising: Free learners see AdMob ads — a banner on the Learn and Leaderboard tabs and an occasional full-screen ad after a finished lesson. In the EEA, UK and Switzerland, Google's consent form comes first. There are never ads inside a lesson, the exam or the paywall.\n\nIn-app purchases (Profile > Subscription > See plans):\n- No Ads: a monthly subscription or a one-time purchase. It removes ads only.\n- Premium: a monthly or yearly subscription. It unlocks every module, the full exam, hard practice, detailed statistics and unlimited lives, with no ads.\nRestore purchases is on the paywall and in Profile > Subscription. Access is confirmed by our server after each purchase.\n\nYour data: Profile > Your data has \"Export my data\" and \"Delete account\". Deletion is immediate and final; the sheet explains that a store subscription must be cancelled separately.\n\nLeaderboard display names are moderated: a blocklist rejects offensive names, every other learner's entry has a Report action, and reported learners can be hidden from the leaderboard.\n\nLessons are in English. The interface is available in English and Romanian."
+    },
+    "info": {
+      "en-US": {
+        "title": "CodeSprint: Learn to Code",
+        "subtitle": "Python in 5 minutes a day",
+        "promoText": "Bite-sized lessons. Daily challenges. Real coding progress. Your first lesson takes five minutes, and no account is needed.",
+        "description": "Learn to Code. 5 Minutes a Day. CodeSprint teaches Python in short, interactive sessions you can finish on a bus ride — and gives you a reason to come back tomorrow.\n\nLEARN BY DOING\n• Bite-sized lessons: a short explanation, a real code example, then questions.\n• Eight kinds of exercise: multiple choice, true or false, predict the output, fill in the blank, put lines of code in order, find the bug, match concepts, and pick every right answer.\n• Every answer is explained, right or wrong.\n\nA CLEAR PATH THROUGH PYTHON\n17 modules of Python Fundamentals take you from print() and variables through conditions, loops, lists, functions, dictionaries, exceptions and files to your first classes and simple problem solving.\n\nBUILD THE HABIT\n• A daily goal of 5, 10 or 15 minutes.\n• Streaks, XP, levels and achievements.\n• A new Daily Challenge every day.\n• A weekly leaderboard — or hide yourself from it.\n• An optional daily reminder at a time you pick.\n\nPRACTISE WHAT YOU LEARNED\n• Review the questions you got wrong.\n• Mixed practice from the lessons you have finished.\n• A Python Fundamentals exam, with your results broken down by skill.\n\nFREE, AND CLEAR ABOUT WHAT ISN'T\nThe first 6 modules are free, with lives, the Daily Challenge, practice and a 10-question sample exam each week. The free version shows ads.\n• No Ads removes advertising, as a monthly subscription or a one-time purchase. It does not unlock Premium lessons or unlimited lives.\n• Premium unlocks every module, the full 30-question exam with retries, hard practice sets, detailed statistics and unlimited lives — with no ads. Monthly or yearly.\n\nSubscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple Account at confirmation of purchase, and renewals are charged within 24 hours before the period ends. Manage or cancel a subscription in your App Store account settings.\n\nSTART IN SECONDS\nYour first lesson needs no account: start as a guest and create an account when you want to keep your progress. You can export or delete your data at any time, from inside the app.\n\nFor learners aged 13 and over. Lessons are in English; the app itself is in English or Romanian.\n\nTerms of use: https://[your-domain]/terms.html\nPrivacy policy: https://[your-domain]/privacy.html\nHelp: https://[your-domain]/",
+        "keywords": [
+          "programming",
+          "coding",
+          "beginner",
+          "lessons",
+          "course",
+          "practice",
+          "quiz",
+          "developer",
+          "computer science",
+          "study",
+          "tutorial"
+        ],
+        "marketingUrl": "https://[your-domain]/",
+        "supportUrl": "https://[your-domain]/",
+        "privacyPolicyUrl": "https://[your-domain]/privacy.html",
+        "privacyChoicesUrl": "https://[your-domain]/delete-account.html",
+        "screenshots": {
+          "APP_IPHONE_67": [
+            "store/screenshots/app-store/en-US/light/01-home.png",
+            "store/screenshots/app-store/en-US/light/02-lesson.png",
+            "store/screenshots/app-store/en-US/light/03-feedback.png",
+            "store/screenshots/app-store/en-US/light/04-learn.png",
+            "store/screenshots/app-store/en-US/light/05-progress.png"
+          ]
+        }
+      },
+      "ro": {
+        "title": "CodeSprint: Learn to Code",
+        "subtitle": "Python în 5 minute pe zi",
+        "promoText": "Lecții scurte. Provocări zilnice. Progres real în programare. Prima lecție durează cinci minute și nu îți trebuie cont.",
+        "description": "Învață să programezi. 5 minute pe zi. CodeSprint te învață Python în sesiuni scurte și interactive, pe care le termini în drum spre școală sau serviciu — și îți dă un motiv să revii mâine.\n\nÎNVEȚI PRACTICÂND\n• Lecții scurte: o explicație pe scurt, un exemplu de cod real, apoi întrebări.\n• Opt tipuri de exerciții: variante multiple, adevărat sau fals, ghicește ce afișează codul, completează codul lipsă, pune liniile de cod în ordine, găsește greșeala, potrivește conceptele și alege toate răspunsurile corecte.\n• Fiecare răspuns e explicat, fie că ai nimerit, fie că nu.\n\nUN DRUM CLAR PRIN PYTHON\n17 module de Python Fundamentals te duc de la print() și variabile, prin condiții, bucle, liste, funcții, dicționare, excepții și fișiere, până la primele clase și la rezolvarea de probleme simple.\n\nÎȚI FACI UN OBICEI\n• Un obiectiv zilnic de 5, 10 sau 15 minute.\n• Serii de zile, XP, niveluri și realizări.\n• O provocare nouă în fiecare zi.\n• Un clasament săptămânal — sau te poți ascunde din el.\n• Un memento zilnic opțional, la ora pe care o alegi.\n\nEXERSEZI CE ÎNVEȚI\n• Reiei întrebările la care ai greșit.\n• Exerciții amestecate din lecțiile terminate.\n• Un examen de Python Fundamentals, cu rezultatele împărțite pe competențe.\n\nGRATUIT, ȘI SPUNEM CLAR CE NU E\nPrimele 6 module sunt gratuite, cu vieți, provocarea zilnică, exerciții și un examen demonstrativ de 10 întrebări pe săptămână. Versiunea gratuită are reclame.\n• Fără reclame elimină reclamele, ca abonament lunar sau ca achiziție unică. Nu deblochează lecțiile Premium și nici viețile nelimitate.\n• Premium deblochează toate modulele, examenul complet de 30 de întrebări cu reîncercări, seturile de exerciții grele, statisticile detaliate și viețile nelimitate — fără reclame. Lunar sau anual.\n\nAbonamentele se reînnoiesc automat, dacă nu le anulezi cu cel puțin 24 de ore înainte de sfârșitul perioadei curente. Plata se face din contul Apple la confirmarea achiziției, iar reînnoirea se plătește în cele 24 de ore dinaintea sfârșitului perioadei. Gestionezi sau anulezi abonamentul din setările contului App Store.\n\nÎNCEPI ÎN CÂTEVA SECUNDE\nPrima lecție nu cere cont: începi ca invitat și îți faci cont când vrei să îți păstrezi progresul. Îți poți exporta sau șterge datele oricând, direct din aplicație.\n\nPentru cursanți de la 13 ani în sus. Lecțiile sunt în limba engleză; aplicația în sine e în română sau engleză.\n\nTermeni de utilizare: https://[your-domain]/terms.html\nPolitica de confidențialitate: https://[your-domain]/privacy.html\nAjutor: https://[your-domain]/",
+        "keywords": [
+          "programare",
+          "începători",
+          "lecții",
+          "curs",
+          "exerciții",
+          "quiz",
+          "informatică",
+          "coding",
+          "dezvoltator",
+          "tutorial",
+          "învățare"
+        ],
+        "marketingUrl": "https://[your-domain]/",
+        "supportUrl": "https://[your-domain]/",
+        "privacyPolicyUrl": "https://[your-domain]/privacy.html",
+        "privacyChoicesUrl": "https://[your-domain]/delete-account.html",
+        "screenshots": {
+          "APP_IPHONE_67": [
+            "store/screenshots/app-store/ro/light/01-home.png",
+            "store/screenshots/app-store/ro/light/02-lesson.png",
+            "store/screenshots/app-store/ro/light/03-feedback.png",
+            "store/screenshots/app-store/ro/light/04-learn.png",
+            "store/screenshots/app-store/ro/light/05-progress.png"
+          ]
+        }
+      }
+    }
+  }
+}

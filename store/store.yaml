@@ -1,0 +1,85 @@
+# Store settings shared by every listing (SPEC §41, §62; Phase 23).
+#
+# Edit this file and store/listing/*.yaml, then run `npm run store:build`. It writes:
+#   store.config.json              → App Store Connect, with `npx eas-cli metadata:push`
+#   store/google-play/<locale>/    → Google Play Console (paste in, or fastlane supply)
+# Both are generated: a test fails if they are out of date. See docs/STORE.md.
+
+# Where web/ is hosted — the same address as EXPO_PUBLIC_LEGAL_BASE_URL in the EAS production
+# environment (`npm run release:check` compares the two). Public, not a secret. While it is
+# null, every store URL reads "https://[your-domain]" and release:check blocks.
+websiteUrl: null
+
+# The line App Store Connect shows under the listing: the year, then the legal entity that
+# holds the rights — e.g. "2026 <PFA name>". While it is null, release:check blocks.
+copyright: null
+
+apple:
+  # Education only. The secondary category is optional, and none of the others describes a
+  # course: Developer Tools is for tools that build apps, Reference for look-up content.
+  categories: [EDUCATION]
+
+  release:
+    # Approved builds wait for you to press Release; updates reach users over seven days.
+    automaticRelease: false
+    phasedRelease: true
+
+  # The age rating questionnaire (App Store Connect → App Information → Age Rating).
+  # Every content question: none of it is in a Python course.
+  advisory:
+    alcoholTobaccoOrDrugUseOrReferences: NONE
+    contests: NONE # a weekly XP ranking with no prize is not a contest
+    gamblingSimulated: NONE
+    gunsOrOtherWeapons: NONE
+    horrorOrFearThemes: NONE
+    matureOrSuggestiveThemes: NONE
+    medicalOrTreatmentInformation: NONE
+    profanityOrCrudeHumor: NONE
+    sexualContentGraphicAndNudity: NONE
+    sexualContentOrNudity: NONE
+    violenceCartoonOrFantasy: NONE
+    violenceRealistic: NONE
+    violenceRealisticProlongedGraphicOrSadistic: NONE
+    gambling: false
+    lootBox: false
+    healthOrWellnessTopics: false
+    messagingAndChat: false
+    parentalControls: false
+    # Links to the legal pages open in the system browser, not inside the app.
+    unrestrictedWebAccess: false
+    # AdMob banners and interstitials for Free learners.
+    advertising: true
+    # Display names are chosen by learners and shown to others on the leaderboard, so yes —
+    # with the moderation guideline 1.2 asks for: a blocklist on names, a Report action, and
+    # hiding a learner from the leaderboard (docs/STORE.md, "User-generated content").
+    userGeneratedContent: true
+    # The birth-year question is a self-declared age gate, not age assurance (verification).
+    ageAssurance: false
+    # 13+, whatever the questionnaire computes: the app refuses accounts under 13 (D10), and
+    # the listing should not invite younger children to a store page for it.
+    ageRatingOverrideV2: THIRTEEN_PLUS
+    # Not in the Kids category (it is not an app made for children under 12).
+    kidsAgeBand: null
+    # The older override and Korea's: not used — the V2 override above sets the rating.
+    ageRatingOverride: NONE
+    koreaAgeRatingOverride: NONE
+
+  # Shown to App Review only. The contact person (name, email, phone) is entered by hand in
+  # App Store Connect → App Review Information: it is personal data and stays out of the repo.
+  reviewNotes: |
+    Thank you for reviewing {{name}}.
+
+    No account is needed. On the first screen, tap "Continue as guest". Onboarding asks for a birth year: please enter an adult year. Accounts under 13 are refused, and learners aged 13-15 get privacy-protective defaults (non-personalised ads, analytics off, hidden from the leaderboard).
+
+    Advertising: Free learners see AdMob ads — a banner on the Learn and Leaderboard tabs and an occasional full-screen ad after a finished lesson. In the EEA, UK and Switzerland, Google's consent form comes first. There are never ads inside a lesson, the exam or the paywall.
+
+    In-app purchases (Profile > Subscription > See plans):
+    - No Ads: a monthly subscription or a one-time purchase. It removes ads only.
+    - Premium: a monthly or yearly subscription. It unlocks every module, the full exam, hard practice, detailed statistics and unlimited lives, with no ads.
+    Restore purchases is on the paywall and in Profile > Subscription. Access is confirmed by our server after each purchase.
+
+    Your data: Profile > Your data has "Export my data" and "Delete account". Deletion is immediate and final; the sheet explains that a store subscription must be cancelled separately.
+
+    Leaderboard display names are moderated: a blocklist rejects offensive names, every other learner's entry has a Report action, and reported learners can be hidden from the leaderboard.
+
+    Lessons are in English. The interface is available in English and Romanian.

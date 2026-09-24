@@ -1,13 +1,20 @@
 import { execSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { buildFromDisk } from '../content/build';
 import { EnvValidationError, parseEnv } from '../../src/lib/env';
+import {
+  SCREENSHOT_IDS,
+  loadStoreSource,
+  renderAppleConfig,
+  screenshotPath,
+} from '../store/listing';
 
 /**
- * `npm run release:check` — what still stands between this repository and a store build
- * (Phase 22, SPEC §51, §54).
+ * `npm run release:check` — what still stands between this repository and a store build, and
+ * a store submission (Phases 22–23, SPEC §41, §51, §54).
  *
  * Every blocker it reports is something a production build would otherwise discover the hard
  * way: an app that refuses to start (the env schema), test ads in a store build, a privacy page
@@ -187,6 +194,97 @@ export const contentFindings = ({ lessons, questions }: DraftCounts): Finding[] 
       ]
     : [];
 
+/** What the store listing still lacks (Phase 23, docs/STORE.md). */
+export interface StoreState {
+  websiteUrl: string | null;
+  copyright: string | null;
+  /** EXPO_PUBLIC_LEGAL_BASE_URL in the EAS production environment, when readable. */
+  appLegalBaseUrl: string | undefined;
+  missingImages: string[];
+}
+
+const withoutTrailingSlash = (url: string) => url.replace(/\/+$/, '');
+
+export const storeFindings = ({
+  websiteUrl,
+  copyright,
+  appLegalBaseUrl,
+  missingImages,
+}: StoreState): Finding[] => {
+  const area = 'Store listing';
+  const findings: Finding[] = [];
+
+  if (!websiteUrl) {
+    findings.push({
+      level: 'blocker',
+      area,
+      message:
+        'websiteUrl is not set in store/store.yaml — the listing links to https://[your-domain]',
+    });
+  } else if (
+    appLegalBaseUrl &&
+    withoutTrailingSlash(websiteUrl) !== withoutTrailingSlash(appLegalBaseUrl)
+  ) {
+    findings.push({
+      level: 'blocker',
+      area,
+      message:
+        'websiteUrl in store/store.yaml and EXPO_PUBLIC_LEGAL_BASE_URL differ — the store and the app would link to different pages',
+    });
+  }
+
+  if (!copyright) {
+    findings.push({
+      level: 'blocker',
+      area,
+      message: 'copyright is not set in store/store.yaml (year and legal entity)',
+    });
+  }
+
+  if (missingImages.length > 0) {
+    findings.push({
+      level: 'blocker',
+      area,
+      message: `${missingImages.length} store images are missing — run \`npm run store:screenshots\``,
+    });
+  }
+
+  return findings;
+};
+
+/**
+ * The artwork `create-expo-app` scaffolds, by SHA-256. The app has shipped with it since
+ * Phase 1: Expo's own mark as the launcher icon, splash and store icon — another company's
+ * artwork, which SPEC §8 rules out as much as it is simply not ours.
+ */
+export const TEMPLATE_ARTWORK: Record<string, string> = {
+  'assets/icon.png': '119462bb78eb240a65c869fc067ee599639b3cb5a41953f25c07b17d2a8c7e0f',
+  'assets/android-icon-foreground.png':
+    '9e3d0315a33c6799de601dd34cd8bf8cc3a8d16f3bf75592baec2ceb7240b391',
+  'assets/android-icon-background.png':
+    'fb139c2dee362ebf2070e23b96da6fc0d43f8492de38b8af1fd7223e19b5861d',
+  'assets/android-icon-monochrome.png':
+    '6371fc2c12e33ad2215a86c281db3d682a81bebe7c957a842c13b8bf00cceb83',
+  'assets/splash-icon.png': '5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8',
+  'assets/favicon.png': 'a4e030697a7571b3e95d31860e4da55d2f98e5e861e2b55e414f45a8556828ba',
+};
+
+/** `hashes`: path → SHA-256 of the file as it is now. */
+export const artworkFindings = (hashes: Record<string, string>): Finding[] => {
+  const unchanged = Object.entries(TEMPLATE_ARTWORK)
+    .filter(([path, template]) => hashes[path] === template)
+    .map(([path]) => path);
+  return unchanged.length > 0
+    ? [
+        {
+          level: 'blocker',
+          area: 'App icon',
+          message: `still Expo's template artwork: ${unchanged.join(', ')} — the app needs its own icon and splash`,
+        },
+      ]
+    : [];
+};
+
 /* ------------------------------------------------------------------ main */
 
 const readWebPages = (): Record<string, string> => {
@@ -229,6 +327,29 @@ const draftCounts = (): DraftCounts => {
   return { lessons: count(rows.lessons), questions: count(rows.questions) };
 };
 
+/** The images the listings upload: what store.config.json names, and Google Play's own. */
+const storeImages = (): string[] => {
+  const source = loadStoreSource();
+  const apple = Object.values(renderAppleConfig(source).apple.info).flatMap(
+    (info) => info.screenshots.APP_IPHONE_67,
+  );
+  const google = source.listings.flatMap((listing) => [
+    ...SCREENSHOT_IDS.map((id) => screenshotPath('google-play', listing.googleLocale, 'light', id)),
+    `store/screenshots/google-play/${listing.googleLocale}/feature-graphic.png`,
+  ]);
+  return [...apple, ...google, 'store/screenshots/google-play/icon.png'];
+};
+
+const readStoreState = (env: Record<string, string> | Finding): StoreState => {
+  const { settings } = loadStoreSource();
+  return {
+    websiteUrl: settings.websiteUrl,
+    copyright: settings.copyright,
+    appLegalBaseUrl: 'level' in env ? undefined : env.EXPO_PUBLIC_LEGAL_BASE_URL,
+    missingImages: storeImages().filter((path) => !existsSync(join(process.cwd(), path))),
+  };
+};
+
 const main = () => {
   const env = readProductionEnv();
 
@@ -236,6 +357,17 @@ const main = () => {
     ...('level' in env ? [env] : productionEnvFindings(env)),
     ...webPlaceholderFindings(readWebPages()),
     ...appAdsFindings(readFileSync(join(process.cwd(), 'web', 'app-ads.txt'), 'utf8')),
+    ...storeFindings(readStoreState(env)),
+    ...artworkFindings(
+      Object.fromEntries(
+        Object.keys(TEMPLATE_ARTWORK).map((path) => [
+          path,
+          createHash('sha256')
+            .update(readFileSync(join(process.cwd(), path)))
+            .digest('hex'),
+        ]),
+      ),
+    ),
     ...contentFindings(draftCounts()),
   ];
 

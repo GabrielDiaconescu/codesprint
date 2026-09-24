@@ -1,0 +1,37 @@
+Învață să programezi. 5 minute pe zi. CodeSprint te învață Python în sesiuni scurte și interactive, pe care le termini în drum spre școală sau serviciu — și îți dă un motiv să revii mâine.
+
+ÎNVEȚI PRACTICÂND
+• Lecții scurte: o explicație pe scurt, un exemplu de cod real, apoi întrebări.
+• Opt tipuri de exerciții: variante multiple, adevărat sau fals, ghicește ce afișează codul, completează codul lipsă, pune liniile de cod în ordine, găsește greșeala, potrivește conceptele și alege toate răspunsurile corecte.
+• Fiecare răspuns e explicat, fie că ai nimerit, fie că nu.
+
+UN DRUM CLAR PRIN PYTHON
+17 module de Python Fundamentals te duc de la print() și variabile, prin condiții, bucle, liste, funcții, dicționare, excepții și fișiere, până la primele clase și la rezolvarea de probleme simple.
+
+ÎȚI FACI UN OBICEI
+• Un obiectiv zilnic de 5, 10 sau 15 minute.
+• Serii de zile, XP, niveluri și realizări.
+• O provocare nouă în fiecare zi.
+• Un clasament săptămânal — sau te poți ascunde din el.
+• Un memento zilnic opțional, la ora pe care o alegi.
+
+EXERSEZI CE ÎNVEȚI
+• Reiei întrebările la care ai greșit.
+• Exerciții amestecate din lecțiile terminate.
+• Un examen de Python Fundamentals, cu rezultatele împărțite pe competențe.
+
+GRATUIT, ȘI SPUNEM CLAR CE NU E
+Primele 6 module sunt gratuite, cu vieți, provocarea zilnică, exerciții și un examen demonstrativ de 10 întrebări pe săptămână. Versiunea gratuită are reclame.
+• Fără reclame elimină reclamele, ca abonament lunar sau ca achiziție unică. Nu deblochează lecțiile Premium și nici viețile nelimitate.
+• Premium deblochează toate modulele, examenul complet de 30 de întrebări cu reîncercări, seturile de exerciții grele, statisticile detaliate și viețile nelimitate — fără reclame. Lunar sau anual.
+
+Abonamentele se reînnoiesc automat până le anulezi. Le gestionezi sau le anulezi oricând din Google Play → Plăți și abonamente.
+
+ÎNCEPI ÎN CÂTEVA SECUNDE
+Prima lecție nu cere cont: începi ca invitat și îți faci cont când vrei să îți păstrezi progresul. Îți poți exporta sau șterge datele oricând, direct din aplicație.
+
+Pentru cursanți de la 13 ani în sus. Lecțiile sunt în limba engleză; aplicația în sine e în română sau engleză.
+
+Termeni de utilizare: https://[your-domain]/terms.html
+Politica de confidențialitate: https://[your-domain]/privacy.html
+Ajutor: https://[your-domain]/

@@ -188,6 +188,15 @@ describe('parseEnv', () => {
     ).not.toThrow();
   });
 
+  it('REFUSES test automation mode in production, and allows it in development', () => {
+    expect(() => parseEnv({ ...productionEnv, EXPO_PUBLIC_AUTOMATION: '1' })).toThrow(
+      /EXPO_PUBLIC_AUTOMATION/,
+    );
+    expect(() =>
+      parseEnv({ EXPO_PUBLIC_APP_ENV: 'development', EXPO_PUBLIC_AUTOMATION: '1' }),
+    ).not.toThrow();
+  });
+
   it('accepts a fully populated production environment', () => {
     expect(() => parseEnv(productionEnv)).not.toThrow();
   });

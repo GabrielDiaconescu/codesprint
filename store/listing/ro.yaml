@@ -1,0 +1,89 @@
+# Romanian store listing (App Store + Google Play). Run `npm run store:build` after editing.
+# Tokens and rules: see en-US.yaml. Written, like the Romanian interface, to be read once by a
+# native speaker before it goes live. It says plainly that the lessons are in English.
+
+appleLocale: ro
+googleLocale: ro
+i18n: ro
+
+subtitle: Python în 5 minute pe zi
+
+promoText: '{{promoLine}} Prima lecție durează cinci minute și nu îți trebuie cont.'
+
+keywords:
+  - programare
+  - începători
+  - lecții
+  - curs
+  - exerciții
+  - quiz
+  - informatică
+  - coding
+  - dezvoltator
+  - tutorial
+  - învățare
+
+shortDescription: Învață Python în lecții scurte, cu serii zilnice, XP și o provocare pe zi.
+
+description: |
+  {{tagline}} {{name}} te învață Python în sesiuni scurte și interactive, pe care le termini în drum spre școală sau serviciu — și îți dă un motiv să revii mâine.
+
+  ÎNVEȚI PRACTICÂND
+  • Lecții scurte: o explicație pe scurt, un exemplu de cod real, apoi întrebări.
+  • Opt tipuri de exerciții: variante multiple, adevărat sau fals, ghicește ce afișează codul, completează codul lipsă, pune liniile de cod în ordine, găsește greșeala, potrivește conceptele și alege toate răspunsurile corecte.
+  • Fiecare răspuns e explicat, fie că ai nimerit, fie că nu.
+
+  UN DRUM CLAR PRIN PYTHON
+  {{moduleCount}} module de Python Fundamentals te duc de la print() și variabile, prin condiții, bucle, liste, funcții, dicționare, excepții și fișiere, până la primele clase și la rezolvarea de probleme simple.
+
+  ÎȚI FACI UN OBICEI
+  • Un obiectiv zilnic de 5, 10 sau 15 minute.
+  • Serii de zile, XP, niveluri și realizări.
+  • O provocare nouă în fiecare zi.
+  • Un clasament săptămânal — sau te poți ascunde din el.
+  • Un memento zilnic opțional, la ora pe care o alegi.
+
+  EXERSEZI CE ÎNVEȚI
+  • Reiei întrebările la care ai greșit.
+  • Exerciții amestecate din lecțiile terminate.
+  • Un examen de Python Fundamentals, cu rezultatele împărțite pe competențe.
+
+  GRATUIT, ȘI SPUNEM CLAR CE NU E
+  Primele {{freeModuleCount}} module sunt gratuite, cu vieți, provocarea zilnică, exerciții și un examen demonstrativ de 10 întrebări pe săptămână. Versiunea gratuită are reclame.
+  • Fără reclame elimină reclamele, ca abonament lunar sau ca achiziție unică. Nu deblochează lecțiile Premium și nici viețile nelimitate.
+  • Premium deblochează toate modulele, examenul complet de 30 de întrebări cu reîncercări, seturile de exerciții grele, statisticile detaliate și viețile nelimitate — fără reclame. Lunar sau anual.
+
+  {{billingTerms}}
+
+  ÎNCEPI ÎN CÂTEVA SECUNDE
+  Prima lecție nu cere cont: începi ca invitat și îți faci cont când vrei să îți păstrezi progresul. Îți poți exporta sau șterge datele oricând, direct din aplicație.
+
+  Pentru cursanți de la 13 ani în sus. Lecțiile sunt în limba engleză; aplicația în sine e în română sau engleză.
+
+  Termeni de utilizare: {{termsUrl}}
+  Politica de confidențialitate: {{privacyUrl}}
+  Ajutor: {{supportUrl}}
+
+billingTerms:
+  apple: Abonamentele se reînnoiesc automat, dacă nu le anulezi cu cel puțin 24 de ore înainte de sfârșitul perioadei curente. Plata se face din contul Apple la confirmarea achiziției, iar reînnoirea se plătește în cele 24 de ore dinaintea sfârșitului perioadei. Gestionezi sau anulezi abonamentul din setările contului App Store.
+  google: Abonamentele se reînnoiesc automat până le anulezi. Le gestionezi sau le anulezi oricând din Google Play → Plăți și abonamente.
+
+screenshots:
+  home:
+    title: Învață să programezi în 5 minute pe zi
+    subtitle: Sesiuni scurte, pe măsura zilei tale
+  lesson:
+    title: Lecții de Python pe bucăți mici
+    subtitle: Cod real, explicat pas cu pas
+  feedback:
+    title: Explicații la fiecare răspuns
+    subtitle: Afli de ce, nu doar dacă
+  learn:
+    title: Un drum clar prin Python
+    subtitle: '{{moduleCount}} module, de la print() la clase'
+  progress:
+    title: Îți vezi progresul crescând
+    subtitle: XP, niveluri, serii și competențe
+
+featureGraphic:
+  title: '{{tagline}}'

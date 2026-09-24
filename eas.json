@@ -50,7 +50,9 @@
         "track": "internal",
         "releaseStatus": "draft"
       },
-      "ios": {}
+      "ios": {
+        "metadataPath": "./store.config.js"
+      }
     }
   }
 }

@@ -27,6 +27,7 @@ listed in `docs/PROGRESS.md` — store accounts, keys, legal review, content rev
 | `docs/LEGAL.md`        | Privacy, deletion, processors, store privacy answers (not advice) |
 | `docs/TESTING.md`      | Test layers, the E2E suite and how to run it                      |
 | `docs/DEPLOYMENT.md`   | Production setup, builds, TestFlight, Play testing, OTA updates   |
+| `docs/STORE.md`        | Store listings, screenshots, and every store form with its answer |
 | `CONTRIBUTING.md`      | Conventions for changing the code, the database and the content   |
 | `CLAUDE.md`            | Working rules, phase gate, key commands                           |
 | `PLAN.md`              | The original plan (Step 1) — historical                           |
@@ -64,21 +65,23 @@ npm run dev                                               # start Metro for the 
 
 ## Commands
 
-| Command                  | Purpose                                               |
-| ------------------------ | ----------------------------------------------------- |
-| `npm run dev`            | Start Metro for the development build                 |
-| `npm run typecheck`      | `tsc --noEmit`                                        |
-| `npm run lint`           | ESLint (`--max-warnings=0`)                           |
-| `npm test`               | Jest unit + component tests                           |
-| `npm run verify`         | typecheck + lint + test                               |
-| `npm run db:reset`       | Apply migrations + seed a local Supabase (Phase 3+)   |
-| `npm run db:test`        | pgTAP suite (Phase 3+)                                |
-| `npm run db:types`       | Regenerate database types after a migration           |
-| `npm run content:check`  | Validate content and run every snippet on real Python |
-| `npm run content:seed`   | Regenerate `supabase/seed.sql` from the content files |
-| `npm run e2e`            | Maestro E2E suite on a device (see `docs/TESTING.md`) |
-| `npm run release:check`  | What still blocks a production build                  |
-| `npm run release:update` | Publish a JavaScript-only fix to production builds    |
+| Command                     | Purpose                                               |
+| --------------------------- | ----------------------------------------------------- |
+| `npm run dev`               | Start Metro for the development build                 |
+| `npm run typecheck`         | `tsc --noEmit`                                        |
+| `npm run lint`              | ESLint (`--max-warnings=0`)                           |
+| `npm test`                  | Jest unit + component tests                           |
+| `npm run verify`            | typecheck + lint + test                               |
+| `npm run db:reset`          | Apply migrations + seed a local Supabase (Phase 3+)   |
+| `npm run db:test`           | pgTAP suite (Phase 3+)                                |
+| `npm run db:types`          | Regenerate database types after a migration           |
+| `npm run content:check`     | Validate content and run every snippet on real Python |
+| `npm run content:seed`      | Regenerate `supabase/seed.sql` from the content files |
+| `npm run e2e`               | Maestro E2E suite on a device (see `docs/TESTING.md`) |
+| `npm run release:check`     | What still blocks a production build                  |
+| `npm run store:build`       | Store listing text from `store/` (App Store and Play) |
+| `npm run store:screenshots` | Store images from the real app, on the emulator       |
+| `npm run release:update`    | Publish a JavaScript-only fix to production builds    |
 
 Local services while Supabase is running: Studio on <http://127.0.0.1:54323>, the API on
 <http://127.0.0.1:54321>, and **Mailpit** — the local inbox that catches every verification and

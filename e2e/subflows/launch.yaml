@@ -8,12 +8,15 @@
 #     a command separator;
 #   * `disableAutoLaunch=1`, not only `disableOnboarding=1`: clearState also resets the
 #     development client's "show menu at launch" preference to on, and its menu then opens over
-#     the first screen as soon as the bundle is up.
+#     the first screen as soon as the bundle is up;
+#   * `disableFab=1`: otherwise the development client floats its own gear button over the top
+#     right of every screen — over the app's Settings button, in every store screenshot, and in
+#     the way of taps.
 appId: ${APP_ID}
 ---
 - evalScript: ${output.consentAnswered = false}
 - clearState
-- openLink: codesprint-dev://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A${METRO_PORT}&disableOnboarding=1&disableAutoLaunch=1
+- openLink: codesprint-dev://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A${METRO_PORT}&disableOnboarding=1&disableAutoLaunch=1&disableFab=1
 
 # Two things can cover the first screen, in either order: Google's consent form (development
 # builds force the EEA one — declined, the non-personalised path every under-16 learner gets)

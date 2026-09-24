@@ -67,6 +67,14 @@ const buildSchema = (isProduction: boolean) =>
        */
       EXPO_PUBLIC_REVENUECAT_TEST_KEY: z.string().min(1).optional(),
 
+      /**
+       * Set by the E2E and store-screenshot runners on the Metro they start: an automated run
+       * is driving the app. Development builds then keep React Native's error toasts off the
+       * screen, where a swipe can open one over the app (the errors still reach Metro's log).
+       * Never in production — refused below.
+       */
+      EXPO_PUBLIC_AUTOMATION: z.literal('1').optional(),
+
       // Phase 15 — AdMob production unit ids (dev/preview always use Google test ids, SPEC §59.31)
       EXPO_PUBLIC_ADMOB_BANNER_ID_IOS: whenShipped(SHIPPED.admob, z.string().min(1), isProduction),
       EXPO_PUBLIC_ADMOB_BANNER_ID_ANDROID: whenShipped(
@@ -123,6 +131,14 @@ const buildSchema = (isProduction: boolean) =>
         });
       }
 
+      if (isProduction && env.EXPO_PUBLIC_AUTOMATION) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['EXPO_PUBLIC_AUTOMATION'],
+          message: 'Test automation mode must never reach production.',
+        });
+      }
+
       if (isProduction && env.EXPO_PUBLIC_REVENUECAT_TEST_KEY) {
         ctx.addIssue({
           code: 'custom',
@@ -147,6 +163,7 @@ const readRawEnv = (): Record<string, string | undefined> => ({
   EXPO_PUBLIC_REVENUECAT_IOS_KEY: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY,
   EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY,
   EXPO_PUBLIC_REVENUECAT_TEST_KEY: process.env.EXPO_PUBLIC_REVENUECAT_TEST_KEY,
+  EXPO_PUBLIC_AUTOMATION: process.env.EXPO_PUBLIC_AUTOMATION,
   EXPO_PUBLIC_ADMOB_BANNER_ID_IOS: process.env.EXPO_PUBLIC_ADMOB_BANNER_ID_IOS,
   EXPO_PUBLIC_ADMOB_BANNER_ID_ANDROID: process.env.EXPO_PUBLIC_ADMOB_BANNER_ID_ANDROID,
   EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_IOS: process.env.EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID_IOS,
