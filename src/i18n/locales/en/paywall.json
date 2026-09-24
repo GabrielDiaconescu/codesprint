@@ -63,10 +63,6 @@
     "body": "We show prices straight from the store, so there is nothing to show until it answers. Check your connection and try again."
   },
   "terms": "Subscriptions renew automatically until cancelled. You can cancel any time from your store account, at least 24 hours before the period ends. Payment is charged to your store account on confirmation.",
-  "legal": {
-    "terms": "Terms",
-    "privacy": "Privacy Policy"
-  },
   "addOnNote": "Your ad-free purchase is permanent and stays yours. Premium is a separate subscription on top of it.",
   "owned": "You already have this"
 }

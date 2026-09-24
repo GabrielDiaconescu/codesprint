@@ -41,5 +41,25 @@
   "about": {
     "title": "About",
     "version": "Version {{value}}"
+  },
+  "yourData": {
+    "title": "Your data",
+    "body": "Download a copy of everything we store about you, or delete your account.",
+    "export": "Export my data",
+    "shareTitle": "Your CodeSprint data",
+    "exportFailed": "Couldn't prepare your data. Try again in a little while.",
+    "delete": "Delete account",
+    "confirmTitle": "Delete your account?",
+    "confirmBody": "Your account, email address, progress, XP, streak and achievements will be deleted for good. This can't be undone.",
+    "confirmBodyGuest": "Your progress, XP, streak and achievements will be deleted for good. This can't be undone.",
+    "subscriptionNote": "Deleting your account does not cancel a subscription. If you have one, cancel it in the App Store or Google Play first.",
+    "confirm": "Delete my account",
+    "deleteFailed": "Your account was not deleted. Check your connection and try again.",
+    "deleted": "Your account has been deleted."
+  },
+  "legal": {
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "support": "Support"
   }
 }

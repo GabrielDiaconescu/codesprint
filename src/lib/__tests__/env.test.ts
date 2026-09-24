@@ -61,6 +61,7 @@ describe('parseEnv', () => {
     EXPO_PUBLIC_ADMOB_REWARDED_ID_ANDROID: 'ca-app-pub-x/6',
     EXPO_PUBLIC_POSTHOG_KEY: 'phc_test',
     EXPO_PUBLIC_POSTHOG_HOST: 'https://eu.i.posthog.com',
+    EXPO_PUBLIC_LEGAL_BASE_URL: 'https://codesprint.example',
   };
 
   it('requires a SHIPPED integration in production', () => {
@@ -86,6 +87,17 @@ describe('parseEnv', () => {
       expect((error as EnvValidationError).issues.join()).toContain(
         'EXPO_PUBLIC_ADMOB_BANNER_ID_IOS',
       );
+    }
+  });
+
+  it('requires the legal pages in production, now that Phase 18 has shipped them', () => {
+    // The privacy policy and terms must be one tap away on the paywall and in Profile, as both
+    // stores require (SPEC §33, §41). A production build without them must not start.
+    try {
+      parseEnv({ ...productionEnv, EXPO_PUBLIC_LEGAL_BASE_URL: undefined });
+      throw new Error('expected validation to fail');
+    } catch (error) {
+      expect((error as EnvValidationError).issues.join()).toContain('EXPO_PUBLIC_LEGAL_BASE_URL');
     }
   });
 

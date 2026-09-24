@@ -41,5 +41,25 @@
   "about": {
     "title": "Despre",
     "version": "Versiunea {{value}}"
+  },
+  "yourData": {
+    "title": "Datele tale",
+    "body": "Descarcă o copie a tot ce păstrăm despre tine sau șterge-ți contul.",
+    "export": "Exportă datele mele",
+    "shareTitle": "Datele tale din CodeSprint",
+    "exportFailed": "Nu am putut pregăti datele. Încearcă din nou puțin mai târziu.",
+    "delete": "Șterge contul",
+    "confirmTitle": "Ștergi contul?",
+    "confirmBody": "Contul, adresa de email, progresul, XP-ul, seria și realizările tale vor fi șterse definitiv. Acțiunea nu poate fi anulată.",
+    "confirmBodyGuest": "Progresul, XP-ul, seria și realizările tale vor fi șterse definitiv. Acțiunea nu poate fi anulată.",
+    "subscriptionNote": "Ștergerea contului nu anulează un abonament. Dacă ai unul, anulează-l mai întâi din App Store sau Google Play.",
+    "confirm": "Șterge-mi contul",
+    "deleteFailed": "Contul nu a fost șters. Verifică-ți conexiunea și încearcă din nou.",
+    "deleted": "Contul tău a fost șters."
+  },
+  "legal": {
+    "privacy": "Politica de confidențialitate",
+    "terms": "Termeni de utilizare",
+    "support": "Suport"
   }
 }

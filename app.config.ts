@@ -52,6 +52,34 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       supportsTablet: false,
       bundleIdentifier: variant.bundleId,
+      // Apple's privacy manifest (SPEC §41). The required-reason APIs that the app's own code
+      // and React Native touch; the SDKs (AdMob, RevenueCat, Sentry, PostHog) ship manifests
+      // of their own, which Xcode merges. Verify with Xcode's privacy report on the first iOS
+      // build (Phase 22) — see docs/LEGAL.md.
+      privacyManifests: {
+        NSPrivacyAccessedAPITypes: [
+          {
+            // AsyncStorage and SecureStore's metadata live in the app's own UserDefaults.
+            NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryUserDefaults',
+            NSPrivacyAccessedAPITypeReasons: ['CA92.1'],
+          },
+          {
+            // React Native and Expo read timestamps of the app's own files (bundles, caches).
+            NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryFileTimestamp',
+            NSPrivacyAccessedAPITypeReasons: ['C617.1'],
+          },
+          {
+            // React Native measures elapsed time for performance and animation.
+            NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategorySystemBootTime',
+            NSPrivacyAccessedAPITypeReasons: ['35F9.1'],
+          },
+          {
+            // Checked before writing caches, never reported off the device.
+            NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryDiskSpace',
+            NSPrivacyAccessedAPITypeReasons: ['E174.1'],
+          },
+        ],
+      },
     },
     android: {
       package: variant.bundleId,

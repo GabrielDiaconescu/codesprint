@@ -414,6 +414,10 @@ verify_jwt = false
 [functions.sync-entitlements]
 verify_jwt = true
 
+# Deletes the CALLER's account (SPEC §41): the id can only come from a verified token.
+[functions.delete-account]
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327

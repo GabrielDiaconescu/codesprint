@@ -8,13 +8,13 @@ import { getEnv } from '@/lib/env';
 import { useTheme } from '@/theme';
 
 import { appVersionLabel } from '../logic/version';
+import { LegalLinks } from './LegalLinks';
 
 /**
  * The version line (SPEC §29).
  *
- * Small, and the first thing support asks for. The legal links that will sit beside it —
- * privacy policy, terms, licences — arrive with Phase 18, together with the pages they point
- * at; a link to a page that does not exist yet would be worse than no link.
+ * Small, and the first thing support asks for — next to the legal and support pages (SPEC §29,
+ * Phase 18), which appear once they are hosted for this environment.
  */
 export const AboutCard = () => {
   const { t } = useTranslation('settings');
@@ -34,6 +34,7 @@ export const AboutCard = () => {
         <Text variant="caption" tone="secondary" testID="app-version">
           {BRAND.name} · {t('about.version', { value: label })}
         </Text>
+        <LegalLinks links={['privacy', 'terms', 'support']} />
       </View>
     </Card>
   );

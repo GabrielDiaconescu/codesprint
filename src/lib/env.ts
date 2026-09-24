@@ -26,7 +26,7 @@ const SHIPPED = {
   // Optional even in production: a build without a DSN simply reports nothing, which is
   // worse than having it but is not a reason to refuse to start (SPEC §44).
   sentry: false, // Phase 16 — written, DSN still a pending human action
-  legalPages: false, // Phase 18
+  legalPages: true, // Phase 18 — shipped; pages in web/, hosted by a human action
 } as const;
 
 /** `required` in production once the phase ships; otherwise optional everywhere. */

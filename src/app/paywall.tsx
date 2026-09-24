@@ -18,7 +18,7 @@ import {
 } from '@/features/subscriptions/hooks/useSubscription';
 import { annualSavingPercent, buildPlans, type Plan } from '@/features/paywall/logic/plans';
 import { PAYWALL_TRIGGERS, type PaywallTrigger } from '@/features/paywall/logic/prompts';
-import { getEnv } from '@/lib/env';
+import { LegalLinks } from '@/features/settings/components/LegalLinks';
 import { services } from '@/services';
 import { useToastStore } from '@/store/toastStore';
 import { useTheme } from '@/theme';
@@ -44,8 +44,6 @@ export default function PaywallScreen() {
   const router = useRouter();
   const showToast = useToastStore((state) => state.show);
   const { data: config } = useAppConfig();
-
-  const legalBase = getEnv().EXPO_PUBLIC_LEGAL_BASE_URL;
 
   const params = useLocalSearchParams<{ trigger?: string }>();
   const trigger: PaywallTrigger = (PAYWALL_TRIGGERS as readonly string[]).includes(
@@ -191,22 +189,8 @@ export default function PaywallScreen() {
           />
         </View>
 
-        <View style={[styles.legal, { gap: theme.spacing.lg }]}>
-          <Text
-            variant="caption"
-            tone="secondary"
-            onPress={() => void Linking.openURL(`${legalBase}/terms.html`)}
-          >
-            {t('legal.terms')}
-          </Text>
-          <Text
-            variant="caption"
-            tone="secondary"
-            onPress={() => void Linking.openURL(`${legalBase}/privacy.html`)}
-          >
-            {t('legal.privacy')}
-          </Text>
-        </View>
+        {/* Terms (the EULA) and privacy, as both stores require on a subscription screen. */}
+        <LegalLinks links={['terms', 'privacy']} />
       </ScrollView>
     </Screen>
   );
@@ -220,5 +204,4 @@ const isCancellation = (error: unknown): boolean =>
 
 const styles = StyleSheet.create({
   content: { paddingVertical: 16 },
-  legal: { flexDirection: 'row', justifyContent: 'center' },
 });

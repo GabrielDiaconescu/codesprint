@@ -22,9 +22,10 @@ current phase, decisions taken and pending human actions.
 | `PLAN.md`          | Architecture plan, database draft, risks, phase-1 detail          |
 | `CLAUDE.md`        | Working rules, phase gate, key commands                           |
 | `docs/TESTING.md`  | Test layers, the E2E suite and how to run it                      |
+| `docs/LEGAL.md`    | Privacy, deletion, processors, store privacy answers (not advice) |
 
 Further documents (`ARCHITECTURE.md`, `DATABASE.md`, `CONTENT.md`, `MONETIZATION.md`,
-`LEGAL.md`, `DEPLOYMENT.md`, `CONTRIBUTING.md`) are written in the phases that
+`DEPLOYMENT.md`, `CONTRIBUTING.md`) are written in the phases that
 make them meaningful, rather than as empty stubs.
 
 ## Requirements

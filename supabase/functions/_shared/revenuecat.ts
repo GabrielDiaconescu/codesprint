@@ -157,3 +157,39 @@ export const fetchSubscriber = async (
 
   return (await response.json()) as SubscriberResponse;
 };
+
+export type CustomerDeletion = 'deleted' | 'not-found' | 'not-configured';
+
+/**
+ * Deletes the RevenueCat customer for an account being deleted (SPEC §41).
+ *
+ * Without a secret key this says so rather than pretending: an environment with no RevenueCat
+ * project (local development without the key) has no customer to delete, and the caller
+ * reports `not-configured`. Production always has the key — `sync-entitlements` cannot work
+ * without it either.
+ *
+ * 404 is a real answer — RevenueCat never saw this learner — and counts as done.
+ */
+export const deleteCustomer = async (
+  apiKey: string | undefined,
+  appUserId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<CustomerDeletion> => {
+  if (!apiKey) return 'not-configured';
+
+  const response = await fetchImpl(
+    `${REVENUECAT_API}/subscribers/${encodeURIComponent(appUserId)}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },
+    },
+  );
+
+  if (response.ok) return 'deleted';
+  if (response.status === 404) return 'not-found';
+
+  throw new RevenueCatError(
+    response.status,
+    `RevenueCat responded ${response.status} for customer deletion`,
+  );
+};

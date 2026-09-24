@@ -10,6 +10,7 @@ import { ReminderSettingsCard } from '@/features/notifications/components/Remind
 import { AboutCard } from '@/features/settings/components/AboutCard';
 import { AppearanceSettingsCard } from '@/features/settings/components/AppearanceSettingsCard';
 import { LanguageSettingsCard } from '@/features/settings/components/LanguageSettingsCard';
+import { YourDataCard } from '@/features/settings/components/YourDataCard';
 import { SubscriptionCard } from '@/features/subscriptions/components/SubscriptionCard';
 import { LevelCard } from '@/features/progress/components/LevelCard';
 import { useProfile } from '@/features/profile/hooks/useProfile';
@@ -61,6 +62,8 @@ export default function ProfileScreen() {
         {profile && <LeaderboardSettingsCard profile={profile} />}
 
         {profile && <PrivacySettingsCard profile={profile} />}
+
+        <YourDataCard />
 
         <Button
           testID="profile-progress"
