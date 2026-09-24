@@ -99,6 +99,15 @@ const checkDevice = () => {
       `${APP_ID} is not installed. Install a development build first (README, "Running on a device").`,
     );
   }
+
+  // A freshly installed debug build is not compiled ahead of time, and its first cold starts
+  // verify bytecode slowly enough on an emulator for Android to kill it as not responding.
+  // Compiling now is a no-op once done, and saves a run of nine identical launch failures.
+  // Its own, longer timeout: the first compile of a 280 MB debug build takes a minute or more.
+  step(`Compiling ${APP_ID} ahead of time (instant once done)`);
+  run('adb', ['shell', 'cmd', 'package', 'compile', '-m', 'speed', APP_ID], {
+    timeoutMs: 5 * 60_000,
+  });
 };
 
 /** Maestro from MAESTRO_BIN, PATH, or where its installers put it. */

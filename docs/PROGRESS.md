@@ -2,43 +2,45 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 21 complete — awaiting approval for Phase 18 (privacy & legal).
-The E2E suite passes 8 of 8 on the emulator, and on the way it found six live bugs in the
-app, the guest-to-account journey among them. Two findings await a decision (out of lives; rate
-limits). Order from here: **18 → 22 → 23**, with the PFA → D-U-N-S chain and the content review
-running in parallel.
+**Current phase:** Phase 18 complete — awaiting approval for Phase 22 (production builds,
+TestFlight, Google Play closed testing). Out of lives now stops answering, answers and rewards
+are rate-limited, and learners can export and delete their data in the app; the legal pages
+are written but not yet hosted. The E2E suite passes 9 of 9. Order from here: **22 → 23**, with
+the PFA → D-U-N-S chain, the legal review and the content review in parallel.
 **Last updated:** 2026-09-24
 
 ---
 
 ## Phase status
 
-| Phase     | Scope                                | Status                                |
-| --------- | ------------------------------------ | ------------------------------------- |
-| 0         | Human prerequisites & open decisions | **In progress** (parallel, see below) |
-| 1         | Project setup & architecture         | **Complete** — device check deferred  |
-| 2         | Design system                        | **Complete** — pending device check   |
-| 3         | Database foundation                  | **Complete** — pending device check   |
-| 4         | Authentication                       | **Complete** — pending device check   |
-| 5         | Onboarding, age gate, consent        | **Complete** — pending device check   |
-| 6         | Content pipeline & development seed  | **Complete** — pending device check   |
-| 7         | Course & lesson engine               | **Complete** — pending device check   |
-| 8         | Question engine & grading RPCs       | **Complete** — pending device check   |
-| 9         | XP, levels, progress                 | **Complete** — pending device check   |
-| 10        | Streak, lives, achievements          | **Complete** — pending device check   |
-| 11        | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
-| 12        | Leaderboard, display names, reports  | **Complete** — pending device check   |
-| 13        | Exam mode                            | **Complete** — pending device check   |
-| 14        | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
-| 15        | Ads, consent, rewarded rewards       | **Complete** — pending device check   |
-| 16        | Analytics + monitoring               | **Complete** — pending device check   |
-| 17        | Local notifications                  | **Complete** — pending device check   |
-| 20        | Polish, accessibility, performance   | **Complete** — pending device check   |
-| —         | Playful 3D restyle (SPEC §8, §13)    | **Complete** — pending device check   |
-| 19        | Content to launch volume             | **Complete** — drafts await review    |
-| —         | Romanian interface (SPEC §38)        | **Complete** — verified on emulator   |
-| 21        | E2E & regression hardening           | **Complete** — see verification       |
-| 18, 22–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| Phase | Scope                                | Status                                |
+| ----- | ------------------------------------ | ------------------------------------- |
+| 0     | Human prerequisites & open decisions | **In progress** (parallel, see below) |
+| 1     | Project setup & architecture         | **Complete** — device check deferred  |
+| 2     | Design system                        | **Complete** — pending device check   |
+| 3     | Database foundation                  | **Complete** — pending device check   |
+| 4     | Authentication                       | **Complete** — pending device check   |
+| 5     | Onboarding, age gate, consent        | **Complete** — pending device check   |
+| 6     | Content pipeline & development seed  | **Complete** — pending device check   |
+| 7     | Course & lesson engine               | **Complete** — pending device check   |
+| 8     | Question engine & grading RPCs       | **Complete** — pending device check   |
+| 9     | XP, levels, progress                 | **Complete** — pending device check   |
+| 10    | Streak, lives, achievements          | **Complete** — pending device check   |
+| 11    | Home, Practice, Daily Challenge      | **Complete** — pending device check   |
+| 12    | Leaderboard, display names, reports  | **Complete** — pending device check   |
+| 13    | Exam mode                            | **Complete** — pending device check   |
+| 14    | Billing, entitlements, paywall       | **Complete** — live on the Test Store |
+| 15    | Ads, consent, rewarded rewards       | **Complete** — pending device check   |
+| 16    | Analytics + monitoring               | **Complete** — pending device check   |
+| 17    | Local notifications                  | **Complete** — pending device check   |
+| 20    | Polish, accessibility, performance   | **Complete** — pending device check   |
+| —     | Playful 3D restyle (SPEC §8, §13)    | **Complete** — pending device check   |
+| 19    | Content to launch volume             | **Complete** — drafts await review    |
+| —     | Romanian interface (SPEC §38)        | **Complete** — verified on emulator   |
+| 21    | E2E & regression hardening           | **Complete** — see verification       |
+| —     | Out of lives, rate limits (decided)  | **Complete**                          |
+| 18    | Privacy & legal                      | **Complete** — pages await hosting    |
+| 22–23 | See `PLAN.md` / SPEC §57             | Not started                           |
 
 ---
 
@@ -2158,6 +2160,8 @@ The suite earned its keep before it was green. Each of these was live in the app
 
 ### Found, not fixed — needs a decision
 
+**Both resolved on 2026-09-24** — see "Decisions after Phase 21" below.
+
 - **Out of lives does not stop anyone answering.** At 0 lives the card appears (the flow
   asserts it), but the next question can be answered as normal; a wrong answer just costs
   nothing more (a Phase 10 decision: "never negative"). SPEC §22 lists what a learner _can_ do
@@ -2169,6 +2173,96 @@ The suite earned its keep before it was green. Each of these was live in the app
   server-side and the ledger is idempotent, so this is abuse-resistance rather than a hole, but
   the SPEC asks for it. **Recommendation:** a small migration with a per-user, per-minute cap
   on `submit_answer` and the reward RPCs, before the store builds (Phase 22).
+
+## Decisions after Phase 21 — out of lives, rate limits (2026-09-24)
+
+Both approved by the user and implemented before Phase 18 (commit `e8b4775`):
+
+- **Out of lives means out of answers** (SPEC §22). At 0 lives, answering in lesson, practice
+  and challenge context is refused (`LV000`); the answer that spends the last life is still
+  taken, a regenerated life reopens answering, and exams and Premium are unaffected. The app
+  shows the out-of-lives card at the Check button and keeps the selection.
+- **Per-user rate limits** (SPEC §40, §42): 60 answers and 10 rewarded grants a minute, both in
+  `app_config`, 0 disables (`RL000`). The app says "slow down", not "check your connection".
+- Both are `BEFORE INSERT` triggers on the rows they guard (`user_question_attempts`,
+  `rewarded_ad_grants`), so every writing path is covered and no RPC had to be copied. A refusal
+  rolls back its own call. pgTAP `15_lives_gate_and_rate_limits` (20 assertions); the E2E lives
+  flow now opens the next lesson at 0 lives and checks the refusal.
+
+## Phase 18 — what was implemented (Privacy & legal)
+
+- **Export my data** — `export_my_data()` returns every table of learner data, whole
+  (`to_jsonb`, so a future column is included automatically), as one JSON document. Reports
+  about the learner are exported without the reporter; no answer key is ever included; 10
+  exports an hour. Profile → **Your data** → Export saves it as a dated `.json` file through the
+  system share sheet.
+- **Delete my account** — the `delete-account` Edge Function deletes the RevenueCat customer
+  first, then the auth user; the deletion cascades through every user table. Confirmed in a
+  sheet that says it is final and does **not** cancel a store subscription. Without the
+  RevenueCat key it answers `revenuecat: not-configured` rather than pretending.
+- **Nothing personal survives a deletion**, whatever deletes the account: a `BEFORE DELETE`
+  trigger on `auth.users` redacts the purchase-event payloads (the one table that keeps rows,
+  for webhook idempotency). pgTAP `16_privacy` finds every user table from the catalogue and
+  proves none still points at a deleted user.
+- **Static pages** in `web/`: support, privacy policy, terms of use, account deletion (the page
+  Google Play requires), `app-ads.txt`. Drafts written from what the app actually does, with
+  every unknown marked `[LIKE THIS]`, for the lawyer. Plain HTML, light and dark, no external
+  requests.
+- **In the app**: Privacy, Terms and Support links in Profile → About, Terms and Privacy on the
+  paywall — only where the pages are hosted. `EXPO_PUBLIC_LEGAL_BASE_URL` is now required in
+  production (`SHIPPED.legalPages`).
+- **Apple privacy manifest** declared in `app.config.ts` (required-reason APIs).
+- **`docs/LEGAL.md`**: status, data inventory, processors and DPAs, consent and minors, draft
+  answers for Google's Data safety form and Apple's privacy label, points for the lawyer,
+  hosting instructions.
+
+### Found on the way
+
+- The paywall's Terms and Privacy links were built as `` `${legalBase}/terms.html` `` and read
+  "undefined/terms.html" wherever the URL was unset. Now `legalUrls()` returns null there and no
+  link is shown.
+- `billing_events` only nulled its `user_id` on deletion, so the purchase history inside the
+  payload outlived the account. Now redacted by the trigger above.
+
+### Verification
+
+- **E2E: 9 of 9 flows passed** in one run (`npm run e2e`, about 18 minutes): onboarding 1 m ·
+  age gate 42 s · module 1 with every question type 5 m 32 s · wrong answers and lives,
+  including the refusal at 0 lives, 2 m 20 s · Daily Challenge 1 m 28 s · paywall and restore
+  1 m 14 s · interface language 1 m 10 s · guest keeps progress 2 m 23 s · **export my data,
+  then delete the account** 2 m 24 s.
+- `delete-account` over real HTTP against the local stack: a fresh anonymous user is deleted
+  (`{"deleted":true,"revenuecat":"not-configured"}`), gone from `auth.users` afterwards; no
+  token → 401.
+- pgTAP: **16 files, 556 tests** (was 14 / 520), including `15_lives_gate_and_rate_limits`
+  (20) and `16_privacy` (16).
+- `npm run verify`: typecheck clean, lint clean, **85 suites / 1349 tests** (was 78 / 1322).
+- New tests: the refusal mapping, QuestionPage's refused states, the deletion order and the
+  RevenueCat customer call, the Your data card, the legal links and URLs, the licences page
+  generator, the production requirement for the legal pages URL.
+- A new development build (for `expo-sharing`), installed on the emulator. Its first cold
+  starts timed out as "not responding" until compiled ahead of time; the E2E runner now does
+  that itself (`docs/TESTING.md`).
+- CI green on all four jobs for the Phase 18 commits.
+
+### Decisions
+
+1. **New dependency: `expo-sharing`** (first-party Expo). A GDPR export must work for any
+   account; sharing it as text goes through a Binder transaction capped near 1 MB on Android,
+   which a year of an active learner's answers exceeds. A file of any size goes to Files,
+   Drive or email. `expo-file-system` was already installed through `expo`; it is now declared.
+   It meant a new development build.
+2. **RevenueCat before the database** in the deletion: a failure there leaves the account intact
+   to retry, instead of a customer record keyed by an id nobody can see any more.
+3. **The purchase log is redacted, not deleted**: its event ids are what make a replayed
+   RevenueCat webhook a no-op (SPEC §31).
+4. **A report about a learner is in their export without its reporter** — their data, but not
+   the other person's identity. On the lawyer's list.
+5. **Legal pages in English only** for now, like the lessons; Romanian when the lawyer has
+   reviewed the English.
+6. **Open-source licences as a generated page** (`npm run legal:licenses` → `web/licenses.html`,
+   329 packages with their licence texts), linked from Profile → About. The whole production
+   tree, build tools included: an extra attribution costs nothing, a missing one is a breach.
 
 ## Known limitations
 
@@ -2298,14 +2392,24 @@ Romanian UI text was written by me and wants a native speaker's read.
 
 ## Human actions required before the next phases
 
-**Decisions from Phase 21 (see "Found, not fixed"):**
+**Phase 18 — to make the privacy work public:**
 
-- **Out of lives:** should 0 lives stop answering in lessons, practice and the challenge?
-  Recommended: yes, checked in `submit_answer`.
-- **Rate limits** on the answer and reward RPCs (SPEC §40, §42): add them before Phase 22?
-  Recommended: yes, one small migration.
-- Optional: export `REVENUECAT_SECRET_API_KEY` (from the RevenueCat dashboard) in the shell
-  before `npx supabase start`, so the E2E suite checks restore end to end, not only its failure.
+- **Host `web/`** on a free static host that allows commercial use (Cloudflare Pages or GitHub
+  Pages), at the domain the store listings will use. See `docs/LEGAL.md`, "Hosting the pages".
+- Then set **`EXPO_PUBLIC_LEGAL_BASE_URL`** in the EAS environments (preview, production). A
+  production build refuses to start without it; the in-app links appear once it is set.
+- **Fill the placeholders** in `web/*.html`: controller name and address (the PFA), the
+  support and privacy email addresses, retention periods, effective date — and the AdMob
+  publisher id in `web/app-ads.txt`.
+- **A lawyer's review** of the privacy policy, terms and consent flow — the open points are
+  listed in `docs/LEGAL.md`, "For the lawyer".
+- **Sign the data processing agreements** (Supabase, RevenueCat, Google, PostHog, Sentry, the
+  email provider) and choose Sentry's EU region.
+- **Deploy the Edge Functions** (`delete-account`, `sync-entitlements`, `revenuecat-webhook`)
+  to staging and production, with `REVENUECAT_SECRET_API_KEY` set — without it, deletion
+  cannot remove the RevenueCat customer. Needs a Supabase access token.
+- Optional: `REVENUECAT_SECRET_API_KEY` in the shell before `npx supabase start`, so the E2E
+  suite checks restore end to end, not only its failure.
 
 **Content review — the longest item before a store build:**
 
@@ -3412,3 +3516,24 @@ these fixes; a new preview build is needed to see them on the phone):
    unlimited lives, and its button reads **Buy once**.
 6. **Lesson completion:** no "arrive in the next release" line; the button reads **Continue**
    and does not move while the XP and achievements appear under it.
+
+## Phase 18 device checklist (SPEC §57 — "Export data; delete account end-to-end")
+
+On the **new** preview build (the Phase 18 one — older ones have no "Your data" card):
+
+1. **Out of lives:** as a free learner past three lessons, lose every life in a lesson. Open the
+   next lesson and answer: the answer is refused and the out-of-lives card appears **at the
+   Check button**, with your selection still in place. Watch the rewarded ad (test ad): Check
+   now works.
+2. **Export:** Profile → Your data → **Export my data**. The share sheet opens with a file named
+   `codesprint-data-<today>.json`. Save it to Files or send it to yourself, and open it: your
+   answers, XP events, progress and profile are there — and no answers to the questions.
+3. **Delete:** Profile → Your data → **Delete account**. The sheet says it is final and that a
+   subscription is not cancelled. Confirm: you land on the sign-in screen and a toast says the
+   account was deleted. Signing in with the old email now fails.
+   On staging, this needs the `delete-account` Edge Function deployed (Human actions).
+4. **Links:** once `EXPO_PUBLIC_LEGAL_BASE_URL` is set, Profile → About shows Privacy policy,
+   Terms of use, Support and Open-source licences, and the paywall shows Terms and Privacy —
+   each opens the right page. Without it, no links appear at all (never a broken one).
+5. **The web pages:** open `web/index.html` in a browser (or the hosted site): every page links
+   to the others, reads in light and dark mode, and the deletion page explains both ways.
