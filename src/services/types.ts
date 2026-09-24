@@ -752,6 +752,8 @@ export interface AppConfigValues {
   level_thresholds: number[];
   content_version: number;
   min_supported_app_version: string;
+  /** The App Store's numeric id for the listing, once it exists; where "Update" goes on iOS. */
+  ios_app_store_id: string | null;
 }
 
 export interface ConfigService extends ServiceIdentity {

@@ -35,6 +35,9 @@ const VARIANTS: Record<AppVariant, { name: string; bundleId: string; scheme: str
   },
 };
 
+/** The EAS project. Overridable for a fork; the id is not a secret. */
+const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID ?? '7ab009a0-219f-4861-906f-64431e42ebae';
+
 export default ({ config }: ConfigContext): ExpoConfig => {
   const variant = VARIANTS[APP_VARIANT] ?? VARIANTS.development;
 
@@ -42,7 +45,21 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ...config,
     name: variant.name,
     slug: 'codesprint',
-    version: '0.1.0',
+    // The store version. Build numbers are EAS's job (eas.json → appVersionSource: remote,
+    // autoIncrement), so this changes only for a release people should see as new.
+    version: '1.0.0',
+    // Over-the-air JavaScript fixes (SPEC §51). The fingerprint of the native project decides
+    // which builds an update may reach: add or upgrade a native module and the fingerprint
+    // changes, so JavaScript that needs it can never land on a build that lacks it. A native
+    // change always ships as a new store build.
+    runtimeVersion: { policy: 'fingerprint' },
+    updates: {
+      url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
+      // Checked on launch, downloaded in the background, applied on the next launch: never a
+      // blank screen waiting on the network.
+      checkAutomatically: 'ON_LOAD',
+      fallbackToCacheTimeout: 0,
+    },
     orientation: 'portrait',
     icon: './assets/icon.png',
     scheme: variant.scheme,
@@ -52,6 +69,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       supportsTablet: false,
       bundleIdentifier: variant.bundleId,
+      config: {
+        // Export compliance: the only encryption is the HTTPS the OS provides, which is exempt.
+        // Declared here so App Store Connect stops asking on every TestFlight build.
+        usesNonExemptEncryption: false,
+      },
       // Apple's privacy manifest (SPEC §41). The required-reason APIs that the app's own code
       // and React Native touch; the SDKs (AdMob, RevenueCat, Sentry, PostHog) ship manifests
       // of their own, which Xcode merges. Verify with Xcode's privacy report on the first iOS
@@ -134,6 +156,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         },
       ],
       [
+        '@sentry/react-native/expo',
+        {
+          // Source maps and native debug symbols are uploaded while a release build is made, so
+          // a production crash arrives readable (SPEC §44). Organisation and project come from
+          // SENTRY_ORG / SENTRY_PROJECT and the token from SENTRY_AUTH_TOKEN, all in the EAS
+          // environment — never here, where the token would end up in the app package.
+          // Development and preview builds set SENTRY_DISABLE_AUTO_UPLOAD in eas.json.
+          organization: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+        },
+      ],
+      [
         'expo-tracking-transparency',
         {
           // Shown only when personalised ads are actually requested, and only after UMP.
@@ -162,7 +196,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
          * It is not a secret. It appears in the public project URL:
          * https://expo.dev/accounts/gabrieldiaconescu/projects/codesprint
          */
-        projectId: process.env.EAS_PROJECT_ID ?? '7ab009a0-219f-4861-906f-64431e42ebae',
+        projectId: EAS_PROJECT_ID,
       },
     },
   };

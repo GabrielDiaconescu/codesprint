@@ -14,5 +14,11 @@
     "offlineBody": "Check your connection and try again.",
     "errorTitle": "Something went wrong",
     "errorBody": "We couldn't load this. Please try again."
+  },
+  "forceUpdate": {
+    "title": "Time to update",
+    "body": "This version of CodeSprint is no longer supported. Update to keep learning — your progress is saved and waiting.",
+    "bodyNoLink": "This version of CodeSprint is no longer supported. Update it from the App Store to keep learning — your progress is saved and waiting.",
+    "action": "Update"
   }
 }

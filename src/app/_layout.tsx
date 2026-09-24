@@ -12,6 +12,8 @@ import { Screen, StateView, ToastHost } from '@/components/ui';
 import { useAuthBootstrap } from '@/features/auth/hooks/useAuthBootstrap';
 import { useAdsBootstrap } from '@/features/ads/hooks/useAds';
 import { useAnalyticsBootstrap } from '@/features/analytics/hooks/useAnalytics';
+import { ForceUpdateScreen } from '@/features/config/components/ForceUpdateScreen';
+import { useForceUpdate } from '@/features/config/hooks/useForceUpdate';
 import { useReminders } from '@/features/notifications/hooks/useReminders';
 import { useBillingBootstrap } from '@/features/paywall/hooks/useBillingBootstrap';
 import { useProfile } from '@/features/profile/hooks/useProfile';
@@ -76,9 +78,14 @@ const ThemedApp = () => {
   // rather than on Home, because it also has to cancel them — for somebody who has met
   // today's goal and never opens Home again today (SPEC §48).
   useReminders();
+  const forceUpdate = useForceUpdate();
 
   const onboardingCompleted = profileQuery.data?.onboardingCompleted ?? false;
   const profileReady = profileQuery.isSuccess;
+
+  // A retired build shows one screen, whoever is signed in and whatever state they are in:
+  // the server may no longer speak its language (SPEC §50, §51).
+  if (forceUpdate.required) return <ForceUpdateScreen url={forceUpdate.url} />;
 
   // The profile decides between onboarding and the app, so it has to resolve before either can
   // be shown. This is the only place in the app that blocks on a query, and it does so for one

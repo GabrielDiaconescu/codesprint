@@ -5,12 +5,15 @@
 #   * the dev build's OWN scheme, not `exp+codesprint`: a preview build installed on the same
 #     device claims that one too, and Android stops to ask which app should open it;
 #   * the link is built here rather than passed in whole: an `&` on a Windows command line is
-#     a command separator.
+#     a command separator;
+#   * `disableAutoLaunch=1`, not only `disableOnboarding=1`: clearState also resets the
+#     development client's "show menu at launch" preference to on, and its menu then opens over
+#     the first screen as soon as the bundle is up.
 appId: ${APP_ID}
 ---
 - evalScript: ${output.consentAnswered = false}
 - clearState
-- openLink: codesprint-dev://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A${METRO_PORT}&disableOnboarding=1
+- openLink: codesprint-dev://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A${METRO_PORT}&disableOnboarding=1&disableAutoLaunch=1
 
 # Two things can cover the first screen, in either order: Google's consent form (development
 # builds force the EEA one — declined, the non-personalised path every under-16 learner gets)

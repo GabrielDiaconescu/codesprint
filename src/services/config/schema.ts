@@ -36,6 +36,7 @@ const KEY_SCHEMAS = {
   level_thresholds: z.array(z.number().int().nonnegative()).min(2),
   content_version: z.number().int().nonnegative(),
   min_supported_app_version: z.string().min(1),
+  ios_app_store_id: z.string().regex(/^\d+$/).nullable(),
 } as const satisfies { [K in keyof AppConfigValues]: z.ZodType<AppConfigValues[K]> };
 
 export interface ParsedConfig {

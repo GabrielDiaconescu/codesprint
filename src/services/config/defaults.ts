@@ -36,4 +36,6 @@ export const DEFAULT_APP_CONFIG: AppConfigValues = {
   ],
   content_version: 0,
   min_supported_app_version: '0.1.0',
+  // Known once the app exists in App Store Connect; until then iOS has no listing to link.
+  ios_app_store_id: null,
 };

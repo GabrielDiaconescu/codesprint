@@ -22,10 +22,24 @@ appId: ${APP_ID}
     commands:
       - tapOn:
           text: Wait
+# The development client's own menu. It has no Close button, and its "Open React Native dev
+# menu" row would otherwise match the check below. Back is safe here: the menu is on screen.
 - runFlow:
     when:
       visible:
-        text: React Native dev menu
+        text: Toggle performance monitor
     commands:
-      - tapOn:
-          text: Close
+      - pressKey: back
+# React Native's dev menu, which does have one.
+- runFlow:
+    when:
+      visible:
+        text: Close
+    commands:
+      - runFlow:
+          when:
+            visible:
+              text: .*React Native dev menu.*
+          commands:
+            - tapOn:
+                text: Close

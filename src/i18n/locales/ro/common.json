@@ -14,5 +14,11 @@
     "offlineBody": "Verifică-ți conexiunea și încearcă din nou.",
     "errorTitle": "Ceva n-a mers",
     "errorBody": "Nu am putut încărca asta. Încearcă din nou."
+  },
+  "forceUpdate": {
+    "title": "E timpul pentru o actualizare",
+    "body": "Această versiune de CodeSprint nu mai este suportată. Actualizează aplicația ca să continui — progresul tău e salvat și te așteaptă.",
+    "bodyNoLink": "Această versiune de CodeSprint nu mai este suportată. Actualizeaz-o din App Store ca să continui — progresul tău e salvat și te așteaptă.",
+    "action": "Actualizează"
   }
 }

@@ -43,5 +43,6 @@ export const useAppConfig = () =>
         level_thresholds: services.config.get('level_thresholds'),
         content_version: services.config.get('content_version'),
         min_supported_app_version: services.config.get('min_supported_app_version'),
+        ios_app_store_id: services.config.get('ios_app_store_id'),
       }) satisfies AppConfigValues,
   });
