@@ -6,17 +6,18 @@ and everything marked `[LIKE THIS]` there, before launch.
 
 ## Status
 
-| Area                         | State                                                                        |
-| ---------------------------- | ---------------------------------------------------------------------------- |
-| Export my data               | **Done** — `export_my_data()`, Profile → Your data                           |
-| Delete account (in app)      | **Done** — `delete-account` Edge Function, Profile → Your data               |
-| Delete account (web request) | **Page written** (`web/delete-account.html`) — needs hosting and a mailbox   |
-| Privacy policy, terms        | **Drafts** (`web/privacy.html`, `web/terms.html`) — need legal review        |
-| Support page, `app-ads.txt`  | **Written** — need hosting, the support address and the AdMob publisher id   |
-| Apple privacy manifest       | **Declared** in `app.config.ts` — verify with Xcode's privacy report (Ph 22) |
-| Store privacy forms          | **Answers drafted below** — to be entered in the consoles (Phase 23)         |
-| Processor agreements (DPAs)  | **Not signed yet** — human action, list below                                |
-| EU DSA trader details        | **Blocked** on the legal entity (PFA)                                        |
+| Area                         | State                                                                                           |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| Export my data               | **Done** — `export_my_data()`, Profile → Your data                                              |
+| Delete account (in app)      | **Done** — `delete-account` Edge Function, Profile → Your data                                  |
+| Delete account (web request) | **Page written** (`web/delete-account.html`) — needs hosting and a mailbox                      |
+| Privacy policy, terms        | **Drafts** (`web/privacy.html`, `web/terms.html`) — need legal review                           |
+| Open-source licences         | **Generated** — `web/licenses.html` by `npm run legal:licenses`; rerun after dependency changes |
+| Support page, `app-ads.txt`  | **Written** — need hosting, the support address and the AdMob publisher id                      |
+| Apple privacy manifest       | **Declared** in `app.config.ts` — verify with Xcode's privacy report (Ph 22)                    |
+| Store privacy forms          | **Answers drafted below** — to be entered in the consoles (Phase 23)                            |
+| Processor agreements (DPAs)  | **Not signed yet** — human action, list below                                                   |
+| EU DSA trader details        | **Blocked** on the legal entity (PFA)                                                           |
 
 ## What the app stores
 

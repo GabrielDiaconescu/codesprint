@@ -7,7 +7,7 @@ import { useTheme } from '@/theme';
 
 import { legalUrls, type LegalUrls } from '../logic/legalUrls';
 
-type LegalLink = keyof Pick<LegalUrls, 'privacy' | 'terms' | 'support'>;
+type LegalLink = keyof Pick<LegalUrls, 'privacy' | 'terms' | 'support' | 'licenses'>;
 
 /**
  * Links to the static legal and support pages (SPEC §29, §33).

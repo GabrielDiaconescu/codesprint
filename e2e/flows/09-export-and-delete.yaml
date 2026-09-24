@@ -1,0 +1,54 @@
+# The two data rights, end to end (SPEC §41, Phase 18): a copy of everything, then deletion of
+# everything. The server side is proven by supabase/tests/16_privacy.test.sql; this proves the
+# learner can actually reach both, and that deletion ends the session.
+appId: ${APP_ID}
+name: Export my data, then delete the account
+tags:
+  - privacy
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow: ../subflows/guest-onboarding.yaml
+
+# Something worth exporting: the first lesson.
+- tapOn:
+    id: home-continue
+- runFlow: ../generated/play-lesson-1.yaml
+- runFlow: ../subflows/finish-lesson.yaml
+
+- tapOn:
+    id: tab-profile
+- extendedWaitUntil:
+    visible:
+      id: level-card
+    timeout: 20000
+
+# Export: the system share sheet opens with the export as a dated JSON file.
+- scrollUntilVisible:
+    element:
+      id: your-data-export
+    direction: DOWN
+- tapOn:
+    id: your-data-export
+- extendedWaitUntil:
+    visible:
+      text: 'codesprint-data-.*\.json'
+    timeout: 30000
+- back
+
+# Delete: nothing happens until the sheet is confirmed; then the session is gone.
+- scrollUntilVisible:
+    element:
+      id: your-data-delete
+    direction: DOWN
+- tapOn:
+    id: your-data-delete
+- extendedWaitUntil:
+    visible:
+      id: delete-account-confirm
+    timeout: 10000
+- tapOn:
+    id: delete-account-confirm
+- extendedWaitUntil:
+    visible:
+      id: sign-in-guest
+    timeout: 30000

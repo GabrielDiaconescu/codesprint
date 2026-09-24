@@ -8,6 +8,7 @@ describe('legalUrls', () => {
       terms: 'https://codesprint.example/terms.html',
       support: 'https://codesprint.example/',
       deleteAccount: 'https://codesprint.example/delete-account.html',
+      licenses: 'https://codesprint.example/licenses.html',
     });
   });
 

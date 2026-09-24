@@ -41,23 +41,24 @@ phone, served by a Metro the runner starts itself, against the **local** Supabas
 
 ### What is covered
 
-| Flow                             | SPEC          | Proves                                                                   |
-| -------------------------------- | ------------- | ------------------------------------------------------------------------ |
-| `01-onboarding`                  | §11, §13      | A guest completes all six steps and lands on a Home that is not empty    |
-| `02-age-gate`                    | §11, §41      | A ten-year-old is stopped, with no way back into onboarding              |
-| `03-lessons-every-question-type` | §15, §16, §18 | All of module 1 — every V1 question type — graded by the real server     |
-| `04-wrong-answers-and-lives`     | §22           | Wrong answers after the grace period cost lives down to 0; out-of-lives  |
-| `05-daily-challenge`             | §24           | The challenge pays once; the second visit shows it as claimed            |
-| `06-paywall-and-restore`         | §31, §33      | The paywall shows Free, the No Ads disclaimer and plans; restore reports |
-| `07-language-and-profile`        | §13, §29, §38 | EN → RO from Home (with Romanian plurals), and back from Profile         |
-| `08-guest-to-account`            | §12, D1       | A guest confirms an email through Mailpit and keeps their progress       |
+| Flow                             | SPEC          | Proves                                                                       |
+| -------------------------------- | ------------- | ---------------------------------------------------------------------------- |
+| `01-onboarding`                  | §11, §13      | A guest completes all six steps and lands on a Home that is not empty        |
+| `02-age-gate`                    | §11, §41      | A ten-year-old is stopped, with no way back into onboarding                  |
+| `03-lessons-every-question-type` | §15, §16, §18 | All of module 1 — every V1 question type — graded by the real server         |
+| `04-wrong-answers-and-lives`     | §22           | Wrong answers after the grace period cost lives down to 0; out-of-lives      |
+| `05-daily-challenge`             | §24           | The challenge pays once; the second visit shows it as claimed                |
+| `06-paywall-and-restore`         | §31, §33      | The paywall shows Free, the No Ads disclaimer and plans; restore reports     |
+| `07-language-and-profile`        | §13, §29, §38 | EN → RO from Home (with Romanian plurals), and back from Profile             |
+| `08-guest-to-account`            | §12, D1       | A guest confirms an email through Mailpit and keeps their progress           |
+| `09-export-and-delete`           | §41           | The export reaches the share sheet as a JSON file; deletion ends the session |
 
 **Restore, end to end,** needs the RevenueCat secret key in the local Edge Functions: export
 `REVENUECAT_SECRET_API_KEY` in the shell before `npx supabase start` (never in `.env` files that
 reach the app). Without it the runner says so, and `06-paywall-and-restore` checks only that
 restore fails honestly instead of claiming success.
 
-**Not covered yet:** account deletion (arrives in Phase 18 — add its flow then), a real store
+**Not covered yet:** a real store
 purchase (needs the store accounts; the paywall runs on the RevenueCat Test Store), social
 sign-in (needs OAuth client IDs), and iOS (needs a Mac or EAS for a simulator build).
 
@@ -118,4 +119,5 @@ a bundle built against staging, and the suite would then write test accounts the
 | Everything is slow, `pm` commands time out                       | The emulator is out of memory. Give it 4 GB (`-memory 4096`) and cold-boot it.                                                                                                                                                                           |
 | The emulator never appears in `adb devices` after a restart      | It is waiting on a crash-report dialog from its last run, on the desktop. Answer it, or move `%TEMP%\AndroidEmulator\emu-crash-*.db` aside.                                                                                                              |
 | The app closes in the middle of a flow, on Android's home screen | `hideKeyboard` pressed Back while no keyboard was up. Flows never use it: Enter submits a form, or closes the keyboard on the answer box.                                                                                                                |
+| `Function not found` from a new Edge Function                    | The local edge runtime loads the functions it found at start. `npx supabase stop && npx supabase start` after adding one.                                                                                                                                |
 | A flow fails on "Do not consent"                                 | Development builds force Google's EEA consent form; the launch subflow declines it. If it never appears, UMP could not reach Google — check the network.                                                                                                 |

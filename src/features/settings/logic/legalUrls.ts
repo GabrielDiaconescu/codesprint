@@ -10,6 +10,7 @@ export interface LegalUrls {
   terms: string;
   support: string;
   deleteAccount: string;
+  licenses: string;
 }
 
 export const legalUrls = (base: string | undefined): LegalUrls | null => {
@@ -21,6 +22,7 @@ export const legalUrls = (base: string | undefined): LegalUrls | null => {
     terms: `${root}/terms.html`,
     support: `${root}/`,
     deleteAccount: `${root}/delete-account.html`,
+    licenses: `${root}/licenses.html`,
   };
 };
 

@@ -34,7 +34,7 @@ export const AboutCard = () => {
         <Text variant="caption" tone="secondary" testID="app-version">
           {BRAND.name} · {t('about.version', { value: label })}
         </Text>
-        <LegalLinks links={['privacy', 'terms', 'support']} />
+        <LegalLinks links={['privacy', 'terms', 'support', 'licenses']} />
       </View>
     </Card>
   );
