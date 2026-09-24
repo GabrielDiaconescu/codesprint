@@ -43,26 +43,30 @@ Local Studio: http://127.0.0.1:54323 · API: http://127.0.0.1:54321
 
 ## Migrations
 
-| File                                       | Contents                                                                                                |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `20260917120000_extensions_and_helpers`    | Enums, `set_updated_at`, `require_auth_uid`, date helpers                                               |
-| `20260917120100_content_tables`            | courses, modules, lessons, lesson_contents, questions, question_answer_keys, exams                      |
-| `20260917120200_user_tables`               | profiles, user_stats, xp_events, attempts, progress, achievements, leaderboard, exams, billing, reports |
-| `20260917120300_app_config`                | Config table plus the seeded default values                                                             |
-| `20260917120400_rls_policies`              | Grant revocation, RLS on every table, all policies                                                      |
-| `20260917120500_core_functions`            | Entitlements, module gating, the XP ledger, profile RPCs                                                |
-| `20260917120600_auth_support`              | Guest conversion mirror, abandoned-guest purge, the pg_cron schedule                                    |
-| `20260917120700_onboarding`                | Age thresholds, the age gate, server-enforced minor protections                                         |
-| `20260917120800_lesson_engine`             | `get_lesson`, plus the localisation helpers it needs                                                    |
-| `20260917120900_question_grading`          | `submit_answer`, the grader for all eight types, normalisation, question XP                             |
-| `20260917121000_progress`                  | `complete_lesson`, `get_progress_summary`, `get_user_stats`, and the counters they read                 |
-| `20260917121100_streak_lives_achievements` | Lazy streaks, lazy lives, the achievement catalogue and its engine                                      |
-| `20260917121200_practice_and_challenge`    | Practice XP and sets, the Daily Challenge, and the Home summary                                         |
-| `20260917121300_leaderboard`               | Display names, the weekly ranking, reports, and the per-day ranking cap                                 |
-| `20260917121400_exams`                     | Exam attempts: the frozen paper, the server-side clock, grading, and score XP                           |
-| `20260917121500_billing`                   | Entitlement reconciliation, the webhook idempotency log, and the client's view of it                    |
-| `20260917121600_lifetime_entitlements`     | Reports the no_ads expiry, so a lifetime purchase can be told from a subscription                       |
-| `20260917121700_rewarded_ads`              | Server-granted rewarded-ad rewards under a per-day cap                                                  |
+| File                                        | Contents                                                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `20260917120000_extensions_and_helpers`     | Enums, `set_updated_at`, `require_auth_uid`, date helpers                                               |
+| `20260917120100_content_tables`             | courses, modules, lessons, lesson_contents, questions, question_answer_keys, exams                      |
+| `20260917120200_user_tables`                | profiles, user_stats, xp_events, attempts, progress, achievements, leaderboard, exams, billing, reports |
+| `20260917120300_app_config`                 | Config table plus the seeded default values                                                             |
+| `20260917120400_rls_policies`               | Grant revocation, RLS on every table, all policies                                                      |
+| `20260917120500_core_functions`             | Entitlements, module gating, the XP ledger, profile RPCs                                                |
+| `20260917120600_auth_support`               | Guest conversion mirror, abandoned-guest purge, the pg_cron schedule                                    |
+| `20260917120700_onboarding`                 | Age thresholds, the age gate, server-enforced minor protections                                         |
+| `20260917120800_lesson_engine`              | `get_lesson`, plus the localisation helpers it needs                                                    |
+| `20260917120900_question_grading`           | `submit_answer`, the grader for all eight types, normalisation, question XP                             |
+| `20260917121000_progress`                   | `complete_lesson`, `get_progress_summary`, `get_user_stats`, and the counters they read                 |
+| `20260917121100_streak_lives_achievements`  | Lazy streaks, lazy lives, the achievement catalogue and its engine                                      |
+| `20260917121200_practice_and_challenge`     | Practice XP and sets, the Daily Challenge, and the Home summary                                         |
+| `20260917121300_leaderboard`                | Display names, the weekly ranking, reports, and the per-day ranking cap                                 |
+| `20260917121400_exams`                      | Exam attempts: the frozen paper, the server-side clock, grading, and score XP                           |
+| `20260917121500_billing`                    | Entitlement reconciliation, the webhook idempotency log, and the client's view of it                    |
+| `20260917121600_lifetime_entitlements`      | Reports the no_ads expiry, so a lifetime purchase can be told from a subscription                       |
+| `20260917121700_rewarded_ads`               | Server-granted rewarded-ad rewards under a per-day cap                                                  |
+| `20260924100000_lives_gate_and_rate_limits` | Out of lives refuses answers (`LV000`); per-user limits on answers and rewards (`RL000`)                |
+| `20260924110000_privacy`                    | `export_my_data`, and redacting purchase events when an account is deleted                              |
+| `20260924120000_store_listing_config`       | `ios_app_store_id`, where the force-update screen sends an iPhone                                       |
+| `20260924130000_fast_local_date`            | `local_date_for` without a timezone-catalogue scan per call — answers no longer slow down with history  |
 
 ---
 
@@ -163,55 +167,55 @@ the search path and hijack an unqualified reference while the function runs as o
 
 ### Internal (no client grant)
 
-| Function                                    | Purpose                                                                               |
-| ------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `award_xp(...)`                             | **The only write path for XP.** See below                                             |
-| `has_entitlement(uuid, entitlement)`        | The authority for paid access (SPEC §31)                                              |
-| `is_ad_free(uuid)`                          | `no_ads OR premium`                                                                   |
-| `module_requires_premium(uuid)`             | Computed from `free_module_count`                                                     |
-| `can_access_module(uuid, uuid)`             | Free boundary + entitlement                                                           |
-| `config_int(text, integer)`                 | Numeric config read with a fallback                                                   |
-| `local_date_for(text, timestamptz)`         | Server-side local date; unknown timezone degrades to UTC                              |
-| `iso_week_start(timestamptz)`               | Leaderboard partition key                                                             |
-| `require_auth_uid()`                        | Raises 28000 on an unauthenticated request                                            |
-| `handle_new_user()`                         | Trigger: creates profile + stats for every auth user, guests included                 |
-| `handle_user_updated()`                     | Trigger: mirrors `auth.users.is_anonymous` onto `profiles`                            |
-| `delete_stale_anonymous_users(int)`         | Scheduled purge of abandoned guests. See below                                        |
-| `age_from_birth_year(int)`                  | Age reached during the current year (SPEC §11: birth year only)                       |
-| `is_minor(uuid)`                            | Below `minor_protection_age`. An unknown birth year fails closed                      |
-| `localized_text(jsonb, text)`               | Reads a localized field with an English fallback                                      |
-| `localize_deep(jsonb, text)`                | Collapses every localized object in a structure to one locale                         |
-| `grade_answer(uuid, jsonb)`                 | Compares a submission with its key. Malformed input grades as incorrect, never raises |
-| `normalize_answer_text(text, mode)`         | Straightens curly quotes and dashes, then applies the match mode                      |
-| `question_xp(uuid, integer)`                | XP for a correct answer; halved and floored on a retry                                |
-| `config_numeric(text, numeric)`             | Decimal config read with a fallback (the retry multiplier)                            |
-| `touch_daily_activity(uuid, int, int, int)` | Accumulates one day of activity, keyed on the user's LOCAL date                       |
-| `current_streak_for(uuid)`                  | The streak as of now. A streak not extended yesterday reads as 0                      |
-| `evaluate_streak(uuid)`                     | Marks today as qualifying once the daily minimum is met, and extends                  |
-| `regenerate_lives(uuid)`                    | Credits lives earned since `lives_updated_at`, advancing the clock by what it spent   |
-| `consume_life(uuid, answer_context)`        | Takes one life, respecting Premium, context and the beginner grace                    |
-| `lives_state(uuid)`                         | Lives plus when the next one arrives                                                  |
-| `achievement_rule_met(uuid, jsonb)`         | Evaluates one rule. An unknown type never unlocks                                     |
-| `evaluate_achievements(uuid, text[])`       | Unlocks what the given kinds of event could have earned                               |
-| `practice_xp_today(uuid)`                   | Practice XP earned on the current local day, for the cap                              |
-| `award_practice_xp(uuid, uuid)`             | Pays a correct practice answer up to the daily cap                                    |
-| `mistake_count(uuid)`                       | How many questions are waiting to be reviewed                                         |
-| `daily_challenge_questions(uuid, date)`     | A scheduled challenge, or a deterministic pick                                        |
-| `display_name_problem(text)`                | Validates a name, returning a code the client localizes. Null means acceptable        |
-| `validate_display_name()`                   | Trigger: applies that rule to every write into `profiles.display_name`                |
-| `leaderboard_eligible(uuid)`                | Named, registered, not hidden. The single definition of "appears on the board"        |
-| `leaderboard_xp_today(uuid)`                | Leaderboard-eligible XP in the ledger for the user's local day, for the cap           |
-| `config_bool(text, boolean)`                | Boolean config read with a fallback                                                   |
-| `exam_unavailable_reason(uuid, uuid)`       | Why an exam cannot be started, as a code. Null means it can                           |
-| `exam_question_set(uuid, uuid)`             | Picks and shuffles one attempt's questions, honouring the difficulty mix              |
-| `exam_questions(uuid, text)`                | The frozen paper, rendered — no explanation, no hint text, no key                     |
-| `exam_results(uuid, text, integer, jsonb)`  | Builds the results page. Internal, so a client cannot pass its own XP figure          |
-| `config_bool(text, boolean)`                | (listed above)                                                                        |
-| `apply_entitlements(uuid, jsonb)`           | **service_role only.** Reconciles one user against the full RevenueCat subscriber     |
-| `entitlement_state(uuid)`                   | What a user currently holds, as the server sees it                                    |
-| `record_billing_event(text, uuid, …)`       | **service_role only.** Logs a delivery; says whether it still needs work              |
-| `rewarded_grants_today(uuid, text)`         | Grants of one reward type on the user's local day, for the cap                        |
-| `mark_billing_event_processed(text)`        | **service_role only.** Marks a delivery finished                                      |
+| Function                                    | Purpose                                                                                                                                                           |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `award_xp(...)`                             | **The only write path for XP.** See below                                                                                                                         |
+| `has_entitlement(uuid, entitlement)`        | The authority for paid access (SPEC §31)                                                                                                                          |
+| `is_ad_free(uuid)`                          | `no_ads OR premium`                                                                                                                                               |
+| `module_requires_premium(uuid)`             | Computed from `free_module_count`                                                                                                                                 |
+| `can_access_module(uuid, uuid)`             | Free boundary + entitlement                                                                                                                                       |
+| `config_int(text, integer)`                 | Numeric config read with a fallback                                                                                                                               |
+| `local_date_for(text, timestamptz)`         | Server-side local date; unknown timezone degrades to UTC. Called per row by the daily caps, so it must stay cheap: no catalogue lookups (`17_answer_performance`) |
+| `iso_week_start(timestamptz)`               | Leaderboard partition key                                                                                                                                         |
+| `require_auth_uid()`                        | Raises 28000 on an unauthenticated request                                                                                                                        |
+| `handle_new_user()`                         | Trigger: creates profile + stats for every auth user, guests included                                                                                             |
+| `handle_user_updated()`                     | Trigger: mirrors `auth.users.is_anonymous` onto `profiles`                                                                                                        |
+| `delete_stale_anonymous_users(int)`         | Scheduled purge of abandoned guests. See below                                                                                                                    |
+| `age_from_birth_year(int)`                  | Age reached during the current year (SPEC §11: birth year only)                                                                                                   |
+| `is_minor(uuid)`                            | Below `minor_protection_age`. An unknown birth year fails closed                                                                                                  |
+| `localized_text(jsonb, text)`               | Reads a localized field with an English fallback                                                                                                                  |
+| `localize_deep(jsonb, text)`                | Collapses every localized object in a structure to one locale                                                                                                     |
+| `grade_answer(uuid, jsonb)`                 | Compares a submission with its key. Malformed input grades as incorrect, never raises                                                                             |
+| `normalize_answer_text(text, mode)`         | Straightens curly quotes and dashes, then applies the match mode                                                                                                  |
+| `question_xp(uuid, integer)`                | XP for a correct answer; halved and floored on a retry                                                                                                            |
+| `config_numeric(text, numeric)`             | Decimal config read with a fallback (the retry multiplier)                                                                                                        |
+| `touch_daily_activity(uuid, int, int, int)` | Accumulates one day of activity, keyed on the user's LOCAL date                                                                                                   |
+| `current_streak_for(uuid)`                  | The streak as of now. A streak not extended yesterday reads as 0                                                                                                  |
+| `evaluate_streak(uuid)`                     | Marks today as qualifying once the daily minimum is met, and extends                                                                                              |
+| `regenerate_lives(uuid)`                    | Credits lives earned since `lives_updated_at`, advancing the clock by what it spent                                                                               |
+| `consume_life(uuid, answer_context)`        | Takes one life, respecting Premium, context and the beginner grace                                                                                                |
+| `lives_state(uuid)`                         | Lives plus when the next one arrives                                                                                                                              |
+| `achievement_rule_met(uuid, jsonb)`         | Evaluates one rule. An unknown type never unlocks                                                                                                                 |
+| `evaluate_achievements(uuid, text[])`       | Unlocks what the given kinds of event could have earned                                                                                                           |
+| `practice_xp_today(uuid)`                   | Practice XP earned on the current local day, for the cap                                                                                                          |
+| `award_practice_xp(uuid, uuid)`             | Pays a correct practice answer up to the daily cap                                                                                                                |
+| `mistake_count(uuid)`                       | How many questions are waiting to be reviewed                                                                                                                     |
+| `daily_challenge_questions(uuid, date)`     | A scheduled challenge, or a deterministic pick                                                                                                                    |
+| `display_name_problem(text)`                | Validates a name, returning a code the client localizes. Null means acceptable                                                                                    |
+| `validate_display_name()`                   | Trigger: applies that rule to every write into `profiles.display_name`                                                                                            |
+| `leaderboard_eligible(uuid)`                | Named, registered, not hidden. The single definition of "appears on the board"                                                                                    |
+| `leaderboard_xp_today(uuid)`                | Leaderboard-eligible XP in the ledger for the user's local day, for the cap                                                                                       |
+| `config_bool(text, boolean)`                | Boolean config read with a fallback                                                                                                                               |
+| `exam_unavailable_reason(uuid, uuid)`       | Why an exam cannot be started, as a code. Null means it can                                                                                                       |
+| `exam_question_set(uuid, uuid)`             | Picks and shuffles one attempt's questions, honouring the difficulty mix                                                                                          |
+| `exam_questions(uuid, text)`                | The frozen paper, rendered — no explanation, no hint text, no key                                                                                                 |
+| `exam_results(uuid, text, integer, jsonb)`  | Builds the results page. Internal, so a client cannot pass its own XP figure                                                                                      |
+| `config_bool(text, boolean)`                | (listed above)                                                                                                                                                    |
+| `apply_entitlements(uuid, jsonb)`           | **service_role only.** Reconciles one user against the full RevenueCat subscriber                                                                                 |
+| `entitlement_state(uuid)`                   | What a user currently holds, as the server sees it                                                                                                                |
+| `record_billing_event(text, uuid, …)`       | **service_role only.** Logs a delivery; says whether it still needs work                                                                                          |
+| `rewarded_grants_today(uuid, text)`         | Grants of one reward type on the user's local day, for the cap                                                                                                    |
+| `mark_billing_event_processed(text)`        | **service_role only.** Marks a delivery finished                                                                                                                  |
 
 ### The XP ledger
 
