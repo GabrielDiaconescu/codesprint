@@ -39,6 +39,13 @@ export const moduleOneLessons = (courses: LoadedCourse[]): LessonFile[] => {
   return moduleOne.lessons.map((lesson) => lesson.data);
 };
 
+/** What the free account meets after module 1: module 2's first lesson. */
+export const lessonAfterModuleOne = (courses: LoadedCourse[]): LessonFile => {
+  const lesson = firstCourse(courses).modules[1]?.lessons[0];
+  if (!lesson) throw new Error('no module 2, lesson 1');
+  return lesson.data;
+};
+
 /**
  * Three questions pinned as the Daily Challenge for every date near today, so the flow knows
  * the answers. Taken from module 1 — always free — and only those marked challenge-eligible.

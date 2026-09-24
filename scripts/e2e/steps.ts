@@ -195,6 +195,23 @@ export const answerQuestion = (question: ContentQuestion, mode: AnswerMode): Com
   { extendedWaitUntil: { notVisible: { id: 'answer-feedback' }, timeout: WAIT_MS } },
 ];
 
+/**
+ * Opens a lesson up to its first question and presses Check on a RIGHT answer — without
+ * waiting for feedback, because the point is what happens instead: with no lives left, the
+ * server refuses even a right answer (SPEC §22).
+ */
+export const attemptFirstQuestion = (lesson: LessonFile): Command[] => {
+  const first = lesson.blocks.findIndex((block) => block.type === 'question');
+  const block = lesson.blocks[first];
+  if (!block || block.type !== 'question') throw new Error('the lesson has no question');
+
+  return [
+    ...(first > 0 ? tap('lesson-continue') : []),
+    ...answerInput(block.question, 'correct'),
+    ...tap('check-answer'),
+  ];
+};
+
 export interface PlayOptions {
   mode?: AnswerMode;
   /**

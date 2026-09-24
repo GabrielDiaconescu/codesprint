@@ -633,6 +633,27 @@ export type Database = {
           },
         ]
       }
+      rate_limit_counters: {
+        Row: {
+          bucket: string
+          hits: number
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          hits: number
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          bucket?: string
+          hits?: number
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           created_at: string
@@ -1027,6 +1048,15 @@ export type Database = {
         Returns: number
       }
       display_name_problem: { Args: { p_name: string }; Returns: string }
+      enforce_rate_limit: {
+        Args: {
+          p_bucket: string
+          p_max: number
+          p_user_id: string
+          p_window?: string
+        }
+        Returns: undefined
+      }
       entitlement_state: { Args: { p_user_id: string }; Returns: Json }
       evaluate_achievements: {
         Args: { p_rule_types: string[]; p_user_id: string }
@@ -1054,6 +1084,7 @@ export type Database = {
         Args: { p_exam_id: string; p_user_id: string }
         Returns: string
       }
+      export_my_data: { Args: never; Returns: Json }
       get_achievements: { Args: { p_locale?: string }; Returns: Json }
       get_app_config: { Args: never; Returns: Json }
       get_daily_challenge: { Args: { p_locale?: string }; Returns: Json }
@@ -1107,6 +1138,13 @@ export type Database = {
       mark_billing_event_processed: {
         Args: { p_event_id: string }
         Returns: undefined
+      }
+      may_answer: {
+        Args: {
+          p_context: Database["public"]["Enums"]["answer_context"]
+          p_user_id: string
+        }
+        Returns: boolean
       }
       mistake_count: { Args: { p_user_id: string }; Returns: number }
       module_requires_premium: {

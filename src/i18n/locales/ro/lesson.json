@@ -96,6 +96,7 @@
     },
     "blankMarker": "spațiu liber",
     "submitError": "Nu am putut verifica răspunsul. Selecția ta rămâne — încearcă din nou.",
+    "slowDown": "Ai trimis multe răspunsuri foarte repede. Ia o scurtă pauză, apoi verifică din nou.",
     "unrenderable": "Întrebarea nu a putut fi afișată și a fost sărită.",
     "expected": "Răspuns așteptat:",
     "outputLabel": "Ieșire",

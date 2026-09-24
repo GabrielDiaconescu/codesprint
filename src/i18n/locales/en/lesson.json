@@ -94,6 +94,7 @@
     },
     "blankMarker": "blank",
     "submitError": "Couldn't check your answer. Your selection is kept — try again.",
+    "slowDown": "That was a lot of answers very quickly. Take a breath, then check again.",
     "unrenderable": "This question could not be displayed and has been skipped.",
     "expected": "Expected:",
     "outputLabel": "Output",

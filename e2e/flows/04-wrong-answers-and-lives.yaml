@@ -54,3 +54,16 @@ tags:
 
 - assertVisible:
     text: 0 lives left of 5
+
+# Out of lives means out of answers (SPEC §22). The next lesson still opens — reading is never
+# blocked — but its first answer, even a right one, is refused, and the ways forward are
+# offered where the learner pressed Check. Nothing is graded.
+- tapOn:
+    id: home-continue
+- runFlow: ../generated/attempt-next-lesson.yaml
+- scrollUntilVisible:
+    element:
+      id: out-of-lives
+    direction: DOWN
+- assertNotVisible:
+    id: answer-feedback

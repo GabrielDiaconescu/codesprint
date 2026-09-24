@@ -1,4 +1,5 @@
 import * as Linking from 'expo-linking';
+import { z } from 'zod';
 
 import { getSupabaseClient } from '../supabase/client';
 import type {
@@ -59,6 +60,12 @@ const REASON_BY_EVENT: Record<string, AuthChangeReason> = {
   USER_UPDATED: 'user-updated',
   PASSWORD_RECOVERY: 'password-recovery',
 };
+
+/** What `delete-account` answers with (supabase/functions/delete-account). Parsed, not trusted. */
+const deletionResponse = z.object({
+  deleted: z.literal(true),
+  revenuecat: z.enum(['deleted', 'not-found', 'not-configured']),
+});
 
 export const SupabaseAuthService: AuthService = {
   serviceName: 'SupabaseAuthService',
@@ -173,6 +180,20 @@ export const SupabaseAuthService: AuthService = {
       // cleared the local session. Surfacing an error here would strand the user on a screen
       // they asked to leave, which is strictly worse than a token expiring on its own.
     }
+  },
+
+  async deleteAccount() {
+    const { data, error } = await getSupabaseClient().functions.invoke('delete-account', {
+      body: {},
+    });
+    if (error) throw error;
+
+    const result = deletionResponse.parse(data);
+
+    // The user no longer exists on the server, so the server half of signing out fails — which
+    // signOut already tolerates — and the local session is what is cleared.
+    await SupabaseAuthService.signOut();
+    return { revenuecat: result.revenuecat };
   },
 
   setAppActive(active) {

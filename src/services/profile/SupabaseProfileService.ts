@@ -83,6 +83,12 @@ export const SupabaseProfileService: ProfileService = {
     if (error) throw error;
   },
 
+  async exportMyData() {
+    const { data, error } = await getSupabaseClient().rpc('export_my_data');
+    if (error) throw error;
+    return data;
+  },
+
   async syncSession(timezone: string) {
     const { data, error } = await getSupabaseClient().rpc('sync_session', {
       p_timezone: timezone,

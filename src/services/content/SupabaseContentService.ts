@@ -4,6 +4,7 @@ import { localize } from '@/lib/content/localize';
 
 import { getSupabaseClient } from '../supabase/client';
 import {
+  AnswerRefusedError,
   LessonUnavailableError,
   type ContentService,
   type CourseOverview,
@@ -12,6 +13,7 @@ import {
   type ModuleSummary,
 } from '../types';
 
+import { toAnswerRefusal } from './answerRefusal';
 import { answerResult, lessonResponse } from './lessonSchema';
 
 /**
@@ -143,7 +145,12 @@ export const SupabaseContentService: ContentService = {
       p_locale: locale,
     });
 
-    if (error) throw new LessonUnavailableError(toLessonReason(error));
+    if (error) {
+      // Refused, as opposed to failed: out of lives, or too fast (SPEC §22, §42).
+      const refusal = toAnswerRefusal(error);
+      if (refusal) throw new AnswerRefusedError(refusal);
+      throw new LessonUnavailableError(toLessonReason(error));
+    }
     return answerResult.parse(data);
   },
 };

@@ -12,6 +12,12 @@ tags:
 
 - tapOn:
     id: tab-profile
+# Profile's cards arrive as their data does, and each one pushes the next down. Scrolling
+# before the level card is in has left "See plans" off screen by the time of the tap.
+- extendedWaitUntil:
+    visible:
+      id: level-card
+    timeout: 20000
 - scrollUntilVisible:
     element:
       id: subscription-upgrade

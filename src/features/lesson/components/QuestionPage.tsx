@@ -10,7 +10,12 @@ import { useSubmitAnswer } from '@/features/questions/hooks/useSubmitAnswer';
 import { isAnswerComplete } from '@/features/questions/logic/answers';
 import { parseQuestion } from '@/features/questions/payloads';
 import { emptyAnswer, type AnswerValue, type Solution } from '@/features/questions/types';
-import type { AnswerContext, AnswerResult, RenderableQuestion } from '@/services';
+import {
+  AnswerRefusedError,
+  type AnswerContext,
+  type AnswerResult,
+  type RenderableQuestion,
+} from '@/services';
 import { useTheme } from '@/theme';
 
 interface QuestionPageProps {
@@ -31,7 +36,8 @@ interface QuestionPageProps {
  * The state machine is small and deliberate:
  *
  *   answering ──Check──▶ pending ──ok──▶ graded ──Continue──▶ (next page)
- *                           └──error──▶ answering (selection kept, Check offered again)
+ *                           ├──error───▶ answering (selection kept, Check offered again)
+ *                           └──refused─▶ answering (out of lives, or too fast: said so)
  *
  * A network failure never loses the selection and never records anything: the server did
  * not see the answer, so nothing was graded, deducted or counted (SPEC §18).
@@ -70,6 +76,7 @@ export const QuestionPage = ({
   }
 
   const graded = result !== null;
+  const refusal = submit.error instanceof AnswerRefusedError ? submit.error.reason : null;
   const canCheck = !graded && !submit.isPending && isAnswerComplete(parsed, value);
 
   const check = () => {
@@ -119,11 +126,20 @@ export const QuestionPage = ({
         correct={result?.correct}
       />
 
-      {submit.isError && !graded && (
+      {/* Refused for lives (SPEC §22): the server took nothing, so the selection stays and
+          Check works again as soon as a life is back — from the countdown, an ad, or Premium.
+          Placed at the Check button, where the learner's eyes already are. */}
+      {refusal === 'out-of-lives' && !graded && <RewardedLifeCard />}
+
+      {submit.isError && !graded && refusal !== 'out-of-lives' && (
         <View style={[styles.error, { gap: theme.spacing.sm }]} accessibilityRole="alert">
-          <Icon name="cloud-offline" size="md" color={theme.colors.danger} />
-          <Text variant="bodySmall" tone="danger" style={styles.flex}>
-            {t('question.submitError')}
+          <Icon
+            name={refusal === 'rate-limited' ? 'hourglass' : 'cloud-offline'}
+            size="md"
+            color={theme.colors.danger}
+          />
+          <Text testID="submit-error" variant="bodySmall" tone="danger" style={styles.flex}>
+            {t(refusal === 'rate-limited' ? 'question.slowDown' : 'question.submitError')}
           </Text>
         </View>
       )}

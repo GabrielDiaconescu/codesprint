@@ -11,7 +11,7 @@ import {
   moduleOneLessons,
   pinnedChallenge,
 } from '../fixtures';
-import { answerInput, playLesson, type Command } from '../steps';
+import { answerInput, attemptFirstQuestion, playLesson, type Command } from '../steps';
 
 /**
  * The E2E generator (SPEC §53).
@@ -174,6 +174,16 @@ describe('playing a lesson', () => {
       scrollUntilVisible: { element: { id: 'answer-feedback' } },
     });
     expect(taps(commands).filter((id) => id === 'answer-feedback-continue')).toHaveLength(1);
+  });
+});
+
+describe('attempting a lesson with no lives', () => {
+  it('stops right after Check — the refusal, not feedback, is what comes next', () => {
+    const lesson = lessons[0]!;
+    const commands = attemptFirstQuestion(lesson);
+
+    expect(commands.at(-1)).toEqual({ tapOn: { id: 'check-answer' } });
+    expect(taps(commands)).not.toContain('answer-feedback-continue');
   });
 });
 

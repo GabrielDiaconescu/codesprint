@@ -81,6 +81,14 @@ export interface SignUpResult {
 
 export type ConfirmationKind = 'signup' | 'email_change';
 
+/**
+ * What happened to the RevenueCat customer. `not-configured` is an environment without the
+ * RevenueCat secret (local development) — said plainly rather than reported as done.
+ */
+export interface AccountDeletionResult {
+  revenuecat: 'deleted' | 'not-found' | 'not-configured';
+}
+
 export interface AuthService extends ServiceIdentity {
   /** The restored session, if SecureStore still holds a valid refresh token. */
   getUser(): Promise<AuthUser | null>;
@@ -118,6 +126,12 @@ export interface AuthService extends ServiceIdentity {
   ): Promise<DeepLinkOutcome>;
 
   signOut(): Promise<void>;
+  /**
+   * Deletes the caller's account everywhere we keep it — the database and the RevenueCat
+   * customer — then signs out locally (SPEC §41). A store subscription is NOT cancelled: only
+   * the learner can do that, in the store.
+   */
+  deleteAccount(): Promise<AccountDeletionResult>;
 
   /**
    * Drives Supabase's token auto-refresh from foreground state. Refreshing while
@@ -197,6 +211,11 @@ export interface ProfileService extends ServiceIdentity {
    * Irreversible, and deliberately so: the account must not exist.
    */
   rejectUnderageAccount(): Promise<void>;
+  /**
+   * Everything stored about the caller, as one JSON document (SPEC §41 — access and
+   * portability). Opaque to the app: it is handed to the learner, not read.
+   */
+  exportMyData(): Promise<unknown>;
   /** App-open heartbeat; also reports the device timezone (SPEC §21). */
   syncSession(timezone: string): Promise<UserProfile>;
 }
@@ -250,6 +269,19 @@ export class LessonUnavailableError extends Error {
   constructor(public readonly reason: LessonErrorReason) {
     super(`lesson unavailable: ${reason}`);
     this.name = 'LessonUnavailableError';
+  }
+}
+
+/**
+ * Why the server would not take an answer at all (SPEC §22, §42). Nothing was graded, recorded
+ * or deducted: the learner's selection stays, and Check works again once the reason is gone.
+ */
+export type AnswerRefusalReason = 'out-of-lives' | 'rate-limited';
+
+export class AnswerRefusedError extends Error {
+  constructor(public readonly reason: AnswerRefusalReason) {
+    super(`answer refused: ${reason}`);
+    this.name = 'AnswerRefusedError';
   }
 }
 

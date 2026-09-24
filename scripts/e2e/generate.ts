@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import { stringify } from 'yaml';
 
 import { loadContent, type LoadedCourse } from '../content/load';
-import { fixtureSql, moduleOneLessons, pinnedChallenge } from './fixtures';
-import { answerQuestion, playLesson, waitFor, type Command } from './steps';
+import { fixtureSql, lessonAfterModuleOne, moduleOneLessons, pinnedChallenge } from './fixtures';
+import { answerQuestion, attemptFirstQuestion, playLesson, waitFor, type Command } from './steps';
 
 /**
  * Writes the content-derived half of the E2E suite into `e2e/generated/` (gitignored).
@@ -28,6 +28,7 @@ const flow = (commands: Command[]): string =>
  * - `miss-lesson-N.yaml`   the same lesson, every answer plausibly wrong; stops on the LAST
  *                          question's feedback, where the caller asserts what it cost
  * - `play-challenge.yaml`  the pinned Daily Challenge, right; ends on its results screen
+ * - `attempt-next-lesson.yaml`  module 2, lesson 1, up to pressing Check on its first question
  * - `fixtures.sql`         the database state the flows start from (fixtures.ts)
  */
 export const generatedFiles = (courses: LoadedCourse[]): Record<string, string> => {
@@ -44,6 +45,8 @@ export const generatedFiles = (courses: LoadedCourse[]): Record<string, string> 
     ...pinnedChallenge(courses).flatMap((question) => answerQuestion(question, 'correct')),
     waitFor('challenge-done'),
   ]);
+
+  files['attempt-next-lesson.yaml'] = flow(attemptFirstQuestion(lessonAfterModuleOne(courses)));
 
   files['fixtures.sql'] = fixtureSql(courses);
 

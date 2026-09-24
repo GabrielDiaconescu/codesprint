@@ -1,5 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { renderWithProviders } from '@/test-utils';
 import type { UserProfile } from '@/services';
@@ -55,9 +55,15 @@ beforeEach(() => {
  * Waits for the write to FINISH, not merely to be called. `mockUpdate` is called a microtask
  * before the mutation settles, and a settle after the last assertion re-renders the card
  * outside act() — a warning React then attributes to whichever test runs next.
+ *
+ * Then one more tick inside act(): TanStack Query hands the settled state to the component on
+ * a later tick than the one where `isMutating()` reaches 0, and under load that tick came after
+ * the test had ended.
  */
-const settled = (queryClient: QueryClient) =>
-  waitFor(() => expect(queryClient.isMutating()).toBe(0));
+const settled = async (queryClient: QueryClient) => {
+  await waitFor(() => expect(queryClient.isMutating()).toBe(0));
+  await act(() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+};
 
 describe('ReminderSettingsCard', () => {
   it('shows reminders as on when a time is stored, with that time selected', async () => {
