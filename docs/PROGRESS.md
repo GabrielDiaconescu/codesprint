@@ -2,11 +2,11 @@
 
 > Read this first in a new session. It survives context resets.
 
-**Current phase:** Phase 18 complete — awaiting approval for Phase 22 (production builds,
-TestFlight, Google Play closed testing). Out of lives now stops answering, answers and rewards
-are rate-limited, and learners can export and delete their data in the app; the legal pages
-are written but not yet hosted. The E2E suite passes 9 of 9. Order from here: **22 → 23**, with
-the PFA → D-U-N-S chain, the legal review and the content review in parallel.
+**Current phase:** Phase 22 complete — awaiting approval for Phase 23 (store preparation and
+submission). The production build is configured end to end — profile, versioning, OTA updates,
+Sentry source maps, a force-update screen — and `npm run release:check` lists what still
+blocks one. No production build has been made: that needs the store accounts, the production
+Supabase project and the keys in "Human actions", in the order given there.
 **Last updated:** 2026-09-24
 
 ---
@@ -40,7 +40,8 @@ the PFA → D-U-N-S chain, the legal review and the content review in parallel.
 | 21    | E2E & regression hardening           | **Complete** — see verification       |
 | —     | Out of lives, rate limits (decided)  | **Complete**                          |
 | 18    | Privacy & legal                      | **Complete** — pages await hosting    |
-| 22–23 | See `PLAN.md` / SPEC §57             | Not started                           |
+| 22    | Production builds, TestFlight, Play  | **Complete** — builds await accounts  |
+| 23    | Store preparation & submission       | Not started                           |
 
 ---
 
@@ -2264,6 +2265,104 @@ Both approved by the user and implemented before Phase 18 (commit `e8b4775`):
    329 packages with their licence texts), linked from Profile → About. The whole production
    tree, build tools included: an extra attribution costs nothing, a missing one is a breach.
 
+## Phase 22 — what was implemented (Production builds, TestFlight, Play testing)
+
+Everything a production build needs that can exist before the store accounts do. The build
+itself, TestFlight and the Play internal track wait on the accounts (Human actions).
+
+- **Production build profile** (`eas.json`): store distribution, an Android App Bundle, the
+  EAS `production` environment, the `production` update channel, and build numbers that EAS
+  owns and increments (`appVersionSource: remote`, `autoIncrement`). **Submit profile**: iOS to
+  App Store Connect; Android to the **internal** track as a **draft**, so nothing reaches a
+  tester until you start the rollout.
+- **Version `1.0.0`** in `app.config.ts` — the store version people see. Build numbers are
+  separate and never collide.
+- **Over-the-air updates** (SPEC §51): `expo-updates` with a **fingerprint** runtime version,
+  checked on launch and applied on the next one — no blank screen waiting on the network.
+  `npm run release:update` publishes to production and always passes the production
+  environment (see Decisions).
+- **Force-update screen** (SPEC §50, §51): below `min_supported_app_version` the app shows
+  why, that progress is safe, and a button to the store listing instead of the app.
+  `force_update_shown` is captured (SPEC §43). New config key `ios_app_store_id` (migration
+  `20260924120000`), because an App Store link needs the numeric id that exists only once the
+  listing does; without it the screen says where to update rather than showing a dead button.
+- **Sentry source maps and native symbols** uploaded while a release build is made (SPEC §44):
+  the Sentry Expo plugin, and Sentry's Metro serializer, which stamps each bundle with a debug
+  id so a crash from a store build or an OTA update is matched to exactly its source map.
+  Development and preview builds skip the upload; production requires it.
+- **Export compliance** declared (`usesNonExemptEncryption: false` — HTTPS only), so App Store
+  Connect stops asking on every build.
+- **`npm run release:check`**: reads the EAS production environment through the EAS CLI,
+  validates it with the app's own startup schema, and adds what the schema cannot know —
+  Google test ids left in, a production build pointed at staging, the Sentry build variables,
+  placeholders left in the legal pages and `app-ads.txt`, and content still in draft. It never
+  prints a value; where the app's schema quotes one, the check redacts it.
+- **Documentation** (SPEC §55): `docs/DEPLOYMENT.md` (production Supabase, the EAS production
+  environment variable by variable, builds, signing, TestFlight, Play internal and closed
+  testing, OTA updates and rollback, retiring old builds, the release checklist),
+  `docs/ARCHITECTURE.md`, `CONTRIBUTING.md`; README brought up to date.
+
+### Found on the way
+
+- **An OTA update published from a laptop would have reached nobody.** The runtime
+  fingerprint includes the plugin options fed by build variables (the AdMob app ids, the
+  Sentry slugs). Verified: the same commit gives runtime `001955a7…` without
+  `ADMOB_APP_ID_ANDROID` and `6f49e992…` with it. `eas update` run with the local environment
+  publishes to a runtime no store build has. `release:update` pins `--environment production`.
+- **Source maps were never uploaded.** Phase 16 wired the Sentry SDK but not its build
+  plugin, so every production crash would have arrived as minified line 1.
+- **The force-update screen did not exist**, though `min_supported_app_version` and the
+  `force_update_shown` event had been in config and the analytics list since Phase 3.
+- `docs/MONETIZATION.md` still told you to swap a no-op billing service that was replaced in
+  Phase 14; the README still said "Phase 1 of 23".
+- **The E2E launch had been passing by luck.** `clearState` resets the development client's
+  "show menu at launch" preference to on, so its menu opened over the first screen whenever
+  the bundle arrived early enough — and its "Open React Native dev menu" row matched the
+  check meant for React Native's own menu, which then looked for a Close button that does
+  not exist. Two failures in a row today. The launch link now passes `disableAutoLaunch=1`,
+  and the overlay subflow tells the two menus apart.
+
+### Verification
+
+- `npm run verify`: typecheck clean, lint clean, **88 suites / 1373 tests** (was 85 / 1349).
+  New: version comparison and store URLs (8), the force-update screen (3), the release check
+  (13).
+- pgTAP: **16 files, 556 tests** after a reset with the new migration.
+- `expo prebuild` for Android with the production variant: the Sentry Gradle step, the
+  `expo-updates` manifest entries (runtime version, update URL, check on launch) all present.
+  iOS prebuild cannot run on Windows; EAS runs it in the cloud.
+- `npm run release:check` against the real EAS production environment (empty today): every
+  blocker it lists is real — they are the Human actions below.
+- Every EAS CLI command and flag in `docs/DEPLOYMENT.md` checked against the installed CLI
+  (24.7.0).
+- **E2E: 9 of 9 flows passed** in one run (32 m 30 s, a slower emulator than last time) on the
+  existing development build, after the `_layout.tsx` change and the launch fix below:
+  onboarding 1 m 42 s · age gate 1 m 12 s · module 1, every question type 8 m 46 s · lives
+  4 m 12 s · Daily Challenge 2 m 40 s · paywall and restore 2 m 18 s · language 2 m 39 s ·
+  guest keeps progress 4 m 33 s · export and delete 4 m 28 s.
+- The Android bundle exports with the Sentry serializer and carries its debug id.
+
+### Decisions
+
+1. **New dependency: `expo-updates`** (first-party Expo) for SPEC §51's OTA fixes.
+   **`expo-application`** is now declared: it was already installed and linked through
+   `expo-notifications`, and the force-update check reads the native version from it. No new
+   code runs on a build that lacks it.
+2. **Fingerprint runtime version**, not `appVersion`: an update can never reach a build whose
+   native code it does not match, whatever anyone remembers to bump. The cost is that any
+   native change — a module, `app.config.ts`, `eas.json` — needs a new store build before
+   updates reach it, which is true anyway.
+3. **Updates apply on the next launch** (`fallbackToCacheTimeout: 0`), never by blocking the
+   one in progress.
+4. **A production build fails without Sentry's upload variables.** A store build whose crashes
+   cannot be read is not worth shipping; the failure is at build time, where it costs nothing.
+   `release:check` reports them first.
+5. **`EXPO_PUBLIC_*` values are plaintext in EAS.** They are compiled into the app for anyone
+   to read; hiding them protects nothing and stops them being validated. `SENTRY_AUTH_TOKEN`
+   is the one `secret` variable. No server secret is in the EAS environment at all.
+6. **Android goes to the internal track as a draft.** Closed and production tracks are a
+   decision made in Play Console, not a side effect of `eas submit`.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -2288,8 +2387,9 @@ Romanian UI text was written by me and wants a native speaker's read.
   implementation; the guard stays, so a future phase cannot quietly ship a placeholder.
 - **Analytics captures nothing without a PostHog key**, and nothing without consent even
   with one. Both are correct; neither has been exercised against a real project yet.
-- **No Sentry DSN**, so crashes are reported nowhere. Creating the project is free and can
-  be done now; source maps additionally need `SENTRY_AUTH_TOKEN` in the EAS environment.
+- **No Sentry project yet**, so crashes are reported nowhere. The source-map upload is wired
+  (Phase 22); it needs the DSN and the three build variables in the EAS production
+  environment, and a production build fails without them.
 - Session length is still not instrumented; it needs an app-state listener and a decision
   about what counts as a session. The `notification_*` events landed with Phase 17.
 - **Ads serve Google's TEST inventory**, and will until `EXPO_PUBLIC_APP_ENV=production`
@@ -2327,19 +2427,18 @@ Romanian UI text was written by me and wants a native speaker's read.
 
 **Content and features still to come:**
 
-- The seed carries 2 modules, 8 lessons and 40 questions — enough to exercise every feature,
-  not launch volume. The remaining 15 modules are Phase 19. The exam pool is 38 against a
-  30-question full exam, so two sittings overlap heavily; SPEC §35 wants 60+ at launch.
-- Two achievements name modules whose content arrives in Phase 19 and cannot unlock before
-  then. "10 Exams Completed" needs ten sittings, which the free weekly limit makes a
-  Premium-only achievement in practice.
+- **Production would serve modules 1–2 only today.** `content:publish --production` ships
+  reviewed content alone: 8 of 76 lessons, an exam pool of 38 and a challenge pool of 39.
+  All 17 modules are written and verified by machine (Phase 19); the rest is the human review.
+- "10 Exams Completed" needs ten sittings, which the free weekly limit makes a Premium-only
+  achievement in practice.
 - `daily_challenges` supports scheduling a specific set or bonus per date. Nothing is
   scheduled; the deterministic pick covers it.
 - Onboarding does not let an intermediate learner choose a starting module (SPEC §11). Their
   answer is stored and unused; every module up to the free boundary is reachable anyway.
-- Settings is complete except for what Phase 18 owns: account management (change email or
-  password, link sign-in methods, export my data, delete account) and the legal links,
-  which wait for the pages they would point at.
+- **Changing email or password while signed in is not built** (SPEC §29). A password can be
+  changed through "Forgot password"; an email cannot be changed at all. Linking Apple or
+  Google waits on D6. Export, deletion and the legal links are done (Phase 18).
 - Avatars are an initial on a colour derived from `avatar_key`, not preset artwork. No photo
   uploads in V1 by design (SPEC §29); the preset set is a content decision, not a code one.
 - **No sounds (SPEC §29).** Haptics are wired and now have a working setting; audio has no
@@ -2384,6 +2483,9 @@ Romanian UI text was written by me and wants a native speaker's read.
   (`@expo/cli` and its `query-string` / `decode-uri-component` / `uuid` / `xcode` chain).
   They are build-time code, not shipped app code, and cannot be resolved without an Expo
   release — `npm audit fix --force` would downgrade Expo itself. Recheck each SDK upgrade.
+- **No production build exists yet**, and the first one needs new development and preview
+  builds too: `expo-updates` and the Sentry plugin are native. The installed builds keep
+  working — nothing they run depends on either.
 - **The app has not been run on a physical device yet.** It runs on the Android emulator;
   every device checklist from Phase 1 onward is outstanding, deferred by agreement. Fonts, contrast, dynamic type and
   reduce-motion in particular can only be verified on hardware.
@@ -2391,6 +2493,23 @@ Romanian UI text was written by me and wants a native speaker's read.
 ---
 
 ## Human actions required before the next phases
+
+**Phase 22 — to make the first production build, in this order** (details in
+`docs/DEPLOYMENT.md`; `npm run release:check` ticks them off):
+
+1. **Accounts** — Apple Developer Program and Google Play Console (Organization, after the
+   PFA → D-U-N-S chain below), each with its paid-apps agreement, tax and banking.
+2. **Production Supabase** — a new Pro project in Frankfurt; `db push`; auth settings by hand
+   (site URL and redirect `codesprint://`, custom SMTP); `functions deploy` and the RevenueCat
+   secrets; `content:publish --production`. DEPLOYMENT.md §1.
+3. **Services** — AdMob (app + 6 ad units), RevenueCat (real stores), PostHog EU project,
+   Sentry project and an org auth token, hosting for `web/` at your domain.
+4. **EAS production environment** — the variables in DEPLOYMENT.md §2. Then
+   `npm run release:check` until it reports no blockers.
+5. **Build and submit** — `eas build --profile production`; TestFlight via `eas submit`; the
+   first Android bundle uploaded by hand to the internal track. Then put the App Store numeric
+   id in `eas.json` (`ascAppId`) and in `app_config.ios_app_store_id`.
+6. **New development and preview builds** at the same time — the native project changed.
 
 **Phase 18 — to make the privacy work public:**
 
@@ -3537,3 +3656,25 @@ On the **new** preview build (the Phase 18 one — older ones have no "Your data
    each opens the right page. Without it, no links appear at all (never a broken one).
 5. **The web pages:** open `web/index.html` in a browser (or the hosted site): every page links
    to the others, reads in light and dark mode, and the deletion page explains both ways.
+
+## Phase 22 device checklist (SPEC §57 — "Install from TestFlight / Play testing track")
+
+Blocked until the first production build exists (Human actions, Phase 22). Then, on a real
+iPhone and a real Android phone:
+
+1. **Install** from TestFlight (iOS) and from the Play **internal testing** link (Android).
+   The app is named "CodeSprint" (no "Dev" / "Preview") and installs alongside the other two.
+2. **First start**: onboarding appears; no red screen, and no configuration error (that one
+   means a variable is missing from the EAS production environment).
+3. **Production backend**: finish a lesson as a guest; in the production project's Table
+   Editor your anonymous user and its `xp_events` rows are there — not on staging.
+4. **Ads**: as a free learner, the banner is a real ad, not one labelled "Test Ad". Do **not**
+   tap it — tapping your own live ads gets the AdMob account suspended.
+5. **Store sandbox**: buy No Ads and Premium with a sandbox tester (iOS) / licence tester
+   (Android); restore on a second install; Premium lessons open, ads disappear.
+6. **Crash reporting**: in Sentry, the build's release exists with its source maps
+   (Releases → the version → Artifacts).
+7. **An update**: publish a harmless text change with `npm run release:update`; close and
+   reopen the app twice — the change appears on the second launch.
+8. **Force update**: in `app_config`, set `min_supported_app_version` to `9.0.0` and reopen:
+   the "Time to update" screen, with an **Update** button to the store. Set it back to `1.0.0`.

@@ -16,6 +16,7 @@ Read `docs/PROGRESS.md` first in every new session: it holds the current phase a
 | `npm run db:test`          | `supabase test db` — pgTAP suite (Phase 3+)                       |
 | `npm run db:types`         | Regenerate `src/types/database.types.ts` after every migration    |
 | `npm run content:validate` | Content schema validation (Phase 6+)                              |
+| `npm run release:check`    | What still blocks a production build (`docs/DEPLOYMENT.md`)       |
 
 ## Phase gate rule (SPEC §64) — the most important rule here
 

@@ -168,8 +168,8 @@ It proves the plumbing. The store paperwork still has to be proved separately.
    Authorization field.
 9. Decide the **transfer behaviour** for when a subscription is seen on a second account
    (SPEC §31). The webhook handles `TRANSFER` by re-syncing both accounts either way.
-10. Flip `billing` from `NoopBillingService` to `RevenueCatBillingService` in
-    `src/services/registry.ts`, and remove `'billing'` from `PRODUCTION_NOOP_ALLOWLIST`.
+10. Put the two public SDK keys in the EAS `production` environment
+    (`docs/DEPLOYMENT.md`, section 2). The app already uses `RevenueCatBillingService`.
 
 ### The secret that must never be public
 
