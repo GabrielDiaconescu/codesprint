@@ -1,23 +1,26 @@
 # Legal and compliance
 
 Engineering's side of privacy and store compliance (SPEC §41, §55). **Not legal advice.** The
-texts in `web/` are drafts written from what the app actually does; a lawyer must review them,
-and everything marked `[LIKE THIS]` there, before launch.
+texts in `web/` (English) and `web/ro/` (Romanian) are drafts written from what the app actually
+does and reviewed against Romanian and EU law in **`docs/LEGAL-REVIEW.md`** — which also lists
+the decisions that are yours to take. A lawyer must still confirm them, and everything marked
+`[LIKE THIS]`, before launch.
 
 ## Status
 
-| Area                         | State                                                                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| Export my data               | **Done** — `export_my_data()`, Profile → Your data                                              |
-| Delete account (in app)      | **Done** — `delete-account` Edge Function, Profile → Your data                                  |
-| Delete account (web request) | **Page written** (`web/delete-account.html`) — needs hosting and a mailbox                      |
-| Privacy policy, terms        | **Drafts** (`web/privacy.html`, `web/terms.html`) — need legal review                           |
-| Open-source licences         | **Generated** — `web/licenses.html` by `npm run legal:licenses`; rerun after dependency changes |
-| Support page, `app-ads.txt`  | **Written** — need hosting, the support address and the AdMob publisher id                      |
-| Apple privacy manifest       | **Declared** in `app.config.ts` — verify with Xcode's privacy report (Ph 22)                    |
-| Store privacy forms          | **Answers drafted below** — to be entered in the consoles (Phase 23)                            |
-| Processor agreements (DPAs)  | **Not signed yet** — human action, list below                                                   |
-| EU DSA trader details        | **Blocked** on the legal entity (PFA)                                                           |
+| Area                         | State                                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| Export my data               | **Done** — `export_my_data()`, Profile → Your data                                                |
+| Delete account (in app)      | **Done** — `delete-account` Edge Function, Profile → Your data                                    |
+| Delete account (web request) | **Page written** (`web/delete-account.html`) — needs hosting and a mailbox                        |
+| Privacy policy, terms        | **Reviewed drafts**, English and Romanian (`docs/LEGAL-REVIEW.md`) — need a lawyer's confirmation |
+| Change password (in app)     | **Done** — Profile → Change password; signs out the other devices                                 |
+| Open-source licences         | **Generated** — `web/licenses.html` by `npm run legal:licenses`; rerun after dependency changes   |
+| Support page, `app-ads.txt`  | **Written** — need hosting, the support address and the AdMob publisher id                        |
+| Apple privacy manifest       | **Declared** in `app.config.ts` — verify with Xcode's privacy report (Ph 22)                      |
+| Store privacy forms          | **Answers drafted below** — to be entered in the consoles (Phase 23)                              |
+| Processor agreements (DPAs)  | **Not signed yet** — human action, list below                                                     |
+| EU DSA trader details        | **Blocked** on the legal entity (PFA)                                                             |
 
 ## What the app stores
 
@@ -54,7 +57,8 @@ the auth user. A RevenueCat failure leaves the account intact and the learner ca
 | Processor              | Role                      | Region / transfer                                                                     | DPA   |
 | ---------------------- | ------------------------- | ------------------------------------------------------------------------------------- | ----- |
 | Supabase               | Database, auth, functions | EU (eu-central-1)                                                                     | `[ ]` |
-| RevenueCat             | Subscription status       | US — `[DPF / SCCs]`                                                                   | `[ ]` |
+| RevenueCat             | Subscription status       | US — SCCs in RevenueCat's DPA                                                         | `[ ]` |
+| Expo (650 Industries)  | OTA updates (EAS Update)  | US — `[safeguard]`; receives IP, OS, a random installation id                         | `[ ]` |
 | Google (AdMob, UMP)    | Ads, consent              | `[DPF / SCCs]`; Google is independent controller for some ad processing — `[confirm]` | `[ ]` |
 | PostHog                | Analytics (consent only)  | EU                                                                                    | `[ ]` |
 | Sentry                 | Crash reporting           | `[choose EU region]`                                                                  | `[ ]` |
@@ -71,7 +75,8 @@ the auth user. A RevenueCat failure leaves the account intact and the learner ca
 - **Age:** under 13, the account is deleted at the age gate and the refusal is shown. Under 16:
   analytics off, non-personalised ads only, hidden from the leaderboard by default.
 - **Crash reporting:** on by default, with PII scrubbed (`sendDefaultPii: false`, request
-  bodies stripped). Basis: legitimate interests — **for the lawyer to confirm.**
+  bodies stripped). Basis: legitimate interests; whether it needs consent under Law 506/2004 is
+  decision D2 in `docs/LEGAL-REVIEW.md`.
 
 ## Store answers (drafts — entered as described in `docs/STORE.md`)
 
@@ -110,18 +115,15 @@ are incomplete.
 
 ## For the lawyer
 
-1. Legal bases in `web/privacy.html` — especially non-personalised ads and crash reporting.
-2. International transfers (RevenueCat, Google, Sentry region).
-3. Retention periods for Sentry, PostHog and Supabase backups.
-4. Terms §4 (what happens if a paid feature is removed), §8 (liability), §10 (law, ODR).
-5. Minimum age 13 with parental agreement below majority; the under-16 defaults.
-6. Whether reports ABOUT a learner should be in their export as they are (reason and status,
-   never the reporter).
-7. EU DSA trader information for both stores, once the PFA exists.
+`docs/LEGAL-REVIEW.md` — in Romanian, for a Romanian lawyer: the decisions (minimum age against
+the Civil Code and the pending "online age of majority" bill; crash reporting without consent;
+refunds when a paid feature goes; a phone number in the trader details), every finding against
+the GDPR, Law 506/2004, consumer law, the DSA and ANPC rules, and the sources checked.
 
 ## Hosting the pages
 
-`web/` is plain static HTML: no build step, no external requests. Host it on a free static host
+`web/` is plain static HTML — English at the root, Romanian in `web/ro/` — with no build step and
+no external requests. Host it on a free static host
 whose terms allow commercial use (SPEC §0.1.9 — Cloudflare Pages or GitHub Pages, not Vercel
 Hobby), at the domain listed in both store listings, so that `https://[domain]/app-ads.txt`
 resolves. Then set `EXPO_PUBLIC_LEGAL_BASE_URL=https://[domain]` in the EAS environments: the

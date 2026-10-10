@@ -287,14 +287,16 @@ export const artworkFindings = (hashes: Record<string, string>): Finding[] => {
 
 /* ------------------------------------------------------------------ main */
 
-const readWebPages = (): Record<string, string> => {
-  const dir = join(process.cwd(), 'web');
-  return Object.fromEntries(
-    readdirSync(dir)
-      .filter((name) => name.endsWith('.html') && name !== 'licenses.html')
-      .map((name) => [`web/${name}`, readFileSync(join(dir, name), 'utf8')]),
+/** Every hand-written page, in each language: web/*.html and web/ro/*.html. */
+const readWebPages = (): Record<string, string> =>
+  Object.fromEntries(
+    ['web', 'web/ro'].flatMap((folder) => {
+      const dir = join(process.cwd(), folder);
+      return readdirSync(dir)
+        .filter((name) => name.endsWith('.html') && name !== 'licenses.html')
+        .map((name) => [`${folder}/${name}`, readFileSync(join(dir, name), 'utf8')]);
+    }),
   );
-};
 
 /**
  * The production environment as EAS holds it. Plain and sensitive values come back (sensitive

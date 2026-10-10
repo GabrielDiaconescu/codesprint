@@ -193,3 +193,27 @@ asks for, and where it is:
 
 Reports are not surfaced anywhere automatically. Check the `reports` table at least weekly while
 the app is live.
+
+**Every action needs a statement of reasons** (EU Digital Services Act, art. 17): when you rename
+someone, hide them from the leaderboard or suspend them, email the account's address — in the
+learner's app language — saying what you did, why, and how to contest it. A template:
+
+> Subject: Your CodeSprint leaderboard name
+>
+> We have [renamed you / hidden you from the leaderboard] because your display name
+> “[NAME]” [breaks section 9 of our terms: reason, e.g. it insults another person / is illegal
+> because …]. We decided this after [a report from another learner / our own review]; it was
+> reviewed by a person, not decided automatically. Your progress is not affected. If you think
+> this is a mistake, reply to this email and we will look at it again. You can also turn to the
+> courts or to ANPC (reclamatiisal.anpc.ro).
+
+> Subiect: Numele tău din clasamentul CodeSprint
+>
+> Te-am [redenumit / ascuns din clasament] deoarece numele tău afișat „[NUME]” [încalcă
+> secțiunea 9 din termeni: motivul, de ex. insultă o altă persoană / este ilegal pentru că …].
+> Am decis acest lucru în urma [unei raportări de la alt cursant / propriei verificări]; decizia a
+> fost luată de o persoană, nu automat. Progresul tău nu este afectat. Dacă crezi că este o
+> greșeală, răspunde la acest email și o reanalizăm. Te poți adresa și instanței sau ANPC
+> (reclamatiisal.anpc.ro).
+
+Keep the report, the decision and the email for as long as the account exists.

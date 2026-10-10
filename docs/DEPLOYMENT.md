@@ -53,16 +53,21 @@ Everything here needs a Supabase access token on your machine: `npx supabase log
    `supabase/config.toml` is the _development_ configuration (dev scheme, `exp://` redirects)
    and would overwrite production with it.
 
-   | Setting (Authentication →)        | Production value                                            |
-   | --------------------------------- | ----------------------------------------------------------- |
-   | URL Configuration → Site URL      | `codesprint://`                                             |
-   | URL Configuration → Redirect URLs | `codesprint://**` — only this; no `exp://`, dev or preview  |
-   | Sign In / Providers → Anonymous   | on (D1)                                                     |
-   | Sign In / Providers → Email       | confirm email **on**; secure email change **on**            |
-   | Passwords                         | minimum 8, letters and digits — as in `config.toml`         |
-   | Emails → SMTP                     | your own SMTP provider; the built-in sender is not for prod |
-   | Rate Limits                       | review; tighten anonymous sign-ins if abused (SPEC §12)     |
-   | Attack Protection → CAPTCHA       | off at launch; on if anonymous sign-ups are abused          |
+   | Setting (Authentication →)        | Production value                                                                                                                                                                        |
+   | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | URL Configuration → Site URL      | `codesprint://`                                                                                                                                                                         |
+   | URL Configuration → Redirect URLs | `codesprint://**` — only this; no `exp://`, dev or preview                                                                                                                              |
+   | Sign In / Providers → Anonymous   | on (D1)                                                                                                                                                                                 |
+   | Sign In / Providers → Email       | confirm email **on**; secure email change **on**; secure password change **off** — on, a guest more than a day old cannot create an account; the app checks the current password itself |
+   | Audit Logs                        | “Write audit logs to the database” **off** — those rows keep the email after an account is deleted (`docs/LEGAL-REVIEW.md`)                                                             |
+   | Passwords                         | minimum 8, letters and digits — as in `config.toml`                                                                                                                                     |
+   | Emails → SMTP                     | your own SMTP provider; the built-in sender is not for prod                                                                                                                             |
+   | Rate Limits                       | review; tighten anonymous sign-ins if abused (SPEC §12)                                                                                                                                 |
+   | Attack Protection → CAPTCHA       | off at launch; on if anonymous sign-ups are abused                                                                                                                                      |
+
+   And at the analytics and crash providers, so the privacy policy stays true: PostHog —
+   “Discard client IP data” on and data retention 12 months; Sentry — the project in the **EU**
+   region, event retention at most 90 days.
 
 4. **Edge Functions and their secrets.**
 

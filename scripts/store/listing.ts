@@ -125,8 +125,10 @@ export const loadStoreSource = (root: string = STORE_ROOT): StoreSource => {
 
 /* ------------------------------------------------------------------ rendering */
 
-export const websiteUrls = (websiteUrl: string | null) => {
-  const base = (websiteUrl ?? WEBSITE_PLACEHOLDER).replace(/\/+$/, '');
+/** The legal and support pages in the listing's language: Romanian under `/ro/` (web/ro). */
+export const websiteUrls = (websiteUrl: string | null, language = 'en') => {
+  const root = (websiteUrl ?? WEBSITE_PLACEHOLDER).replace(/\/+$/, '');
+  const base = language.toLowerCase().startsWith('ro') ? `${root}/ro` : root;
   return {
     support: `${base}/`,
     privacy: `${base}/privacy.html`,
@@ -145,7 +147,7 @@ export const fillTokens = (template: string, tokens: Record<string, string>): st
 
 /** Everything one locale's text says, with the tokens filled in, for one store. */
 export const renderListing = (source: StoreSource, listing: Listing, store: 'apple' | 'google') => {
-  const urls = websiteUrls(source.settings.websiteUrl);
+  const urls = websiteUrls(source.settings.websiteUrl, listing.i18n);
   const phrases = source.i18n[listing.i18n];
   if (!phrases) throw new Error(`no i18n phrases for ${listing.i18n}`);
 
@@ -195,7 +197,6 @@ export const screenshotPath = (
 /** `store.config.json` — the App Store Connect listing, in EAS Metadata's format. */
 export const renderAppleConfig = (source: StoreSource) => {
   const { settings } = source;
-  const urls = websiteUrls(settings.websiteUrl);
 
   return {
     configVersion: 0,
@@ -211,6 +212,7 @@ export const renderAppleConfig = (source: StoreSource) => {
       info: Object.fromEntries(
         source.listings.map((listing) => {
           const text = renderListing(source, listing, 'apple');
+          const urls = websiteUrls(settings.websiteUrl, listing.i18n);
           return [
             listing.appleLocale,
             {

@@ -22,6 +22,20 @@ describe('legalUrls', () => {
     expect(legalUrls(undefined)).toBeNull();
     expect(legalUrls('  ')).toBeNull();
   });
+
+  it('sends a learner using the app in Romanian to the Romanian pages', () => {
+    expect(legalUrls('https://codesprint.example', 'ro')).toEqual({
+      privacy: 'https://codesprint.example/ro/privacy.html',
+      terms: 'https://codesprint.example/ro/terms.html',
+      support: 'https://codesprint.example/ro/',
+      deleteAccount: 'https://codesprint.example/ro/delete-account.html',
+      // Generated in English only.
+      licenses: 'https://codesprint.example/licenses.html',
+    });
+    expect(legalUrls('https://codesprint.example', 'en-US')?.terms).toBe(
+      'https://codesprint.example/terms.html',
+    );
+  });
 });
 
 describe('exportFileName', () => {

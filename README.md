@@ -24,6 +24,7 @@ listed in `docs/PROGRESS.md` — store accounts, keys, legal review, content rev
 | `docs/DATABASE.md`     | Tables, policies, functions, migrations, seed                     |
 | `docs/CONTENT.md`      | Content format, pipeline and review                               |
 | `docs/MONETIZATION.md` | Tiers, store products, RevenueCat setup, ad rules                 |
+| `docs/LEGAL-REVIEW.md` | Legal compliance review against Romanian and EU law (in Romanian) |
 | `docs/LEGAL.md`        | Privacy, deletion, processors, store privacy answers (not advice) |
 | `docs/TESTING.md`      | Test layers, the E2E suite and how to run it                      |
 | `docs/DEPLOYMENT.md`   | Production setup, builds, TestFlight, Play testing, OTA updates   |

@@ -17,9 +17,9 @@ type LegalLink = keyof Pick<LegalUrls, 'privacy' | 'terms' | 'support' | 'licens
  * (SPEC §47) — a line of caption text is not enough on its own.
  */
 export const LegalLinks = ({ links }: { links: readonly LegalLink[] }) => {
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
   const theme = useTheme();
-  const urls = legalUrls(getEnv().EXPO_PUBLIC_LEGAL_BASE_URL);
+  const urls = legalUrls(getEnv().EXPO_PUBLIC_LEGAL_BASE_URL, i18n.language);
 
   if (!urls) return null;
 

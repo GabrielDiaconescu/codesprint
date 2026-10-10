@@ -9,7 +9,10 @@ sixteen-second answer, unreadable inline code, raw Markdown in 309 explanations,
 every header — and one that is flagged: the app icon is still Expo's template. What remains is
 human: the icon, accounts, the production project, keys, the content and legal reviews, then
 submission — in the order under "Human actions".
-**Last updated:** 2026-09-24
+Since then (2026-10-10): the password is changed in the app, and the legal pages were reviewed
+against Romanian and EU law and translated into Romanian (`docs/LEGAL-REVIEW.md`) — four
+decisions there are yours, the minimum age above all.
+**Last updated:** 2026-10-10
 
 ---
 
@@ -44,6 +47,7 @@ submission — in the order under "Human actions".
 | 18    | Privacy & legal                      | **Complete** — pages await hosting    |
 | 22    | Production builds, TestFlight, Play  | **Complete** — builds await accounts  |
 | 23    | Store preparation & submission       | **Complete** — submission is human    |
+| —     | Password change, legal review        | **Complete** — decisions await you    |
 
 ---
 
@@ -2475,6 +2479,98 @@ itself, TestFlight and the Play internal track wait on the accounts (Human actio
 6. **Screenshots are not committed**: they are derived from code and content and regenerate in
    one command — after a rename, a content change or a restyle.
 
+## After Phase 23 — password change in the app, legal review (2026-10-10)
+
+Asked for after the last phase: managing the account without a website, and a review of the
+privacy policy and terms against Romanian and EU law.
+
+**Managing the account needs no website.**
+
+- **Changing the password is in the app** (Profile → Change password; SPEC §29).
+  `AuthService.changePassword` signs in again with the current password — so an unlocked phone
+  in someone else's hands is not enough — then sets the new one, then signs out every **other**
+  device on the account (`signOut({ scope: 'others' })`). No email, no web page. A wrong
+  current password has its own message (`wrong-password`) instead of "invalid credentials".
+  Guests have no password and see no button.
+- **Deleting the account** has been in the app since Phase 18, and "Forgot password" sends a
+  link that opens the app (`codesprint://`), not a website.
+- **What still needs a website is the stores**: a privacy policy URL (both), a support URL
+  (App Store), a web page where deletion can be requested without the app (Google Play), and
+  `app-ads.txt` for AdMob. `web/` is that site — static, free to host on Cloudflare Pages or
+  GitHub Pages, even without a domain. A domain is still worth having for the SMTP sender.
+
+**Found on the way: a bottom sheet's text field sat under the keyboard.** A React Native
+`Modal` is a window of its own, so the system never moves its content out of the keyboard's
+way; the new E2E flow could not reach the password sheet's button. `BottomSheet` now rises by
+the keyboard's height (`useKeyboardHeight`: on iOS as the keyboard starts to move, on Android
+once it has). The display-name and report sheets, which also have text fields, get the same fix.
+
+**And a stopped container read as a missing key.** After a Docker restart the local Edge
+Functions container stayed down — `supabase start` does not bring it back while the rest of the
+stack is up — so the E2E runner reported "RevenueCat key not set" and flow 09 failed at its last
+step, deletion. The runner now checks that container first and says how to restart it.
+
+**The legal review** — `docs/LEGAL-REVIEW.md`, written in Romanian because its reader is the
+Romanian lawyer who confirms it (the one exception to English documentation):
+
+- **Every legal page rewritten against what the app actually does, and translated**:
+  `web/ro/` holds the privacy policy, terms, deletion and support pages in Romanian. The app's
+  legal links open the interface language's version (`legalUrls`), and so does each store
+  listing (`npm run store:build`). The licences page stays one, in English.
+- **Privacy (GDPR, Law 190/2018, Law 506/2004)**: the controller identified (registration no.,
+  CUI) and the DPO question answered; legal bases corrected — birth year is a legal obligation
+  and a legitimate interest (protecting minors), not "contract"; moderation is a DSA obligation;
+  **Expo was a missing recipient** (update checks send the IP, OS and a random installation id);
+  concrete retention periods instead of `[N]`; the one-month deadline for requests; an "On your
+  device" section for Law 506/2004; and, honestly, that crash reports and analytics — keyed by
+  the pseudonymous id — expire (90 days, 12 months) rather than being deleted with the account.
+- **Consumer law (OUG 34/2014, OUG 141/2021, Law 193/2000, Civil Code)**: trader details,
+  auto-renewal and cancellation, the 14-day withdrawal through the stores, the legal guarantee
+  for digital services, 30 days' notice and free termination before a paid feature is removed,
+  no limit on liability where the law forbids one, Romanian law without taking away the
+  consumer's home-country protection, the consumer's own courts, and ANPC's SAL. The EU ODR
+  link is gone: the platform was abolished on 20 July 2025 (Reg. (EU) 2024/3228).
+- **DSA**: display names make the app a hosting service. The terms describe the moderation,
+  automatic name filter included; anyone can notify illegal content; a decision comes with a
+  statement of reasons (procedure and email templates in `docs/STORE.md`); a contact point in
+  Romanian and English. As a micro-enterprise, the platform obligations of art. 19–28 do not
+  apply.
+- **Settings that keep the policy true**, now in `docs/DEPLOYMENT.md`: Supabase's audit logs
+  not written to the database (those rows keep the email after deletion), PostHog discarding
+  IPs with 12-month retention, Sentry in the EU with at most 90 days.
+- `release:check` counts the placeholders in the Romanian pages too.
+
+### Verification
+
+- `npm run verify`: typecheck clean, lint clean, **96 suites / 1453 tests** (was 93 / 1440) —
+  the password change (5), its sheet (3), the keyboard offset, legal URLs per language in the
+  app and the store listing, the new error message in both languages.
+- **E2E: 10 of 10 flows passed** (31 m 43 s). New flow `10-change-password`: a wrong current
+  password is refused, the right one changes it, and the new one signs in after signing out.
+- **Supabase's "secure password change", probed on the local stack with it on**: a guest whose
+  session was two days old could not create an account (`reauthentication_needed`); a registered
+  user's direct change was refused too, and the app's re-sign-in then change passed.
+- Legal pages: every relative link resolves; the Romanian pages use ș and ț, never ş and ţ.
+- `npm run store:build`: regenerated; the Romanian listings link to `/ro/`.
+- `npm run release:check`: **31 blockers** — the 27 of Phase 23, plus the placeholders in the
+  four Romanian pages.
+
+### Decisions
+
+1. **Re-sign-in rather than Supabase's `reauthenticate()`**, which emails a code: proving the
+   current password needs no SMTP and no round trip, and gives a fresh session.
+2. **Other devices are signed out** after a change: a password is usually changed because
+   someone else may know it. Their access tokens lapse within the hour; refresh is refused.
+3. **The legal texts exist in both languages**, and the version opened follows the interface
+   language — Romanian consumer law expects the information in Romanian.
+4. **No product decision taken on the lawyer's behalf**: the minimum age, crash reporting
+   without consent, the refund route and the phone number are D1–D4 in the review, marked in
+   the texts and counted by `release:check`.
+5. **Supabase's "secure password change" stays off**, locally and in production
+   (`docs/DEPLOYMENT.md`, and a comment in `config.toml`): on, it refuses a guest more than a day
+   old who links an email and password — the way every guest becomes an account (D1) — and a
+   guest has no email to reauthenticate with. The app's re-sign-in is the check that matters.
+
 ## Known limitations
 
 Rewritten at the end of each phase, so this describes the product as it stands today.
@@ -2551,9 +2647,10 @@ Romanian UI text was written by me and wants a native speaker's read.
 - **A locked module does not lead to the paywall.** It shows its lock and says what Premium
   unlocks, but offers no button; the way in is Profile → Subscription → See plans (and the
   out-of-lives card, and the full exam). SPEC §34's module-boundary prompt is not wired.
-- **Changing email or password while signed in is not built** (SPEC §29). A password can be
-  changed through "Forgot password"; an email cannot be changed at all. Linking Apple or
-  Google waits on D6. Export, deletion and the legal links are done (Phase 18).
+- **Changing the email address is not built** (SPEC §29). The password is changed in the app;
+  an email address cannot be changed yet — it needs Supabase's secure email change, which
+  confirms on both addresses and so needs production SMTP. Linking Apple or Google waits on
+  D6. Export, deletion and the legal links are done (Phase 18).
 - Avatars are an initial on a colour derived from `avatar_key`, not preset artwork. No photo
   uploads in V1 by design (SPEC §29); the preset set is a content decision, not a code one.
 - **No sounds (SPEC §29).** Haptics are wired and now have a working setting; audio has no
@@ -2649,13 +2746,21 @@ Romanian UI text was written by me and wants a native speaker's read.
   Pages), at the domain the store listings will use. See `docs/LEGAL.md`, "Hosting the pages".
 - Then set **`EXPO_PUBLIC_LEGAL_BASE_URL`** in the EAS environments (preview, production). A
   production build refuses to start without it; the in-app links appear once it is set.
-- **Fill the placeholders** in `web/*.html`: controller name and address (the PFA), the
-  support and privacy email addresses, retention periods, effective date — and the AdMob
-  publisher id in `web/app-ads.txt`.
-- **A lawyer's review** of the privacy policy, terms and consent flow — the open points are
-  listed in `docs/LEGAL.md`, "For the lawyer".
-- **Sign the data processing agreements** (Supabase, RevenueCat, Google, PostHog, Sentry, the
-  email provider) and choose Sentry's EU region.
+- **Decide D1–D4 in `docs/LEGAL-REVIEW.md`** — above all the **minimum age**: 13 today; the
+  review recommends 14 now (Romanian civil capacity), and 16 or verified parental consent if
+  the "online majority" bill (L190/2025) becomes law. It is `min_user_age` in `app_config`
+  plus the listing text.
+- **A lawyer's confirmation** of the reviewed texts, in both languages; the markers
+  `[LAWYER TO CONFIRM]` / `[DE CONFIRMAT DE AVOCAT]` show where.
+- **Fill the placeholders** in `web/*.html` and `web/ro/*.html`: the PFA's name, registration
+  number, CUI and address, the support and privacy email addresses, the reply time, the
+  effective date, the email provider — and the AdMob publisher id in `web/app-ads.txt`.
+- **Sign the data processing agreements** (Supabase, RevenueCat, Expo, Google, PostHog,
+  Sentry, the email provider), fill in Expo's transfer safeguard, and set the providers as
+  `docs/DEPLOYMENT.md` lists: Supabase audit logs off the database, PostHog IPs discarded and
+  12 months, Sentry in the EU with at most 90 days.
+- **The ANPC SAL pictogram** on the site's home page, if the lawyer confirms it applies; and
+  the DSA statement of reasons (`docs/STORE.md`) each time a name is changed or hidden.
 - **Deploy the Edge Functions** (`delete-account`, `sync-entitlements`, `revenuecat-webhook`)
   to staging and production, with `REVENUECAT_SECRET_API_KEY` set — without it, deletion
   cannot remove the RevenueCat customer. Needs a Supabase access token.
@@ -3826,3 +3931,20 @@ On the emulator or any phone with the development build, then in a browser:
    cut, no Android status bar, the feature graphic and icon. Read the Romanian captions.
 5. **The listing**: read `store/google-play/en-US/full_description.txt` and the Romanian one as
    a customer would. Everything it says is in the app you just used.
+
+## Password change and legal pages — device checklist
+
+On the emulator or any phone with the development build, signed in with email (a guest has no
+password):
+
+1. **Profile → Change password.** The sheet opens; tap each field — the sheet rises above the
+   keyboard and the button stays visible. The same in the leaderboard's display-name sheet.
+2. **A wrong current password**: "That isn't your current password." The sheet stays open.
+3. **The right one**: "Password changed. Your other devices have been signed out." Sign out,
+   then sign in with the new password; the old one is refused.
+4. **A second device** signed in to the same account lands on the sign-in screen the next time
+   it refreshes its session — within the hour, when its access token lapses.
+5. **Legal links in Romanian**: switch to RO, Profile → Legal (shown when
+   `EXPO_PUBLIC_LEGAL_BASE_URL` is set) — the privacy policy and terms open in Romanian.
+6. **The pages themselves**: open `web/ro/index.html` in a browser; ș and ț render with a comma
+   below, and every link and the language switch work.

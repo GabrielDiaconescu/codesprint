@@ -132,9 +132,9 @@ describe('store listings', () => {
     for (const entry of rendered) expect(customerText(entry)).not.toMatch(/[şţŞŢ]/);
   });
 
-  it('carries the terms of use and privacy policy in every description (Apple 3.1.2)', () => {
-    const urls = websiteUrls(source.settings.websiteUrl);
-    for (const { text } of rendered) {
+  it('carries the terms and privacy policy, in its own language, in every description (Apple 3.1.2)', () => {
+    for (const { listing, text } of rendered) {
+      const urls = websiteUrls(source.settings.websiteUrl, listing.i18n);
       expect(text.description).toContain(urls.terms);
       expect(text.description).toContain(urls.privacy);
     }
@@ -177,6 +177,15 @@ describe('websiteUrls', () => {
   it('uses the placeholder until the domain exists, so release:check can block on it', () => {
     expect(websiteUrls(null).privacy).toBe(`${WEBSITE_PLACEHOLDER}/privacy.html`);
     expect(websiteUrls('https://example.com/').terms).toBe('https://example.com/terms.html');
+  });
+
+  it('points the Romanian listing at the Romanian pages', () => {
+    expect(websiteUrls('https://example.com', 'ro')).toEqual({
+      support: 'https://example.com/ro/',
+      privacy: 'https://example.com/ro/privacy.html',
+      terms: 'https://example.com/ro/terms.html',
+      deletion: 'https://example.com/ro/delete-account.html',
+    });
   });
 });
 

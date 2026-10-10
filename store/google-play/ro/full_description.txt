@@ -32,6 +32,6 @@ Prima lecție nu cere cont: începi ca invitat și îți faci cont când vrei s�
 
 Pentru cursanți de la 13 ani în sus. Lecțiile sunt în limba engleză; aplicația în sine e în română sau engleză.
 
-Termeni de utilizare: https://[your-domain]/terms.html
-Politica de confidențialitate: https://[your-domain]/privacy.html
-Ajutor: https://[your-domain]/
+Termeni de utilizare: https://[your-domain]/ro/terms.html
+Politica de confidențialitate: https://[your-domain]/ro/privacy.html
+Ajutor: https://[your-domain]/ro/
