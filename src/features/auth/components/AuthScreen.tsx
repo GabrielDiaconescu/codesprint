@@ -56,12 +56,19 @@ export const AuthScreen = ({ title, subtitle, children }: AuthScreenProps) => {
  * Icon plus text, never colour alone (SPEC §47), and it takes the already-translated string —
  * mapping an error code to a sentence is the caller's job via `useAuthErrorText`.
  */
-export const AuthErrorBanner = ({ message }: { message: string | null }) => {
+export const AuthErrorBanner = ({
+  message,
+  testID,
+}: {
+  message: string | null;
+  testID?: string;
+}) => {
   const theme = useTheme();
   if (!message) return null;
 
   return (
     <View
+      testID={testID}
       accessibilityRole="alert"
       style={[
         styles.banner,

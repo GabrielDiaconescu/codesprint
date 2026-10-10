@@ -8,8 +8,11 @@ import { useSignOut } from '@/features/auth/hooks/useAuthActions';
 import { useSessionStore } from '@/store/sessionStore';
 import { useTheme } from '@/theme';
 
+import { ChangePasswordSheet } from './ChangePasswordSheet';
+
 /**
- * Who you are signed in as, and the two things you can do about it (SPEC §12, §29).
+ * Who you are signed in as, and what you can do about it (SPEC §12, §29): sign out, and —
+ * with an account — change the password, all inside the app.
  *
  * The guest case is the interesting one. Signing out of a guest session is destructive in a
  * way no other sign-out is: there is no email to sign back in with, so the account — and
@@ -27,6 +30,7 @@ export const SessionCard = () => {
   const emailConfirmed = useSessionStore((state) => state.emailConfirmed);
 
   const [confirming, setConfirming] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   const signOut = useSignOut({ onSuccess: () => setConfirming(false) });
 
   const isGuest = status === 'guest';
@@ -62,6 +66,19 @@ export const SessionCard = () => {
           </>
         )}
 
+        {!isGuest && (
+          <View style={{ marginTop: theme.spacing.md }}>
+            <Button
+              testID="profile-change-password"
+              variant="secondary"
+              label={t('changePassword.open')}
+              icon="key"
+              onPress={() => setChangingPassword(true)}
+              fullWidth
+            />
+          </View>
+        )}
+
         <Divider />
 
         <Button
@@ -95,6 +112,8 @@ export const SessionCard = () => {
           />
         </View>
       </BottomSheet>
+
+      <ChangePasswordSheet visible={changingPassword} onClose={() => setChangingPassword(false)} />
     </>
   );
 };

@@ -70,6 +70,7 @@ describe('auth error coverage', () => {
     'email-taken',
     'weak-password',
     'same-password',
+    'wrong-password',
     'rate-limited',
     'expired-link',
     'guest-disabled',

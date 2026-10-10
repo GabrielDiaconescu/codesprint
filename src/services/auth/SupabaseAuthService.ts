@@ -11,7 +11,7 @@ import type {
 } from '../types';
 
 import { interpretAuthParams } from './deepLink';
-import { toAuthErrorCode, toAuthFailure } from './errors';
+import { AuthFailure, toAuthErrorCode, toAuthFailure } from './errors';
 
 /**
  * Supabase Auth (SPEC §12).
@@ -153,6 +153,33 @@ export const SupabaseAuthService: AuthService = {
   async updatePassword(newPassword) {
     const { error } = await getSupabaseClient().auth.updateUser({ password: newPassword });
     if (error) throw toAuthFailure(error);
+  },
+
+  async changePassword(currentPassword, newPassword) {
+    const auth = getSupabaseClient().auth;
+    const { data } = await auth.getSession();
+    const email = data.session?.user.email;
+    if (!email) throw toAuthFailure({ code: 'unknown' });
+
+    // Signing in again with the current password proves it is the account holder, and leaves a
+    // session fresh enough for Supabase's "secure password change" rule — no email round trip.
+    const check = await auth.signInWithPassword({ email, password: currentPassword });
+    if (check.error) {
+      const code = toAuthErrorCode(check.error);
+      throw new AuthFailure(code === 'invalid-credentials' ? 'wrong-password' : code, check.error);
+    }
+
+    const { error } = await auth.updateUser({ password: newPassword });
+    if (error) throw toAuthFailure(error);
+
+    // A password is usually changed because someone else may know it: their sessions end here.
+    // The change itself has succeeded, so a failure to reach the other sessions is not an error
+    // to show — they still expire with their refresh tokens.
+    try {
+      await auth.signOut({ scope: 'others' });
+    } catch {
+      // See above.
+    }
   },
 
   async consumeAuthCallback(params): Promise<DeepLinkOutcome> {

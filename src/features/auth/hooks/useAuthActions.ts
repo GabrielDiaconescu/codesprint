@@ -75,6 +75,19 @@ export const useUpdatePassword = (options?: Options<void, { password: string }>)
   });
 };
 
+interface PasswordChange {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/** Changing the password while signed in; every other device is signed out (SPEC §29). */
+export const useChangePassword = (options?: Options<void, PasswordChange>) =>
+  useMutation<void, Error, PasswordChange>({
+    ...options,
+    mutationFn: ({ currentPassword, newPassword }) =>
+      services.auth.changePassword(currentPassword, newPassword),
+  });
+
 export const useSignOut = (options?: Options<void, void>) => {
   const queryClient = useQueryClient();
 

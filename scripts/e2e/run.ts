@@ -9,6 +9,7 @@ import {
   ROOT,
   applyLocalSql,
   checkDevice,
+  checkEdgeFunctions,
   findMaestro,
   localPublishableKey,
   projectId,
@@ -26,7 +27,8 @@ import {
  *
  * One command, because every step below is one somebody forgets:
  *
- *   1. checks the device, the installed development build, Maestro and local Supabase;
+ *   1. checks the device, the installed development build, Maestro, local Supabase and its Edge
+ *      Functions;
  *   2. resets the LOCAL database and applies the E2E fixtures (skip with --no-reset);
  *   3. regenerates the content-derived subflows;
  *   4. starts its OWN Metro on METRO_PORT, pointed at local Supabase — never a Metro that is
@@ -70,6 +72,7 @@ const main = async () => {
   checkDevice();
   const maestro = findMaestro();
   const publishableKey = localPublishableKey();
+  checkEdgeFunctions();
   const restore = restoreOutcome();
 
   step('Generating subflows and fixtures from content/');

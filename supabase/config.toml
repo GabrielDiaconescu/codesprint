@@ -234,6 +234,10 @@ double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
 enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
+# Off on purpose, here and in production: on, a guest whose session is more than a day old cannot
+# create an account (linking sets a password, refused with `reauthentication_needed`), and a guest
+# has no email to reauthenticate with. The app checks the current password itself
+# (AuthService.changePassword).
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
 max_frequency = "1s"

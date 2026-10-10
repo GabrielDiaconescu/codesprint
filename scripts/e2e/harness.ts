@@ -148,6 +148,22 @@ export const projectId = (): string => {
   return match?.[1] ?? fail('No project_id in supabase/config.toml');
 };
 
+/**
+ * The local Edge Functions run in a container of their own, which `supabase start` does not bring
+ * back when it stopped while the rest of the stack stayed up — after a Docker restart, say. Without
+ * it, deleting an account fails at the very end of its flow, and restore looks like a missing key.
+ */
+export const checkEdgeFunctions = () => {
+  const container = `supabase_edge_runtime_${projectId()}`;
+  const state = run('docker', ['inspect', '--format', '{{.State.Running}}', container]);
+  if ((state.stdout ?? '').trim() !== 'true') {
+    fail(
+      `The local Edge Functions are not running (${container}). Restart the local stack: ` +
+        'npx supabase stop, then npx supabase start',
+    );
+  }
+};
+
 export const resetDatabase = () => {
   step('Resetting the local database (migrations + seed)');
   const result = run(npx, ['supabase', 'db', 'reset']);

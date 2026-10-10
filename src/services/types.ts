@@ -49,6 +49,8 @@ export type AuthErrorCode =
   | 'email-taken'
   | 'weak-password'
   | 'same-password'
+  /** Changing the password while signed in: the current password given is not the account's. */
+  | 'wrong-password'
   | 'rate-limited'
   | 'expired-link'
   | 'guest-disabled'
@@ -114,6 +116,12 @@ export interface AuthService extends ServiceIdentity {
   sendPasswordReset(email: string): Promise<void>;
   /** Valid only inside a recovery session opened by the reset deep link. */
   updatePassword(newPassword: string): Promise<void>;
+  /**
+   * Changing the password while signed in (SPEC §29) — no email, no website. The current
+   * password is checked first, so an unlocked phone in someone else's hands is not enough;
+   * every OTHER device signed in to the account is then signed out.
+   */
+  changePassword(currentPassword: string, newPassword: string): Promise<void>;
 
   /**
    * Consumes the parameters of an auth callback and reports what the link was for.

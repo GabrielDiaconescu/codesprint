@@ -13,6 +13,7 @@ import { useReducedMotion, useTheme } from '@/theme';
 
 import { Icon } from './Icon';
 import { Text } from './Text';
+import { useKeyboardHeight } from './useKeyboardHeight';
 
 export interface BottomSheetProps {
   visible: boolean;
@@ -35,6 +36,10 @@ const DISMISS_DISTANCE = 120;
  *
  * Accessibility: the backdrop is a real button so a screen reader can dismiss the sheet, and
  * the drag gesture is never the only way out (SPEC §47).
+ *
+ * The sheet rises above the on-screen keyboard. A Modal has a window of its own, so nothing else
+ * moves it: the keyboard would cover a sheet with text fields — the change-password sheet once
+ * hid its second field and its button that way.
  */
 export const BottomSheet = ({
   visible,
@@ -47,6 +52,8 @@ export const BottomSheet = ({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
+  // The keyboard already covers the bottom safe area that the sheet pads for.
+  const keyboardOffset = Math.max(0, useKeyboardHeight() - insets.bottom);
   const translateY = useSharedValue(0);
 
   const close = () => {
@@ -80,7 +87,10 @@ export const BottomSheet = ({
       statusBarTranslucent
       testID={testID}
     >
-      <View style={styles.root}>
+      <View
+        testID={testID ? `${testID}-frame` : undefined}
+        style={[styles.root, { paddingBottom: keyboardOffset }]}
+      >
         <Pressable
           style={styles.backdrop}
           onPress={close}
